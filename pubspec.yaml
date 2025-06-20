@@ -1,0 +1,44 @@
+name: padel_mobile
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  get:
+  get_storage:
+  connectivity_plus:
+  dio:
+  logger:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/lottie_files/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
+        - asset: fonts/Poppins/Poppins-Medium.ttf
+          weight: 500
+        - asset: fonts/Poppins/Poppins-Regular.ttf
+          weight: 200
