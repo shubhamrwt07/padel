@@ -26,6 +26,7 @@ class PrimaryTextField extends StatelessWidget {
   final Widget? prefix;
   final Widget? prefixIcon;
   final EdgeInsets? scrollPadding;
+  final bool? obscureText;
   const PrimaryTextField({
     super.key,
     this.action,
@@ -48,23 +49,26 @@ class PrimaryTextField extends StatelessWidget {
     this.keyboardType,
     this.onChanged,
     this.prefixText,
-    this.prefix,this.prefixIcon, this.scrollPadding
+    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height??50,
+      height: height??55,
       width: width?? Get.width,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border:border??Border.all(color: AppColors.blackColor,),
+        borderRadius: BorderRadius.circular(12),
+        // border:border??Border.all(color: AppColors.primaryColor,),
         shape: BoxShape.rectangle,
+        color: AppColors.textFieldColor
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: TextField(
+          obscureText: obscureText??false,
+          obscuringCharacter: "*",
           scrollPadding: scrollPadding?? const EdgeInsets.all(0),
           inputFormatters: formatter,
           onSubmitted:onFieldSubmitted ,
@@ -73,7 +77,7 @@ class PrimaryTextField extends StatelessWidget {
           enabled: enabled,
           maxLength: maxLength,
           style:style?? Theme.of(context)
-              .textTheme.labelSmall!.copyWith(color: AppColors.blackColor),
+              .textTheme.titleSmall!.copyWith(color: AppColors.textColor),
           keyboardType: keyboardType??TextInputType.text,
           maxLines: maxLine,
           minLines: minLine,
@@ -84,12 +88,20 @@ class PrimaryTextField extends StatelessWidget {
             prefixText:prefixText,
             prefix:prefix ,
             prefixIcon: prefixIcon,
-            contentPadding: EdgeInsets.only(left: Get.width*0.02),
+            // contentPadding: EdgeInsets.only(left: Get.width*0.04),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: Get.width * 0.04,
+              vertical: (height ?? 57) * 0.25,
+            ),
             counterText: "",
             hintText: hintText,
-            hintStyle: Theme.of(context).textTheme.labelSmall!.copyWith(color: AppColors.blackColor),
+            hintStyle: Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.textColor),
             border: InputBorder.none,
-            fillColor: color??AppColors.whiteColor,
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primaryColor,width: 2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            fillColor: color??AppColors.textFieldColor,
           ),
         ),
       ),
