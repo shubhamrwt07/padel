@@ -2,6 +2,10 @@
 class Assets {
   Assets._();
 
+  static const String imagesIcApple = 'assets/images/ic_apple.png';
+  static const String imagesIcFacebook = 'assets/images/ic_facebook.png';
+  static const String imagesIcGoggle = 'assets/images/ic_goggle.png';
+  static const String imagesImgBackground = 'assets/images/img_background.png';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }
