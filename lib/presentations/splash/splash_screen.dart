@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:padel_mobile/configs/components/primary_container.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -6,7 +7,11 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Text("Splash")),
+      body: PrimaryContainer(
+        child: Center(
+            child:
+            Text("Splash",style: TextStyle(fontSize: 22),)),
+      ),
     );
   }
 }

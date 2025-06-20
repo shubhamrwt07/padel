@@ -26,7 +26,7 @@ class AppThemes {
   titleLarge:TextStyle(
       fontWeight: FontWeight.w700,
       fontFamily: "Poppins",
-      color: AppColors.blackColor,
+      color: AppColors.primaryColor,
       fontSize: 30) ,
       titleMedium:   TextStyle(
         fontWeight: FontWeight.w600,
