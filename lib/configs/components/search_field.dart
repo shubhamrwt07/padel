@@ -48,22 +48,22 @@ class SearchField extends StatelessWidget {
         enabled: enabled,
         maxLength: maxLength,
         style: style ?? Theme.of(context)
-            .textTheme.labelSmall!.copyWith(color: AppColors.blackColor,fontSize: 12),
+            .textTheme.labelLarge!.copyWith(color: AppColors.textColor,fontSize: 12),
         keyboardType: TextInputType.text,
         maxLines: maxLine,
         minLines: minLine,
         onChanged: onChanged,
         decoration: InputDecoration(
-          filled: true,
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
           suffix: suffix,
           counterText: "",
           hintText: hintText,
           hintStyle: Theme.of(context)
-              .textTheme.bodyMedium!
-              .copyWith(color: AppColors.blackColor),
-          fillColor: color ?? AppColors.whiteColor,
+              .textTheme.labelLarge!
+              .copyWith(color: AppColors.textColor),
+          filled: true,
+          fillColor: color ?? Color(0XFFF6F8FF),
           contentPadding:
           EdgeInsets.symmetric(vertical: Get.height * .005, horizontal: 12),
           border: OutlineInputBorder(

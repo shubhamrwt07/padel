@@ -21,13 +21,13 @@ class AppThemes {
       primary: AppColors.primaryColor,
       // secondary: AppColors.secondaryColor,
     ),
-    scaffoldBackgroundColor: AppColors.whiteColor,
+    scaffoldBackgroundColor: Colors.transparent,
     textTheme: const TextTheme(
   titleLarge:TextStyle(
       fontWeight: FontWeight.w700,
       fontFamily: "Poppins",
       color: AppColors.primaryColor,
-      fontSize: 30) ,
+      fontSize: 26) ,
       titleMedium:   TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: "Poppins",
@@ -77,7 +77,12 @@ class AppThemes {
       bodyMedium: TextStyle(
           fontWeight: FontWeight.w400,
           fontFamily: "Poppins",
-          color: AppColors.blackColor,
+          color: AppColors.textColor,
+          fontSize: 6),
+      bodySmall: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontFamily: "Poppins",
+          color: AppColors.textColor,
           fontSize: 6),
     ),
   );

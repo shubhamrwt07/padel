@@ -17,6 +17,8 @@ dependencies:
   connectivity_plus:
   dio:
   logger:
+  flutter_svg:
+  pin_code_fields:
 
 dev_dependencies:
   flutter_test:

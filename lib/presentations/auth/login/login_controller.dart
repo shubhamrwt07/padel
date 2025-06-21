@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 class LoginController extends GetxController{
- RxBool isVisible = false.obs;
+ RxBool isVisible = true.obs;
  void eyeToggle(){
    isVisible.value =! isVisible.value;
  }
