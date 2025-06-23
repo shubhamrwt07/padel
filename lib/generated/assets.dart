@@ -8,8 +8,18 @@ class Assets {
   static const String imagesIcGoogle = 'assets/images/ic_google.svg';
   static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
   static const String imagesIcWallet = 'assets/images/ic_wallet.png';
+  static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
+  static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
+  static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
+  static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
   static const String imagesImgCart = 'assets/images/img_cart.png';
+  static const String imagesImgCustomerPicBooking = 'assets/images/img_customerPic_booking.png';
+  static const String imagesImgDummy1 = 'assets/images/img_dummy_1.png';
+  static const String imagesImgDummy2 = 'assets/images/img_dummy_2.png';
+  static const String imagesImgDummy3 = 'assets/images/img_dummy_3.png';
+  static const String imagesImgDummy4 = 'assets/images/img_dummy_4.png';
+  static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 

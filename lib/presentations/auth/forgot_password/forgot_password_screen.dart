@@ -30,7 +30,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                     height: 30,
                     width: 40,
                     child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
+                      Icons.arrow_back,
                       color: AppColors.blackColor,
                       size: 18,
                     ),

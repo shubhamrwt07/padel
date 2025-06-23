@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/auth/booking/booking_binding.dart';
+import 'package:padel_mobile/presentations/auth/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
@@ -8,6 +10,12 @@ import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart'
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
+import 'package:padel_mobile/presentations/cart/cart_binding.dart';
+import 'package:padel_mobile/presentations/cart/cart_screen.dart';
+import 'package:padel_mobile/presentations/home/home_binding.dart';
+import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/payment/payment_binding.dart';
+import 'package:padel_mobile/presentations/payment/payment_screen.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
@@ -76,5 +84,26 @@ class Routes {
       transitionDuration: defaultDuration,
     ),
 
+    GetPage(
+      name: RoutesName.booking,
+      page: () => BookingScreen(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.cart,
+      page: () => CartScreen(),
+      binding: CartBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.payment,
+      page: () => PaymentScreen(),
+      binding: PaymentBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
   ];
 }
