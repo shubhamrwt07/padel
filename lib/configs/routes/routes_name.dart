@@ -10,6 +10,9 @@ class RoutesName {
   //Home routes name
   static const String home = '/home' ;
 
+  //Booking routes name
+  static const String booking = '/booking' ;
+
 
 
 }

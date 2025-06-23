@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/auth/booking/booking_binding.dart';
+import 'package:padel_mobile/presentations/auth/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
@@ -50,6 +52,13 @@ class Routes {
       page: () => HomeScreen(),
       binding: HomeBinding(),
       transition: Transition.fadeIn,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.booking,
+      page: () => BookingScreen(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
   ];
