@@ -5,8 +5,11 @@ class Assets {
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
   static const String imagesIcGoogle = 'assets/images/ic_google.svg';
+  static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
+  static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
   static const String imagesImgCart = 'assets/images/img_cart.png';
+  static const String imagesImgCustomerPicBooking = 'assets/images/img_customerPic_booking.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
