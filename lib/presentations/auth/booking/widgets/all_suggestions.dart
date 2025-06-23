@@ -91,7 +91,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                       Row(
                         children: [
                           Text(
-                            "Slots",
+                            "Slot",
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           SizedBox(width: 10,),
