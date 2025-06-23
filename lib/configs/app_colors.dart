@@ -10,7 +10,10 @@ class AppColors {
   static const Color blackColor = Color(0xFF000000);
   static const Color lightBlueColor = Color(0xFFdee6ff);
   static const Color greyColor = Color(0xFFECECEC);
+  static const Color darkGrey = Color(0xFF626262);
   static const Color darkGreyColor = Color(0xFF494949);
   static const Color starUnselectedColor = Color(0xFFD9D9D9);
+  static const Color timeTileBackgroundColor = Color(0xFFFAFBFF);
+  static const Color playerCardBackgroundColor = Color(0xFFfafbff);
 
 }

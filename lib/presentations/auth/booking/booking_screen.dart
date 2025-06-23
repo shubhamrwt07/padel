@@ -4,7 +4,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/auth/booking/widgets/book_session.dart';
 import 'package:padel_mobile/presentations/auth/booking/widgets/home_content.dart';
+import 'package:padel_mobile/presentations/auth/booking/widgets/open_matches.dart';
 import 'package:padel_mobile/presentations/auth/booking/widgets/tab_bar.dart';
 
 import '../../../configs/app_colors.dart';
@@ -99,16 +101,8 @@ class BookingScreen extends GetView<BookingController> {
                            controller: controller.tabController,
                            children: [
                           HomeContent(),
-                             SizedBox(
-                                 height: Get.height,
-                                 width: Get.width,
-                                 child:Text("tab2")
-                             ),
-                             SizedBox(
-                                 height: Get.height,
-                                 width: Get.width,
-                                 child:Text("tab3")
-                             ),
+                             BookSession(),
+                             OpenMatches(),
                              SizedBox(
                                  height: Get.height,
                                  width: Get.width,

@@ -11,6 +11,7 @@ class Assets {
   static const String imagesImgCart = 'assets/images/img_cart.png';
   static const String imagesImgCustomerPicBooking = 'assets/images/img_customerPic_booking.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesLocation = 'assets/images/location.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }
