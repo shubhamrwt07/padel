@@ -2,10 +2,12 @@
 class Assets {
   Assets._();
 
-  static const String imagesIcApple = 'assets/images/ic_apple.png';
-  static const String imagesIcFacebook = 'assets/images/ic_facebook.png';
-  static const String imagesIcGoggle = 'assets/images/ic_goggle.png';
-  static const String imagesImgBackground = 'assets/images/img_background.png';
+  static const String imagesIcApple = 'assets/images/ic_apple.svg';
+  static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
+  static const String imagesIcGoogle = 'assets/images/ic_google.svg';
+  static const String imagesImgBackground = 'assets/images/img_background.svg';
+  static const String imagesImgCart = 'assets/images/img_cart.png';
+  static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }
