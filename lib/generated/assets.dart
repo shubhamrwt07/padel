@@ -3,8 +3,11 @@ class Assets {
   Assets._();
 
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
+  static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.svg';
   static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
   static const String imagesIcGoogle = 'assets/images/ic_google.svg';
+  static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
+  static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';

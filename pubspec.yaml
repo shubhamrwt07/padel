@@ -19,6 +19,7 @@ dependencies:
   logger:
   flutter_svg:
   pin_code_fields:
+  curved_navigation_bar:
   flutter_rating_bar:
   flutter_map:
   latlong2:
