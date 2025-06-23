@@ -12,5 +12,7 @@ class AppColors {
   static const Color lightBlueColor = Color(0xFFdee6ff);
   static const Color greyColor = Color(0xFFECECEC);
   static const Color darkGreyColor = Color(0xFF494949);
+  static const Color bottomNavTextColor = Color(0xFF2f868b);
+  static const Color textFieldBorderColor = Color(0xFFe1e2e5);
 
 }

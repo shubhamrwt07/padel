@@ -9,6 +9,10 @@ class RoutesName {
 
   //Home routes name
   static const String home = '/home' ;
+  static const String bottomNav = '/bottomNav' ;
+  static const String profile = '/profile' ;
+  static const String editProfile = '/editProfile' ;
+
 
 
 }
