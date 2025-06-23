@@ -32,4 +32,6 @@ class BookingController extends GetxController with GetSingleTickerProviderState
     {'icon': Icons.photo, 'label': 'Photos'},
 
   ];
+  final isShowAllReviews = false.obs;
+  final isShowAllPhotos = false.obs;
 }

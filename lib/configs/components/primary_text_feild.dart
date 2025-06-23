@@ -27,6 +27,7 @@ class PrimaryTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final EdgeInsets? scrollPadding;
   final bool? obscureText;
+  final TextStyle? hintStyle;
   const PrimaryTextField({
     super.key,
     this.action,
@@ -49,7 +50,7 @@ class PrimaryTextField extends StatelessWidget {
     this.keyboardType,
     this.onChanged,
     this.prefixText,
-    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText,
+    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText, this.hintStyle,
   });
 
   @override
@@ -95,7 +96,7 @@ class PrimaryTextField extends StatelessWidget {
             ),
             counterText: "",
             hintText: hintText,
-            hintStyle: Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.textColor),
+            hintStyle:hintStyle?? Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.textColor),
             border: InputBorder.none,
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.primaryColor,width: 2),
