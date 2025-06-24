@@ -32,8 +32,7 @@ class Filters extends GetView<BookingController> {
         child: Align(
           alignment: Alignment.center,
           child: PrimaryButton(
-            height: 40,
-
+            height: 50,
             onTap: () {
               Get.back();
             },
@@ -41,7 +40,6 @@ class Filters extends GetView<BookingController> {
           ).paddingOnly(left: 20,right: 20),
         ),
       ),
-
       appBar: primaryAppBar(
         title: const Text("Filters"),
         context: context,
@@ -81,41 +79,48 @@ class Filters extends GetView<BookingController> {
                 ),
               ],
             ),
-
-            const SizedBox(height: 16),
-            Text("Location", style: Get.textTheme.headlineMedium),
-
-            const SizedBox(height: 8),
-
+            Text("Location", style: Get.textTheme.headlineMedium).paddingOnly(bottom: Get.height*0.01),
             Obx(
-              () => SizedBox(
+              () => Container(
                 height: 50,
-                child: DropdownButtonFormField<String>(
-                  dropdownColor: Colors.white,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  value: controller.selectedLocation.value.isEmpty
-                      ? null
-                      : controller.selectedLocation.value,
-                  hint: Text(
-                    "Enter Location",
-                    style: Get.textTheme.headlineSmall,
-                  ),
-                  items: controller.locations
-                      .map(
-                        (String location) => DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            location,
-                            style: Get.textTheme.headlineSmall,
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlueColor.withAlpha(50),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.blackColor.withAlpha(20))
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 15), // Optional: adds padding
+                    ),
+                    dropdownColor: AppColors.whiteColor,
+                    value: controller.selectedLocation.value.isEmpty
+                        ? null
+                        : controller.selectedLocation.value,
+                    hint: Text(
+                      "Enter Location",
+                      style: Get.textTheme.headlineSmall,
+                    ),
+                    items: controller.locations
+                        .map(
+                          (String location) => DropdownMenuItem<String>(
+                            value: location,
+                            child: Text(
+                              location,
+                              style: Get.textTheme.headlineSmall,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (String? newValue) {
-                    controller.selectedLocation.value = newValue ?? '';
-                  },
+                        )
+                        .toList(),
+                    onChanged: (String? newValue) {
+                      controller.selectedLocation.value = newValue ?? '';
+                    },
+                  ),
                 ),
               ),
             ),
@@ -139,6 +144,19 @@ class Filters extends GetView<BookingController> {
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2100),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              textTheme: const TextTheme(
+                                // Customize as needed
+                                titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                bodyLarge: TextStyle(fontSize: 14),
+                                bodyMedium: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
                       );
                       if (picked != null) {
                         controller.startDate.value = picked.toString().split(
@@ -159,6 +177,19 @@ class Filters extends GetView<BookingController> {
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2100),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              textTheme: const TextTheme(
+                                // Customize as needed
+                                titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                bodyLarge: TextStyle(fontSize: 14),
+                                bodyMedium: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
                       );
                       if (picked != null) {
                         controller.endDate.value = picked.toString().split(
@@ -190,6 +221,19 @@ class Filters extends GetView<BookingController> {
                       TimeOfDay? picked = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay.now(),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              textTheme: const TextTheme(
+                                // Customize as needed
+                                titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                bodyLarge: TextStyle(fontSize: 14),
+                                bodyMedium: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
                       );
                       if (picked != null) {
                         controller.startTime.value = picked.format(context);
@@ -204,6 +248,18 @@ class Filters extends GetView<BookingController> {
                         : controller.endTime.value,
                     onTap: () async {
                       TimeOfDay? picked = await showTimePicker(
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              textTheme: const TextTheme(
+                                titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                bodyLarge: TextStyle(fontSize: 14),
+                                bodyMedium: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
                         context: context,
                         initialTime: TimeOfDay.now(),
                       );
@@ -241,7 +297,8 @@ class Filters extends GetView<BookingController> {
         height: 40,
         width: Get.width * .4,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey), // grey border
+          color: AppColors.lightBlueColor.withAlpha(50),
+          border: Border.all(color: AppColors.blackColor.withAlpha(20)), // grey border
           borderRadius: BorderRadius.circular(6), // radius 6
         ),
         child: Row(
@@ -250,7 +307,7 @@ class Filters extends GetView<BookingController> {
             Text(
               value ?? hintText,
               style: Get.textTheme.headlineSmall!.copyWith(
-                color: value == null ? Colors.grey : Colors.black,
+                color:Colors.black,
               ),
             ),
             if (icon != null) ...[
@@ -278,7 +335,6 @@ class Filters extends GetView<BookingController> {
             return Obx(
               () => Transform.translate(
                 offset: Offset(-9, 0),
-
                 child: CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,

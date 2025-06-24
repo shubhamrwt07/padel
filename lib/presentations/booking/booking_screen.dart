@@ -129,7 +129,7 @@ class BookingScreen extends GetView<BookingController> {
                           SizedBox(
                             height: double.infinity,
                             width: double.infinity,
-                            child: Text("tab4"),
+                            child: Center(child: Text("Coming Soon...")),
                           ),
                         ],
                       ),

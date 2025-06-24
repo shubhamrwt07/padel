@@ -26,6 +26,7 @@ dependencies:
   flutter_map:
   latlong2:
   flutter_slidable:
+  dropdown_search:
 
 dev_dependencies:
   flutter_test:

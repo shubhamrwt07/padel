@@ -22,6 +22,9 @@ class RoutesName {
   //Payment routes name
   static const String payment = '/payment' ;
 
+  //BookingConfirmAndCancel routes name
+  static const String bookingConfirmAndCancel = '/bookingConfirmAndCancel' ;
+
 
 
 }

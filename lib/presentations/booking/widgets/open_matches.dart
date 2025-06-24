@@ -53,7 +53,7 @@ class OpenMatches extends GetView<BookingController> {
                 onTap: () {
                   Get.to(AllSuggestions());
                 },
-                text: "Book the first spot",
+                text: "+ Book the first spot",
               )
           ),
         ),
@@ -119,7 +119,7 @@ class OpenMatches extends GetView<BookingController> {
                           borderRadius: BorderRadius.circular(10),
                           color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
                           border: Border.all(
-                            color: isSelected ? Colors.transparent : AppColors.greyColor,
+                            color: isSelected ? Colors.transparent : AppColors.blackColor.withAlpha(10),
                             width: 1,
                           ),
                         ),
@@ -225,6 +225,7 @@ class OpenMatches extends GetView<BookingController> {
                         ? Colors.black
                         : AppColors.timeTileBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
+                      border: Border.all(color: AppColors.blackColor.withAlpha(10))
                   ),
                   child: Text(
                     time,
@@ -249,11 +250,20 @@ class OpenMatches extends GetView<BookingController> {
           "Book a place in a match",
           style: Theme.of(context).textTheme.headlineLarge,
         ),
-        Text(
-          "View all",
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor),
+        GestureDetector(
+          onTap: ()=>Get.to(()=>AllSuggestions(),transition: Transition.rightToLeft),
+          child: Container(
+            height: 20,
+            width: Get.width*0.15,
+            alignment: Alignment.centerRight,
+            color: Colors.transparent,
+            child: Text(
+              "View all",
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor),
+            ),
+          ),
         ),
       ],
     );
@@ -261,7 +271,6 @@ class OpenMatches extends GetView<BookingController> {
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(
-      height: Get.height * 0.25,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -292,7 +301,6 @@ class OpenMatches extends GetView<BookingController> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildPlayerSlot().paddingOnly(bottom: 6),
-
                       _buildPlayerSlot().paddingOnly(bottom: 6),
                       Container(width: 1, color: Colors.black),
                       _buildPlayerSlot().paddingOnly(bottom: 6),
@@ -346,7 +354,6 @@ class OpenMatches extends GetView<BookingController> {
   Widget _buildPlayerSlot() {
     return Column(
       children: [
-        const CircleAvatar(radius: 27),
         const CircleAvatar(radius: 27),
         const SizedBox(height: 7),
         Text("Available", style: Get.textTheme.bodySmall),
