@@ -21,7 +21,6 @@ class AllSuggestions extends StatefulWidget {
 class _AllSuggestionsState extends State<AllSuggestions> {
   @override
   Widget build(BuildContext context) {
-    final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
     return Scaffold(
       appBar: primaryAppBar(
         leading: BackButton(),
@@ -64,7 +63,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
               height: 50,
 
               onTap: () {},
-              text: "Book the first spot",
+              text: "+ Start a match",
             ),
           ),
         ),
@@ -182,7 +181,6 @@ class _AllSuggestionsState extends State<AllSuggestions> {
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(
-      height: Get.height * 0.25,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),

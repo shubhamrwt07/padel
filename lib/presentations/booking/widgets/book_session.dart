@@ -134,7 +134,7 @@ class BookSession extends GetView<BookingController> {
                           border: Border.all(
                             color: isSelected
                                 ? Colors.transparent
-                                : AppColors.greyColor,
+                                : AppColors.blackColor.withAlpha(10),
                             width: 1,
                           ),
                         ),
@@ -242,6 +242,7 @@ class BookSession extends GetView<BookingController> {
                         ? Colors.black
                         : AppColors.timeTileBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
+                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
                   ),
                   child: Text(
                     time,

@@ -17,63 +17,65 @@ class HomeScreen extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      appBar: primaryAppBar(
-        showLeading: false,
-        title: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: "Hello!\n",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: ()=>FocusManager.instance.primaryFocus!.unfocus(),
+      child: Scaffold(
+        appBar: primaryAppBar(
+          showLeading: false,
+          title: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "Hello!\n",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: "Jane Cooper",
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ).paddingOnly(left: Get.width * 0.02),
-        action: [
-          Container(
-            height: 30,
-            width: 30,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.whiteColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade100,
-                  blurRadius: 1.4,
-                  spreadRadius: 2.2,
+                TextSpan(
+                  text: "Jane Cooper",
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
-            child: Icon(Icons.notifications_none_rounded),
-          ).paddingOnly(right: Get.width * 0.02),
-        ],
-        context: context,
+          ).paddingOnly(left: Get.width * 0.02),
+          action: [
+            Container(
+              height: 30,
+              width: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.whiteColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade100,
+                    blurRadius: 1.4,
+                    spreadRadius: 2.2,
+                  ),
+                ],
+              ),
+              child: Icon(Icons.notifications_none_rounded),
+            ).paddingOnly(right: Get.width * 0.02),
+          ],
+          context: context,
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchField(),
+            clubTicketList(context),
+            Text(
+              "New Booking",
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
+            ).paddingOnly(bottom: Get.width * 0.02, left: Get.width * 0.05),
+            locationAndDateTime(context),
+            addToCart(context),
+          ],
+        ).paddingOnly(),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          searchField(),
-          clubTicketList(context),
-          Text(
-            "New Booking",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
-          ).paddingOnly(bottom: Get.width * 0.02, left: Get.width * 0.05),
-          locationAndDateTime(context),
-          addToCart(context),
-        ],
-      ).paddingOnly(),
     );
   }
 
@@ -250,7 +252,7 @@ class HomeScreen extends GetView<HomeController> {
                             const SizedBox(height: 12),
                             Text(
                               "Select Locations",
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                             const SizedBox(height: 8),
                             TextField(
@@ -418,7 +420,10 @@ class HomeScreen extends GetView<HomeController> {
           itemCount: 10,
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: ()=>Get.toNamed(RoutesName.booking),
+              onTap: () {
+                Get.toNamed(RoutesName.booking);
+                FocusManager.instance.primaryFocus!.unfocus();
+              },
               child: Container(
                 height: Get.height * 0.13,
                 decoration: BoxDecoration(
@@ -476,7 +481,10 @@ class HomeScreen extends GetView<HomeController> {
                               height: 25,
                               textStyle: Theme.of(context).textTheme.displayLarge!.copyWith(color: AppColors.whiteColor,fontSize: 7),
                               width: Get.width * 0.2,
-                              onTap: ()=>Get.toNamed(RoutesName.booking),
+                              onTap: () {
+                                Get.toNamed(RoutesName.booking);
+                                FocusManager.instance.primaryFocus!.unfocus();
+                              },
                               text: "Add to Cart",
                             ).paddingOnly(bottom: 5),
                           ],
