@@ -49,7 +49,7 @@ class AppThemes {
           color: AppColors.blackColor,
           fontSize: 14),
       headlineSmall: TextStyle(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           fontFamily: "Poppins",
           color: AppColors.blackColor,
           fontSize: 12),
