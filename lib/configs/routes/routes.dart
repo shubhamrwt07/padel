@@ -4,6 +4,8 @@ import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_binding.dart';
+import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_binding.dart';
+import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
@@ -12,8 +14,6 @@ import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
-import 'package:padel_mobile/presentations/home/home_binding.dart';
-import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/payment/payment_binding.dart';
 import 'package:padel_mobile/presentations/payment/payment_screen.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
@@ -102,6 +102,13 @@ class Routes {
       name: RoutesName.payment,
       page: () => PaymentScreen(),
       binding: PaymentBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.bookingConfirmAndCancel,
+      page: () => BookingConfirmAndCancelScreen(),
+      binding: BookingConfirmAndCancelBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

@@ -432,7 +432,7 @@ class HomeContent extends GetView<BookingController> {
                         style: Theme
                             .of(context)
                             .textTheme
-                            .bodyMedium,)
+                            .displayMedium!.copyWith(fontSize: 7,height: 1.1,),)
                     ],
                   ),
                 ).paddingOnly(bottom: 10);
