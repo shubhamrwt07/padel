@@ -19,12 +19,12 @@ dependencies:
   logger:
   flutter_svg:
   pin_code_fields:
-  curved_navigation_bar:
   flutter_rating_bar:
   easy_date_timeline: ^2.0.9
   intl: ^0.20.2
   flutter_map:
   latlong2:
+  google_nav_bar:
   flutter_slidable:
   dropdown_search:
 
