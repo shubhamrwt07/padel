@@ -318,8 +318,11 @@ class HomeScreen extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                Icon(Icons.location_on_outlined, size: 13),
-                                Text(
+                                Image.asset(
+                                  Assets.imagesIcLocation,
+                                  color: AppColors.primaryColor,
+                                  scale: 4,
+                                ) ,                               Text(
                                   "Chandigarh 160001",
                                   style: Theme.of(context).textTheme.bodyLarge!
                                       .copyWith(fontWeight: FontWeight.w500),

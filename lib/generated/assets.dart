@@ -4,13 +4,16 @@ class Assets {
 
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.svg';
+  static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
   static const String imagesIcGoogle = 'assets/images/ic_google.svg';
-  static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
-  static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
+  static const String imagesIcLocation = 'assets/images/ic_location.png';
+  static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
+  static const String imagesIcRemove = 'assets/images/ic_remove.png';
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
+  static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
   static const String imagesImgCart = 'assets/images/img_cart.png';
