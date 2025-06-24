@@ -20,5 +20,6 @@ class AppColors {
   static const Color playerCardBackgroundColor = Color(0xFFfafbff);
    static const Color lightRedColor = Color(0xFFFFDCDC);
   static const Color redColor = Color(0xFFCE1313);
+  static const Color textHintColor = Color(0xFF374151);
 
 }
