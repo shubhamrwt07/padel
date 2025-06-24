@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
 class BookingBinding implements Bindings{
   @override

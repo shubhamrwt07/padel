@@ -7,8 +7,8 @@ class PrimaryButton extends StatelessWidget {
   final Widget? child;
   final String text;
   final TextStyle? textStyle;
-   Function onTap;
-   PrimaryButton({
+  final Function onTap;
+   const PrimaryButton({
     super.key,
     this.width,
     this.height,
@@ -26,8 +26,9 @@ class PrimaryButton extends StatelessWidget {
           onTap();
       },
       child: Container(
-        height:height?? 60,
+        height:height?? 50,
         width: width??Get.width,
+        alignment: Alignment.center,
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -37,29 +38,9 @@ class PrimaryButton extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(50),
         ),
-        child:child?? Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(height: 5,width: 5,),
-            Text(
-                text,
-                style:textStyle?? Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.whiteColor,fontSize: 18)
-            ).paddingOnly(left: Get.width*0.08),
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Color(0xFF3DBE64),
-                shape: BoxShape.circle,
-                border: Border.all(color: Color(0xFF2556DA), width: 1),
-              ),
-              child: const Icon(
-                Icons.arrow_outward,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ],
+        child:child?? Text(
+            text,
+            style:textStyle?? Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.whiteColor,fontSize: 18)
         ),
       ),
     );
@@ -70,7 +51,7 @@ class CartButton extends StatelessWidget {
   final double? width, height;
   final String text;
   final TextStyle? textStyle;
-  Function onTap;
+  final Function onTap;
   CartButton({
     super.key,
     this.width,

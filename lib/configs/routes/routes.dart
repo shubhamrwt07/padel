@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_binding.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
+import 'package:padel_mobile/presentations/booking/booking_binding.dart';
+import 'package:padel_mobile/presentations/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
@@ -25,7 +25,7 @@ import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
-  static const String initialRoute = RoutesName.editProfile;
+  static const String initialRoute = RoutesName.splash;
 
    static const Duration defaultDuration = Duration(milliseconds: 200);
 
@@ -48,7 +48,7 @@ class Routes {
       name: RoutesName.signUp,
       page: () => const SignUpScreen(),
       binding: SignUpBinding(),
-      transition: Transition.fadeIn,
+      transition: Transition.downToUp,
       transitionDuration: defaultDuration,
     ),
     GetPage(

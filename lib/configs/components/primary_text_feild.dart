@@ -56,7 +56,7 @@ class PrimaryTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height??55,
+      height: height??50,
       width: width?? Get.width,
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -78,7 +78,7 @@ class PrimaryTextField extends StatelessWidget {
           enabled: enabled,
           maxLength: maxLength,
           style:style?? Theme.of(context)
-              .textTheme.titleSmall!.copyWith(color: AppColors.textColor),
+              .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
           keyboardType: keyboardType??TextInputType.text,
           maxLines: maxLine,
           minLines: minLine,
@@ -96,7 +96,7 @@ class PrimaryTextField extends StatelessWidget {
             ),
             counterText: "",
             hintText: hintText,
-            hintStyle:hintStyle?? Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.textColor),
+            hintStyle:hintStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
             border: InputBorder.none,
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.primaryColor,width: 2),

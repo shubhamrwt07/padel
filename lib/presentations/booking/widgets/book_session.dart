@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
-import 'package:padel_mobile/presentations/auth/booking/widgets/all_suggestions.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
 
 class BookSession extends GetView<BookingController> {
   const BookSession({super.key});

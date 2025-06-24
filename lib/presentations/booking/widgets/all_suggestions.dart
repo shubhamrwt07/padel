@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
 
 import '../../../../configs/components/app_bar.dart';
 import '../../../../generated/assets.dart';
