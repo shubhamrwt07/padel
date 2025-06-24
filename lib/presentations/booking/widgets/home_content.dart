@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
 import 'add_review_bottomsheet.dart';
 
@@ -106,10 +106,12 @@ class HomeContent extends GetView<BookingController> {
                             if (index != 1) {
                               controller.selectedIndex.value = index;
 
-                              if (index != 2)
+                              if (index != 2) {
                                 controller.isShowAllReviews.value = false;
-                              if (index != 3)
+                              }
+                              if (index != 3) {
                                 controller.isShowAllPhotos.value = false;
+                              }
                             }
                           },
                           child: homeOptionItem(
@@ -153,35 +155,40 @@ class HomeContent extends GetView<BookingController> {
                       controller.isShowAllPhotos.toggle();
                     }
                   },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        controller.selectedIndex.value == 2
-                            ? (controller.isShowAllReviews.value
-                            ? "Show Less"
-                            : "Show All")
-                            : (controller.isShowAllPhotos.value
-                            ? "Show Less"
-                            : "Show All"),
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .labelMedium!
-                            .copyWith(color: AppColors.primaryColor),
-                      ),
-                      Icon(
-                        controller.selectedIndex.value == 2
-                            ? (controller.isShowAllReviews.value
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down)
-                            : (controller.isShowAllPhotos.value
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down),
-                        size: 15,
-                        color: AppColors.primaryColor,
-                      ),
-                    ],
+                  child: Container(
+                    width: Get.width*0.2,
+                    height: 20,
+                    color: Colors.transparent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          controller.selectedIndex.value == 2
+                              ? (controller.isShowAllReviews.value
+                              ? "Show Less"
+                              : "Show All")
+                              : (controller.isShowAllPhotos.value
+                              ? "Show Less"
+                              : "Show All"),
+                          style: Theme
+                              .of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(color: AppColors.primaryColor),
+                        ),
+                        Icon(
+                          controller.selectedIndex.value == 2
+                              ? (controller.isShowAllReviews.value
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down)
+                              : (controller.isShowAllPhotos.value
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down),
+                          size: 15,
+                          color: AppColors.primaryColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -343,7 +350,7 @@ class HomeContent extends GetView<BookingController> {
               padding: EdgeInsetsGeometry.zero,
               itemBuilder: (context, index) {
                 return Container(
-                  height: 100,
+                  // height: 100,
                   width: Get.width,
                   padding: EdgeInsets.all(7),
                   decoration: BoxDecoration(
@@ -379,7 +386,7 @@ class HomeContent extends GetView<BookingController> {
                                     children: [
                                       RatingBar.builder(
                                         itemSize: 12,
-                                        initialRating: 3,
+                                        initialRating: 4,
                                         minRating: 0,
                                         unratedColor: AppColors
                                             .starUnselectedColor,
@@ -432,7 +439,7 @@ class HomeContent extends GetView<BookingController> {
                         style: Theme
                             .of(context)
                             .textTheme
-                            .bodyMedium,)
+                            .displayMedium!.copyWith(fontSize: 7,height: 1.1,),)
                     ],
                   ),
                 ).paddingOnly(bottom: 10);

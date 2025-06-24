@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
 
-import 'all_suggestions.dart';
-
-class OpenMatches extends GetView<BookingController> {
-  const OpenMatches({super.key});
+class BookSession extends GetView<BookingController> {
+  const BookSession({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,30 +33,31 @@ class OpenMatches extends GetView<BookingController> {
         child: Align(
           alignment: Alignment.center,
           child: Container(
-              height: 55,
-              width: Get.width * 0.9,
-              decoration: BoxDecoration(
-                color: Theme.of(Get.context!).primaryColor,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: PrimaryButton(
-                height: 50,
+            height: 55,
+            width: Get.width * 0.9,
+            decoration: BoxDecoration(
+              color: Theme.of(Get.context!).primaryColor,
+              borderRadius: BorderRadius.circular(40),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: PrimaryButton(
+              height: 50,
 
-                onTap: () {
-                  Get.to(AllSuggestions());
-                },
-                text: "Book the first spot",
-              )
+              onTap: () {
+                Get.to(AllSuggestions());
+              },
+              text: "Book the first spot",
+            )
           ),
         ),
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -70,8 +70,18 @@ class OpenMatches extends GetView<BookingController> {
               const SizedBox(height: 12),
               _buildTimeSlots(),
               SizedBox(height: Get.height * 0.02),
-              _buildMatchHeader(context),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Available Court",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                ],
+              ),
               SizedBox(height: Get.height * 0.02),
+              _buildMatchCard(context),
+              _buildMatchCard(context),
               _buildMatchCard(context),
             ],
           ),
@@ -111,15 +121,20 @@ class OpenMatches extends GetView<BookingController> {
                         return FadeTransition(opacity: animation, child: child);
                       },
                       child: Container(
-                        key: ValueKey(isSelected), // important: unique key triggers animation
+                        key: ValueKey(isSelected),
+                        // important: unique key triggers animation
                         alignment: Alignment.center,
                         height: Get.height * 0.15,
                         margin: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
+                          color: isSelected
+                              ? Colors.black
+                              : AppColors.playerCardBackgroundColor,
                           border: Border.all(
-                            color: isSelected ? Colors.transparent : AppColors.greyColor,
+                            color: isSelected
+                                ? Colors.transparent
+                                : AppColors.blackColor.withAlpha(10),
                             width: 1,
                           ),
                         ),
@@ -138,7 +153,9 @@ class OpenMatches extends GetView<BookingController> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : AppColors.darkGrey,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.darkGrey,
                               ),
                             ),
                             Text(
@@ -153,7 +170,6 @@ class OpenMatches extends GetView<BookingController> {
                       ),
                     ),
                   );
-
                 },
             onDateChange: (date) {
               controller.selectedDate.value = date;
@@ -216,7 +232,8 @@ class OpenMatches extends GetView<BookingController> {
                 transitionBuilder: (child, animation) =>
                     FadeTransition(opacity: animation, child: child),
                 child: Container(
-                  key: ValueKey(isSelected), // triggers animation
+                  key: ValueKey(isSelected),
+                  // triggers animation
                   width: (Get.width - 80) / 3,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   alignment: Alignment.center,
@@ -225,6 +242,7 @@ class OpenMatches extends GetView<BookingController> {
                         ? Colors.black
                         : AppColors.timeTileBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
+                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
                   ),
                   child: Text(
                     time,
@@ -241,104 +259,18 @@ class OpenMatches extends GetView<BookingController> {
     );
   }
 
-  Widget _buildMatchHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Book a place in a match",
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        Text(
-          "View all",
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMatchCard(BuildContext context) {
     return Container(
-      height: Get.height * 0.25,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.playerCardBackgroundColor,
-          border: Border.all(color: AppColors.greyColor)
-
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.greyColor, width: 1.5),
+        ),
       ),
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "21 June | 9:00am",
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          Text(
-            "The first player sets the match type",
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-          const SizedBox(height: 12),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 0),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      Container(width: 1, color: Colors.black),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                    ],
-                  ),
-                ),
-              ),
-              const Divider(thickness: 1, height: 0, color: Colors.black),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'The Good Club',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: Get.width * .65,
-                    child: Text(
-                      'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-
-                    width: Get.width * .15,
-                    child: Text(
-                      '2000',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primaryColor),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ).paddingOnly(right: Get.width * .04),
-                ],
-              ),
-            ],
-          ),
-        ],
+      child: ExpansionTile(
+        title: Text("Court 1", style: Get.textTheme.headlineSmall),
+        leading: const CircleAvatar(radius: 20),
+        subtitle: Text("Outdoor | wall | Double"),
+        children: [],
       ),
     );
   }
@@ -346,7 +278,6 @@ class OpenMatches extends GetView<BookingController> {
   Widget _buildPlayerSlot() {
     return Column(
       children: [
-        const CircleAvatar(radius: 27),
         const CircleAvatar(radius: 27),
         const SizedBox(height: 7),
         Text("Available", style: Get.textTheme.bodySmall),

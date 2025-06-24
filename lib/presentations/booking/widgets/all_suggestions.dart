@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/filters.dart';
 
 import '../../../../configs/components/app_bar.dart';
 import '../../../../generated/assets.dart';
@@ -21,7 +21,6 @@ class AllSuggestions extends StatefulWidget {
 class _AllSuggestionsState extends State<AllSuggestions> {
   @override
   Widget build(BuildContext context) {
-    final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
     return Scaffold(
       appBar: primaryAppBar(
         leading: BackButton(),
@@ -64,7 +63,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
               height: 50,
 
               onTap: () {},
-              text: "Book the first spot",
+              text: "+ Start a match",
             ),
           ),
         ),
@@ -154,7 +153,9 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                     "For your level",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  Icon(Icons.filter_list),
+                  InkWell(
+                      onTap: ()=>Get.to(Filters()),
+                      child: Icon(Icons.filter_list)),
                 ],
               ),
               SizedBox(height: Get.height * .03),
@@ -180,7 +181,6 @@ class _AllSuggestionsState extends State<AllSuggestions> {
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(
-      height: Get.height * 0.25,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),

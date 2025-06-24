@@ -49,7 +49,7 @@ class AppThemes {
           color: AppColors.blackColor,
           fontSize: 14),
       headlineSmall: TextStyle(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           fontFamily: "Poppins",
           color: AppColors.blackColor,
           fontSize: 12),
@@ -84,6 +84,16 @@ class AppThemes {
           fontFamily: "Poppins",
           color: AppColors.textColor,
           fontSize: 10),
+      displayLarge: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontFamily: "Poppins",
+          color: AppColors.textColor,
+          fontSize: 6),
+      displayMedium: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontFamily: "Poppins",
+          color: AppColors.textColor,
+          fontSize: 6),
     ),
   );
 }

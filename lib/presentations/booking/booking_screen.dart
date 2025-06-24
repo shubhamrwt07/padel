@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
-import 'package:padel_mobile/presentations/auth/booking/widgets/book_session.dart';
-import 'package:padel_mobile/presentations/auth/booking/widgets/home_content.dart';
-import 'package:padel_mobile/presentations/auth/booking/widgets/open_matches.dart';
-import 'package:padel_mobile/presentations/auth/booking/widgets/tab_bar.dart';
-
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/book_session.dart';
+import 'package:padel_mobile/presentations/booking/widgets/home_content.dart';
+import 'package:padel_mobile/presentations/booking/widgets/open_matches.dart';
+import 'package:padel_mobile/presentations/booking/widgets/tab_bar.dart';
 import '../../../configs/app_colors.dart';
 
 class BookingScreen extends GetView<BookingController> {
@@ -131,7 +129,7 @@ class BookingScreen extends GetView<BookingController> {
                           SizedBox(
                             height: double.infinity,
                             width: double.infinity,
-                            child: Text("tab4"),
+                            child: Center(child: Text("Coming Soon...")),
                           ),
                         ],
                       ),
