@@ -32,6 +32,18 @@ class BookingController extends GetxController with GetSingleTickerProviderState
     {'icon': Icons.photo, 'label': 'Photos'},
 
   ];
-  final isShowAllReviews = false.obs;
+
+
+  //OPEN MATCHES-----------------------------------------------------------------
+  String? selectedTime;
+  Rx<DateTime> selectedDate=DateTime.now().obs;
+  final List<String> timeSlots = [
+    "8:00am", "8:10am", "8:30am",
+    "8:40am", "9:00am", "9:20am",
+    "9:40am", "10:00am", "10:20am",
+  ];
+
+
+   final isShowAllReviews = false.obs;
   final isShowAllPhotos = false.obs;
-}
+ }

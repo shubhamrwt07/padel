@@ -21,6 +21,7 @@ class Assets {
   static const String imagesImgDummy4 = 'assets/images/img_dummy_4.png';
   static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesLocation = 'assets/images/location.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }
