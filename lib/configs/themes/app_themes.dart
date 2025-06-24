@@ -21,7 +21,7 @@ class AppThemes {
       primary: AppColors.primaryColor,
       // secondary: AppColors.secondaryColor,
     ),
-    scaffoldBackgroundColor: Colors.transparent,
+    scaffoldBackgroundColor: Colors.white,
     textTheme: const TextTheme(
   titleLarge:TextStyle(
       fontWeight: FontWeight.w700,
@@ -78,12 +78,12 @@ class AppThemes {
           fontWeight: FontWeight.w400,
           fontFamily: "Poppins",
           color: AppColors.textColor,
-          fontSize: 6),
+          fontSize: 12),
       bodySmall: TextStyle(
           fontWeight: FontWeight.w500,
           fontFamily: "Poppins",
           color: AppColors.textColor,
-          fontSize: 6),
+          fontSize: 10),
     ),
   );
 }

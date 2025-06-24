@@ -21,9 +21,12 @@ dependencies:
   pin_code_fields:
   curved_navigation_bar:
   flutter_rating_bar:
+  easy_date_timeline: ^2.0.9
+  intl: ^0.20.2
   flutter_map:
   latlong2:
   flutter_slidable:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
