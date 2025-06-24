@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/auth/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
 import 'add_review_bottomsheet.dart';
 

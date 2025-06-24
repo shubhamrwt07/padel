@@ -280,110 +280,116 @@ class HomeScreen extends StatelessWidget {
       child: ListView.builder(
         itemCount: 10,
         itemBuilder: (context, index) {
-          return Container(
-            height: Get.height * 0.13,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.lightBlueColor),
-            ),
-            padding: EdgeInsets.all(10),
-            // color: Colors.red,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      height: 95,
-                      width: 113,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: AssetImage(Assets.imagesImgCart),
+          return GestureDetector(
+            onTap: ()=>Get.toNamed(RoutesName.booking),
+            child: Container(
+              height: Get.height * 0.13,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.lightBlueColor),
+              ),
+              padding: EdgeInsets.all(10),
+              // color: Colors.red,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        height: 95,
+                        width: 113,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: AssetImage(Assets.imagesImgCart),
+                          ),
                         ),
+                      ).paddingOnly(right: 10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Padel Haus",
+                                style: Theme.of(context).textTheme.headlineSmall!
+                                    .copyWith(fontWeight: FontWeight.w500),
+                              ),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined, size: 13),
+                                  Text(
+                                    "Chandigarh 160001",
+                                    style: Theme.of(context).textTheme.bodyLarge!
+                                        .copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "4 Courts | Free parking | Shed",
+                                style: Theme.of(context).textTheme.bodyLarge!
+                                    .copyWith(color: AppColors.labelBlackColor),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: ()=>Get.toNamed(RoutesName.booking),
+                            child: CartButton(
+                              height: 30,
+                              width: Get.width * 0.26,
+                              onTap: () {},
+                              text: "Add to Cart",
+                            ),
+                          ),
+                        ],
                       ),
-                    ).paddingOnly(right: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Padel Haus",
-                              style: Theme.of(context).textTheme.headlineSmall!
-                                  .copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.location_on_outlined, size: 13),
-                                Text(
-                                  "Chandigarh 160001",
-                                  style: Theme.of(context).textTheme.bodyLarge!
-                                      .copyWith(fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              "4 Courts | Free parking | Shed",
-                              style: Theme.of(context).textTheme.bodyLarge!
-                                  .copyWith(color: AppColors.labelBlackColor),
-                            ),
-                          ],
-                        ),
-                        CartButton(
-                          height: 30,
-                          width: Get.width * 0.26,
-                          onTap: () {},
-                          text: "Add to Cart",
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: AppColors.secondaryColor,
-                              size: 15,
-                            ),
-                            Text(
-                              "4.9",
-                              style: Theme.of(context).textTheme.bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                        Icon(
-                          Icons.directions,
-                          color: AppColors.secondaryColor,
-                          size: 13,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      "₹ 1200",
-                      style: Theme.of(context).textTheme.headlineLarge!
-                          .copyWith(fontWeight: FontWeight.w500),
-                    ).paddingOnly(bottom: 5),
-                  ],
-                ),
-              ],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: AppColors.secondaryColor,
+                                size: 15,
+                              ),
+                              Text(
+                                "4.9",
+                                style: Theme.of(context).textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          Icon(
+                            Icons.directions,
+                            color: AppColors.secondaryColor,
+                            size: 13,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        "₹ 1200",
+                        style: Theme.of(context).textTheme.headlineLarge!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ).paddingOnly(bottom: 5),
+                    ],
+                  ),
+                ],
+              ),
+            ).paddingOnly(
+              left: Get.width * 0.05,
+              right: Get.width * 0.05,
+              bottom: 8,
             ),
-          ).paddingOnly(
-            left: Get.width * 0.05,
-            right: Get.width * 0.05,
-            bottom: 8,
           );
         },
       ),

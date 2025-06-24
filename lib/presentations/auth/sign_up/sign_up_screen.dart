@@ -13,12 +13,11 @@ class SignUpScreen extends GetView<SignUpController> {
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryContainer(
-      child: GestureDetector(
-        onTap: (){
-          FocusManager.instance.primaryFocus!.unfocus();
-        },
+    return GestureDetector(
+      onTap: ()=>FocusManager.instance.primaryFocus!.unfocus(),
+      child: PrimaryContainer(
         child: Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: primaryAppBar(title: SizedBox(), context: context),
           body: SingleChildScrollView(
             child: Column(
@@ -42,7 +41,7 @@ class SignUpScreen extends GetView<SignUpController> {
           style: Theme.of(context).textTheme.titleLarge,
         ).paddingOnly(bottom: Get.height * 0.02,top: Get.height*0.05),
         Text(
-          "Create an account so you can explore all\nthe existing jobs",
+          "Create an account so you can explore all the existing jobs",
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.06),
@@ -90,15 +89,15 @@ class SignUpScreen extends GetView<SignUpController> {
                 ? null
                 : controller.selectedLocation!.value,
             hint: Text(
-              'Location',
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                color: AppColors.textColor,
-              ),
+              'Preference Location',
+              style: Theme.of(context)
+                  .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
             ),
             isExpanded: true,
             icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textColor),
             dropdownColor: AppColors.textFieldColor,
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(color: AppColors.textColor),
+            style: Theme.of(context)
+                .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
             onChanged: (value) {
               if (value != null) controller.selectedLocation!.value = value;
             },
@@ -111,12 +110,11 @@ class SignUpScreen extends GetView<SignUpController> {
           ),
         );
       }),
-    ).paddingOnly(bottom: Get.height * 0.07);
+    ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.05 : Get.height * 0.22,);
   }
   Widget bottomButtonAndContent(BuildContext context){
     return Column(
       children: [
-        PrimaryButton(onTap: (){}, text: "Create").paddingOnly(bottom: Get.height*0.04),
         GestureDetector(
           onTap: (){
             Get.toNamed(RoutesName.login);
@@ -124,19 +122,21 @@ class SignUpScreen extends GetView<SignUpController> {
           child: Container(
             color: Colors.transparent,
             child: RichText(text: TextSpan(
-              children:[
-                TextSpan(
-                  text: "Already have an account ",
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
-                ),
-                TextSpan(
-                    text: "Sign in",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor)
-                ),
-              ]
+                children:[
+                  TextSpan(
+                      text: "Already have an account ",
+                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
+                  ),
+                  TextSpan(
+                      text: "Sign in",
+                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor)
+                  ),
+                ]
             )),
           ),
-        )
+        ).paddingOnly(bottom: Get.height*0.04),
+        PrimaryButton(onTap: (){}, text: "Create"),
+        SizedBox(height: Get.height*0.05,)
       ],
     );
   }
