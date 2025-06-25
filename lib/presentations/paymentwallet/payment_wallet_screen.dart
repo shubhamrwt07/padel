@@ -101,7 +101,7 @@ class PaymentWalletScreen extends StatelessWidget {
               ),),
               Icon(Icons.filter)
             ],).paddingOnly(top: 15),
-
+///
         ],
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
     );
