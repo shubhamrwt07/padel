@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
+import 'package:padel_mobile/presentations/booking/widgets/details_page.dart';
 import 'package:padel_mobile/presentations/booking/widgets/filters.dart';
 
 import '../../../../configs/components/app_bar.dart';
@@ -181,91 +182,94 @@ class _AllSuggestionsState extends State<AllSuggestions> {
   }
 
   Widget _buildMatchCard(BuildContext context) {
-    return Container(
-      height: Get.height * 0.25,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.playerCardBackgroundColor,
-        border: Border.all(color: AppColors.greyColor),
-      ),
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "21 June | 9:00am",
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          Text(
-            "The first player sets the match type",
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-          const SizedBox(height: 12),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 0),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      Container(width: 1, color: Colors.black),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                    ],
+    return InkWell(
+      onTap: ()=>Get.to(DetailsPage()),
+      child: Container(
+        height: Get.height * 0.25,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: AppColors.playerCardBackgroundColor,
+          border: Border.all(color: AppColors.greyColor),
+        ),
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "21 June | 9:00am",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            Text(
+              "The first player sets the match type",
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            const SizedBox(height: 12),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 0),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildPlayerSlot().paddingOnly(bottom: 6),
+      
+                        _buildPlayerSlot().paddingOnly(bottom: 6),
+                        Container(width: 1, color: Colors.black),
+                        _buildPlayerSlot().paddingOnly(bottom: 6),
+                        _buildPlayerSlot().paddingOnly(bottom: 6),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const Divider(thickness: 1, height: 0, color: Colors.black),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'The Good Club',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      SvgPicture.asset(Assets.imagesLocation, height: 20),
-                      Container(
-                        width: Get.width * .55,
-                        child: Text(
-                          'Sukhna chandigarh 160001',
-                          style: Theme.of(context).textTheme.labelSmall,
+                const Divider(thickness: 1, height: 0, color: Colors.black),
+              ],
+            ),
+      
+            const SizedBox(height: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'The Good Club',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        SvgPicture.asset(Assets.imagesLocation, height: 20),
+                        Container(
+                          width: Get.width * .55,
+                          child: Text(
+                            'Sukhna chandigarh 160001',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-
-                    width: Get.width * .15,
-                    child: Text(
-                      '2000',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: AppColors.primaryColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                      ],
                     ),
-                  ).paddingOnly(right: Get.width * .04),
-                ],
-              ),
-            ],
-          ),
-        ],
+                    Container(
+                      alignment: Alignment.center,
+      
+                      width: Get.width * .15,
+                      child: Text(
+                        '2000',
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: AppColors.primaryColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ).paddingOnly(right: Get.width * .04),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

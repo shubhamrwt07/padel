@@ -1,4 +1,4 @@
-package com.example.padel_mobile
+package com.matchacha.app
 
 import io.flutter.embedding.android.FlutterActivity
 
