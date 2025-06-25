@@ -28,6 +28,8 @@ class RoutesName {
 
   //BookingConfirmAndCancel routes name
   static const String bookingConfirmAndCancel = '/bookingConfirmAndCancel' ;
+  static const String paymentFilter = '/paymentFilter';
+  static const String support = '/support';
 
 
 

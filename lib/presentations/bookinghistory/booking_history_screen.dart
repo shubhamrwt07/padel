@@ -33,7 +33,6 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
     return Scaffold(
       appBar: primaryAppBar(
         showLeading: true,
-        leading: Icon(Icons.arrow_back, color: Colors.black),
         centerTitle: true,
         title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
         context: context,
