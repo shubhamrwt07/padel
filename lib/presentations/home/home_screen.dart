@@ -523,6 +523,26 @@ class HomeScreen extends GetView<HomeController> {
                             //   color: AppColors.secondaryColor,
                             //   size: 13,
                             // ),
+                            Row(
+                              children: [
+
+                                Icon(
+                                  Icons.star,
+                                  color: AppColors.secondaryColor,
+                                  size: 15,
+                                ),
+                                Text(
+                                  "4.9",
+                                  style: Theme.of(context).textTheme.bodyLarge!
+                                      .copyWith(fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                            Icon(
+                              Icons.directions,
+                              color: AppColors.secondaryColor,
+                              size: 13,
+                            ),
                           ],
                         ),
                         Text(
