@@ -23,6 +23,8 @@ import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/payment/payment_binding.dart';
 import 'package:padel_mobile/presentations/payment/payment_screen.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
+import 'package:padel_mobile/presentations/support/support_binding.dart';
+import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
@@ -30,15 +32,14 @@ import '../../presentations/editProfile/edit_profile_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
-
 class Routes {
-  static const String initialRoute = RoutesName.paymentFilter;
+  static const String initialRoute = RoutesName.profile;
 
   static const Duration defaultDuration = Duration(milliseconds: 200);
 
   static final route = [
     GetPage(
-      name: RoutesName.cart,
+      name: RoutesName.splash,
       page: () => const SplashScreen(),
       binding: SplashBinding(),
       transition: Transition.fadeIn,
@@ -138,6 +139,12 @@ class Routes {
       name: RoutesName.paymentFilter,
       page: () => PaymentFilterUi(),
       binding: PaymentFilterBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),GetPage(
+      name: RoutesName.support,
+      page: () => SupportScreen(),
+      binding: SupportBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     )

@@ -10,7 +10,80 @@ import '../../generated/assets.dart';
 class ProfileUi extends StatelessWidget {
   const ProfileUi({super.key});
 
-  @override
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Are you sure you want to logout?",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Get.offAllNamed(RoutesName.login); // Perform logout
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.redColor,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 8, // Reduced vertical padding
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    textStyle: TextStyle(fontSize: 14), // Smaller font if needed
+                  ),
+                  child: Text("Yes",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall!
+
+                        .copyWith(fontWeight: FontWeight.w600,color: Colors.white),),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.blueColor,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 8, // Reduced vertical padding
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    textStyle: TextStyle(fontSize: 14), // Smaller font if needed
+                  ),
+                  child: Text("No", style: Theme.of(context)
+                      .textTheme
+                      .titleSmall!
+
+                      .copyWith(fontWeight: FontWeight.w600,color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -19,11 +92,11 @@ class ProfileUi extends StatelessWidget {
         showLeading: false,
         title: Text(
           "Profile",
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium!
+              .copyWith(fontWeight: FontWeight.w600),
         ).paddingOnly(left: Get.width * 0.02),
-
         context: context,
       ),
       body: Column(
@@ -33,7 +106,6 @@ class ProfileUi extends StatelessWidget {
             children: [
               Stack(
                 alignment: Alignment.bottomRight,
-                // Aligns children to bottom-right by default
                 children: [
                   Container(
                     height: Get.height * .11,
@@ -42,12 +114,12 @@ class ProfileUi extends StatelessWidget {
                       color: AppColors.tabSelectedColor,
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: Icon(Icons.person, size: 90,color: AppColors.labelBlackColor,),
+                    child: Icon(Icons.person,
+                        size: 90, color: AppColors.labelBlackColor),
                   ),
                   Positioned(
-
-                    bottom: 0, // Adjust spacing from bottom
-                    right: 8, // Adjust spacing from right
+                    bottom: 0,
+                    right: 8,
                     child: Container(
                       padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -68,20 +140,28 @@ class ProfileUi extends StatelessWidget {
                 children: [
                   Text(
                     "Jane Cooper",
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w700,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall!
+                        .copyWith(
+                      fontWeight: FontWeight.w600,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(),
-
                   Text(
                     "jackson.graham@example.com",
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge!
+                        .copyWith(
                       fontWeight: FontWeight.w500,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(top: 0),
-                  GestureDetector(onTap:(){Get.toNamed(RoutesName.editProfile);},
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed(RoutesName.editProfile);
+                    },
                     child: Container(
                       alignment: Alignment.center,
                       height: Get.height * .03,
@@ -92,18 +172,18 @@ class ProfileUi extends StatelessWidget {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            const Color(0xFF3DBE64), // #3DBE64 (30%)
-                            const Color(0xFF1F41BB), // #1F41BB (70%)
+                            const Color(0xFF3DBE64),
+                            const Color(0xFF1F41BB),
                           ],
-                          stops: [
-                            0.1,
-                            0.9,
-                          ], // 30% for first color, rest for second
+                          stops: [0.1, 0.9],
                         ),
                       ),
                       child: Text(
                         "Edit Profile",
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 10,
                         ),
@@ -114,9 +194,10 @@ class ProfileUi extends StatelessWidget {
               ).paddingOnly(left: 10),
             ],
           ).paddingOnly(left: Get.width * .03, right: Get.width * .03),
-          GestureDetector(onTap: (){
-            Get.toNamed(RoutesName.bookingHistory);
-          },
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(RoutesName.bookingHistory);
+            },
             child: Row(
               children: [
                 Icon(
@@ -126,7 +207,10 @@ class ProfileUi extends StatelessWidget {
                 ),
                 Text(
                   "Booking",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(
                     color: AppColors.labelBlackColor,
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -135,16 +219,23 @@ class ProfileUi extends StatelessWidget {
               ],
             ).paddingOnly(top: Get.height * .05),
           ),
-          GestureDetector(onTap: (){
-            Get.toNamed(RoutesName.paymentWallet);
-          },
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(RoutesName.paymentWallet);
+            },
             child: Row(
               children: [
-                Icon(Icons.payment,                 size: 25,
-                    color: AppColors.labelBlackColor),
+                Icon(
+                  Icons.payment,
+                  size: 25,
+                  color: AppColors.labelBlackColor,
+                ),
                 Text(
                   "Payments",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(
                     color: AppColors.labelBlackColor,
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -153,9 +244,10 @@ class ProfileUi extends StatelessWidget {
               ],
             ).paddingOnly(top: Get.height * .05),
           ),
-          GestureDetector(onTap: (){
-            Get.toNamed(RoutesName.cart);
-          },
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(RoutesName.cart);
+            },
             child: Row(
               children: [
                 Icon(
@@ -165,7 +257,10 @@ class ProfileUi extends StatelessWidget {
                 ),
                 Text(
                   "Cart",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(
                     color: AppColors.labelBlackColor,
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -183,7 +278,10 @@ class ProfileUi extends StatelessWidget {
               ),
               Text(
                 "Help & Support",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(
                   color: AppColors.labelBlackColor,
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
@@ -200,7 +298,10 @@ class ProfileUi extends StatelessWidget {
               ),
               Text(
                 "Privacy",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(
                   color: AppColors.labelBlackColor,
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
@@ -208,21 +309,31 @@ class ProfileUi extends StatelessWidget {
               ).paddingOnly(left: Get.width * .1),
             ],
           ).paddingOnly(top: Get.height * .05),
-          Row(
-            children: [
-              SvgPicture.asset(height: 22,width: 22,
-                Assets.imagesIcLogOut,
-              ).paddingOnly(left: 5),
-              Text(
-                "Logout",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ).paddingOnly(left: Get.width * .11),
-            ],
-          ).paddingOnly(top: Get.height * .05),
+          GestureDetector(
+            onTap: () {
+              _showLogoutDialog(context);
+            },
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  Assets.imagesIcLogOut,
+                  height: 22,
+                  width: 22,
+                ).paddingOnly(left: 5),
+                Text(
+                  "Logout",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ).paddingOnly(left: Get.width * .11),
+              ],
+            ).paddingOnly(top: Get.height * .05),
+          ),
         ],
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
     );
