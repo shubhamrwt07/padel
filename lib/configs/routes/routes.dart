@@ -30,13 +30,13 @@ import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 
 class Routes {
-  static const String initialRoute = RoutesName.splash;
+  static const String initialRoute = RoutesName.paymentWallet;
 
   static const Duration defaultDuration = Duration(milliseconds: 200);
 
   static final route = [
     GetPage(
-      name: RoutesName.splash,
+      name: RoutesName.cart,
       page: () => const SplashScreen(),
       binding: SplashBinding(),
       transition: Transition.fadeIn,
