@@ -500,12 +500,7 @@ class HomeScreen extends GetView<HomeController> {
                           children: [
                             Row(
                               children: [
-                                Image.asset(
-                                  Assets.imagesIcLocation,
-                                  color: AppColors.primaryColor,
-                                  scale: 4,
-                                ) ,                               Text(
-                                  "Chandigarh 160001",),
+
                                 Icon(
                                   Icons.star,
                                   color: AppColors.secondaryColor,
