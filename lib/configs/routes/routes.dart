@@ -13,6 +13,8 @@ import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
+import 'package:padel_mobile/presentations/payment_filter/payment_filter_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
@@ -30,7 +32,7 @@ import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 
 class Routes {
-  static const String initialRoute = RoutesName.paymentWallet;
+  static const String initialRoute = RoutesName.paymentFilter;
 
   static const Duration defaultDuration = Duration(milliseconds: 200);
 
@@ -130,6 +132,12 @@ class Routes {
       name: RoutesName.bookingConfirmAndCancel,
       page: () => BookingConfirmAndCancelScreen(),
       binding: BookingConfirmAndCancelBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),  GetPage(
+      name: RoutesName.paymentFilter,
+      page: () => PaymentFilterUi(),
+      binding: PaymentFilterBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     )

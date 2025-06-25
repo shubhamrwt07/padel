@@ -19,7 +19,6 @@ class EditProfileUi extends StatelessWidget {
       backgroundColor: AppColors.whiteColor,
       appBar: primaryAppBar(
         showLeading: true,
-        leading: Icon(Icons.arrow_back, color: Colors.black),
         centerTitle: true,
         title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
         action: [
@@ -55,10 +54,10 @@ class EditProfileUi extends StatelessWidget {
                       height: Get.height * .11,
                       width: Get.width * .24,
                       decoration: BoxDecoration(
-                        color: Colors.grey,
+                        color: AppColors.tabSelectedColor,
                         borderRadius: BorderRadius.circular(50),
                       ),
-                      child: Icon(Icons.person, size: 90),
+                      child: Icon(Icons.person, size: 90,color: AppColors.labelBlackColor,),
                     ),
                     Positioned(
                       bottom: 0, // Adjust spacing from bottom
@@ -82,8 +81,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Full Name",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),
@@ -91,8 +90,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Email",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),
@@ -100,8 +99,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Phone",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),
@@ -111,8 +110,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Gender",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),
@@ -133,8 +132,8 @@ class EditProfileUi extends StatelessWidget {
                   Text(
                     "Female",
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(left: 5),
@@ -152,8 +151,8 @@ class EditProfileUi extends StatelessWidget {
                   Text(
                     "Male",
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(left: 5),
@@ -171,8 +170,8 @@ class EditProfileUi extends StatelessWidget {
                   Text(
                     "Other",
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(left: 5),
@@ -181,8 +180,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Date of Birth",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),
@@ -204,8 +203,8 @@ class EditProfileUi extends StatelessWidget {
               Text(
                 "Location / City",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: Get.height * .02),

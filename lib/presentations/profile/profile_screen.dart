@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -38,10 +39,10 @@ class ProfileUi extends StatelessWidget {
                     height: Get.height * .11,
                     width: Get.width * .24,
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: AppColors.tabSelectedColor,
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: Icon(Icons.person, size: 90),
+                    child: Icon(Icons.person, size: 90,color: AppColors.labelBlackColor,),
                   ),
                   Positioned(
 
@@ -80,96 +81,111 @@ class ProfileUi extends StatelessWidget {
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(top: 0),
-                  Container(
-                    alignment: Alignment.center,
-                    height: Get.height * .03,
-                    width: Get.width * .22,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          const Color(0xFF3DBE64), // #3DBE64 (30%)
-                          const Color(0xFF1F41BB), // #1F41BB (70%)
-                        ],
-                        stops: [
-                          0.1,
-                          0.9,
-                        ], // 30% for first color, rest for second
+                  GestureDetector(onTap:(){Get.toNamed(RoutesName.editProfile);},
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: Get.height * .03,
+                      width: Get.width * .22,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            const Color(0xFF3DBE64), // #3DBE64 (30%)
+                            const Color(0xFF1F41BB), // #1F41BB (70%)
+                          ],
+                          stops: [
+                            0.1,
+                            0.9,
+                          ], // 30% for first color, rest for second
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      "Edit Profile",
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: AppColors.whiteColor,
-                        fontSize: 10,
+                      child: Text(
+                        "Edit Profile",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: AppColors.whiteColor,
+                          fontSize: 10,
+                        ),
                       ),
-                    ),
-                  ).paddingOnly(top: 10),
+                    ).paddingOnly(top: 10),
+                  ),
                 ],
               ).paddingOnly(left: 10),
             ],
           ).paddingOnly(left: Get.width * .03, right: Get.width * .03),
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_month_outlined,
-                size: 30,
-                color: AppColors.labelBlackColor,
-              ),
-              Text(
-                "Booking",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+          GestureDetector(onTap: (){
+            Get.toNamed(RoutesName.bookingHistory);
+          },
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_month_outlined,
+                  size: 25,
                   color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
                 ),
-              ).paddingOnly(left: Get.width * .1),
-            ],
-          ).paddingOnly(top: Get.height * .05),
-          Row(
-            children: [
-              Icon(Icons.payment, size: 30, color: AppColors.labelBlackColor),
-              Text(
-                "Payments",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                Text(
+                  "Booking",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: AppColors.labelBlackColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ).paddingOnly(left: Get.width * .1),
+              ],
+            ).paddingOnly(top: Get.height * .05),
+          ),
+          GestureDetector(onTap: (){
+            Get.toNamed(RoutesName.paymentWallet);
+          },
+            child: Row(
+              children: [
+                Icon(Icons.payment,                 size: 25,
+                    color: AppColors.labelBlackColor),
+                Text(
+                  "Payments",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: AppColors.labelBlackColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ).paddingOnly(left: Get.width * .1),
+              ],
+            ).paddingOnly(top: Get.height * .05),
+          ),
+          GestureDetector(onTap: (){
+            Get.toNamed(RoutesName.cart);
+          },
+            child: Row(
+              children: [
+                Icon(
+                  Icons.shopping_cart_outlined,
+                  size: 25,
                   color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
                 ),
-              ).paddingOnly(left: Get.width * .1),
-            ],
-          ).paddingOnly(top: Get.height * .05),
-          Row(
-            children: [
-              Icon(
-                Icons.shopping_cart_outlined,
-                size: 30,
-                color: AppColors.labelBlackColor,
-              ),
-              Text(
-                "Cart",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ).paddingOnly(left: Get.width * .1),
-            ],
-          ).paddingOnly(top: Get.height * .05),
+                Text(
+                  "Cart",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: AppColors.labelBlackColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ).paddingOnly(left: Get.width * .1),
+              ],
+            ).paddingOnly(top: Get.height * .05),
+          ),
           Row(
             children: [
               Icon(
                 Icons.headset_mic,
-                size: 30,
+                size: 25,
                 color: AppColors.labelBlackColor,
               ),
               Text(
                 "Help & Support",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontSize: 16,
                 ),
               ).paddingOnly(left: Get.width * .1),
@@ -179,14 +195,14 @@ class ProfileUi extends StatelessWidget {
             children: [
               Icon(
                 Icons.privacy_tip_outlined,
-                size: 30,
+                size: 25,
                 color: AppColors.labelBlackColor,
               ),
               Text(
                 "Privacy",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontSize: 16,
                 ),
               ).paddingOnly(left: Get.width * .1),
@@ -201,7 +217,7 @@ class ProfileUi extends StatelessWidget {
                 "Logout",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: Colors.red,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontSize: 16,
                 ),
               ).paddingOnly(left: Get.width * .11),
