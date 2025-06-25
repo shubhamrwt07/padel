@@ -20,6 +20,11 @@ class AppColors {
   static const Color playerCardBackgroundColor = Color(0xFFfafbff);
    static const Color lightRedColor = Color(0xFFFFDCDC);
   static const Color redColor = Color(0xFFCE1313);
+  static const Color containerBorderColor = Color(0xFFf4f6fc);
+  static const Color blueColor = Color(0xFF1A237E);
+  static const Color tabColor = Color(0xFFc9c4d0);
+  static const Color payColor = Color(0xFFd7e0ff);
+  static const Color tabSelectedColor = Color(0xFFeff2ff);
   static const Color textHintColor = Color(0xFF374151);
 
 }

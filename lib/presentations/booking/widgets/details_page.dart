@@ -6,6 +6,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 
 import '../../../configs/components/primary_button.dart';
+import '../../../generated/assets.dart';
 
 class DetailsPage extends StatelessWidget {
   const DetailsPage({super.key});
@@ -140,7 +141,7 @@ class DetailsPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("The Good Club", style: Get.textTheme.bodySmall),
-                          Icon(CupertinoIcons.location),
+                          SvgPicture.asset(Assets.imagesDirections),
                         ],
                       ),
                     ),
@@ -163,7 +164,15 @@ class DetailsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Text("Information",style: Get.textTheme.titleSmall,),
+          ),
+          ListTile(
+            leading: SvgPicture.asset(Assets.imagesCourt),
+            title: Text('Type of Court ( 2 court)',style: Get.textTheme.bodySmall,),
+            subtitle:   Text('Outdoor, crystal, Double)',style: Get.textTheme.headlineSmall,),
           )
+
+
+
         ],
       ).paddingAll(16),
     );

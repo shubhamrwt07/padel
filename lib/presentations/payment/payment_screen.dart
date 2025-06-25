@@ -6,6 +6,8 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/payment/payment_controller.dart';
 
+import '../booking/successful_screens/booking_successful_screen.dart';
+
 class PaymentScreen extends GetView<PaymentController> {
   const PaymentScreen({super.key});
 
@@ -60,6 +62,7 @@ class PaymentScreen extends GetView<PaymentController> {
               height: 50,
               width: Get.width*0.9,
               onTap: () {
+                Get.to(()=>BookingSuccessfulScreen(),transition: Transition.rightToLeft);
               }, text: "",
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

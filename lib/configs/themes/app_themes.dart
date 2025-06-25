@@ -84,6 +84,16 @@ class AppThemes {
           fontFamily: "Poppins",
           color: AppColors.textColor,
           fontSize: 10),
+      displayLarge: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontFamily: "Poppins",
+          color: AppColors.textColor,
+          fontSize: 6),
+      displayMedium: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontFamily: "Poppins",
+          color: AppColors.textColor,
+          fontSize: 6),
     ),
   );
 }

@@ -8,7 +8,6 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/widgets/details_page.dart';
 import 'package:padel_mobile/presentations/booking/widgets/filters.dart';
-
 import '../../../../configs/components/app_bar.dart';
 import '../../../../generated/assets.dart';
 
@@ -22,7 +21,7 @@ class AllSuggestions extends StatefulWidget {
 class _AllSuggestionsState extends State<AllSuggestions> {
   @override
   Widget build(BuildContext context) {
-    final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
+
     return Scaffold(
       appBar: primaryAppBar(
         leading: BackButton(),
@@ -63,14 +62,12 @@ class _AllSuggestionsState extends State<AllSuggestions> {
             ),
             child: PrimaryButton(
               height: 50,
-
               onTap: () {},
-              text: "Book the first spot",
+              text: "+ Start a match",
             ),
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -85,7 +82,6 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                     'Afternoon',
                     'Evening',
                   ];
-
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -95,7 +91,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                             "Slots",
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                          SizedBox(width: 10,),
+                          SizedBox(width: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: slots.map((slot) {
@@ -142,12 +138,10 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                         ],
                       ),
                       const SizedBox(height: 12),
-
                     ],
                   );
                 },
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -156,16 +150,15 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   InkWell(
-                      onTap: ()=>Get.to(Filters()),
-                      child: Icon(Icons.filter_list)),
+                    onTap: () => Get.to(Filters()),
+                    child: Icon(Icons.filter_list),
+                  ),
                 ],
               ),
               SizedBox(height: Get.height * .03),
-
               ListView.builder(
                 physics: ClampingScrollPhysics(),
                 itemCount: 4,
-
                 shrinkWrap: true,
                 itemBuilder: (context, int index) {
                   return Padding(
@@ -185,7 +178,6 @@ class _AllSuggestionsState extends State<AllSuggestions> {
     return InkWell(
       onTap: ()=>Get.to(DetailsPage()),
       child: Container(
-        height: Get.height * 0.25,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -214,12 +206,11 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildPlayerSlot().paddingOnly(bottom: 6),
-      
-                        _buildPlayerSlot().paddingOnly(bottom: 6),
+                        _buildPlayerSlot(imageUrl: Assets.imagesImgCart, name: 'Courtney Henry').paddingOnly(bottom: 6),
+                        _buildPlayerSlot(imageUrl: Assets.imagesImgCart, name: 'Devon Lane').paddingOnly(bottom: 6),
                         Container(width: 1, color: Colors.black),
-                        _buildPlayerSlot().paddingOnly(bottom: 6),
-                        _buildPlayerSlot().paddingOnly(bottom: 6),
+                        _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
+                        _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
                       ],
                     ),
                   ),
@@ -227,7 +218,6 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                 const Divider(thickness: 1, height: 0, color: Colors.black),
               ],
             ),
-      
             const SizedBox(height: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +234,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                       children: [
                         SvgPicture.asset(Assets.imagesLocation, height: 20),
                         Container(
-                          width: Get.width * .55,
+                           width: Get.width * .5,
                           child: Text(
                             'Sukhna chandigarh 160001',
                             style: Theme.of(context).textTheme.labelSmall,
@@ -253,11 +243,10 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                       ],
                     ),
                     Container(
-                      alignment: Alignment.center,
-      
-                      width: Get.width * .15,
+                       alignment: Alignment.center,
+                      width: Get.width * .2,
                       child: Text(
-                        '2000',
+                        '₹2000',
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           color: AppColors.primaryColor,
                         ),
@@ -274,7 +263,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
     );
   }
 
-  Widget _buildPlayerSlot() {
+  Widget _buildPlayerSlot({required String imageUrl, required String name}) {
     return Column(
       children: [
         Container(
@@ -285,16 +274,28 @@ class _AllSuggestionsState extends State<AllSuggestions> {
             color: AppColors.whiteColor,
             border: Border.all(color: AppColors.primaryColor),
           ),
-          child: Icon(CupertinoIcons.add, color: AppColors.primaryColor),
+          child: imageUrl.isEmpty
+              ? Icon(CupertinoIcons.add, color: AppColors.primaryColor)
+              : ClipOval(
+            child: Image.asset(
+              imageUrl,
+              fit: BoxFit.cover,
+              width: 50, // match container size
+              height: 50,
+            ),
+          ),
         ),
         const SizedBox(height: 7),
         Text(
-          "Available",
+          name.isNotEmpty ? name : 'Available',
           style: Get.textTheme.bodySmall!.copyWith(
-            color: AppColors.primaryColor,
+            color: name.isNotEmpty
+                ? AppColors.darkGreyColor
+                : AppColors.primaryColor,
           ),
         ),
       ],
     );
+
   }
 }

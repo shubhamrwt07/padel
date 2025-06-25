@@ -21,6 +21,13 @@ class RoutesName {
 
   //Payment routes name
   static const String payment = '/payment' ;
+  //Booking History name
+  static const String bookingHistory = '/bookingHistory' ;
+  //Payment Wallet
+  static const String paymentWallet = '/paymentWallet' ;
+
+  //BookingConfirmAndCancel routes name
+  static const String bookingConfirmAndCancel = '/bookingConfirmAndCancel' ;
 
 
 

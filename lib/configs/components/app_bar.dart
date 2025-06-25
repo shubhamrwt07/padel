@@ -40,7 +40,7 @@ AppBar primaryAppBar({
         : null, // hide leading if showLeading is false
 
     title: title,
-    titleTextStyle: Theme.of(context).textTheme.headlineLarge!.copyWith(
+    titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
       color: AppColors.blackColor,
       fontSize: 20,
     ),

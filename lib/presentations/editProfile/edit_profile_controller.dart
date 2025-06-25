@@ -13,7 +13,7 @@ class EditProfileController extends GetxController {
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
     );
-
+///
     if (pickedDate != null && pickedDate != selectedDate.value) {
       selectedDate.value = pickedDate;
       // Optional: You can update UI or do something with the date here
