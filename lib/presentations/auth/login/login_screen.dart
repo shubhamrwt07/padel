@@ -39,7 +39,7 @@ class LoginScreen extends GetView<LoginController> {
     return Column(
       children: [
         Text(
-          "Login Here",
+          "Login here",
           style: Theme.of(context).textTheme.titleLarge,
         ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.15),
         Text(
@@ -100,7 +100,7 @@ class LoginScreen extends GetView<LoginController> {
         PrimaryButton(onTap: (){
           FocusManager.instance.primaryFocus!.unfocus();
           Get.toNamed(RoutesName.bottomNav);
-        }, text: "Sign in"),
+        }, text: "Sign in",),
         SizedBox(height: Get.height*0.05,)
       ],
     );

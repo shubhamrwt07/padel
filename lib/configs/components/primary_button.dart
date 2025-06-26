@@ -40,7 +40,7 @@ class PrimaryButton extends StatelessWidget {
         ),
         child:child?? Text(
             text,
-            style:textStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor)
+            style:textStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor,fontWeight: FontWeight.w600,fontSize: 18)
         ),
       ),
     );

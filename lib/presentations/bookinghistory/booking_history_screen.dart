@@ -75,7 +75,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                               child: Container(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 // Add spacing between items
-                                height: Get.height * .11,
+                                height: Get.height * .1,
                                 width: Get.width,
                                 decoration: BoxDecoration(
                                   color: Colors.white, // Background color
@@ -121,7 +121,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                               .bodyLarge!
                                               .copyWith(
                                             fontWeight: FontWeight.w400,
-                                            fontSize: 12,
+                                            fontSize: 8,
                                             color: AppColors.darkGrey,
                                           ),
                                         ),
@@ -138,7 +138,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                               .headlineSmall!
                                               .copyWith(
                                             fontWeight: FontWeight.w500,
-                                            fontSize: 12,
+                                            fontSize: 8,
                                             color: AppColors.blackColor,
                                           ),
                                         ),
@@ -150,7 +150,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                               .headlineSmall!
                                               .copyWith(
                                             fontWeight: FontWeight.w500,
-                                            fontSize: 12,
+                                            fontSize: 8,
                                             color: AppColors.blackColor,
                                           ),
                                         ).paddingOnly(left: 5),
@@ -162,7 +162,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                               .headlineSmall!
                                               .copyWith(
                                             fontWeight: FontWeight.w500,
-                                            fontSize: 12,
+                                            fontSize: 8,
                                             color: AppColors
                                                 .labelBlackColor,
                                           ),
@@ -201,7 +201,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                                 fontSize: 10,
                                               ),
                                             ),
-                                          ).paddingOnly(left: Get.width * .18),
+                                          ).paddingOnly(left: Get.width * .33),
                                         ),
                                       ],
                                     ),
