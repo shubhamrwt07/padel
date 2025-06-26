@@ -93,6 +93,56 @@ class PaymentFilterUi extends StatelessWidget {
                   color: AppColors.labelBlackColor,
                 ),
               ),
+              Row(
+                children: [
+                  // First Text Field - Start Date
+                  Expanded(
+                    child: TextFormField(
+                      onTap: () async {
+                        // Show date picker
+                        final DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (pickedDate != null) {
+                          // You can update controller or state here
+                        }
+                      },
+                      decoration: InputDecoration(
+                        suffixIcon: Icon(Icons.calendar_month),
+                        border: OutlineInputBorder(),
+                      ),
+                      readOnly: true, // Prevent keyboard from appearing
+                    ),
+                  ),
+
+                  SizedBox(width: 10), // Space between fields
+
+                  // Second Text Field - End Date
+                  Expanded(
+                    child: TextFormField(
+                      onTap: () async {
+                        final DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (pickedDate != null) {
+                          // Update value accordingly
+                        }
+                      },
+                      decoration: InputDecoration(
+                        suffixIcon: Icon(Icons.calendar_month),
+                        border: OutlineInputBorder(),
+                      ),
+                      readOnly: true,
+                    ),
+                  ),
+                ],
+              ).paddingOnly( top: 16),
 
               // Status Section (Radio Buttons)
               Text(
