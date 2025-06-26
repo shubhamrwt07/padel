@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/payment/payment_screen.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
 
 import '../../generated/assets.dart';
 
-class PaymentController extends GetxController{
+class PaymentMethodController extends GetxController{
   var option = ''.obs;
   final List<Map<String, String>> paymentList = [
     {

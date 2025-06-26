@@ -1,16 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/cart/cart_controller.dart';
+import 'package:padel_mobile/presentations/cart/cart_screen.dart';
+import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:padel_mobile/presentations/profile/profile_screen.dart';
+
+import '../home/home_controller.dart';
 
 class BottomNavigationController extends GetxController {
+  HomeController homeController = Get.put(HomeController());
+  CartController cartController = Get.put(CartController());
+  ProfileController profileController = Get.put(ProfileController());
+
+
+
   // Reactive variable to hold selected index
   final selectedIndex = 0.obs;
 
   // List of pages (you can expand this as needed)
   final List<Widget> pages = [
-    Center(child: Text('Home', style: TextStyle(fontSize: 24))),
-    Center(child: Text('coach', style: TextStyle(fontSize: 24))),
-    Center(child: Text('cart', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Profile', style: TextStyle(fontSize: 24))),
+HomeScreen(),
+Container(
+height: Get.height,
+  width: Get.width,
+  child: Center(child: Text("Coming Soon",style: TextStyle(fontSize: 15),)),
+),
+    CartScreen(),
+ProfileUi()
   ];
 
   // Function to update selected index

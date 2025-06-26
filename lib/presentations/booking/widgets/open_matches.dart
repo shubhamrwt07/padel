@@ -1,4 +1,5 @@
 import 'package:easy_date_timeline/easy_date_timeline.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
+import '../../../generated/assets.dart';
 import 'all_suggestions.dart';
 
 class OpenMatches extends GetView<BookingController> {
@@ -65,9 +67,10 @@ class OpenMatches extends GetView<BookingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDatePicker(),
-              const SizedBox(height: 20),
-              _buildSlotHeader(context),
-              const SizedBox(height: 12),
+               Transform.translate(
+                   offset: Offset(0, -5),
+                   child: _buildSlotHeader(context)),
+
               _buildTimeSlots(),
               SizedBox(height: Get.height * 0.02),
               _buildMatchHeader(context),
@@ -85,9 +88,8 @@ class OpenMatches extends GetView<BookingController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Select date", style: Get.textTheme.labelLarge),
-        SizedBox(height: Get.height * 0.01),
         Obx(
-          () => EasyDateTimeLinePicker.itemBuilder(
+              () => EasyDateTimeLinePicker.itemBuilder(
             headerOptions: HeaderOptions(
               headerBuilder: (_, context, date) => const SizedBox.shrink(),
             ),
@@ -95,66 +97,73 @@ class OpenMatches extends GetView<BookingController> {
             firstDate: DateTime(2025, 1, 1),
             lastDate: DateTime(2030, 3, 18),
             focusedDate: controller.selectedDate.value,
-            itemExtent: 70,
+            itemExtent: 72,
             itemBuilder:
                 (context, date, isSelected, isDisabled, isToday, onTap) {
-                  final dayName = DateFormat('E').format(date);
-                  final monthName = DateFormat('MMMM').format(date);
+              final dayName = DateFormat('E').format(date);
+              final monthName = DateFormat('MMMM').format(date);
 
-                  return GestureDetector(
-                    onTap: onTap,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 1000),
-                      switchInCurve: Curves.easeIn,
-                      switchOutCurve: Curves.easeOut,
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: Container(
-                        key: ValueKey(isSelected), // important: unique key triggers animation
-                        alignment: Alignment.center,
-                        height: Get.height * 0.15,
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
-                          border: Border.all(
-                            color: isSelected ? Colors.transparent : AppColors.blackColor.withAlpha(10),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              dayName,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            Text(
-                              date.day.toString(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : AppColors.darkGrey,
-                              ),
-                            ),
-                            Text(
-                              monthName,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
+              return GestureDetector(
+                onTap: onTap,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 1000),
+                  switchInCurve: Curves.easeIn,
+                  switchOutCurve: Curves.easeOut,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: Container(
+                    key: ValueKey(isSelected),
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: isSelected
+                          ? Colors.black
+                          : AppColors.playerCardBackgroundColor,
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.transparent
+                            : AppColors.blackColor.withAlpha(10),
+                        width: 1,
                       ),
                     ),
-                  );
-
-                },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          dayName,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        Text(
+                          date.day.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.darkGrey,
+                          ),
+                        ),
+                        Text(
+                          monthName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).paddingOnly(
+                top: Get.height * .01,
+                bottom: Get.height * .01,
+              );
+            },
             onDateChange: (date) {
               controller.selectedDate.value = date;
             },
@@ -163,7 +172,6 @@ class OpenMatches extends GetView<BookingController> {
       ],
     );
   }
-
   Widget _buildSlotHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,16 +185,19 @@ class OpenMatches extends GetView<BookingController> {
                 context,
               ).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: Get.width * .01),
             Transform.scale(
               scale: 0.7,
-              child: Switch(
-                value: false,
-                activeColor: Colors.white,
-                activeTrackColor: Theme.of(context).primaryColor,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: Colors.grey.shade400,
-                onChanged: (value) {},
+              child: Obx(
+                    () => CupertinoSwitch(
+                  value: controller.viewUnavailableSlots.value,
+                  activeTrackColor: Theme.of(context).primaryColor,
+                  inactiveTrackColor: Colors.grey.shade300,
+                  thumbColor: Colors.white,
+                  onChanged: (value) {
+                    controller.viewUnavailableSlots.value = value;
+                  },
+                ),
               ),
             ),
           ],
@@ -278,18 +289,23 @@ class OpenMatches extends GetView<BookingController> {
           border: Border.all(color: AppColors.greyColor)
 
       ),
-      padding: const EdgeInsets.all(15),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "21 June | 9:00am",
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          Text(
-            "The first player sets the match type",
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "21 June | 9:00am",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        Text(
+          "The first player sets the match type",
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
+    ).paddingOnly(top: 15,bottom: 10,right: 15,left: 15),
           const SizedBox(height: 12),
           Column(
             children: [
@@ -300,19 +316,20 @@ class OpenMatches extends GetView<BookingController> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      Container(width: 1, color: Colors.black),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
-                      _buildPlayerSlot().paddingOnly(bottom: 6),
+                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking).paddingOnly(bottom: 6),
+                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking).paddingOnly(bottom: 6),
+                      Container(width: 1, color: AppColors.greyColor),
+                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking).paddingOnly(bottom: 6),
+                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking).paddingOnly(bottom: 6),
                     ],
                   ),
                 ),
               ),
-              const Divider(thickness: 1, height: 0, color: Colors.black),
+
             ],
           ),
-
+          Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
+          
           const SizedBox(height: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +343,7 @@ class OpenMatches extends GetView<BookingController> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    width: Get.width * .65,
+                     width: Get.width * .64,
                     child: Text(
                       'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -335,9 +352,9 @@ class OpenMatches extends GetView<BookingController> {
                   Container(
                     alignment: Alignment.center,
 
-                    width: Get.width * .15,
+                    width: Get.width * .16,
                     child: Text(
-                      '2000',
+                      '₹2000',
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primaryColor),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -345,18 +362,21 @@ class OpenMatches extends GetView<BookingController> {
                 ],
               ),
             ],
-          ),
+          ).paddingOnly(top: 5,bottom: 15,left: 15),
         ],
       ),
     );
   }
 
-  Widget _buildPlayerSlot() {
+  Widget _buildPlayerSlot({required String image}) {
     return Column(
       children: [
-        const CircleAvatar(radius: 27),
+         CircleAvatar(radius: 27,
+        backgroundColor:AppColors.greyColor,
+        backgroundImage: AssetImage(image),
+        ),
         const SizedBox(height: 7),
-        Text("Available", style: Get.textTheme.bodySmall),
+        Text("Available", style: Get.textTheme.bodySmall!.copyWith(color: AppColors.primaryColor)),
       ],
     );
   }

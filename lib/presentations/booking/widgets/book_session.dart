@@ -8,6 +8,8 @@ import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
 
+import '../../../generated/assets.dart';
+
 class BookSession extends GetView<BookingController> {
   const BookSession({super.key});
 
@@ -202,8 +204,8 @@ class BookSession extends GetView<BookingController> {
               child: Obx(
                     () => CupertinoSwitch(
                   value: controller.viewUnavailableSlots.value,
-                  activeColor: Theme.of(context).primaryColor,
-                  trackColor: Colors.grey.shade300,
+                      activeTrackColor: Theme.of(context).primaryColor,
+                      inactiveTrackColor: Colors.grey.shade300,
                   thumbColor: Colors.white,
                   onChanged: (value) {
                     controller.viewUnavailableSlots.value = value;
@@ -275,7 +277,7 @@ class BookSession extends GetView<BookingController> {
       ),
       child: ExpansionTile(
         title: Text("Court 1", style: Get.textTheme.headlineSmall),
-        leading: const CircleAvatar(radius: 23),
+        leading:   CircleAvatar(radius: 23,backgroundColor: AppColors.greyColor,backgroundImage:AssetImage(Assets.imagesImgDummy2,),),
         subtitle: Text("Outdoor | wall | Double"),
         children: [],
       ),

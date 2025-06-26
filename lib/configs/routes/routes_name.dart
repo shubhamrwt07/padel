@@ -20,7 +20,7 @@ class RoutesName {
   static const String cart = '/cart' ;
 
   //Payment routes name
-  static const String payment = '/payment' ;
+  static const String paymentMethod = '/paymentMethod' ;
   //Booking History name
   static const String bookingHistory = '/bookingHistory' ;
   //Payment Wallet
@@ -28,6 +28,8 @@ class RoutesName {
 
   //BookingConfirmAndCancel routes name
   static const String bookingConfirmAndCancel = '/bookingConfirmAndCancel' ;
+  static const String paymentFilter = '/paymentFilter';
+  static const String support = '/support';
 
 
 

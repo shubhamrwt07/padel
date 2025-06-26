@@ -314,13 +314,11 @@ class HomeScreen extends GetView<HomeController> {
                               );
                             }),
                             const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                log("Selected Locations: ${controller.selectedLocations.join(', ')}");
-                              },
-                              child: const Text("Done"),
-                            ),
+                        PrimaryButton(
+
+                            height: 45,
+                            width: Get.width,
+                            onTap: ()=>Get.back(), text:  "Done")
                           ],
                         ),
                       ),
@@ -498,6 +496,31 @@ class HomeScreen extends GetView<HomeController> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
+                            // Row(
+                            //   children: [
+                            //     Image.asset(
+                            //       Assets.imagesIcLocation,
+                            //       color: AppColors.primaryColor,
+                            //       scale: 4,
+                            //     ) ,                               Text(
+                            //       "Chandigarh 160001",),
+                            //     Icon(
+                            //       Icons.star,
+                            //       color: AppColors.secondaryColor,
+                            //       size: 15,
+                            //     ),
+                            //     Text(
+                            //       "4.9",
+                            //       style: Theme.of(context).textTheme.bodyLarge!
+                            //           .copyWith(fontWeight: FontWeight.w500),
+                            //     ),
+                            //   ],
+                            // ),
+                            // Icon(
+                            //   Icons.directions,
+                            //   color: AppColors.secondaryColor,
+                            //   size: 13,
+                            // ),
                             Row(
                               children: [
 

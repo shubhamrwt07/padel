@@ -9,6 +9,7 @@ class Assets {
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcDummyIcon = 'assets/images/ic_dummy_icon.png';
   static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
+  static const String imagesIcFilter = 'assets/images/ic_filter.png';
   static const String imagesIcGoogle = 'assets/images/ic_google.svg';
   static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
   static const String imagesIcLocation = 'assets/images/ic_location.png';

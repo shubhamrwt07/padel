@@ -13,14 +13,18 @@ import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
+import 'package:padel_mobile/presentations/payment_filter/payment_filter_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
-import 'package:padel_mobile/presentations/payment/payment_binding.dart';
-import 'package:padel_mobile/presentations/payment/payment_screen.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_binding.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
+import 'package:padel_mobile/presentations/support/support_binding.dart';
+import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
@@ -28,7 +32,6 @@ import '../../presentations/editProfile/edit_profile_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
-
 class Routes {
   static const String initialRoute = RoutesName.splash;
 
@@ -107,9 +110,9 @@ class Routes {
       transitionDuration: defaultDuration,
     ),
     GetPage(
-      name: RoutesName.payment,
-      page: () => PaymentScreen(),
-      binding: PaymentBinding(),
+      name: RoutesName.paymentMethod,
+      page: () => PaymentMethodScreen(),
+      binding: PaymentMethodBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
@@ -130,6 +133,18 @@ class Routes {
       name: RoutesName.bookingConfirmAndCancel,
       page: () => BookingConfirmAndCancelScreen(),
       binding: BookingConfirmAndCancelBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),  GetPage(
+      name: RoutesName.paymentFilter,
+      page: () => PaymentFilterUi(),
+      binding: PaymentFilterBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),GetPage(
+      name: RoutesName.support,
+      page: () => SupportScreen(),
+      binding: SupportBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     )

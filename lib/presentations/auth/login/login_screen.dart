@@ -99,7 +99,7 @@ class LoginScreen extends GetView<LoginController> {
         ),
         PrimaryButton(onTap: (){
           FocusManager.instance.primaryFocus!.unfocus();
-          Get.toNamed(RoutesName.home);
+          Get.toNamed(RoutesName.bottomNav);
         }, text: "Sign in"),
         SizedBox(height: Get.height*0.05,)
       ],
