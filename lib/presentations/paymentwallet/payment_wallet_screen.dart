@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -121,19 +122,24 @@ class PaymentWalletScreen extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
-                Container(height: 28,width: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.tabSelectedColor,
-                      borderRadius: BorderRadius.circular(8)
+                GestureDetector(
+                  onTap: (){
+                    Get.toNamed(RoutesName.paymentFilter);
+                  },
+                  child: Container(height: 28,width: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.tabSelectedColor,
+                        borderRadius: BorderRadius.circular(8)
 
-                  ),
-                  child: Image.asset(
-                    Assets.imagesIcFilter,
-                    scale: 5,
+                    ),
+                    child: Image.asset(
+                      Assets.imagesIcFilter,
+                      scale: 5,
+                    ),
                   ),
                 ) ,              ],
             ).paddingOnly(top: 15,bottom: 15),
-            Container(height: Get.height,
+            SizedBox(height: Get.height,
               child: ListView.builder(
                 itemCount: 20,
                 itemBuilder: (context, index) {

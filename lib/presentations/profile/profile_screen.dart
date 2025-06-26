@@ -269,26 +269,32 @@ class ProfileUi extends StatelessWidget {
               ],
             ).paddingOnly(top: Get.height * .05),
           ),
-          Row(
-            children: [
-              Icon(
-                Icons.headset_mic,
-                size: 25,
-                color: AppColors.labelBlackColor,
-              ),
-              Text(
-                "Help & Support",
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(
-                  color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ).paddingOnly(left: Get.width * .1),
-            ],
-          ).paddingOnly(top: Get.height * .05),
+          GestureDetector(
+            onTap: ()=>Get.toNamed(RoutesName.support),
+            child: Container(
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.headset_mic,
+                    size: 25,
+                    color: AppColors.labelBlackColor,
+                  ),
+                  Text(
+                    "Help & Support",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                      color: AppColors.labelBlackColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                  ).paddingOnly(left: Get.width * .1),
+                ],
+              ).paddingOnly(top: Get.height * .05),
+            ),
+          ),
           Row(
             children: [
               Icon(
