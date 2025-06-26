@@ -61,7 +61,7 @@ class DetailsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: Get.height * .18,
+            height: Get.height * .16,
             width: Get.width,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
@@ -81,18 +81,24 @@ class DetailsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                Divider(color: AppColors.greyColor),
+                Transform.translate(
+                    offset: Offset(0,-Get.height*.007),
+                    child: Divider(color: AppColors.greyColor)),
                 Flexible(
-                  child: Row(
-                    children: [
-                      Expanded(child: gameDetails("Gender", "All Players")),
-                      Expanded(child: gameDetails("Level", "0.92 - 0.132")),
-                      Expanded(child: gameDetails("Price", "₹2000")),
-                    ],
-                  ),
+                    child: Transform.translate(
+                      offset: Offset(0,-Get.height*.008),
+                      child: Row(
+                        children: [
+                          Expanded(child: gameDetails("Gender", "All Players")),
+                          Expanded(child: gameDetails("Level", "0.92 - 0.132")),
+                          Expanded(child: gameDetails("Price", "₹2000")),
+                        ],
+
+                                        ),
+                    ),
                 ),
               ],
-            ).paddingAll(10),
+            ),
           ),
           SizedBox(height: Get.height * .015),
           Container(
@@ -130,6 +136,9 @@ class DetailsPage extends StatelessWidget {
                     border: Border.all(color: AppColors.greyColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(Assets.imagesImgDummy2,fit: BoxFit.cover,)),
                 ),
                 SizedBox(width: 10),
                 Column(
@@ -203,7 +212,7 @@ class DetailsPage extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       height: Get.height * .1,
-      color: AppColors.playerCardBackgroundColor,
+      color: Colors.transparent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -211,6 +220,8 @@ class DetailsPage extends StatelessWidget {
             title,
             style: Get.textTheme.bodyLarge!.copyWith(
               fontWeight: FontWeight.w500,
+              fontSize: 10,
+              color: AppColors.darkGrey
             ),
           ),
           SizedBox(height: Get.height * .01),
@@ -220,10 +231,26 @@ class DetailsPage extends StatelessWidget {
     );
   }
 
-  Widget playerCard(String name, bool showSubtitle) {
+  Widget playerCard(String name, bool showSubtitle,String image) {
     return Column(
       children: [
-        CircleAvatar(radius: 25),
+        Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color:image.isNotEmpty?AppColors.whiteColor
+            :AppColors.primaryColor),
+          ),
+          child: image.isNotEmpty
+              ? ClipOval(
+
+            child: Image.asset(image, fit: BoxFit.cover),
+          )
+              : Icon(CupertinoIcons.plus, color: AppColors.primaryColor),
+        ),
+
         SizedBox(height: 5),
         Text(
           name,
@@ -234,6 +261,7 @@ class DetailsPage extends StatelessWidget {
             ? Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
+                 
                   color: Colors.green.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -266,18 +294,18 @@ class DetailsPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              playerCard("Courtney Henry", true),
-              playerCard("Devon Lane", true),
+              playerCard("Courtney Henry", true,Assets.imagesImgCustomerPicBooking),
+              playerCard("Devon Lane", true,Assets.imagesImgCustomerPicBooking),
               Container(
                 height: Get.height * .09,
                 width: 2,
                 color: AppColors.greyColor,
               ),
-              playerCard("Devon Lane", false),
-              playerCard("Devon Lane", false),
+              playerCard("Add me", false,''),
+              playerCard("", false,''),
             ],
           ),
-          SizedBox(height: 10),
+          SizedBox(height: Get.height*.016),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [Text("Team A"), Text("Team B")],

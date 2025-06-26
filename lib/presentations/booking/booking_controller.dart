@@ -102,4 +102,6 @@ class BookingController extends GetxController
 
   final isShowAllReviews = false.obs;
   final isShowAllPhotos = false.obs;
+
+  Rx<bool> viewUnavailableSlots = false.obs;
 }

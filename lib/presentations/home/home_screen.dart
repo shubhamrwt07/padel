@@ -314,13 +314,11 @@ class HomeScreen extends GetView<HomeController> {
                               );
                             }),
                             const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                log("Selected Locations: ${controller.selectedLocations.join(', ')}");
-                              },
-                              child: const Text("Done"),
-                            ),
+                        PrimaryButton(
+
+                            height: 45,
+                            width: Get.width,
+                            onTap: ()=>Get.back(), text:  "Done")
                           ],
                         ),
                       ),
