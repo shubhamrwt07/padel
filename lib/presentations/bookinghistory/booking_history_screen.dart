@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -64,171 +65,159 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                 SingleChildScrollView(
                   child: Column(
                     children: [
-                      Container( height: Get.height ,
+                      Container(height: Get.height,
                         child: ListView.builder(
                           itemCount: 20,
                           itemBuilder: (context, index) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10), // Add spacing between items
-                              height: Get.height * .11,
-                              width: Get.width,
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Background color
-                                border: Border.all(
-                                  color: AppColors.containerBorderColor, // Border color
-                                  width: 2.0, // Border width
+                            return GestureDetector(onTap: () {
+                              Get.toNamed(RoutesName.bookingConfirmAndCancel);
+                            },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                // Add spacing between items
+                                height: Get.height * .1,
+                                width: Get.width,
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // Background color
+                                  border: Border.all(
+                                    color: AppColors.containerBorderColor,
+                                    // Border color
+                                    width: 2.0, // Border width
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      16.0), // Border radius
                                 ),
-                                borderRadius: BorderRadius.circular(16.0), // Border radius
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Padel Haus",
-                                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                          color: AppColors.blackColor,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.alarm, size: 16),
-                                          Text(
-                                            "27June,25",
-                                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                              color: AppColors.blackColor,
-                                            ),
-                                          ),
-                                          Text(
-                                            "8:00am",
-                                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                              color: AppColors.blackColor,
-                                            ),
-                                          ).paddingOnly(left: 5),
-                                          Text(
-                                            "(60mins)",
-                                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                              color: AppColors.labelBlackColor,
-                                            ),
-                                          ).paddingOnly(left: 5),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Image.asset(
-                                        Assets.imagesIcLocation,
-                                        scale: 2,
-                                      ),
-                                      Text(
-                                        "Chandigarh, 160101",
-                                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                          color: AppColors.darkGrey,
-                                        ),
-                                      ),
-                                      Text(
-                                        "₹",
-                                        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 18,
-                                          color: AppColors.blueColor,
-                                        ),
-                                      ).paddingOnly(left: Get.width * .35),
-                                      Text(
-                                        "1200",
-                                        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 18,
-                                          color: AppColors.blueColor,
-                                        ),
-                                      ).paddingOnly(left: 5),
-                                    ],
-                                  ).paddingOnly(top: 3, bottom: 3),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "4 Courts",
-                                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                          color: AppColors.blackColor,
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 13,
-                                        width: 1.5,
-                                        color: AppColors.labelBlackColor,
-                                      ).paddingOnly(left: 2, right: 2),
-                                      Text(
-                                        "Free parking",
-                                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                          color: AppColors.blackColor,
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 13,
-                                        width: 1.5,
-                                        color: AppColors.labelBlackColor,
-                                      ).paddingOnly(left: 2, right: 2),
-                                      Text(
-                                        "Shed",
-                                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                          color: AppColors.blackColor,
-                                        ),
-                                      ),
-                                      Container(
-                                        alignment: Alignment.center,
-                                        height: Get.height * .028,
-                                        width: Get.width * .23,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            colors: [
-                                              const Color(0xFF3DBE64), // #3DBE64 (30%)
-                                              const Color(0xFF1F41BB), // #1F41BB (70%)
-                                            ],
-                                            stops: [0.1, 0.9], // 30% for first color, rest for second
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Padel Haus",
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .headlineSmall!
+                                              .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12,
+                                            color: AppColors.blackColor,
                                           ),
                                         ),
-                                        child: Text(
-                                          "View Details",
-                                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                            color: AppColors.whiteColor,
-                                            fontSize: 10,
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Image.asset(
+                                          Assets.imagesIcLocation,
+                                          scale: 2,
+                                        ),
+                                        Text(
+                                          "Chandigarh, 160101",
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 8,
+                                            color: AppColors.darkGrey,
                                           ),
                                         ),
-                                      ).paddingOnly(left: Get.width * .18),
-                                    ],
-                                  ),
-                                ],
-                              ).paddingOnly(
-                                left: Get.width * .03,
-                                right: Get.width * .03,
-                                top: Get.height * .01,
-                                bottom: Get.width * .01,
+
+                                      ],
+                                    ).paddingOnly(top: 3, bottom: 3),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "27June,25",
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .headlineSmall!
+                                              .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 8,
+                                            color: AppColors.blackColor,
+                                          ),
+                                        ),
+                                         Text(
+                                          "8:00am",
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .headlineSmall!
+                                              .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 8,
+                                            color: AppColors.blackColor,
+                                          ),
+                                        ).paddingOnly(left: 5),
+                                            Text(
+                                          "(60mins)",
+                                          style: Theme
+                                              .of(context)
+                                              .textTheme
+                                              .headlineSmall!
+                                              .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 8,
+                                            color: AppColors
+                                                .labelBlackColor,
+                                          ),
+                                        ).paddingOnly(left: 5),
+                                        GestureDetector(onTap: (){Get.toNamed(RoutesName.bookingConfirmAndCancel);},
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: Get.height * .028,
+                                            width: Get.width * .23,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(
+                                                  20),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.centerLeft,
+                                                end: Alignment.centerRight,
+                                                colors: [
+                                                  const Color(0xFF3DBE64),
+                                                  // #3DBE64 (30%)
+                                                  const Color(0xFF1F41BB),
+                                                  // #1F41BB (70%)
+                                                ],
+                                                stops: [
+                                                  0.1,
+                                                  0.9
+                                                ], // 30% for first color, rest for second
+                                              ),
+                                            ),
+                                            child: Text(
+                                              "View Details",
+                                              style: Theme
+                                                  .of(context)
+                                                  .textTheme
+                                                  .bodyLarge!
+                                                  .copyWith(
+                                                color: AppColors.whiteColor,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ).paddingOnly(left: Get.width * .33),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ).paddingOnly(
+                                  left: Get.width * .03,
+                                  right: Get.width * .03,
+                                  top: Get.height * .01,
+                                  bottom: Get.width * .01,
+                                ),
                               ),
                             );
                           },
                         ),
-                      )                  ],
+                      )
+                    ],
                   ).paddingOnly(
                     top: 10,
                     left: Get.width * .03,
