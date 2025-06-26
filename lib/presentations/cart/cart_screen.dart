@@ -199,7 +199,7 @@ class CartScreen extends StatelessWidget {
             ).paddingOnly(bottom: Get.height * 0.02),
             PrimaryButton(
               height: 50,
-              onTap: () => Get.toNamed(RoutesName.payment),
+              onTap: () => Get.toNamed(RoutesName.paymentMethod),
               text: "",
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

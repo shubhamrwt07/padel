@@ -21,7 +21,11 @@ class BottomNavigationController extends GetxController {
   // List of pages (you can expand this as needed)
   final List<Widget> pages = [
 HomeScreen(),
-HomeScreen(),
+Container(
+height: Get.height,
+  width: Get.width,
+  child: Center(child: Text("Coming Soon",style: TextStyle(fontSize: 15),)),
+),
     CartScreen(),
 ProfileUi()
   ];

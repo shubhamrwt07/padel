@@ -20,8 +20,8 @@ import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_screen.d
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
-import 'package:padel_mobile/presentations/payment/payment_binding.dart';
-import 'package:padel_mobile/presentations/payment/payment_screen.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_binding.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
@@ -33,7 +33,7 @@ import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
-  static const String initialRoute = RoutesName.profile;
+  static const String initialRoute = RoutesName.splash;
 
   static const Duration defaultDuration = Duration(milliseconds: 200);
 
@@ -110,9 +110,9 @@ class Routes {
       transitionDuration: defaultDuration,
     ),
     GetPage(
-      name: RoutesName.payment,
-      page: () => PaymentScreen(),
-      binding: PaymentBinding(),
+      name: RoutesName.paymentMethod,
+      page: () => PaymentMethodScreen(),
+      binding: PaymentMethodBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

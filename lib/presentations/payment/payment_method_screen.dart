@@ -4,12 +4,12 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/payment/payment_controller.dart';
+import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 
 import '../booking/successful_screens/booking_successful_screen.dart';
 
-class PaymentScreen extends GetView<PaymentController> {
-  const PaymentScreen({super.key});
+class PaymentMethodScreen extends GetView<PaymentMethodController> {
+  const PaymentMethodScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

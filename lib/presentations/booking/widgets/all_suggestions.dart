@@ -62,7 +62,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
             ),
             child: PrimaryButton(
               height: 50,
-              onTap: () {},
+              onTap: () {Get.back();},
               text: "+ Start a match",
             ),
           ),

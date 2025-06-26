@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
+import '../../configs/components/primary_button.dart';
 import 'payment_filter_controller.dart';
 
 class PaymentFilterUi extends StatelessWidget {
@@ -14,6 +15,50 @@ class PaymentFilterUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: Container(
+        height: Get.height * .09,
+        padding: const EdgeInsets.only(top: 10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(40),
+            topRight: Radius.circular(40),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Align(
+          alignment: Alignment.center,
+          child: Container(
+              height: 55,
+              width: Get.width * 0.9,
+              decoration: BoxDecoration(
+                color: Theme.of(Get.context!).primaryColor,
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: PrimaryButton(
+                height: 50,
+
+                onTap: () {
+                  Get.back();
+                },
+                text: "Apply Filter",
+              )
+          ),
+        ),
+      ),
       appBar: primaryAppBar(
         showLeading: true,
         centerTitle: true,
