@@ -21,9 +21,9 @@ class AllSuggestions extends StatefulWidget {
 class _AllSuggestionsState extends State<AllSuggestions> {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: primaryAppBar(
+        centerTitle: true,
         leading: BackButton(),
         title: Text("All Suggestions"),
         context: context,
@@ -62,7 +62,9 @@ class _AllSuggestionsState extends State<AllSuggestions> {
             ),
             child: PrimaryButton(
               height: 50,
-              onTap: () {Get.back();},
+              onTap: () {
+                Get.back();
+              },
               text: "+ Start a match",
             ),
           ),
@@ -137,7 +139,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 5),
                     ],
                   );
                 },
@@ -151,11 +153,15 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                   ),
                   InkWell(
                     onTap: () => Get.to(Filters()),
-                    child: Icon(Icons.filter_list),
+                    child: Image.asset(
+                      Assets.imagesIcFilter,
+                      height: 40,
+                      width: 20,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: Get.height * .03),
+
               ListView.builder(
                 physics: ClampingScrollPhysics(),
                 itemCount: 4,
@@ -176,7 +182,8 @@ class _AllSuggestionsState extends State<AllSuggestions> {
 
   Widget _buildMatchCard(BuildContext context) {
     return InkWell(
-      onTap: ()=>Get.to(DetailsPage()),
+      onTap: ()=>
+        Get.to(DetailsPage()),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -184,18 +191,23 @@ class _AllSuggestionsState extends State<AllSuggestions> {
           color: AppColors.playerCardBackgroundColor,
           border: Border.all(color: AppColors.greyColor),
         ),
-        padding: const EdgeInsets.all(15),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "21 June | 9:00am",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Text(
-              "The first player sets the match type",
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "21 June | 9:00am",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Text(
+                  "The first player sets the match type",
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ).paddingOnly(top: 15, bottom: 10, right: 15, left: 15),
             const SizedBox(height: 12),
             Column(
               children: [
@@ -206,18 +218,31 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildPlayerSlot(imageUrl: Assets.imagesImgCart, name: 'Courtney Henry').paddingOnly(bottom: 6),
-                        _buildPlayerSlot(imageUrl: Assets.imagesImgCart, name: 'Devon Lane').paddingOnly(bottom: 6),
-                        Container(width: 1, color: Colors.black),
-                        _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
-                        _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
+                        _buildPlayerSlot(
+                          imageUrl: Assets.imagesImgCustomerPicBooking,
+                          name: 'Courtney Henry',
+                        ).paddingOnly(bottom: 6),
+                        _buildPlayerSlot(
+                          imageUrl: Assets.imagesImgCustomerPicBooking,
+                          name: 'Devon Lane',
+                        ).paddingOnly(bottom: 6),
+                        Container(width: 1, color: AppColors.greyColor),
+                        _buildPlayerSlot(
+                          imageUrl: '',
+                          name: '',
+                        ).paddingOnly(bottom: 6),
+                        _buildPlayerSlot(
+                          imageUrl: '',
+                          name: '',
+                        ).paddingOnly(bottom: 6),
                       ],
                     ),
                   ),
                 ),
-                const Divider(thickness: 1, height: 0, color: Colors.black),
               ],
             ),
+            Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
+
             const SizedBox(height: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,21 +255,16 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        SvgPicture.asset(Assets.imagesLocation, height: 20),
-                        Container(
-                           width: Get.width * .5,
-                          child: Text(
-                            'Sukhna chandigarh 160001',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ),
-                      ],
+                    Container(
+                       width: Get.width * .61,
+                      child: Text(
+                        'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
                     Container(
-                       alignment: Alignment.center,
-                      width: Get.width * .2,
+                      alignment: Alignment.center,
+                       width: Get.width * .16,
                       child: Text(
                         '₹2000',
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -256,7 +276,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                   ],
                 ),
               ],
-            ),
+            ).paddingOnly(top: 5, bottom: 15, right: 0, left: 15),
           ],
         ),
       ),
@@ -277,13 +297,13 @@ class _AllSuggestionsState extends State<AllSuggestions> {
           child: imageUrl.isEmpty
               ? Icon(CupertinoIcons.add, color: AppColors.primaryColor)
               : ClipOval(
-            child: Image.asset(
-              imageUrl,
-              fit: BoxFit.cover,
-              width: 50, // match container size
-              height: 50,
-            ),
-          ),
+                  child: Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    width: 50, // match container size
+                    height: 50,
+                  ),
+                ),
         ),
         const SizedBox(height: 7),
         Text(
@@ -296,6 +316,5 @@ class _AllSuggestionsState extends State<AllSuggestions> {
         ),
       ],
     );
-
   }
 }

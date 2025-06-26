@@ -1,4 +1,5 @@
 import 'package:easy_date_timeline/easy_date_timeline.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,8 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
+
+import '../../../generated/assets.dart';
 
 class BookSession extends GetView<BookingController> {
   const BookSession({super.key});
@@ -53,7 +56,7 @@ class BookSession extends GetView<BookingController> {
                 Get.to(AllSuggestions());
               },
               text: "Book the first spot",
-            )
+            ),
           ),
         ),
       ),
@@ -65,9 +68,11 @@ class BookSession extends GetView<BookingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDatePicker(),
-              const SizedBox(height: 20),
-              _buildSlotHeader(context),
-              const SizedBox(height: 12),
+              Transform.translate(
+                offset: Offset(0, -5),
+                child: _buildSlotHeader(context),
+              ),
+              SizedBox(height: Get.height * .0009),
               _buildTimeSlots(),
               SizedBox(height: Get.height * 0.02),
               Row(
@@ -95,7 +100,6 @@ class BookSession extends GetView<BookingController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Select date", style: Get.textTheme.labelLarge),
-        SizedBox(height: Get.height * 0.01),
         Obx(
           () => EasyDateTimeLinePicker.itemBuilder(
             headerOptions: HeaderOptions(
@@ -105,7 +109,7 @@ class BookSession extends GetView<BookingController> {
             firstDate: DateTime(2025, 1, 1),
             lastDate: DateTime(2030, 3, 18),
             focusedDate: controller.selectedDate.value,
-            itemExtent: 70,
+            itemExtent: 72,
             itemBuilder:
                 (context, date, isSelected, isDisabled, isToday, onTap) {
                   final dayName = DateFormat('E').format(date);
@@ -122,10 +126,8 @@ class BookSession extends GetView<BookingController> {
                       },
                       child: Container(
                         key: ValueKey(isSelected),
-                        // important: unique key triggers animation
                         alignment: Alignment.center,
-                        height: Get.height * 0.15,
-                        margin: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: isSelected
@@ -169,6 +171,9 @@ class BookSession extends GetView<BookingController> {
                         ),
                       ),
                     ),
+                  ).paddingOnly(
+                    top: Get.height * .01,
+                    bottom: Get.height * .01,
                   );
                 },
             onDateChange: (date) {
@@ -193,16 +198,19 @@ class BookSession extends GetView<BookingController> {
                 context,
               ).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: Get.width * .01),
             Transform.scale(
               scale: 0.7,
-              child: Switch(
-                value: false,
-                activeColor: Colors.white,
-                activeTrackColor: Theme.of(context).primaryColor,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: Colors.grey.shade400,
-                onChanged: (value) {},
+              child: Obx(
+                    () => CupertinoSwitch(
+                  value: controller.viewUnavailableSlots.value,
+                      activeTrackColor: Theme.of(context).primaryColor,
+                      inactiveTrackColor: Colors.grey.shade300,
+                  thumbColor: Colors.white,
+                  onChanged: (value) {
+                    controller.viewUnavailableSlots.value = value;
+                  },
+                ),
               ),
             ),
           ],
@@ -216,7 +224,7 @@ class BookSession extends GetView<BookingController> {
       builder: (controller) {
         return Wrap(
           spacing: 20,
-          runSpacing: 20,
+          runSpacing: Get.height * .01,
           children: controller.timeSlots.map((time) {
             final isSelected = controller.selectedTime == time;
 
@@ -233,7 +241,6 @@ class BookSession extends GetView<BookingController> {
                     FadeTransition(opacity: animation, child: child),
                 child: Container(
                   key: ValueKey(isSelected),
-                  // triggers animation
                   width: (Get.width - 80) / 3,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   alignment: Alignment.center,
@@ -242,7 +249,9 @@ class BookSession extends GetView<BookingController> {
                         ? Colors.black
                         : AppColors.timeTileBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
+                    border: Border.all(
+                      color: AppColors.blackColor.withAlpha(10),
+                    ),
                   ),
                   child: Text(
                     time,
@@ -268,20 +277,10 @@ class BookSession extends GetView<BookingController> {
       ),
       child: ExpansionTile(
         title: Text("Court 1", style: Get.textTheme.headlineSmall),
-        leading: const CircleAvatar(radius: 20),
+        leading:   CircleAvatar(radius: 23,backgroundColor: AppColors.greyColor,backgroundImage:AssetImage(Assets.imagesImgDummy2,),),
         subtitle: Text("Outdoor | wall | Double"),
         children: [],
       ),
-    );
-  }
-
-  Widget _buildPlayerSlot() {
-    return Column(
-      children: [
-        const CircleAvatar(radius: 27),
-        const SizedBox(height: 7),
-        Text("Available", style: Get.textTheme.bodySmall),
-      ],
     );
   }
 }
