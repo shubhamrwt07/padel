@@ -5,7 +5,6 @@ import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 import '../../configs/components/primary_button.dart';
 import '../../configs/components/primary_text_feild.dart';
-import '../../configs/routes/routes_name.dart';
 import 'edit_profile_controller.dart';
 
 class EditProfileUi extends StatelessWidget {

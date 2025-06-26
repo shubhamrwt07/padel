@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
 
 import '../../generated/assets.dart';
 

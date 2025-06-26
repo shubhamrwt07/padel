@@ -1,9 +1,6 @@
-import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/widgets/details_page.dart';
@@ -255,7 +252,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                        width: Get.width * .61,
                       child: Text(
                         'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
