@@ -17,7 +17,7 @@ class ConfirmCancellation extends StatelessWidget {
         children: [
           confirmCancelContent(context),
           PrimaryButton(onTap: (){
-            Get.toNamed(RoutesName.home);
+            Get.toNamed(RoutesName.bottomNav);
           }, text: "Continue").paddingOnly(bottom: Get.height*0.08)
         ],
       ).paddingOnly(left: Get.width*0.05,right: Get.width*0.05),
