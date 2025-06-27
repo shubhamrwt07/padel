@@ -61,7 +61,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       width: Get.width,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.lightBlueColor.withAlpha(50),
+        color: AppColors.playerCardBackgroundColor.withAlpha(50),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.blackColor.withAlpha(10)),
       ),
@@ -99,7 +99,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         Text(label,
             style: Theme.of(context)
                 .textTheme
-                .labelLarge!
+                .headlineSmall!
                 .copyWith(color: AppColors.textColor)),
         Text(value,
             style: Theme.of(context)
@@ -128,10 +128,29 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: AppColors.textColor,
                     fontWeight: FontWeight.w500)),
-            Text("₹ 1200",
+            RichText(
+              text: TextSpan(
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: AppColors.primaryColor,
-                    fontWeight: FontWeight.w500)),
+                  color: AppColors.primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+                children: [
+                  // ₹ Symbol with custom font family
+                  TextSpan(
+                    text: '₹',
+                    style: TextStyle(
+                      fontFamily: "Roboto"
+                      , // e.g., 'Noto Sans Symbols'
+                    ),
+                  ),
+
+                  // Amount text (1200) - uses default parent style
+                  TextSpan(
+                    text: ' 1200',
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ],

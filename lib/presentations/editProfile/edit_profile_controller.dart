@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 class EditProfileController extends GetxController {
   // Reactive variable for selected date
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+  RxString selectedGender = ''.obs; // Add this line
 
   // Function to show date picker
   Future<void> selectDate(BuildContext context) async {

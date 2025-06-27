@@ -41,22 +41,22 @@ class HomeScreen extends GetView<HomeController> {
             ),
           ).paddingOnly(left: Get.width * 0.02),
           action: [
-            Container(
-              height: 30,
-              width: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.whiteColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade100,
-                    blurRadius: 1.4,
-                    spreadRadius: 2.2,
-                  ),
-                ],
-              ),
-              child: Icon(Icons.notifications_none_rounded),
-            ).paddingOnly(right: Get.width * 0.02),
+            // Container(
+            //   height: 30,
+            //   width: 30,
+            //   decoration: BoxDecoration(
+            //     shape: BoxShape.circle,
+            //     color: AppColors.whiteColor,
+            //     boxShadow: [
+            //       BoxShadow(
+            //         color: Colors.grey.shade100,
+            //         blurRadius: 1.4,
+            //         spreadRadius: 2.2,
+            //       ),
+            //     ],
+            //   ),
+            //   child: Icon(Icons.notifications_none_rounded),
+            // ).paddingOnly(right: Get.width * 0.02),
           ],
           context: context,
         ),
@@ -81,7 +81,12 @@ class HomeScreen extends GetView<HomeController> {
 
   Widget searchField() {
     return SearchField(
-      suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textColor),
+      suffixIcon: Image.asset(
+        Assets.imagesIcSearch,
+       // your image path
+    scale: 3,
+        color: AppColors.textColor, // optional: tint color like an icon
+      ),
       hintText: "Search",
       onChanged: (v) {},
     ).paddingOnly(
@@ -141,8 +146,10 @@ class HomeScreen extends GetView<HomeController> {
                             ),
                             Row(
                               children: [
-                                Icon(Icons.location_on_outlined, size: 13),
-                                Text(
+                                Image.asset(
+                                  Assets.imagesIcLocation,
+                                  scale: 3,
+                                ),                                Text(
                                   "Chandigarh 160001",
                                   style: Theme.of(context).textTheme.displayMedium,
                                 ),
@@ -178,27 +185,26 @@ class HomeScreen extends GetView<HomeController> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "29/06/2025",
-                          style: Theme.of(context).textTheme.bodyLarge!
-                              .copyWith(fontWeight: FontWeight.w500),
-                        ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "8:00am-10:00am",
+                              "29thJune’2025",
                               style: Theme.of(context).textTheme.bodyLarge!
                                   .copyWith(
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.textColor,
+                                    color: AppColors.blackColor,
                                   ),
                             ),
                             Text(
-                              "( 60mins )",
+                              "8:00am",
+                              style: Theme.of(context).textTheme.labelSmall!
+                                  .copyWith(color: AppColors.labelBlackColor,fontSize: 8),
+                            ).paddingOnly(left: 5),
+                            Text(
+                              "(60)",
                               style: Theme.of(context).textTheme.labelSmall!
                                   .copyWith(color: AppColors.labelBlackColor),
-                            ),
+                            ).paddingOnly(left: Get.width*.1),
                           ],
                         ),
                       ],
@@ -393,7 +399,7 @@ class HomeScreen extends GetView<HomeController> {
                 ),
                 Icon(
                   Icons.calendar_month_outlined,
-                  size: 20,
+                  size: 17,
                   color: AppColors.textColor,
                 ),
               ],
@@ -460,8 +466,10 @@ class HomeScreen extends GetView<HomeController> {
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on_outlined, size: 13),
-                                    Text(
+                                    Image.asset(
+                                      Assets.imagesIcLocation,
+                                      scale: 5,
+                                    ),                                    Text(
                                       "Chandigarh 160001",
                                       style: Theme.of(context).textTheme.bodyLarge!
                                           .copyWith(fontWeight: FontWeight.w500),
@@ -472,7 +480,7 @@ class HomeScreen extends GetView<HomeController> {
                                   "4 Courts | Free parking | Shed",
                                   style: Theme.of(context).textTheme.bodyLarge!
                                       .copyWith(color: AppColors.labelBlackColor),
-                                ),
+                                ).paddingOnly(top: 5),
                               ],
                             ),
                             PrimaryButton(
@@ -543,10 +551,28 @@ class HomeScreen extends GetView<HomeController> {
                             ),
                           ],
                         ),
-                        Text(
-                          "₹ 1200",
-                          style: Theme.of(context).textTheme.headlineLarge!
-                              .copyWith(fontWeight: FontWeight.w500),
+
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '₹',
+                                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                    fontFamily: "Roboto"
+
+                                  // Keep other styles consistent
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' 1200',
+                                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  // Keep other styles consistent
+                                ),
+                              ),
+                            ],
+                          ),
                         ).paddingOnly(bottom: 5),
                       ],
                     ),

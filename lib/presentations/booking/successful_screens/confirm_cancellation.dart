@@ -18,7 +18,7 @@ class ConfirmCancellation extends StatelessWidget {
           confirmCancelContent(context),
           PrimaryButton(onTap: (){
             Get.toNamed(RoutesName.bottomNav);
-          }, text: "Continue").paddingOnly(bottom: Get.height*0.08)
+          }, text: "Continue").paddingOnly(bottom: Get.height*0.05)
         ],
       ).paddingOnly(left: Get.width*0.05,right: Get.width*0.05),
     );
@@ -29,7 +29,9 @@ class ConfirmCancellation extends StatelessWidget {
         Center(child: SvgPicture.asset(Assets.imagesImgBookingConfirm,height: 200,)).paddingOnly(top: Get.height*0.15,bottom: Get.height*0.03),
         Text("Confirm Cancellation",style: Theme.of(context).textTheme.titleMedium,).paddingOnly(bottom: Get.height*0.02),
         Text("You will receive your refund on your wallet",style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w400),).paddingOnly(bottom: Get.height*0.02),
-        Text("View Status",style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor),).paddingOnly(bottom: Get.height*0.02),
+        Text("View Status",style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor,        decoration: TextDecoration.underline,    decorationColor: AppColors.primaryColor, // Set underline color to blue
+
+        ),).paddingOnly(bottom: Get.height*0.02),
       ],
     );
   }

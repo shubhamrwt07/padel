@@ -9,6 +9,8 @@ import 'package:padel_mobile/configs/components/primary_text_feild.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+import 'forgot_password_controller.dart';
+
 class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   const ForgotPasswordScreen({super.key});
 
@@ -49,7 +51,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                     return welcomeBack(context);
                 }
               }).paddingSymmetric(horizontal: Get.width * 0.05),
-            ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
+            ).paddingOnly(left: Get.width * 0.0, right: Get.width * 0.00),
           )
       ),
     );
@@ -97,7 +99,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           animationCurve: Curves.easeInCubic,
           pinTheme: PinTheme(
             shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             fieldHeight: 60,
             fieldWidth: 60,
             inactiveColor: AppColors.greyColor,
@@ -131,7 +133,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             text: TextSpan(
                 children: [
                   TextSpan(
-                      text: "Don’t receive code? ",
+                      text: "Don’t receive code ? ",
                       style:Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
                   ),
                   TextSpan(
@@ -159,13 +161,36 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.05),
         PrimaryTextField(
-          scrollPadding: EdgeInsets.only(bottom: Get.height * 0.3),
           hintText: "Password",
+          obscureText: controller.isVisiblePassword.value,
+          maxLine: 1,
+          suffixIcon: IconButton(
+            onPressed: () => controller.passwordToggle(),
+            icon: Image.asset(
+              controller.isVisiblePassword.value
+                  ? 'assets/images/ic_eye.png'
+                  : 'assets/images/ic_eye_off.png',
+              color: AppColors.textColor,
+              height: 24,
+              width: 24,
+            ),
+          ),
         ).paddingOnly(bottom: Get.height * 0.03),
         PrimaryTextField(
-          scrollPadding: EdgeInsets.only(bottom: Get.height * 0.3),
           hintText: "Confirm Password",
-        ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
+          obscureText: controller.isVisibleConfirmPassword.value,
+          maxLine: 1,
+          suffixIcon: IconButton(
+            onPressed: () => controller.confirmPasswordToggle(),
+            icon: Image.asset(
+              controller.isVisibleConfirmPassword.value
+                  ? 'assets/images/ic_eye.png'
+                  : 'assets/images/ic_eye_off.png',
+              color: AppColors.textColor,
+              height: 24,
+              width: 24,
+            ),
+          ),          ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
         PrimaryButton(onTap: ()=>controller.goToDone(), text: "Change Password").paddingOnly(bottom: Get.height*0.03),
 
       ],
@@ -177,7 +202,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
         Center(
           child: Text(
             "Welcome Back !",
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 30)
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.28),
         ),
         Text(

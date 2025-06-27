@@ -129,8 +129,8 @@ class BottomNavUi extends StatelessWidget {
 
   final List<Map<String, dynamic>> _tabs = [
     {'icon': Icons.home, 'label': 'Home', 'size': 28.0},
-    {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 20.0},
+    {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 22.0},
     {'icon': Icons.shopping_cart, 'label': 'Cart', 'size': 24.0},
-    {'icon': CupertinoIcons.person_circle, 'label': 'Profile', 'size': 30.0},
+    {'icon':  Assets.imagesIcProfile, 'label': 'Profile', 'isSvg': true, 'size': 22.0},
   ];
 }
