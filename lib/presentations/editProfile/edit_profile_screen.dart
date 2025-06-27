@@ -5,7 +5,6 @@ import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 import '../../configs/components/primary_button.dart';
 import '../../configs/components/primary_text_feild.dart';
-import '../../configs/routes/routes_name.dart';
 import 'edit_profile_controller.dart';
 
 class EditProfileUi extends StatelessWidget {
@@ -23,8 +22,8 @@ class EditProfileUi extends StatelessWidget {
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
           ),
           boxShadow: [
             BoxShadow(
@@ -41,7 +40,8 @@ class EditProfileUi extends StatelessWidget {
               width: Get.width * 0.9,
               decoration: BoxDecoration(
                 color: Theme.of(Get.context!).primaryColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(30),
+
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
@@ -68,22 +68,7 @@ class EditProfileUi extends StatelessWidget {
         action: [
           GestureDetector(
             onTap: ()=>Get.back(),
-            child: Container(
-              height: 30,
-              width: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.whiteColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade100,
-                    blurRadius: 1.4,
-                    spreadRadius: 2.2,
-                  ),
-                ],
-              ),
-              child: Icon(Icons.check),
-            ).paddingOnly(right: Get.width * 0.02),
+            child: Icon(Icons.check,color: AppColors.blueColor,).paddingOnly(right: Get.width * 0.02),
           ),
         ],
         context: context,
@@ -129,107 +114,110 @@ class EditProfileUi extends StatelessWidget {
                 Text(
                   "Full Name",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),
-                PrimaryTextField(hintText: "Enter Name").paddingOnly(top: 8),
+                PrimaryTextField(hintText: "Enter Name").paddingOnly(top: 10),
                 Text(
                   "Email",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),
-                PrimaryTextField(hintText: " Enter Email").paddingOnly(top: 8),
+                PrimaryTextField(hintText: " Enter Email",).paddingOnly(top: 10),
                 Text(
                   "Phone",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),
                 PrimaryTextField(
-                  hintText: "Enter Phone Number",
-                ).paddingOnly(top: 8),
+                  hintText: "Enter Phone Number",keyboardType: TextInputType.phone,
+                ).paddingOnly(top: 10),
                 Text(
                   "Gender",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),
-                Row(
+                Obx(() => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black, // Border Color
-                          width: 2.0, // Border Width
-                        ),
-                        borderRadius: BorderRadius.circular(8),
+                    GestureDetector(
+                      onTap: () => controller.selectedGender.value = "Female",
+                      child: Row(
+                        children: [
+                          Icon(
+                            controller.selectedGender.value == "Female"
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            size: 15,
+                            color: AppColors.labelBlackColor,
+                          ),
+                          Text(
+                            "Female",
+                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: AppColors.labelBlackColor,
+                            ),
+                          ).paddingOnly(left: 5),
+                        ],
                       ),
                     ),
-                    Text(
-                      "Female",
-                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: AppColors.labelBlackColor,
-                      ),
-                    ).paddingOnly(left: 5),
-                    Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black, // Border Color
-                          width: 2.0, // Border Width
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    Text(
-                      "Male",
-                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: AppColors.labelBlackColor,
-                      ),
-                    ).paddingOnly(left: 5),
-                    Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black, // Border Color
-                          width: 2.0, // Border Width
-                        ),
-                        borderRadius: BorderRadius.circular(8),
+                    GestureDetector(
+                      onTap: () => controller.selectedGender.value = "Male",
+                      child: Row(
+                        children: [
+                          Icon(
+                            controller.selectedGender.value == "Male"
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            size: 15,
+                            color: AppColors.labelBlackColor,
+                          ),
+                          Text(
+                            "Male",
+                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: AppColors.labelBlackColor,
+                            ),
+                          ).paddingOnly(left: 5),
+                        ],
                       ),
                     ),
-                    Text(
-                      "Other",
-                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: AppColors.labelBlackColor,
+                    GestureDetector(
+                      onTap: () => controller.selectedGender.value = "Other",
+                      child: Row(
+                        children: [
+                          Icon(
+                            controller.selectedGender.value == "Other"
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            size: 15,
+                            color: AppColors.labelBlackColor,
+                          ),
+                          Text(
+                            "Other",
+                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: AppColors.labelBlackColor,
+                            ),
+                          ).paddingOnly(left: 5),
+                        ],
                       ),
-                    ).paddingOnly(left: 5),
+                    ),
                   ],
-                ).paddingOnly(top: 8),
-                Text(
+                )).paddingOnly(top: 10),                Text(
                   "Date of Birth",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),
@@ -244,15 +232,14 @@ class EditProfileUi extends StatelessWidget {
                       color: AppColors.lightBlueColor,
                     ),
                     child: Icon(
-                      Icons.calendar_month_outlined,
+                      Icons.calendar_month_outlined,color: AppColors.iconColor,
                     ).paddingOnly(right: 10),
-                  ),
+                  ).paddingOnly(top: 10),
                 ),
                 Text(
                   "Location / City",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.labelBlackColor,
                   ),
                 ).paddingOnly(top: Get.height * .02),

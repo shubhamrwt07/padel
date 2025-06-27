@@ -44,13 +44,19 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
           Container(
             color: Colors.white,
             child: TabBar(
+              dividerColor: AppColors.tabColor,
               controller: _tabController,
               indicatorColor: AppColors.primaryColor,
-              // Set the active tab color
               labelColor: AppColors.primaryColor,
-              // Text color for the active tab
               unselectedLabelColor: AppColors.labelBlackColor,
-              // Text color for inactive tabs
+              labelStyle: TextStyle(
+                fontSize: 12, // Set your desired font size
+                fontWeight: FontWeight.w500, // Make active text bold
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
               tabs: [
                 Tab(text: "Upcoming"),
                 Tab(text: "Completed"),
@@ -104,7 +110,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                             fontSize: 12,
                                             color: AppColors.blackColor,
                                           ),
-                                        ),
+                                        ).paddingOnly(left: 4),
                                       ],
                                     ),
                                     Row(
@@ -130,8 +136,9 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                     ).paddingOnly(top: 3, bottom: 3),
                                     Row(
                                       children: [
+                                        Icon(Icons.alarm,size: 10,).paddingOnly(left: 2),
                                         Text(
-                                          "27June,25",
+                                          "Thu,27June",
                                           style: Theme
                                               .of(context)
                                               .textTheme
@@ -141,7 +148,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                             fontSize: 8,
                                             color: AppColors.blackColor,
                                           ),
-                                        ),
+                                        ).paddingOnly(left: 2),
                                          Text(
                                           "8:00am",
                                           style: Theme
@@ -155,7 +162,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                           ),
                                         ).paddingOnly(left: 5),
                                             Text(
-                                          "(60mins)",
+                                          "(60m)",
                                           style: Theme
                                               .of(context)
                                               .textTheme
@@ -201,7 +208,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                                 fontSize: 10,
                                               ),
                                             ),
-                                          ).paddingOnly(left: Get.width * .33),
+                                          ).paddingOnly(left: Get.width * .3),
                                         ),
                                       ],
                                     ),

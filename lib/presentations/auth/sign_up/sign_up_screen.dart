@@ -39,7 +39,7 @@ class SignUpScreen extends GetView<SignUpController> {
         Text(
           "Create Account",
           style: Theme.of(context).textTheme.titleLarge,
-        ).paddingOnly(bottom: Get.height * 0.02,top: Get.height*0.05),
+        ).paddingOnly(bottom: Get.height * 0.02,top: Get.height*0.02),
         Text(
           "Create an account so you can explore all the existing jobs",
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -62,14 +62,33 @@ class SignUpScreen extends GetView<SignUpController> {
             hintText: "Password",
             obscureText: controller.isVisiblePassword.value,
             maxLine: 1,
-            suffixIcon: IconButton(onPressed: ()=>controller.passwordToggle(), icon: Icon(controller.isVisiblePassword.value?Icons.visibility_off:Icons.visibility,color: AppColors.textColor,)),
+            suffixIcon: IconButton(
+              onPressed: () => controller.passwordToggle(),
+              icon: Image.asset(
+                controller.isVisiblePassword.value
+                    ? 'assets/images/ic_eye.png'
+                    : 'assets/images/ic_eye_off.png',
+                color: AppColors.textColor,
+                height: 24,
+                width: 24,
+              ),
+            ),
           ).paddingOnly(bottom: Get.height * 0.03),
           PrimaryTextField(
             hintText: "Confirm Password",
             obscureText: controller.isVisibleConfirmPassword.value,
             maxLine: 1,
-            suffixIcon: IconButton(onPressed: ()=>controller.confirmPasswordToggle(), icon: Icon(controller.isVisibleConfirmPassword.value?Icons.visibility_off:Icons.visibility,color: AppColors.textColor,)),
-          ).paddingOnly(bottom: Get.height * 0.03),
+            suffixIcon: IconButton(
+              onPressed: () => controller.confirmPasswordToggle(),
+              icon: Image.asset(
+                controller.isVisibleConfirmPassword.value
+                    ? 'assets/images/ic_eye.png'
+                    : 'assets/images/ic_eye_off.png',
+                color: AppColors.textColor,
+                height: 24,
+                width: 24,
+              ),
+            ),          ).paddingOnly(bottom: Get.height * 0.03),
         ],
       ),
     );
@@ -113,7 +132,7 @@ class SignUpScreen extends GetView<SignUpController> {
           ),
         );
       }),
-    ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.05 : Get.height * 0.22,);
+    ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.05 : Get.height * 0.1,);
   }
   Widget bottomButtonAndContent(BuildContext context){
     return Column(
@@ -131,15 +150,15 @@ class SignUpScreen extends GetView<SignUpController> {
                       style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
                   ),
                   TextSpan(
-                      text: "Sign in",
+                      text: "Sign In",
                       style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor)
                   ),
                 ]
             )),
           ),
-        ).paddingOnly(bottom: Get.height*0.04),
+        ).paddingOnly(bottom: Get.height*0.03),
         PrimaryButton(onTap: (){}, text: "Create"),
-        SizedBox(height: Get.height*0.05,)
+        SizedBox(height: Get.height*0.04,)
       ],
     );
   }
