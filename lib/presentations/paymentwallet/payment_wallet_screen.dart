@@ -81,6 +81,7 @@ class PaymentWalletScreen extends StatelessWidget {
                         "₹",
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           color: AppColors.primaryColor,
+
                           fontFamily: "Roboto"
                         ),
                       ).paddingOnly(left: Get.width * .4),
@@ -208,6 +209,8 @@ class PaymentWalletScreen extends StatelessWidget {
                                 .textTheme
                                 .headlineMedium!
                                 .copyWith(
+                              fontFamily: "Roboto",
+
                               color: AppColors.blueColor,
                               fontWeight: FontWeight.w500,
                             ),

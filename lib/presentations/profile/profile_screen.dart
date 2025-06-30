@@ -24,8 +24,9 @@ class ProfileUi extends StatelessWidget {
             Text(
               "Are you sure you want to logout?",
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.blackColor
               ),
               textAlign: TextAlign.center,
             ),
@@ -38,10 +39,10 @@ class ProfileUi extends StatelessWidget {
                     Get.offAllNamed(RoutesName.login); // Perform logout
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.redColor,
+                    backgroundColor: AppColors.darkGrey,
                     padding: EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 8, // Reduced vertical padding
+                      horizontal: 30,
+                      vertical: 10, // Reduced vertical padding
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
@@ -61,10 +62,10 @@ class ProfileUi extends StatelessWidget {
 
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.blueColor,
+                    backgroundColor: AppColors.primaryColor,
                     padding: EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 8, // Reduced vertical padding
+                      horizontal: 30,
+                      vertical: 10, // Reduced vertical padding
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
