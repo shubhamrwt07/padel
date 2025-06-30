@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 
+import '../../../configs/components/custom_button.dart';
 import '../../../configs/components/primary_button.dart';
+import '../../../configs/routes/routes_name.dart';
 import '../../../generated/assets.dart';
 
 class DetailsPage extends StatelessWidget {
@@ -32,14 +34,32 @@ class DetailsPage extends StatelessWidget {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: PrimaryButton(
-            height: 40,
-
-            onTap: () {
-              Get.back();
-            },
-            text: "Apply Filter",
-          ).paddingOnly(left: 20,right: 20),
+          child: CustomButton(
+              width: Get.width*0.85,
+              onTap: (){
+                Get.toNamed(RoutesName.paymentMethod);
+              },
+              child: Row(
+                children: [
+                  Text(
+                    "₹ 2000",
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ).paddingOnly(
+                    right: Get.width * 0.2,
+                    left: Get.width * 0.05,
+                  ),
+                  Text(
+                    "Book Price",
+                    style: Theme.of(context).textTheme.headlineMedium!
+                        .copyWith(
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
+                ],
+              )).paddingOnly(left: 20,right: 20),
         ),
       ),
       appBar: primaryAppBar(

@@ -8,6 +8,7 @@ import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
+import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 
 import '../../../generated/assets.dart';
 
@@ -60,7 +61,7 @@ class BookSession extends GetView<BookingController> {
                 ],
               ),
               onTap: (){
-              Get.back();
+              Get.to(()=>CartScreen(buttonType: "true"));
               }),
         ),
       ),

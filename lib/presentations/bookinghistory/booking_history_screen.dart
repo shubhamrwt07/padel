@@ -71,12 +71,10 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                 SingleChildScrollView(
                   child: Column(
                     children: [
-                         Container(height: Get.height,
-                         child: ListView.builder(
-                       Container(
+                      Container(
                         height: Get.height,
                         child: ListView.builder(
-                           itemCount: 20,
+                          itemCount: 20,
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () {

@@ -46,8 +46,7 @@ class OpenMatches extends GetView<BookingController> {
                 ),
               ).paddingOnly(right: Get.width*0.14),
               onTap: (){
-                Get.back();
-
+Get.to(()=>AllSuggestions(),transition: Transition.rightToLeft);
               }),
         ),
       ),
