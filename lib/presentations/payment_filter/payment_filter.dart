@@ -26,7 +26,7 @@ class PaymentFilterUi extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: AppColors.lightBlueColor,
               blurRadius: 10,
               offset: Offset(0, -2),
             ),
@@ -34,7 +34,9 @@ class PaymentFilterUi extends StatelessWidget {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Container(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20), // Add bottom padding here
+            child: Container(
               height: 55,
               width: Get.width * 0.9,
               decoration: BoxDecoration(
@@ -50,16 +52,15 @@ class PaymentFilterUi extends StatelessWidget {
               ),
               child: PrimaryButton(
                 height: 50,
-
                 onTap: () {
                   Get.back();
                 },
                 text: "Apply Filter",
-              )
+              ),
+            ),
           ),
         ),
-      ),
-      appBar: primaryAppBar(
+      ),      appBar: primaryAppBar(
         showLeading: true,
         centerTitle: true,
         title: Text(
@@ -70,11 +71,11 @@ class PaymentFilterUi extends StatelessWidget {
           GestureDetector(
             onTap: controller.clearAll,
             child: Text(
-              " clear all",
+              " Clear all",
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!
-                  .copyWith(color: AppColors.blueColor),
+                  .copyWith(color: AppColors.primaryColor),
             ).paddingOnly(left: Get.width * 0.02),
           ),
         ],
@@ -92,7 +93,7 @@ class PaymentFilterUi extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.labelBlackColor,
                 ),
-              ),
+              ).paddingOnly(left: Get.width*.05,right: Get.width*.05),
               Row(
                 children: [
                   // First Text Field - Start Date
@@ -111,7 +112,7 @@ class PaymentFilterUi extends StatelessWidget {
                         }
                       },
                       decoration: InputDecoration(
-                        suffixIcon: Icon(Icons.calendar_month),
+                        suffixIcon: Icon(Icons.calendar_month_outlined),
                         border: OutlineInputBorder(),
                       ),
                       readOnly: true, // Prevent keyboard from appearing
@@ -122,27 +123,40 @@ class PaymentFilterUi extends StatelessWidget {
 
                   // Second Text Field - End Date
                   Expanded(
-                    child: TextFormField(
-                      onTap: () async {
-                        final DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (pickedDate != null) {
-                          // Update value accordingly
-                        }
-                      },
-                      decoration: InputDecoration(
-                        suffixIcon: Icon(Icons.calendar_month),
-                        border: OutlineInputBorder(),
-                      ),
-                      readOnly: true,
-                    ),
-                  ),
-                ],
-              ).paddingOnly( top: 16),
+                    child: Obx(() {
+                      // Get the selected date from the controller
+                      final date = controller.selectedDate.value;
+
+                      // Format the date for display
+                      final formattedDate = date != null
+                          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
+                          : "Select Date";
+
+                      return TextFormField(
+                        onTap: () async {
+                          // Open date picker with current selected date or today as initial date
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: date ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (pickedDate != null && pickedDate != date) {
+                            // Update the controller with the new date
+                            controller.updateSelectedDate(pickedDate);
+                          }
+                        },
+                        decoration: InputDecoration(
+                          hintText: formattedDate,
+                          suffixIcon: Icon(Icons.calendar_month_outlined),
+                          border: OutlineInputBorder(),
+                        ),
+                        readOnly: true,
+                      );
+                    }),
+                  ),               ],
+              ).paddingOnly( top: 16,left: Get.width*.05,right: Get.width*.05),
 
               // Status Section (Radio Buttons)
               Text(
@@ -150,7 +164,7 @@ class PaymentFilterUi extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.labelBlackColor,
                 ),
-              ).paddingOnly(top: 10),
+              ).paddingOnly(top: 10,left: Get.width*.05,right: Get.width*.05),
               ...['Completed', 'Failed', 'Processing'].map(
                     (status) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
@@ -176,7 +190,7 @@ class PaymentFilterUi extends StatelessWidget {
                             .copyWith(color: AppColors.labelBlackColor),
                       ),
                     ],
-                  ),
+                  ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
                 ),
               ),
 
@@ -186,7 +200,7 @@ class PaymentFilterUi extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.labelBlackColor,
                 ),
-              ).paddingOnly(top: 20),
+              ).paddingOnly(top: 20,left: Get.width*.05,right: Get.width*.05),
               ...['Gpay', 'Paypal', 'Apple pay'].map(
                     (method) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
@@ -212,7 +226,7 @@ class PaymentFilterUi extends StatelessWidget {
                             .copyWith(color: AppColors.labelBlackColor),
                       ),
                     ],
-                  ),
+                  ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
                 ),
               ),
 
@@ -222,7 +236,7 @@ class PaymentFilterUi extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.labelBlackColor,
                 ),
-              ).paddingOnly(top: 20),
+              ).paddingOnly(top: 20,left: Get.width*.05,right: Get.width*.05),
               ...['Up to 200', '200-500', '500-2000'].map(
                     (range) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
@@ -249,11 +263,11 @@ class PaymentFilterUi extends StatelessWidget {
                             .copyWith(color: AppColors.labelBlackColor),
                       ),
                     ],
-                  ),
+                  ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
                 ),
               ),
             ],
-          ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
+          ).paddingOnly(left: Get.width*.0,right: Get.width*.0),
         ),
       ),
     );
