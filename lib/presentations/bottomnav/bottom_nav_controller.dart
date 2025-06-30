@@ -26,7 +26,7 @@ height: Get.height,
   width: Get.width,
   child: Center(child: Text("Coming Soon",style: TextStyle(fontSize: 15),)),
 ),
-    CartScreen(),
+    CartScreen(buttonType: '',),
 ProfileUi()
   ];
 

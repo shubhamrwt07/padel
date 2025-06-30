@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app_colors.dart';
 
 class AppThemes {
@@ -8,7 +9,9 @@ class AppThemes {
     primaryColor: AppColors.primaryColor,
     canvasColor: AppColors.primaryColor,
     fontFamily: "Poppins",
-    appBarTheme: const AppBarTheme(color: AppColors.whiteColor),
+    appBarTheme: const AppBarTheme(color: AppColors.whiteColor,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+    ),
 
     inputDecorationTheme: const InputDecorationTheme(filled: true),
     useMaterial3: true,

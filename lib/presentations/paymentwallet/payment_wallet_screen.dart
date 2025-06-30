@@ -30,10 +30,18 @@ class PaymentWalletScreen extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Color(0x99d5dcf1), // 60% opacity for fade effect - #1F41BB
-                    Color(0x99dbf1e3), // 60% opacity for fade effect - #3DBE64
+                    Color(0x99d5dcf1), // 60% opacity for fade effect
+                    Color(0x99dbf1e3), // 60% opacity for fade effect
                   ],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lightBlueColor.withOpacity(0.2), // Shadow color
+                    spreadRadius: 1, // Spread of the shadow
+                    blurRadius: 4, // Softness of the shadow
+                    offset: Offset(0, 2), // Offset in x and y direction
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,17 +53,13 @@ class PaymentWalletScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.payment,
-                                color: AppColors.labelBlackColor,
+                              Image.asset(
+                                Assets.imagesIcBalanceWallet,
+                                scale: 5,
                               ),
                               Text(
                                 "My Wallet",
-                                style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .headlineSmall!
-                                    .copyWith(
+                                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 16,
                                   color: AppColors.labelBlackColor,
@@ -65,11 +69,7 @@ class PaymentWalletScreen extends StatelessWidget {
                           ),
                           Text(
                             "Available balance",
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
+                            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                               fontWeight: FontWeight.w500,
                               fontSize: 10,
                               color: AppColors.labelBlackColor,
@@ -79,24 +79,18 @@ class PaymentWalletScreen extends StatelessWidget {
                       ),
                       Text(
                         "₹",
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(
-                          color: AppColors.blueColor,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: AppColors.primaryColor,
+
+                          fontFamily: "Roboto"
                         ),
                       ).paddingOnly(left: Get.width * .4),
                       Text(
                         "7000",
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(
-                          color: AppColors.blueColor,
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: AppColors.primaryColor,
                         ),
-                      ),
+                      ).paddingOnly(left: 5),
                     ],
                   ).paddingOnly(
                     left: Get.width * .03,
@@ -106,8 +100,7 @@ class PaymentWalletScreen extends StatelessWidget {
                   ),
                 ],
               ).paddingOnly(),
-            ),
-            Row(
+            ),            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
@@ -216,6 +209,8 @@ class PaymentWalletScreen extends StatelessWidget {
                                 .textTheme
                                 .headlineMedium!
                                 .copyWith(
+                              fontFamily: "Roboto",
+
                               color: AppColors.blueColor,
                               fontWeight: FontWeight.w500,
                             ),
@@ -249,7 +244,7 @@ class PaymentWalletScreen extends StatelessWidget {
 
             ///
           ],
-        ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
+        ).paddingOnly(left: Get.width * .05, right: Get.width * .05,top: Get.height*.02),
       ),
     );
   }

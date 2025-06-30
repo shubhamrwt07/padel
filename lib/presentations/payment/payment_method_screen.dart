@@ -3,9 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
-
+import '../../configs/components/custom_button.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 
 class PaymentMethodScreen extends GetView<PaymentMethodController> {
@@ -44,8 +43,9 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
             ).paddingOnly(top: Get.height*0.02),
           ),
           SizedBox(
-            height: Get.height * 0.75,
+            height: Get.height * 0.72,
             child: ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
               itemCount:controller.paymentList.length,
               itemBuilder: (context, index) {
                 final payment =controller.paymentList[index];
@@ -58,34 +58,29 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               },
             ),
           ),
-          PrimaryButton(
-              height: 50,
-              width: Get.width*0.9,
-              onTap: () {
+          CustomButton(
+              width: Get.width*0.85,
+              onTap: (){
                 Get.to(()=>BookingSuccessfulScreen(),transition: Transition.rightToLeft);
-              }, text: "",
+
+              },
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("₹ 7000",style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.whiteColor,fontWeight: FontWeight.w500),).paddingOnly(right: Get.width*0.2,left: Get.width*0.05),
-                      Text("Book Now",style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: AppColors.whiteColor,fontWeight: FontWeight.w500,fontSize: 13),),
-                    ],
-                  ),
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF3DBE64),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Color(0xFF2556DA), width: 1),
+                  Text(
+                    "₹ 7000",
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w500,
                     ),
-                    child: const Icon(
-                      Icons.arrow_outward,
-                      color: Colors.white,
-                      size: 20,
+                  ).paddingOnly(
+                    right: Get.width * 0.2,
+                    left: Get.width * 0.05,
+                  ),
+                  Text(
+                    "Payment",
+                    style: Theme.of(context).textTheme.headlineMedium!
+                        .copyWith(
+                      color: AppColors.whiteColor,
                     ),
                   ),
                 ],

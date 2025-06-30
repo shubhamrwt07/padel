@@ -91,7 +91,7 @@ class Routes {
       name: RoutesName.editProfile,
       page: () => EditProfileUi(),
       binding: EditProfileBinding(),
-      transition: Transition.fadeIn,
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
 
@@ -104,7 +104,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.cart,
-      page: () => CartScreen(),
+      page: () => CartScreen(buttonType: '',),
       binding: CartBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,

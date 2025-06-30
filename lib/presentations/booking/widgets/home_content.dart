@@ -97,10 +97,18 @@ class HomeContent extends GetView<BookingController> {
                 },
               ),
             ).paddingOnly(bottom: Get.height * 0.02),
-             Container(
+              Container(
                 alignment: Alignment.center,
                  height: Get.height * 0.1,
                 width: Get.width,
+ 
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                color: Colors.transparent,
+                height: Get.height * 0.1,
+                width: Get.width * 0.74,
+ 
                 child: ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
@@ -284,7 +292,8 @@ class HomeContent extends GetView<BookingController> {
           ),
         ),
       ],
-    ).paddingOnly(right: Get.width * 0.09);
+     ).paddingOnly(right: Get.width * 0.09);
+ 
   }
 
   Widget getSelectedView(int index) {
@@ -293,7 +302,7 @@ class HomeContent extends GetView<BookingController> {
       case 0:
         return SizedBox(
           key: ValueKey(0),
-          height: height,
+          height: Get.height * 0.18,
           child: directionGoogleMaps(),
         );
       case 1:
@@ -303,7 +312,7 @@ class HomeContent extends GetView<BookingController> {
           child: const Center(child: Text("Call View")),
         );
       case 2:
-        return Obx(
+         return Obx(
           () => SizedBox(
             key: ValueKey(2),
             height: controller.isShowAllReviews.value
@@ -312,7 +321,8 @@ class HomeContent extends GetView<BookingController> {
             child: reviewContent(Get.context!),
           ),
         );
-      case 3:
+  
+       case 3:
         return SizedBox(
           key: ValueKey(3),
           height: controller.isShowAllPhotos.value
@@ -367,7 +377,7 @@ class HomeContent extends GetView<BookingController> {
                 : Get.height * 0.3,
             color: Colors.transparent,
             child: ListView.builder(
-              itemCount: 10,
+              itemCount: 10,physics: controller.isShowAllReviews.value?ScrollPhysics():NeverScrollableScrollPhysics(),
               padding: EdgeInsetsGeometry.zero,
               itemBuilder: (context, index) {
                 return Container(
@@ -582,21 +592,19 @@ class HomeContent extends GetView<BookingController> {
   }
 
   Widget directionGoogleMaps() {
-    return SizedBox(
-      height: 300,
-      child: FlutterMap(
-        mapController: MapController(),
-        options: MapOptions(
-          initialCenter: LatLng(30.7333, 76.7794),
-          initialZoom: 13,
+ ,
+     return FlutterMap(
+      mapController: MapController(),
+      options: MapOptions(
+        initialCenter: LatLng(30.7333, 76.7794),
+        initialZoom: 13,
+       ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: ['a', 'b', 'c'],
         ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c'],
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

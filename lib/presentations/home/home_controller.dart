@@ -23,8 +23,8 @@ class HomeController extends GetxController{
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDate.value,
-      firstDate: DateTime(2000),
-      lastDate: now,
+      firstDate: now,
+      lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

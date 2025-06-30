@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +39,11 @@ class SupportScreen extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(Icons.call, color: AppColors.labelBlackColor),
+              Icon(
+                CupertinoIcons.phone,
+                // Example of a Cupertino-style caption/chat icon
+                color: AppColors.labelBlackColor,
+              ),
               Text(
                 "Phone Number",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
@@ -50,12 +55,12 @@ class SupportScreen extends StatelessWidget {
           ).paddingOnly(top: 20),
           Row(
             children: [
-              Icon(Icons.chat, color: AppColors.labelBlackColor),
+              Icon(Icons.chat, color: AppColors.primaryColor),
               Text(
                 "Chat",
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.labelBlackColor,
+                  color: AppColors.primaryColor,
                 ),
               ).paddingOnly(left: 10),
             ],

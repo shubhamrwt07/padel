@@ -6,8 +6,11 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/primary_container.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
+import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+
+import 'forgot_password_controller.dart';
 
 class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   const ForgotPasswordScreen({super.key});
@@ -49,7 +52,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                     return welcomeBack(context);
                 }
               }).paddingSymmetric(horizontal: Get.width * 0.05),
-            ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
+            ).paddingOnly(left: Get.width * 0.0, right: Get.width * 0.00),
           )
       ),
     );
@@ -90,38 +93,46 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.057),
         PinCodeTextField(
-          textStyle: Theme.of(context)
-              .textTheme
-              .headlineLarge!
-              .copyWith(fontWeight: FontWeight.w400, fontSize: 30),
+          appContext: context,
+          length: 4,
+          cursorColor: AppColors.primaryColor,
+          textStyle: Theme.of(context).textTheme.headlineLarge!.copyWith(
+            fontWeight: FontWeight.w400,
+            fontSize: 30,
+            color: Colors.black,
+          ),
+          animationType: AnimationType.fade,
+          keyboardType: TextInputType.number,
           animationCurve: Curves.easeInCubic,
+          enableActiveFill: true,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
           pinTheme: PinTheme(
             shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             fieldHeight: 60,
             fieldWidth: 60,
-            inactiveColor: AppColors.greyColor,
+
+            // Hide borders
+            inactiveColor: Colors.transparent,
             selectedColor: AppColors.primaryColor,
-            activeColor: AppColors.primaryColor,
-            inactiveBorderWidth: 1,
-            selectedBorderWidth: 1,
-            activeBorderWidth: 1,
+            activeColor: Colors.transparent,
+            borderWidth: 2,
+
+            // Fill colors for background of boxes
+            inactiveFillColor: Colors.grey.shade100,
+            selectedFillColor: const Color(0xFFF1F4FF),
+            activeFillColor: const Color(0xFFF1F4FF),
           ),
-          autoDisposeControllers: true,
-          enablePinAutofill: true,
-          appContext: context,
-          hintStyle:  TextStyle(color: AppColors.greyColor, fontSize: 22),
-          // hintCharacter: '●',
-          blinkWhenObscuring: true,
-          cursorColor: AppColors.primaryColor,
-          keyboardType: TextInputType.number,
           backgroundColor: Colors.transparent,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          length: 4,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          ],
-        ).paddingOnly(left: Get.width*0.06, right: Get.width*0.06,bottom: Get.height*0.02),
+          blinkWhenObscuring: true,
+          autoDisposeControllers: true,
+          beforeTextPaste: (text) => true,
+          onChanged: (value) {},
+        )
+            .paddingOnly(left: Get.width*0.06, right: Get.width*0.06,bottom: Get.height*0.02),
         Text(
           "00:00",
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -131,7 +142,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             text: TextSpan(
                 children: [
                   TextSpan(
-                      text: "Don’t receive code? ",
+                      text: "Don’t receive code ? ",
                       style:Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
                   ),
                   TextSpan(
@@ -159,13 +170,34 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.05),
         PrimaryTextField(
-          scrollPadding: EdgeInsets.only(bottom: Get.height * 0.3),
           hintText: "Password",
+          obscureText: controller.isVisiblePassword.value,
+          maxLine: 1,
+          suffixIcon: IconButton(
+            onPressed: () => controller.passwordToggle(),
+            icon: Image.asset(
+              controller.isVisiblePassword.value
+                  ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
+              color: AppColors.textColor,
+              height: 24,
+              width: 24,
+            ),
+          ),
         ).paddingOnly(bottom: Get.height * 0.03),
         PrimaryTextField(
-          scrollPadding: EdgeInsets.only(bottom: Get.height * 0.3),
           hintText: "Confirm Password",
-        ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
+          obscureText: controller.isVisibleConfirmPassword.value,
+          maxLine: 1,
+          suffixIcon: IconButton(
+            onPressed: () => controller.confirmPasswordToggle(),
+            icon: Image.asset(
+              controller.isVisibleConfirmPassword.value
+                  ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
+              color: AppColors.textColor,
+              height: 24,
+              width: 24,
+            ),
+          ),          ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
         PrimaryButton(onTap: ()=>controller.goToDone(), text: "Change Password").paddingOnly(bottom: Get.height*0.03),
 
       ],
@@ -177,7 +209,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
         Center(
           child: Text(
             "Welcome Back !",
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 30)
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.28),
         ),
         Text(

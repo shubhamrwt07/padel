@@ -12,7 +12,7 @@ class PaymentMethodController extends GetxController{
     },
     {
       "name": "PayPal",
-      "icon": Assets.imagesIcApple,
+      "icon": Assets.imagesIcPaypal,
       "value": "paypal",
     },
     {

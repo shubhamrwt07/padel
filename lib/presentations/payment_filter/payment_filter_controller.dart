@@ -10,6 +10,9 @@ class PaymentFilterController extends GetxController {
   // Amount (single selection like radio)
   var selectedAmountRange = ''.obs;
 
+  // Date
+  var selectedDate = DateTime.now().obs; // <-- Default to current date
+
   void selectStatus(String status) {
     selectedStatus.value = status;
   }
@@ -28,5 +31,12 @@ class PaymentFilterController extends GetxController {
     selectedStatus.value = 'Completed';
     selectedPaymentMethod.value = '';
     selectedAmountRange.value = '';
+    selectedDate.value = DateTime.now(); // Reset to today's date
+  }
+
+  void updateSelectedDate(DateTime? newDate) {
+    if (newDate != null) {
+      selectedDate.value = newDate;
+    }
   }
 }

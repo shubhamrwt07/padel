@@ -2,91 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/presentations/cart/cart_screen.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 import '../../generated/assets.dart';
 
-class ProfileUi extends StatelessWidget {
+class ProfileUi extends GetView<ProfileController> {
   const ProfileUi({super.key});
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Are you sure you want to logout?",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Get.offAllNamed(RoutesName.login); // Perform logout
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.redColor,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 8, // Reduced vertical padding
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    textStyle: TextStyle(fontSize: 14), // Smaller font if needed
-                  ),
-                  child: Text("Yes",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall!
-
-                        .copyWith(fontWeight: FontWeight.w600,color: Colors.white),),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.blueColor,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 8, // Reduced vertical padding
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    textStyle: TextStyle(fontSize: 14), // Smaller font if needed
-                  ),
-                  child: Text("No", style: Theme.of(context)
-                      .textTheme
-                      .titleSmall!
-
-                      .copyWith(fontWeight: FontWeight.w600,color: Colors.white)),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }  @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: primaryAppBar(
         centerTitle: true,
         showLeading: false,
@@ -107,15 +34,20 @@ class ProfileUi extends StatelessWidget {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  Container(
-                    height: Get.height * .11,
-                    width: Get.width * .24,
-                    decoration: BoxDecoration(
-                      color: AppColors.tabSelectedColor,
-                      borderRadius: BorderRadius.circular(50),
+                  GestureDetector(
+                    onTap: (){
+                      Get.toNamed(RoutesName.editProfile);
+                    },
+                    child: Container(
+                      height: Get.height * .11,
+                      width: Get.width * .24,
+                      decoration: BoxDecoration(
+                        color: AppColors.tabSelectedColor,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Icon(Icons.person,
+                          size: 90, color: AppColors.labelBlackColor),
                     ),
-                    child: Icon(Icons.person,
-                        size: 90, color: AppColors.labelBlackColor),
                   ),
                   Positioned(
                     bottom: 0,
@@ -200,78 +132,92 @@ class ProfileUi extends StatelessWidget {
             onTap: () {
               Get.toNamed(RoutesName.bookingHistory);
             },
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_month_outlined,
-                  size: 20,
-                  color: AppColors.labelBlackColor,
-                ),
-                Text(
-                  "Booking",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(
+            child: Container(
+              color: Colors.transparent,
+              height: 60,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_month_outlined,
+                    size: 20,
                     color: AppColors.labelBlackColor,
-                    fontWeight: FontWeight.w600,
                   ),
-                ).paddingOnly(left: Get.width * .1),
-              ],
+                  Text(
+                    "Booking",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                      color: AppColors.labelBlackColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ).paddingOnly(left: Get.width * .1),
+                ],
+              ),
             ).paddingOnly(top: Get.height * .05),
           ),
           GestureDetector(
             onTap: () {
               Get.toNamed(RoutesName.paymentWallet);
             },
-            child: Row(
-              children: [
-                Image.asset(
-                  Assets.imagesIcBalanceWallet,
-                  scale: 5,
-                ),
-                Text(
-                  "Payments",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(
-                    color: AppColors.labelBlackColor,
-                    fontWeight: FontWeight.w600,
-
+            child: Container(
+              height: 60,
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  Image.asset(
+                    Assets.imagesIcBalanceWallet,
+                    scale: 5,
                   ),
-                ).paddingOnly(left: Get.width * .1),
-              ],
-            ).paddingOnly(top: Get.height * .05),
+                  Text(
+                    "Payments",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                      color: AppColors.labelBlackColor,
+                      fontWeight: FontWeight.w600,
+
+                    ),
+                  ).paddingOnly(left: Get.width * .1),
+                ],
+              ),
+            ),
           ),
           GestureDetector(
             onTap: () {
-              Get.toNamed(RoutesName.cart);
+              // Get.toNamed(RoutesName.cart);
+              Get.to(()=>CartScreen(buttonType: "true"),transition: Transition.rightToLeft);
             },
-            child: Row(
-              children: [
-                Icon(
-                  Icons.shopping_cart_outlined,
-                  size: 20,
-                  color: AppColors.labelBlackColor,
-                ),
-                Text(
-                  "Cart",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(
+            child: Container(
+              color: Colors.transparent,
+              height: 60,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 20,
                     color: AppColors.labelBlackColor,
-                    fontWeight: FontWeight.w600,
                   ),
-                ).paddingOnly(left: Get.width * .1),
-              ],
-            ).paddingOnly(top: Get.height * .05),
+                  Text(
+                    "Cart",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                      color: AppColors.labelBlackColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ).paddingOnly(left: Get.width * .1),
+                ],
+              ),
+            ),
           ),
           GestureDetector(
             onTap: ()=>Get.toNamed(RoutesName.support),
             child: Container(
               color: Colors.transparent,
+              height: 60,
               child: Row(
                 children: [
                   Icon(
@@ -290,55 +236,118 @@ class ProfileUi extends StatelessWidget {
                     ),
                   ).paddingOnly(left: Get.width * .1),
                 ],
-              ).paddingOnly(top: Get.height * .05),
+              ),
             ),
           ),
-          Row(
-            children: [
-              Image.asset(
-                Assets.imagesIcPrivacy,
-                scale: 5,
-              ),
-              Text(
-                "Privacy",
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(
-                  color: AppColors.labelBlackColor,
-                  fontWeight: FontWeight.w600,
-
-                ),
-              ).paddingOnly(left: Get.width * .1),
-            ],
-          ).paddingOnly(top: Get.height * .05),
-          GestureDetector(
-            onTap: () {
-              _showLogoutDialog(context);
-            },
+          Container(
+            color: Colors.transparent,
+            height: 60,
             child: Row(
               children: [
-                SvgPicture.asset(
-                  Assets.imagesIcLogOut,
-                  height: 15,
-                  width: 17,
-                ).paddingOnly(left: 3),
+                Image.asset(
+                  Assets.imagesIcPrivacy,
+                  scale: 5,
+                ),
                 Text(
-                  "Logout",
+                  "Privacy",
                   style: Theme.of(context)
                       .textTheme
                       .headlineSmall!
                       .copyWith(
-                    color: Colors.red,
+                    color: AppColors.labelBlackColor,
                     fontWeight: FontWeight.w600,
 
                   ),
-                ).paddingOnly(left: Get.width * .11),
+                ).paddingOnly(left: Get.width * .1),
               ],
-            ).paddingOnly(top: Get.height * .05),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              _showLogoutDialog(context);
+            },
+            child: Container(
+              color: Colors.transparent,
+              height: 60,
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    Assets.imagesIcLogOut,
+                    height: 15,
+                    width: 17,
+                  ).paddingOnly(left: 3),
+                  Text(
+                    "Logout",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+
+                    ),
+                  ).paddingOnly(left: Get.width * .11),
+                ],
+              ),
+            ),
           ),
         ],
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
+    );
+  }
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Are you sure you want to\nlogout?",
+              style: Theme.of(context).textTheme.titleSmall,
+              textAlign: TextAlign.center,
+            ).paddingOnly(top: Get.height*0.02),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: (){
+                    Get.offAllNamed(RoutesName.login);
+                  },
+                  child: Container(
+                    height: Get.height*0.04,
+                    width: Get.width*0.22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: AppColors.textColor,
+                        borderRadius: BorderRadius.circular(6)
+                    ),
+                    child: Text("Yes",style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600,color: AppColors.whiteColor),),
+                  ).paddingOnly(right: 10),
+                ),
+                GestureDetector(
+                  onTap: ()=>Get.back(),
+                  child: Container(
+                    height: Get.height*0.04,
+                    width: Get.width*0.22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(6)
+                    ),
+                    child: Text("No",style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600,color: AppColors.whiteColor),),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
