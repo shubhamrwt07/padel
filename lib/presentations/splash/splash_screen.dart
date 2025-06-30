@@ -6,9 +6,10 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PrimaryContainer(
-        child: Center(
+    return PrimaryContainer(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
             child:
             Text("Splash",style: TextStyle(fontSize: 22),)),
       ),

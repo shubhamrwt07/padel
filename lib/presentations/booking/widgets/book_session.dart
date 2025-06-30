@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
@@ -35,29 +36,30 @@ class BookSession extends GetView<BookingController> {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Container(
-            height: 55,
-            width: Get.width * 0.9,
-            decoration: BoxDecoration(
-              color: Theme.of(Get.context!).primaryColor,
-              borderRadius: BorderRadius.circular(40),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: PrimaryButton(
-              height: 50,
-
-              onTap: () {
-                Get.to(AllSuggestions());
-              },
-              text: "Book the first spot",
-            ),
-          ),
+          child: CustomButton(
+            width: Get.width*0.9,
+              child: Row(
+                children: [
+                  Text(
+                    "₹ 2000",
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ).paddingOnly(
+                    right: Get.width * 0.2,
+                    left: Get.width * 0.05,
+                  ),
+                  Text(
+                    "Add to cart",
+                    style: Theme.of(context).textTheme.headlineMedium!
+                        .copyWith(
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: (){}),
         ),
       ),
 

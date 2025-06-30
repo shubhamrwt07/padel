@@ -104,7 +104,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.cart,
-      page: () => CartScreen(),
+      page: () => CartScreen(buttonType: '',),
       binding: CartBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,

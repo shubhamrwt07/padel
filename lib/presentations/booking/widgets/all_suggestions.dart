@@ -1,15 +1,13 @@
-import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/widgets/details_page.dart';
 import 'package:padel_mobile/presentations/booking/widgets/filters.dart';
 import '../../../../configs/components/app_bar.dart';
 import '../../../../generated/assets.dart';
+import '../../../configs/components/custom_button.dart';
 
 class AllSuggestions extends StatefulWidget {
   const AllSuggestions({super.key});
@@ -46,28 +44,16 @@ class _AllSuggestionsState extends State<AllSuggestions> {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Container(
-            height: 55,
-            width: Get.width * 0.9,
-            decoration: BoxDecoration(
-              color: Theme.of(Get.context!).primaryColor,
-              borderRadius: BorderRadius.circular(40),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
+          child: CustomButton(
+              width: Get.width*0.9,
+              child: Text(
+                "+ Start a match",
+                style: Theme.of(context).textTheme.headlineMedium!
+                    .copyWith(
+                  color: AppColors.whiteColor,
                 ),
-              ],
-            ),
-            child: PrimaryButton(
-              height: 50,
-              onTap: () {
-                Get.back();
-              },
-              text: "+ Start a match",
-            ),
-          ),
+              ).paddingOnly(right: Get.width*0.14),
+              onTap: (){}),
         ),
       ),
       body: SingleChildScrollView(
@@ -255,7 +241,7 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                        width: Get.width * .61,
                       child: Text(
                         'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',

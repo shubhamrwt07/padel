@@ -33,7 +33,7 @@ class BottomNavUi extends StatelessWidget {
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha(30),
                 spreadRadius: 2,
                 blurRadius: 8,
                 offset: const Offset(0, 0),
@@ -70,12 +70,12 @@ class BottomNavUi extends StatelessWidget {
                       tab['icon'],
                       width: iconSize,
                       height: iconSize,
-                      color: isSelected ? null : Colors.black,
+                      color: isSelected ? null : AppColors.labelBlackColor,
                     )
                         : Icon(
                       tab['icon'],
                       size: iconSize,
-                      color: isSelected ? null : Colors.black,
+                      color: isSelected ? null : AppColors.labelBlackColor,
                     );
 
                     final leadingWidget = isSelected
@@ -128,7 +128,7 @@ class BottomNavUi extends StatelessWidget {
   }
 
   final List<Map<String, dynamic>> _tabs = [
-    {'icon': Icons.home, 'label': 'Home', 'size': 28.0},
+    {'icon': Icons.home_outlined, 'label': 'Home', 'size': 28.0},
     {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 22.0},
     {'icon': Icons.shopping_cart, 'label': 'Cart', 'size': 24.0},
     {'icon':  Assets.imagesIcProfile, 'label': 'Profile', 'isSvg': true, 'size': 22.0},
