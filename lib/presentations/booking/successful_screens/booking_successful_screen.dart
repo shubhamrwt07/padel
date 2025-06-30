@@ -16,7 +16,7 @@ class BookingSuccessfulScreen extends StatelessWidget {
           Center(child: Image.asset(Assets.imagesImgBookingSuccessful,scale: 7,)).paddingOnly(top: Get.height*0.2),
           Text("Booking Successful!",style: Theme.of(context).textTheme.titleLarge!.copyWith(color: AppColors.blackColor,fontWeight: FontWeight.w600),).paddingOnly(bottom: Get.height*0.02),
           Text("Your slot has been booked successfully.",style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.blackColor,fontWeight: FontWeight.w400),).paddingOnly(bottom: Get.height*0.04),
-          PrimaryButton(onTap: (){}, text: "Continue").paddingOnly(bottom: Get.height*0.17),
+          PrimaryButton(onTap: (){Get.toNamed(RoutesName.bottomNav);}, text: "Continue").paddingOnly(bottom: Get.height*0.17),
           Text("You’ll receive a reminder before it starts.",style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.blackColor,fontWeight: FontWeight.w400),).paddingOnly(bottom: Get.height*0.02),
           GestureDetector(
             onTap: ()=>Get.toNamed(RoutesName.bookingConfirmAndCancel),

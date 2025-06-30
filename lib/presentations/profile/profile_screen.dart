@@ -55,7 +55,7 @@ class ProfileUi extends GetView<ProfileController> {
                     child: Container(
                       padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent,
+                        color: AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

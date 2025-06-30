@@ -53,7 +53,9 @@ class _AllSuggestionsState extends State<AllSuggestions> {
                   color: AppColors.whiteColor,
                 ),
               ).paddingOnly(right: Get.width*0.14),
-              onTap: (){}),
+              onTap: (){
+                Get.to(()=>DetailsPage(),transition:Transition.rightToLeft );
+              }),
         ),
       ),
       body: SingleChildScrollView(
