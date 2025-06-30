@@ -199,9 +199,12 @@ Get.to(()=>AllSuggestions(),transition: Transition.rightToLeft);
   Widget _buildTimeSlots() {
     return GetBuilder<BookingController>(
       builder: (controller) {
+        double spacing = Get.width*.02;
+        final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
+
         return Wrap(
-          spacing: 20,
-          runSpacing: 20,
+          spacing: spacing,
+          runSpacing: Get.height * 0.015,
           children: controller.timeSlots.map((time) {
             final isSelected = controller.selectedTime == time;
 
@@ -217,16 +220,18 @@ Get.to(()=>AllSuggestions(),transition: Transition.rightToLeft);
                 transitionBuilder: (child, animation) =>
                     FadeTransition(opacity: animation, child: child),
                 child: Container(
-                  key: ValueKey(isSelected), // triggers animation
-                  width: (Get.width - 80) / 3,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  key: ValueKey(isSelected),
+                  width: tileWidth,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.black
                         : AppColors.timeTileBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: AppColors.blackColor.withAlpha(10))
+                    border: Border.all(
+                      color: AppColors.blackColor.withAlpha(10),
+                    ),
                   ),
                   child: Text(
                     time,

@@ -175,7 +175,7 @@ class DetailsPage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 5),
-                    Container(
+                    SizedBox(
                       height: Get.height * .09,
                       width: Get.width * .49,
                       child: Text(

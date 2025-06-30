@@ -227,9 +227,12 @@ class BookSession extends GetView<BookingController> {
   Widget _buildTimeSlots() {
     return GetBuilder<BookingController>(
       builder: (controller) {
+          double spacing = Get.width*.02;
+        final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
+
         return Wrap(
-          spacing: 20,
-          runSpacing: Get.height * .01,
+          spacing: spacing,
+          runSpacing: Get.height * 0.015,
           children: controller.timeSlots.map((time) {
             final isSelected = controller.selectedTime == time;
 
@@ -246,8 +249,8 @@ class BookSession extends GetView<BookingController> {
                     FadeTransition(opacity: animation, child: child),
                 child: Container(
                   key: ValueKey(isSelected),
-                  width: (Get.width - 80) / 3,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  width: tileWidth,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
@@ -272,6 +275,7 @@ class BookSession extends GetView<BookingController> {
       },
     );
   }
+
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(
