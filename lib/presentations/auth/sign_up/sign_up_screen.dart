@@ -53,6 +53,9 @@ class SignUpScreen extends GetView<SignUpController> {
       ()=> Column(
         children: [
           PrimaryTextField(
+            hintText: "Phone Number",
+          ).paddingOnly(bottom: Get.height * 0.03),
+          PrimaryTextField(
             hintText: "Email",
           ).paddingOnly(bottom: Get.height * 0.03),
           PrimaryTextField(
