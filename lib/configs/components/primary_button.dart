@@ -32,7 +32,7 @@ class PrimaryButton extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF3DBE64), Color(0xFF1F41BB)],
+            colors: [Color(0xFF3DBE64), Color(0xFF1F41BB), Color(0xFF1F41BB)],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),

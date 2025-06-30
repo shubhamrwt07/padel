@@ -1,11 +1,10 @@
-import 'dart:developer';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
@@ -26,20 +25,20 @@ class HomeScreen extends GetView<HomeController> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Hello!\n",
+                  text: "Hello! ",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 TextSpan(
-                  text: "Jane Cooper",
+                  text: "Jane",
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
-          ).paddingOnly(left: Get.width * 0.02),
+          ).paddingOnly(left: Get.width * 0.03,top: Get.height*0.02),
           action: [
             // Container(
             //   height: 30,
@@ -258,15 +257,17 @@ class HomeScreen extends GetView<HomeController> {
                             const SizedBox(height: 12),
                             Text(
                               "Select Locations",
-                              style: Theme.of(context).textTheme.headlineMedium,
+                              style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.w500),
                             ),
                             const SizedBox(height: 8),
                             TextField(
                               controller: searchController,
                               onChanged: (value) => searchQuery.value = value,
+                              style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Icons.search),
                                 hintText: 'Search location...',
+                                hintStyle: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -323,7 +324,7 @@ class HomeScreen extends GetView<HomeController> {
                         PrimaryButton(
 
                             height: 45,
-                            width: Get.width,
+                            width: Get.width*0.4,
                             onTap: ()=>Get.back(), text:  "Done")
                           ],
                         ),
@@ -389,9 +390,7 @@ class HomeScreen extends GetView<HomeController> {
               children: [
                 Obx(
                       () => Text(
-                    controller.selectedDate.value != null
-                        ? DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)
-                        : 'Date / Time',
+                    DateFormat('dd/MM/yyyy').format(controller.selectedDate.value),
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       color: AppColors.textColor,
                     ),
@@ -568,12 +567,13 @@ class HomeScreen extends GetView<HomeController> {
                                 text: ' 1200',
                                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                   fontWeight: FontWeight.w500,
+                                  color: AppColors.blueColor
                                   // Keep other styles consistent
                                 ),
                               ),
                             ],
                           ),
-                        ).paddingOnly(bottom: 5),
+                        ).paddingOnly(bottom: 10),
                       ],
                     ),
                   ],

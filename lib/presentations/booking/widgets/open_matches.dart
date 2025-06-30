@@ -7,6 +7,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
+import '../../../configs/components/custom_button.dart';
 import '../../../generated/assets.dart';
 import 'all_suggestions.dart';
 
@@ -35,29 +36,19 @@ class OpenMatches extends GetView<BookingController> {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Container(
-              height: 55,
-              width: Get.width * 0.9,
-              decoration: BoxDecoration(
-                color: Theme.of(Get.context!).primaryColor,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: PrimaryButton(
-                height: 50,
+          child: CustomButton(
+              width: Get.width*0.9,
+              child: Text(
+                "+ Book the first spot",
+                style: Theme.of(context).textTheme.headlineMedium!
+                    .copyWith(
+                  color: AppColors.whiteColor,
+                ),
+              ).paddingOnly(right: Get.width*0.14),
+              onTap: (){
+                Get.back();
 
-                onTap: () {
-                  Get.to(AllSuggestions());
-                },
-                text: "+ Book the first spot",
-              )
-          ),
+              }),
         ),
       ),
       body: SingleChildScrollView(

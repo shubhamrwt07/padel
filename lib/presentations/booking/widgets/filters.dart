@@ -4,6 +4,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
+import '../../../configs/components/custom_button.dart';
 import '../../../configs/components/primary_button.dart';
 
 
@@ -31,13 +32,18 @@ class Filters extends GetView<BookingController> {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: PrimaryButton(
-            height: 50,
-            onTap: () {
-              Get.back();
-            },
-            text: "Apply Filter",
-          ).paddingOnly(left: 20,right: 20),
+          child:  CustomButton(
+              width: Get.width*0.9,
+              child: Text(
+                "Apply filter",
+                style: Theme.of(context).textTheme.headlineMedium!
+                    .copyWith(
+                  color: AppColors.whiteColor,
+                ),
+              ).paddingOnly(right: Get.width*0.14),
+              onTap: (){
+                Get.back();
+              }).paddingOnly(left: 20,right: 20),
         ),
       ),
       appBar: primaryAppBar(
