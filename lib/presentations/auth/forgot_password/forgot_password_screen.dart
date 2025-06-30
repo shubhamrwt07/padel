@@ -192,8 +192,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             onPressed: () => controller.confirmPasswordToggle(),
             icon: Image.asset(
               controller.isVisibleConfirmPassword.value
-                  ? 'assets/images/ic_eye.png'
-                  : 'assets/images/ic_eye_off.png',
+                  ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
               color: AppColors.textColor,
               height: 24,
               width: 24,

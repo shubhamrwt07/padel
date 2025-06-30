@@ -157,7 +157,7 @@ class SignUpScreen extends GetView<SignUpController> {
             )),
           ),
         ).paddingOnly(bottom: Get.height*0.03),
-        PrimaryButton(onTap: (){}, text: "Create"),
+        PrimaryButton(onTap: (){ Get.toNamed(RoutesName.bottomNav);}, text: "Create"),
         SizedBox(height: Get.height*0.04,)
       ],
     );
