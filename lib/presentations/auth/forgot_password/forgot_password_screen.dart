@@ -6,6 +6,7 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/primary_container.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
+import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -92,38 +93,46 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.057),
         PinCodeTextField(
-          textStyle: Theme.of(context)
-              .textTheme
-              .headlineLarge!
-              .copyWith(fontWeight: FontWeight.w400, fontSize: 30),
+          appContext: context,
+          length: 4,
+          cursorColor: AppColors.primaryColor,
+          textStyle: Theme.of(context).textTheme.headlineLarge!.copyWith(
+            fontWeight: FontWeight.w400,
+            fontSize: 30,
+            color: Colors.black,
+          ),
+          animationType: AnimationType.fade,
+          keyboardType: TextInputType.number,
           animationCurve: Curves.easeInCubic,
+          enableActiveFill: true,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
           pinTheme: PinTheme(
             shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             fieldHeight: 60,
             fieldWidth: 60,
-            inactiveColor: AppColors.greyColor,
+
+            // Hide borders
+            inactiveColor: Colors.transparent,
             selectedColor: AppColors.primaryColor,
-            activeColor: AppColors.primaryColor,
-            inactiveBorderWidth: 1,
-            selectedBorderWidth: 1,
-            activeBorderWidth: 1,
+            activeColor: Colors.transparent,
+            borderWidth: 2,
+
+            // Fill colors for background of boxes
+            inactiveFillColor: Colors.grey.shade100,
+            selectedFillColor: const Color(0xFFF1F4FF),
+            activeFillColor: const Color(0xFFF1F4FF),
           ),
-          autoDisposeControllers: true,
-          enablePinAutofill: true,
-          appContext: context,
-          hintStyle:  TextStyle(color: AppColors.greyColor, fontSize: 22),
-          // hintCharacter: '●',
-          blinkWhenObscuring: true,
-          cursorColor: AppColors.primaryColor,
-          keyboardType: TextInputType.number,
           backgroundColor: Colors.transparent,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          length: 4,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          ],
-        ).paddingOnly(left: Get.width*0.06, right: Get.width*0.06,bottom: Get.height*0.02),
+          blinkWhenObscuring: true,
+          autoDisposeControllers: true,
+          beforeTextPaste: (text) => true,
+          onChanged: (value) {},
+        )
+            .paddingOnly(left: Get.width*0.06, right: Get.width*0.06,bottom: Get.height*0.02),
         Text(
           "00:00",
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -168,8 +177,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             onPressed: () => controller.passwordToggle(),
             icon: Image.asset(
               controller.isVisiblePassword.value
-                  ? 'assets/images/ic_eye.png'
-                  : 'assets/images/ic_eye_off.png',
+                  ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
               color: AppColors.textColor,
               height: 24,
               width: 24,

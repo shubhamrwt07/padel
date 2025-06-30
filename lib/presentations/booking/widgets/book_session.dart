@@ -59,7 +59,9 @@ class BookSession extends GetView<BookingController> {
                   ),
                 ],
               ),
-              onTap: (){}),
+              onTap: (){
+              Get.back();
+              }),
         ),
       ),
 

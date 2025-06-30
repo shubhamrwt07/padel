@@ -17,7 +17,7 @@ class EditProfileUi extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       bottomNavigationBar: Container(
-        height: Get.height * .09,
+        height: Get.height * .1,
         padding: const EdgeInsets.only(top: 10),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -58,7 +58,7 @@ class EditProfileUi extends StatelessWidget {
                 },
                 text: "Update",
               )
-          ),
+          ).paddingOnly(bottom: Get.height*0.03),
         ),
       ),
       appBar: primaryAppBar(

@@ -45,7 +45,10 @@ class OpenMatches extends GetView<BookingController> {
                   color: AppColors.whiteColor,
                 ),
               ).paddingOnly(right: Get.width*0.14),
-              onTap: (){}),
+              onTap: (){
+                Get.back();
+
+              }),
         ),
       ),
       body: SingleChildScrollView(

@@ -6,11 +6,8 @@ import '../../configs/components/app_bar.dart';
 import '../../configs/components/primary_button.dart';
 import 'payment_filter_controller.dart';
 
-class PaymentFilterUi extends StatelessWidget {
-  PaymentFilterUi({super.key});
-
-  final PaymentFilterController controller =
-  Get.put(PaymentFilterController());
+class PaymentFilterUi extends GetView<PaymentFilterController> {
+  const PaymentFilterUi({super.key});
 
   @override
   Widget build(BuildContext context) {

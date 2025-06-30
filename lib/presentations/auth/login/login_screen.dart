@@ -5,6 +5,7 @@ import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/primary_container.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/auth/login/login_controller.dart';
 
 class LoginScreen extends GetView<LoginController> {
@@ -63,7 +64,13 @@ class LoginScreen extends GetView<LoginController> {
             hintText: "Password",
             obscureText: controller.isVisible.value,
             maxLine: 1,
-            suffixIcon: IconButton(onPressed: ()=>controller.eyeToggle(), icon: Icon(controller.isVisible.value?Icons.visibility_off:Icons.visibility,color: AppColors.textColor,)),
+            suffixIcon: IconButton(onPressed: ()=>controller.eyeToggle(), icon: Image.asset(
+              controller.isVisible.value
+                  ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
+              color: AppColors.textColor,
+              height: 24,
+              width: 24,
+            )),
           ).paddingOnly(bottom: Get.height * 0.02),
         ),
         Align(

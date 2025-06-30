@@ -91,7 +91,7 @@ class Routes {
       name: RoutesName.editProfile,
       page: () => EditProfileUi(),
       binding: EditProfileBinding(),
-      transition: Transition.fadeIn,
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
 

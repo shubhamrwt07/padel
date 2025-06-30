@@ -35,7 +35,7 @@ class CartScreen extends StatelessWidget {
   }
   Widget cartList(){
     return SizedBox(
-      height: Get.height * 0.6,
+      height:buttonType=="true"? Get.height * 0.68:Get.height * 0.6,
       child: Scrollbar(
         thickness: 5,
         radius: Radius.circular(8),

@@ -8,6 +8,8 @@ import 'package:padel_mobile/configs/components/primary_text_feild.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_controller.dart';
 
+import '../../../generated/assets.dart';
+
 class SignUpScreen extends GetView<SignUpController> {
   const SignUpScreen({super.key});
 
@@ -66,8 +68,7 @@ class SignUpScreen extends GetView<SignUpController> {
               onPressed: () => controller.passwordToggle(),
               icon: Image.asset(
                 controller.isVisiblePassword.value
-                    ? 'assets/images/ic_eye.png'
-                    : 'assets/images/ic_eye_off.png',
+                    ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
                 color: AppColors.textColor,
                 height: 24,
                 width: 24,
@@ -82,8 +83,7 @@ class SignUpScreen extends GetView<SignUpController> {
               onPressed: () => controller.confirmPasswordToggle(),
               icon: Image.asset(
                 controller.isVisibleConfirmPassword.value
-                    ? 'assets/images/ic_eye.png'
-                    : 'assets/images/ic_eye_off.png',
+                    ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
                 color: AppColors.textColor,
                 height: 24,
                 width: 24,
