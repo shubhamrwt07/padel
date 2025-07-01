@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -5,6 +7,7 @@ import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 import '../../configs/components/primary_button.dart';
 import '../../configs/components/primary_text_feild.dart';
+import '../../generated/assets.dart';
 import 'edit_profile_controller.dart';
 
 class EditProfileUi extends StatelessWidget {
@@ -79,37 +82,53 @@ class EditProfileUi extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    // Aligns children to bottom-right by default
-                    children: [
-                      Container(
-                        height: Get.height * .11,
-                        width: Get.width * .24,
-                        decoration: BoxDecoration(
-                          color: AppColors.tabSelectedColor,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Icon(Icons.person, size: 90,color: AppColors.labelBlackColor,),
-                      ),
-                      Positioned(
-                        bottom: 0, // Adjust spacing from bottom
-                        right: 8, // Adjust spacing from right
-                        child: Container(
-                          padding: EdgeInsets.all(6),
+                  child: Obx(() {
+                    final imagePath = controller.profileImage.value?.path;
+                    return Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          height: Get.height * .11,
+                          width: Get.width * .24,
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            shape: BoxShape.circle,
+                            color: AppColors.tabSelectedColor,
+                            borderRadius: BorderRadius.circular(50),
                           ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 10,
-                            color: Colors.white,
+                          child: imagePath == null
+                              ? Icon(Icons.person, size: 90, color: AppColors.labelBlackColor)
+                              : ClipOval(
+                            child: Image.file(
+                              File(imagePath),
+                              fit: BoxFit.cover,
+                              width: Get.width * .24,
+                              height: Get.height * .11,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        Positioned(
+                          bottom: 0,
+                          right: 8,
+                          child: Container(
+
+                            padding: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.pickImageFromCamera(); // Triggers camera
+                              },
+                              child: Image.asset(
+                                Assets.imagesIcCamara,
+                                scale: 5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  })
                 ),
                 Text(
                   "Full Name",

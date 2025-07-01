@@ -58,10 +58,9 @@ class ProfileUi extends GetView<ProfileController> {
                         color: AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.camera_alt,
-                        size: 10,
-                        color: Colors.white,
+                      child:  Image.asset(
+                        Assets.imagesIcCamara,
+                        scale: 5,
                       ),
                     ),
                   ),

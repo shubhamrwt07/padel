@@ -65,7 +65,7 @@ class CartScreen extends StatelessWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "27June, 2025 ",
+                            text: "27June' 2025",
                             style: Theme.of(context).textTheme.bodyLarge!
                                 .copyWith(fontWeight: FontWeight.w500),
                           ),
@@ -83,7 +83,12 @@ class CartScreen extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          "₹ 1000",
+                          "₹",
+                          style: Theme.of(context).textTheme.labelMedium!
+                              .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
+                        ),
+                        Text(
+                          "1000",
                           style: Theme.of(context).textTheme.labelMedium!
                               .copyWith(fontWeight: FontWeight.w500),
                         ),
@@ -106,7 +111,7 @@ class CartScreen extends StatelessWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "27June, 2025 ",
+                            text: "27June' 2025 ",
                             style: Theme.of(context).textTheme.bodyLarge!
                                 .copyWith(fontWeight: FontWeight.w500),
                           ),
@@ -124,7 +129,12 @@ class CartScreen extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          "₹ 1000",
+                          "₹",
+                          style: Theme.of(context).textTheme.labelMedium!
+                              .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
+                        ),
+                        Text(
+                          "1000",
                           style: Theme.of(context).textTheme.labelMedium!
                               .copyWith(fontWeight: FontWeight.w500),
                         ),
@@ -195,7 +205,7 @@ class CartScreen extends StatelessWidget {
                   Text(
                     "₹",
                     style: Theme.of(context).textTheme.headlineMedium!
-                        .copyWith(fontWeight: FontWeight.w500),
+                        .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
                   ),
 
                   Text(
@@ -213,21 +223,28 @@ class CartScreen extends StatelessWidget {
   }
   Widget button(BuildContext context){
     return CustomButton(
-        width: Get.width*0.85,
+        width: Get.width*0.9,
         onTap: (){
           Get.toNamed(RoutesName.paymentMethod);
         },
         child: Row(
           children: [
             Text(
-              "₹ 7000",
+              "₹",
+              style: Theme.of(context).textTheme.titleMedium!
+                  .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto",
+                color: AppColors.whiteColor,
+              ),
+            ).paddingOnly(left: 30,right: 5),
+            Text(
+              "7000",
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 color: AppColors.whiteColor,
+
                 fontWeight: FontWeight.w500,
               ),
             ).paddingOnly(
               right: Get.width * 0.2,
-              left: Get.width * 0.05,
             ),
             Text(
               "Payment",
