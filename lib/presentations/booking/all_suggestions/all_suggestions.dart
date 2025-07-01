@@ -10,7 +10,7 @@ class AllSuggestions extends StatelessWidget {
     return Scaffold(
       appBar: primaryAppBar(
         centerTitle: true,
-        leading: const BackButton(),
+
         title: const Text("All Suggestions"),
         context: context,
       ),
@@ -38,6 +38,8 @@ class AllSuggestions extends StatelessWidget {
               "+ Start a match",
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                 color: AppColors.whiteColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w600
               ),
             ).paddingOnly(right: Get.width * 0.14),
             onTap: () {
@@ -69,7 +71,7 @@ class AllSuggestions extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
+            ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
             ListView.builder(
               physics: const ClampingScrollPhysics(),
               itemCount: 4,
@@ -98,7 +100,7 @@ class AllSuggestions extends StatelessWidget {
             children: controller.slots.map((slot) {
               final isSelected = controller.selectedSlot.value == slot;
               return Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(.0),
                 child: GestureDetector(
                   onTap: () => controller.selectSlot(slot),
                   child: Container(
@@ -120,14 +122,14 @@ class AllSuggestions extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
+                  ).paddingOnly(left: 10),
                 ),
               );
             }).toList(),
-          ),
+          ).paddingOnly(top: 10),
         ),
       ],
-    );
+    ).paddingOnly(left: Get.width*.03,right: Get.width*.03);
   }
 
   Widget _buildMatchCard(BuildContext context) {
@@ -136,7 +138,7 @@ class AllSuggestions extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(10),
           color: AppColors.playerCardBackgroundColor,
           border: Border.all(color: AppColors.greyColor),
         ),
@@ -205,22 +207,41 @@ class AllSuggestions extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Image.asset(
+                Assets.imagesIcLocation,
+                scale: 3,
+              ),
               SizedBox(
                 width: Get.width * .61,
-                child: Text(
-                  'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
+
+                child:
+
+                Text(
+                  'Chandigarh 160001',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ),
               Container(
                 alignment: Alignment.center,
                 width: Get.width * .16,
-                child: Text(
-                  '₹2000',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: AppColors.primaryColor,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+                child: Row(
+                  children: [
+                    Text(
+                      '₹',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: AppColors.primaryColor,
+                        fontFamily: "Roboto"
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '2000',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: AppColors.primaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ).paddingOnly(right: Get.width * .04),
             ],
@@ -239,10 +260,10 @@ class AllSuggestions extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.whiteColor,
-            border: Border.all(color: AppColors.primaryColor),
+            border: Border.all(color:imageUrl.isEmpty? AppColors.primaryColor: Colors.transparent),
           ),
           child: imageUrl.isEmpty
-              ? const Icon(CupertinoIcons.add, color: AppColors.primaryColor)
+              ? const Icon(CupertinoIcons.add,size: 20, color: AppColors.primaryColor)
               : ClipOval(
             child: Image.asset(
               imageUrl,

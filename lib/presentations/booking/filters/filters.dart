@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class Filters extends StatelessWidget {
@@ -12,8 +13,8 @@ class Filters extends StatelessWidget {
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
           boxShadow: [
             BoxShadow(
@@ -66,64 +67,90 @@ class Filters extends StatelessWidget {
               children: [
                 Text("AM/PM", style: Get.textTheme.headlineSmall),
                 Transform.scale(
-                  scale: 0.65, // reduce switch size
-                  child: Obx(
-                    () => Switch(
-                      value: controller.isAmPm.value,
-                      onChanged: (v) {
-                        controller.isAmPm.value = v;
-                      },
+                  scale: 0.65,
+                  child: Theme(
+                    data: ThemeData(
+                      // This affects only this switch
+                      unselectedWidgetColor: Colors.red, // Track color when off
+                    ),
+                    child:Obx(
+                          () => CupertinoSwitch(
+                        value: controller.viewUnavailableSlots.value,
+                        activeTrackColor: Theme.of(context).primaryColor,
+                        inactiveTrackColor: Colors.grey.shade300,
+                        thumbColor: Colors.white,
+                        onChanged: (value) {
+                          controller.viewUnavailableSlots.value = value;
+                        },
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
             Text("Location", style: Get.textTheme.headlineMedium).paddingOnly(bottom: Get.height*0.01),
-            Obx(
-              () => Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlueColor.withAlpha(50),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.blackColor.withAlpha(20))
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      filled: false,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 15), // Optional: adds padding
-                    ),
-                    dropdownColor: AppColors.whiteColor,
-                    value: controller.selectedLocation.value.isEmpty
-                        ? null
-                        : controller.selectedLocation.value,
-                    hint: Text(
-                      "Enter Location",
-                      style: Get.textTheme.headlineSmall,
-                    ),
-                    items: controller.locations
-                        .map(
-                          (String location) => DropdownMenuItem<String>(
-                            value: location,
-                            child: Text(
-                              location,
-                              style: Get.textTheme.headlineSmall,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (String? newValue) {
-                      controller.selectedLocation.value = newValue ?? '';
-                    },
+          Obx(
+                () => Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: AppColors.lightBlueColor.withAlpha(40),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.blackColor.withAlpha(20)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.all(5), // Use our own alignment
+                    isDense: true, // Helps reduce extra padding
                   ),
+                  dropdownColor: AppColors.whiteColor,
+                  value: controller.selectedLocation.value.isEmpty
+                      ? null
+                      : controller.selectedLocation.value,
+                  hint: Row(
+                    children: [
+                      Text(
+                        "Enter Location",
+                        style: Get.textTheme.headlineSmall,
+                      ),
+                    ],
+                  ),
+                  items: controller.locations
+                      .map(
+                        (String location) => DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(
+                        location,
+                        style: Get.textTheme.headlineSmall,
+                      ),
+                    ),
+                  )
+                      .toList(),
+                  onChanged: (String? newValue) {
+                    controller.selectedLocation.value = newValue ?? '';
+                  },
+                  // Align the selected text to the left (center vertically by default)
+                  selectedItemBuilder: (context) => controller.locations.map((location) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        location,
+                        style: Get.textTheme.headlineSmall,
+                        textAlign: TextAlign.left,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+          ),
+            const SizedBox(height: 10),
             Text("Date", style: Get.textTheme.headlineMedium),
             const SizedBox(height: 8),
 
@@ -163,7 +190,7 @@ class Filters extends StatelessWidget {
                         )[0];
                       }
                     },
-                    icon: Icons.date_range,
+                    icon: Icons.calendar_month_outlined,
                   ),
                   commonPicker(
                     hintText: "End Date",
@@ -196,7 +223,7 @@ class Filters extends StatelessWidget {
                         )[0];
                       }
                     },
-                    icon: Icons.date_range,
+                    icon: Icons.calendar_month_outlined,
                   ),
                 ],
               ),
@@ -238,7 +265,7 @@ class Filters extends StatelessWidget {
                         controller.startTime.value = picked.format(context);
                       }
                     },
-                    icon: Icons.watch_later_outlined,
+                    icon: CupertinoIcons.timer,
                   ),
                   commonPicker(
                     hintText: "End Time",
@@ -266,7 +293,7 @@ class Filters extends StatelessWidget {
                         controller.endTime.value = picked.format(context);
                       }
                     },
-                    icon: Icons.watch_later_outlined,
+                    icon: CupertinoIcons.timer,
                   ),
                 ],
               ),
@@ -294,7 +321,7 @@ class Filters extends StatelessWidget {
       child: Container(
         alignment: Alignment.center,
         height: 40,
-        width: Get.width * .4,
+        width: Get.width * .44,
         decoration: BoxDecoration(
           color: AppColors.lightBlueColor.withAlpha(50),
           border: Border.all(color: AppColors.blackColor.withAlpha(20)), // grey border
@@ -454,8 +481,8 @@ class Filters extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("₹${controller.selectedRange.value.start.round()}"),
-                  Text("₹${controller.selectedRange.value.end.round()}"),
+                  Text("₹${controller.selectedRange.value.start.round()}",style: TextStyle(fontFamily: "Roboto"),),
+                  Text("₹${controller.selectedRange.value.end.round()}",style: TextStyle(fontFamily: "Roboto")),
                 ],
               ),
             ],
