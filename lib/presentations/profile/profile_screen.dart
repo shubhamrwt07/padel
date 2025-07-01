@@ -99,7 +99,7 @@ class ProfileUi extends GetView<ProfileController> {
                             const Color(0xFF3DBE64),
                             const Color(0xFF1F41BB),
                           ],
-                          stops: [0.1, 0.9],
+                          stops: [0.1, 0.4],
                         ),
                       ),
                       child: Text(

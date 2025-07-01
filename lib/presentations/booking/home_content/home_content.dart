@@ -87,34 +87,47 @@ class HomeContent extends StatelessWidget {
               child: Container(
                 color: Colors.transparent,
                 height: Get.height * 0.1,
-                width: Get.width * 0.74,
+                width: Get.width * 0.68,
                 child: ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   itemCount: controller.homeOptionsList.length,
                   itemBuilder: (context, index) {
-                    return Obx(() =>
-                        GestureDetector(
-                          onTap: () {
-                            if (index != 1) {
-                              controller.selectedIndex.value = index;
+                    return Obx(() {
+                      final item = controller.homeOptionsList[index];
+                      final isSelected = controller.selectedIndex.value == index;
 
-                              if (index != 2) {
-                                controller.isShowAllReviews.value = false;
-                              }
-                              if (index != 3) {
-                                controller.isShowAllPhotos.value = false;
-                              }
-                            }
-                          },
-                          child: homeOptionItem(
-                            context,
-                            icon: controller.homeOptionsList[index]['icon'],
-                            label: controller.homeOptionsList[index]['label'],
-                            isSelected: controller.selectedIndex.value == index,
-                          ),
-                        ));
+                      final Widget iconWidget = item['isSvg']
+                          ? SvgPicture.asset(
+                        item['image'],
+                        height: 24,
+                        width: 24,
+                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
+                      )
+                          : Icon(
+                        item['icon'],
+                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
+                      );
+
+                      return GestureDetector(
+                        onTap: () {
+                          if (index != 1) {
+                            controller.selectedIndex.value = index;
+                            if (index != 2) controller.isShowAllReviews.value = false;
+                            if (index != 3) controller.isShowAllPhotos.value = false;
+                          }
+                        },
+                        child: homeOptionItem(
+                          context,
+                          iconWidget: iconWidget,
+                          label: item['label'],
+                          isSelected: isSelected,
+                        ),
+                      );
+                    });
                   },
                 ),
+
               ),
             ),
             Obx(() =>
@@ -222,7 +235,7 @@ class HomeContent extends StatelessWidget {
     return Row(
       children: [
         Icon(Icons.ac_unit,size: 10,color: AppColors.primaryColor,).paddingOnly(right: 5),
-        Text("$index. Free parking", style: Theme
+        Text("${index+1}. Free parking", style: Theme
             .of(context)
             .textTheme
             .displayMedium!
@@ -231,37 +244,37 @@ class HomeContent extends StatelessWidget {
     ).paddingOnly(right: 10);
   }
 
-  Widget homeOptionItem(BuildContext context,
-      {required IconData icon, required String label, required bool isSelected}) {
-    return Column(
-      children: [
-        Container(
-          height: 45,
-          width: 45,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isSelected ? AppColors.labelBlackColor : AppColors
-                .whiteColor,
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
-          ),
-          child: Icon(icon, color: isSelected ? Colors.white : Colors.black),
-        ).paddingOnly(bottom: 5),
-        Text(
-          label,
-          style: Theme
-              .of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(
-            fontWeight: FontWeight.w500,
-            color: isSelected ? AppColors.labelBlackColor : Colors.black,
-          ),
-        ),
-      ],
-    ).paddingOnly(right: Get.width * 0.1);
-  }
+   Widget homeOptionItem(
+       BuildContext context, {
+         required Widget iconWidget,
+         required String label,
+         required bool isSelected,
+       }) {
+     return Column(
+       children: [
+         Container(
+           height: 45,
+           width: 45,
+           decoration: BoxDecoration(
+             shape: BoxShape.circle,
+             color: isSelected ? AppColors.labelBlackColor : AppColors.whiteColor,
+             border: Border.all(color: Colors.grey.withOpacity(0.2)),
+           ),
+           child: Center(child: iconWidget),
+         ).paddingOnly(bottom: 5),
+         Text(
+           label,
+           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+             fontWeight: FontWeight.w500,
+             color: isSelected ? AppColors.labelBlackColor : Colors.black,
+           ),
+         ),
+       ],
+     ).paddingOnly(right: Get.width * 0.07);
+   }
 
-  Widget getSelectedView(int index) {
+
+   Widget getSelectedView(int index) {
     final height = Get.height * 0.33;
     switch (index) {
       case 0:
