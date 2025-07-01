@@ -56,15 +56,16 @@ class DetailsPage extends GetView<DetailsPageController> {
       appBar: primaryAppBar(
         title: Text("Details"),
         context: context,
+        centerTitle: true,
         action: [
           appBarAction(
             Colors.white,
-            Icon(Icons.share, color: Colors.black, size: 18),
+            Icon(Icons.share_outlined, color: Colors.black, size: 18),
           ),
           SizedBox(width: Get.width * .04),
           appBarAction(
             AppColors.primaryColor,
-            Icon(Icons.message, color: Colors.white, size: 18),
+            Icon(Icons.message_outlined, color: Colors.white, size: 18),
           ),
         ],
       ),

@@ -27,6 +27,7 @@ class Assets {
   static const String imagesIcRemove = 'assets/images/ic_remove.png';
   static const String imagesIcSearch = 'assets/images/ic_search.png';
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
+  static const String imagesIcTime = 'assets/images/ic_time.png';
   static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
