@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/primary_container.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class SplashScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: Center(
             child:
-            Text("Splash",style: TextStyle(fontSize: 22),)),
+            Text(AppStrings.appName,style: TextStyle(fontSize: 22),)),
       ),
     );
   }

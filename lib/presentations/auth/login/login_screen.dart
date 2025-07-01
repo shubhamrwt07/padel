@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/primary_container.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
@@ -40,11 +41,11 @@ class LoginScreen extends GetView<LoginController> {
     return Column(
       children: [
         Text(
-          "Login here",
+          AppStrings.login,
           style: Theme.of(context).textTheme.titleLarge,
         ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.15),
         Text(
-          "Welcome back you’ve \nbeen missed!",
+          AppStrings.welcome,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.06),
@@ -56,12 +57,12 @@ class LoginScreen extends GetView<LoginController> {
       children: [
         PrimaryTextField(
           // scrollPadding: EdgeInsets.only(bottom: Get.height * 0.3),
-          hintText: "Email",
+          hintText: AppStrings.email,
         ).paddingOnly(bottom: Get.height * 0.03),
         Obx(
               ()=> PrimaryTextField(
             // scrollPadding: EdgeInsets.only(bottom: Get.height * 0.25),
-            hintText: "Password",
+            hintText: AppStrings.password,
             obscureText: controller.isVisible.value,
             maxLine: 1,
             suffixIcon: IconButton(onPressed: ()=>controller.eyeToggle(), icon: Image.asset(
@@ -83,7 +84,7 @@ class LoginScreen extends GetView<LoginController> {
             child: Container(
               color: Colors.transparent,
               child: Text(
-                "Forgot your password?",
+                AppStrings.forgotPassword,
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.primaryColor,
                 ),
@@ -102,12 +103,12 @@ class LoginScreen extends GetView<LoginController> {
           onTap: ()=>Get.toNamed(RoutesName.signUp),
           child: Container(
               color: Colors.transparent,
-              child: Text("Create new account",style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor),).paddingOnly(bottom: Get.height*0.025)),
+              child: Text(AppStrings.createNewAccount,style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor),).paddingOnly(bottom: Get.height*0.025)),
         ),
         PrimaryButton(onTap: (){
           FocusManager.instance.primaryFocus!.unfocus();
           Get.toNamed(RoutesName.bottomNav);
-        }, text: "Sign in",),
+        }, text: AppStrings.signIn,),
         SizedBox(height: Get.height*0.05,)
       ],
     );
