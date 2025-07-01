@@ -1,16 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/app_bar.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/configs/components/primary_container.dart';
-import 'package:padel_mobile/configs/components/primary_text_feild.dart';
-import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_controller.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
-
-import 'forgot_password_controller.dart';
+import 'package:padel_mobile/presentations/auth/forgot_password/widgets/forgot_password_exports.dart';
 
 class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   const ForgotPasswordScreen({super.key});
@@ -62,19 +50,19 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       children: [
         Center(
           child: Text(
-            "Forgot Password ?",
+            AppStrings.forgotPassword,
             style: Theme.of(context).textTheme.titleLarge,
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.15),
         ),
         Text(
-          "Let’ help you get back in. enter the email linked to your account.",
+          AppStrings.letHelpYouBackIn,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.05),
         PrimaryTextField(
-          hintText: "Email",
+          hintText: AppStrings.email,
         ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.36,),
-        PrimaryButton(onTap: ()=>controller.goToOtp(), text: "Send OTP").paddingOnly(bottom: Get.height*0.03,top: Get.height*0.06),
+        PrimaryButton(onTap: ()=>controller.goToOtp(), text: AppStrings.sendOtp).paddingOnly(bottom: Get.height*0.03,top: Get.height*0.06),
       ],
     );
   }
@@ -83,12 +71,12 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       children: [
         Center(
           child: Text(
-            "Enter OTP",
+            AppStrings.enterOtp,
             style: Theme.of(context).textTheme.titleLarge,
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.15),
         ),
         Text(
-          "A security code has been sent to your email. Please enter it below",
+          AppStrings.aSecurityCodeHasBeenSent,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.057),
@@ -142,16 +130,16 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             text: TextSpan(
                 children: [
                   TextSpan(
-                      text: "Don’t receive code ? ",
+                      text: AppStrings.doNotReceiveCode,
                       style:Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
                   ),
                   TextSpan(
-                      text: "Re-send",
+                      text: AppStrings.resend,
                       style:Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor)
                   ),
                 ]
             )),
-        PrimaryButton(onTap: ()=>controller.goToResetPassword(), text: "Verify").paddingOnly(bottom: Get.height*0.04,top: Get.height*0.03),
+        PrimaryButton(onTap: ()=>controller.goToResetPassword(), text: AppStrings.verify).paddingOnly(bottom: Get.height*0.04,top: Get.height*0.03),
       ],
     );
   }
@@ -160,17 +148,17 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       children: [
         Center(
           child: Text(
-            "Reset Password",
+            AppStrings.resetPassword,
             style: Theme.of(context).textTheme.titleLarge,
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.15),
         ),
         Text(
-          "Enter and confirm a new password to finish resetting.",
+          AppStrings.enterAndConfirmNewPass,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.05),
         PrimaryTextField(
-          hintText: "Password",
+          hintText: AppStrings.password,
           obscureText: controller.isVisiblePassword.value,
           maxLine: 1,
           suffixIcon: IconButton(
@@ -185,7 +173,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           ),
         ).paddingOnly(bottom: Get.height * 0.03),
         PrimaryTextField(
-          hintText: "Confirm Password",
+          hintText: AppStrings.confirmPassword,
           obscureText: controller.isVisibleConfirmPassword.value,
           maxLine: 1,
           suffixIcon: IconButton(
@@ -198,7 +186,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
               width: 24,
             ),
           ),          ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
-        PrimaryButton(onTap: ()=>controller.goToDone(), text: "Change Password").paddingOnly(bottom: Get.height*0.03),
+        PrimaryButton(onTap: ()=>controller.goToDone(), text: AppStrings.changePassword).paddingOnly(bottom: Get.height*0.03),
 
       ],
     );
@@ -208,16 +196,16 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       children: [
         Center(
           child: Text(
-            "Welcome Back !",
+            AppStrings.welcomeBack,
             style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 30)
           ).paddingOnly(bottom: Get.height * 0.03,top: Get.height*0.28),
         ),
         Text(
-          "Your Password has been successfully\nupdated",
+          AppStrings.passwordSuccessfullyUpdate,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.395),
-        PrimaryButton(onTap: ()=>Get.back(), text: "Done").paddingOnly(bottom: Get.height*0.03),
+        PrimaryButton(onTap: ()=>Get.back(), text: AppStrings.done).paddingOnly(bottom: Get.height*0.03),
 
       ],
     );

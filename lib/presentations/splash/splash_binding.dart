@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/splash/splash_controller.dart';
+import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
 
 class SplashBinding implements Bindings{
   @override

@@ -1,17 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 
-import 'add_review_bottomsheet.dart';
-
-class HomeContent extends GetView<BookingController> {
-  const HomeContent({super.key});
-
+class HomeContent extends StatelessWidget {
+   HomeContent({super.key});
+ final HomeContentController controller = Get.put(HomeContentController());
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -86,7 +78,7 @@ class HomeContent extends GetView<BookingController> {
                 scrollDirection: Axis.horizontal,
                 itemCount: 3,
                 itemBuilder: (BuildContext context, index) {
-                  return facilities(context);
+                  return facilities(context,index);
                 },
               ),
             ).paddingOnly(bottom: Get.height * 0.02),
@@ -226,20 +218,16 @@ class HomeContent extends GetView<BookingController> {
     );
   }
 
-  Widget facilities(BuildContext context) {
-    return Container(
-      height: Get.height * 0.025,
-      alignment: Alignment.center,
-      padding: EdgeInsets.only(left: 10, right: 10),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: AppColors.lightBlueColor
-      ),
-      child: Text("Free parking", style: Theme
-          .of(context)
-          .textTheme
-          .bodySmall!
-          .copyWith(color: AppColors.primaryColor),),
+  Widget facilities(BuildContext context,index) {
+    return Row(
+      children: [
+        Icon(Icons.ac_unit,size: 10,color: AppColors.primaryColor,).paddingOnly(right: 5),
+        Text("$index. Free parking", style: Theme
+            .of(context)
+            .textTheme
+            .displayMedium!
+            .copyWith(color: AppColors.primaryColor,fontWeight: FontWeight.w500),),
+      ],
     ).paddingOnly(right: 10);
   }
 

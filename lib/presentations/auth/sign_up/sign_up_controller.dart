@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 
 class SignUpController extends GetxController{
   RxString? selectedLocation = RxString('');

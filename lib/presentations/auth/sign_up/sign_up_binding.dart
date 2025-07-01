@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/auth/sign_up/sign_up_controller.dart';
+import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 
 class SignUpBinding implements Bindings{
   @override

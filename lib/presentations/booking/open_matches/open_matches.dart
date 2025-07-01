@@ -1,19 +1,11 @@
-import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/custom_button.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/presentations/booking/booking_controller.dart';
-import 'package:padel_mobile/presentations/booking/widgets/all_suggestions.dart';
-import 'package:padel_mobile/presentations/cart/cart_screen.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
-import '../../../generated/assets.dart';
+class OpenMatches extends StatelessWidget {
+  OpenMatches({super.key});
 
-class BookSession extends GetView<BookingController> {
-  const BookSession({super.key});
+  final OpenMatchesController controller = Get.put(OpenMatchesController());
 
   @override
   Widget build(BuildContext context) {
@@ -38,34 +30,22 @@ class BookSession extends GetView<BookingController> {
         child: Align(
           alignment: Alignment.center,
           child: CustomButton(
-            width: Get.width*0.9,
-              child: Row(
-                children: [
-                  Text(
-                    "₹ 2000",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ).paddingOnly(
-                    right: Get.width * 0.2,
-                    left: Get.width * 0.05,
-                  ),
-                  Text(
-                    "Add to cart",
-                    style: Theme.of(context).textTheme.headlineMedium!
-                        .copyWith(
-                      color: AppColors.whiteColor,
-                    ),
-                  ),
-                ],
-              ),
-              onTap: (){
-              Get.to(()=>CartScreen(buttonType: "true"));
-              }),
+            width: Get.width * 0.9,
+            child: Text(
+              "+ Book the first spot",
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
+            ).paddingOnly(right: Get.width * 0.14),
+            onTap: () {
+              Get.to(
+                () => AllSuggestions(),
+                transition: Transition.rightToLeft,
+              );
+            },
+          ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -77,21 +57,11 @@ class BookSession extends GetView<BookingController> {
                 offset: Offset(0, -5),
                 child: _buildSlotHeader(context),
               ),
-              SizedBox(height: Get.height * .0009),
+
               _buildTimeSlots(),
               SizedBox(height: Get.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Available Court",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                ],
-              ),
+              _buildMatchHeader(context),
               SizedBox(height: Get.height * 0.02),
-              _buildMatchCard(context),
-              _buildMatchCard(context),
               _buildMatchCard(context),
             ],
           ),
@@ -207,10 +177,10 @@ class BookSession extends GetView<BookingController> {
             Transform.scale(
               scale: 0.7,
               child: Obx(
-                    () => CupertinoSwitch(
+                () => CupertinoSwitch(
                   value: controller.viewUnavailableSlots.value,
-                      activeTrackColor: Theme.of(context).primaryColor,
-                      inactiveTrackColor: Colors.grey.shade300,
+                  activeTrackColor: Theme.of(context).primaryColor,
+                  inactiveTrackColor: Colors.grey.shade300,
                   thumbColor: Colors.white,
                   onChanged: (value) {
                     controller.viewUnavailableSlots.value = value;
@@ -225,9 +195,9 @@ class BookSession extends GetView<BookingController> {
   }
 
   Widget _buildTimeSlots() {
-    return GetBuilder<BookingController>(
+    return GetBuilder<OpenMatchesController>(
       builder: (controller) {
-          double spacing = Get.width*.02;
+        double spacing = Get.width * .02;
         final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
         return Wrap(
@@ -276,20 +246,148 @@ class BookSession extends GetView<BookingController> {
     );
   }
 
+  Widget _buildMatchHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Book a place in a match",
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        GestureDetector(
+          onTap: () => Get.to(
+            () => AllSuggestions(),
+            transition: Transition.rightToLeft,
+          ),
+          child: Container(
+            height: 20,
+            width: Get.width * 0.15,
+            alignment: Alignment.centerRight,
+            color: Colors.transparent,
+            child: Text(
+              "View all",
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: AppColors.primaryColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppColors.greyColor, width: 1.5),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppColors.playerCardBackgroundColor,
+        border: Border.all(color: AppColors.greyColor),
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "21 June | 9:00am",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              Text(
+                "The first player sets the match type",
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ).paddingOnly(top: 15, bottom: 10, right: 15, left: 15),
+          const SizedBox(height: 12),
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 0),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildPlayerSlot(
+                        image: Assets.imagesImgCustomerPicBooking,
+                      ).paddingOnly(bottom: 6),
+                      _buildPlayerSlot(
+                        image: Assets.imagesImgCustomerPicBooking,
+                      ).paddingOnly(bottom: 6),
+                      Container(width: 1, color: AppColors.greyColor),
+                      _buildPlayerSlot(
+                        image: Assets.imagesImgCustomerPicBooking,
+                      ).paddingOnly(bottom: 6),
+                      _buildPlayerSlot(
+                        image: Assets.imagesImgCustomerPicBooking,
+                      ).paddingOnly(bottom: 6),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
+
+          const SizedBox(height: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'The Good Club',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: Get.width * .64,
+                    child: Text(
+                      'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+
+                    width: Get.width * .16,
+                    child: Text(
+                      '₹2000',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: AppColors.primaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ).paddingOnly(right: Get.width * .04),
+                ],
+              ),
+            ],
+          ).paddingOnly(top: 5, bottom: 15, left: 15),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerSlot({required String image}) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 27,
+          backgroundColor: AppColors.greyColor,
+          backgroundImage: AssetImage(image),
         ),
-      ),
-      child: ExpansionTile(
-        title: Text("Court 1", style: Get.textTheme.headlineSmall),
-        leading:   CircleAvatar(radius: 23,backgroundColor: AppColors.greyColor,backgroundImage:AssetImage(Assets.imagesImgDummy2,),),
-        subtitle: Text("Outdoor | wall | Double"),
-        children: [],
-      ),
+        const SizedBox(height: 7),
+        Text(
+          "Available",
+          style: Get.textTheme.bodySmall!.copyWith(
+            color: AppColors.primaryColor,
+          ),
+        ),
+      ],
     );
   }
 }

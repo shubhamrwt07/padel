@@ -60,6 +60,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               width: Get.width * 0.9,
               onTap: () {
                 Get.to(() => BookingSuccessfulScreen(), transition: Transition.rightToLeft);
+
               },
               child: Row(
                 children: [

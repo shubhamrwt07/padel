@@ -1,0 +1,11 @@
+export 'package:flutter/material.dart';
+export 'package:get/get.dart';
+export 'package:padel_mobile/configs/app_colors.dart';
+export 'package:padel_mobile/configs/app_strings.dart';
+export 'package:padel_mobile/configs/components/app_bar.dart';
+export 'package:padel_mobile/configs/components/primary_button.dart';
+export 'package:padel_mobile/configs/components/primary_container.dart';
+export 'package:padel_mobile/configs/components/primary_text_feild.dart';
+export 'package:padel_mobile/configs/routes/routes_name.dart';
+export 'package:padel_mobile/presentations/auth/sign_up/sign_up_controller.dart';
+export 'package:padel_mobile/generated/assets.dart';

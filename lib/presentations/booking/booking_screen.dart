@@ -1,13 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/booking/booking_controller.dart';
-import 'package:padel_mobile/presentations/booking/widgets/book_session.dart';
-import 'package:padel_mobile/presentations/booking/widgets/home_content.dart';
-import 'package:padel_mobile/presentations/booking/widgets/open_matches.dart';
-import 'package:padel_mobile/presentations/booking/widgets/tab_bar.dart';
-import '../../../configs/app_colors.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
@@ -122,11 +113,11 @@ class BookingScreen extends GetView<BookingController> {
                     Expanded(
                       child: TabBarView(
                         controller: controller.tabController,
-                        children: const [
-                          HomeContent(),
-                          BookSession(),
-                          OpenMatches(),
-                          SizedBox(
+                        children: [
+                           HomeContent(),
+                           BookSession(),
+                           OpenMatches(),
+                           const SizedBox(
                             height: double.infinity,
                             width: double.infinity,
                             child: Center(child: Text("Coming Soon...")),

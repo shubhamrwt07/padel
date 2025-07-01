@@ -1,15 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/app_bar.dart';
-import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
-import '../../../configs/components/custom_button.dart';
-import '../../../configs/components/primary_button.dart';
-
-
-class Filters extends GetView<BookingController> {
-  const Filters({super.key});
+class Filters extends StatelessWidget {
+   Filters({super.key});
+   final FiltersController controller = Get.put(FiltersController());
 
   @override
   Widget build(BuildContext context) {
