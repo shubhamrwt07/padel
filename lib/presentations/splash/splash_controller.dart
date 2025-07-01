@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
 
 class SplashController extends GetxController{
   @override

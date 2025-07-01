@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/auth/login/login_controller.dart';
+import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
 
 class LoginBinding implements Bindings{
   @override

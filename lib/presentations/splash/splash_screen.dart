@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:padel_mobile/configs/app_strings.dart';
-import 'package:padel_mobile/configs/components/primary_container.dart';
+import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

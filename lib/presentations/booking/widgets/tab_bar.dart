@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+
 PreferredSizeWidget myTabBar(TabController tabController, BuildContext context,) {
   return TabBar(
     controller: tabController,

@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class AddReviewBottomSheet extends StatelessWidget {
   const AddReviewBottomSheet({super.key});

@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-
+import 'package:padel_mobile/presentations/auth/forgot_password/widgets/forgot_password_exports.dart';
 enum ForgotPasswordStep {
   emailEntry,
   otpEntry,

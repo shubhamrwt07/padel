@@ -1,13 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/app_strings.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/configs/components/primary_container.dart';
-import 'package:padel_mobile/configs/components/primary_text_feild.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/generated/assets.dart';
-import 'package:padel_mobile/presentations/auth/login/login_controller.dart';
+import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
 
 class LoginScreen extends GetView<LoginController> {
   const LoginScreen({super.key});
@@ -84,7 +75,7 @@ class LoginScreen extends GetView<LoginController> {
             child: Container(
               color: Colors.transparent,
               child: Text(
-                AppStrings.forgotPassword,
+                AppStrings.forgotYourPassword,
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.primaryColor,
                 ),

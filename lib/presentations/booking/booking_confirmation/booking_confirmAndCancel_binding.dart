@@ -1,5 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class BookingConfirmAndCancelBinding implements Bindings{
   @override

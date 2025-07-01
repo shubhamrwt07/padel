@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
@@ -24,7 +25,7 @@ class HomeScreen extends GetView<HomeController> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Hello! ",
+                  text: AppStrings.hello,
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -64,7 +65,7 @@ class HomeScreen extends GetView<HomeController> {
             searchField(),
             clubTicketList(context),
             Text(
-              "New Booking",
+              AppStrings.newBooking,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -85,7 +86,7 @@ class HomeScreen extends GetView<HomeController> {
     scale: 3,
         color: AppColors.textColor, // optional: tint color like an icon
       ),
-      hintText: "Search",
+      hintText: AppStrings.search,
       onChanged: (v) {},
     ).paddingOnly(
       top: Get.height * 0.01,
@@ -100,7 +101,7 @@ class HomeScreen extends GetView<HomeController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Your Booking",
+          AppStrings.yourBooking,
           style: Theme.of(
             context,
           ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -147,7 +148,8 @@ class HomeScreen extends GetView<HomeController> {
                                 Image.asset(
                                   Assets.imagesIcLocation,
                                   scale: 3,
-                                ),                                Text(
+                                ),
+                                Text(
                                   "Chandigarh 160001",
                                   style: Theme.of(context).textTheme.displayMedium,
                                 ),
@@ -255,7 +257,7 @@ class HomeScreen extends GetView<HomeController> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              "Select Locations",
+                              AppStrings.selectLocation,
                               style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.w500),
                             ),
                             const SizedBox(height: 8),
@@ -265,7 +267,7 @@ class HomeScreen extends GetView<HomeController> {
                               style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Icons.search),
-                                hintText: 'Search location...',
+                                hintText: AppStrings.searchLocation,
                                 hintStyle: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -324,7 +326,7 @@ class HomeScreen extends GetView<HomeController> {
 
                             height: 45,
                             width: Get.width*0.4,
-                            onTap: ()=>Get.back(), text:  "Done")
+                            onTap: ()=>Get.back(), text: AppStrings.done )
                           ],
                         ),
                       ),
@@ -352,7 +354,7 @@ class HomeScreen extends GetView<HomeController> {
                   color: Colors.transparent,
                   child: Text(
                     controller.selectedLocations.isEmpty
-                        ? "Location"
+                        ? AppStrings.location
                         : controller.selectedLocations.join(", "),
                     style: Theme.of(context)
                         .textTheme
