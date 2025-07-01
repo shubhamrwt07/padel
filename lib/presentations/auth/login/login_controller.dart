@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
 
 class LoginController extends GetxController{
  RxBool isVisible = true.obs;

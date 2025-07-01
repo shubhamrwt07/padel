@@ -1,6 +1,4 @@
-import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/profile/profile_controller.dart';
-
+import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
 class ProfileBinding implements Bindings{
   @override

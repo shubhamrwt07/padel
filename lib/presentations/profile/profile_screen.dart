@@ -1,13 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/presentations/cart/cart_screen.dart';
-import 'package:padel_mobile/presentations/profile/profile_controller.dart';
-
-import '../../configs/app_colors.dart';
-import '../../configs/components/app_bar.dart';
-import '../../generated/assets.dart';
+import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
 class ProfileUi extends GetView<ProfileController> {
   const ProfileUi({super.key});
@@ -18,7 +9,7 @@ class ProfileUi extends GetView<ProfileController> {
         centerTitle: true,
         showLeading: false,
         title: Text(
-          "Profile",
+          AppStrings.profile,
           style: Theme.of(context)
               .textTheme
               .titleMedium!
@@ -112,7 +103,7 @@ class ProfileUi extends GetView<ProfileController> {
                         ),
                       ),
                       child: Text(
-                        "Edit Profile",
+                        AppStrings.editProfile,
                         style: Theme.of(context)
                             .textTheme
                             .bodyLarge!
@@ -143,7 +134,7 @@ class ProfileUi extends GetView<ProfileController> {
                     color: AppColors.labelBlackColor,
                   ),
                   Text(
-                    "Booking",
+                    AppStrings.booking,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -170,7 +161,7 @@ class ProfileUi extends GetView<ProfileController> {
                     scale: 5,
                   ),
                   Text(
-                    "Payments",
+                    AppStrings.payments,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -200,7 +191,7 @@ class ProfileUi extends GetView<ProfileController> {
                     color: AppColors.labelBlackColor,
                   ),
                   Text(
-                    "Cart",
+                    AppStrings.cart,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -226,7 +217,7 @@ class ProfileUi extends GetView<ProfileController> {
                     color: AppColors.labelBlackColor,
                   ),
                   Text(
-                    "Help & Support",
+                    AppStrings.helpSupport,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -249,7 +240,7 @@ class ProfileUi extends GetView<ProfileController> {
                   scale: 5,
                 ),
                 Text(
-                  "Privacy",
+                  AppStrings.privacy,
                   style: Theme.of(context)
                       .textTheme
                       .headlineSmall!
@@ -264,7 +255,7 @@ class ProfileUi extends GetView<ProfileController> {
           ),
           GestureDetector(
             onTap: () {
-              _showLogoutDialog(context);
+              controller.showLogoutDialog(context);
             },
             child: Container(
               color: Colors.transparent,
@@ -277,7 +268,7 @@ class ProfileUi extends GetView<ProfileController> {
                     width: 17,
                   ).paddingOnly(left: 3),
                   Text(
-                    "Logout",
+                    AppStrings.logout,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -295,59 +286,5 @@ class ProfileUi extends GetView<ProfileController> {
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
     );
   }
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Are you sure you want to\nlogout?",
-              style: Theme.of(context).textTheme.titleSmall,
-              textAlign: TextAlign.center,
-            ).paddingOnly(top: Get.height*0.02),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: (){
-                    Get.offAllNamed(RoutesName.login);
-                  },
-                  child: Container(
-                    height: Get.height*0.04,
-                    width: Get.width*0.22,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: AppColors.textColor,
-                        borderRadius: BorderRadius.circular(6)
-                    ),
-                    child: Text("Yes",style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600,color: AppColors.whiteColor),),
-                  ).paddingOnly(right: 10),
-                ),
-                GestureDetector(
-                  onTap: ()=>Get.back(),
-                  child: Container(
-                    height: Get.height*0.04,
-                    width: Get.width*0.22,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(6)
-                    ),
-                    child: Text("No",style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600,color: AppColors.whiteColor),),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 }

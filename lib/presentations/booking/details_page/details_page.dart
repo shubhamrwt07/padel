@@ -1,16 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
-import '../../../configs/components/custom_button.dart';
-import '../../../configs/components/primary_button.dart';
-import '../../../configs/routes/routes_name.dart';
-import '../../../generated/assets.dart';
-
-class DetailsPage extends StatelessWidget {
+class DetailsPage extends GetView<DetailsPageController> {
   const DetailsPage({super.key});
 
   @override

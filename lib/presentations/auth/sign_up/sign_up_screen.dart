@@ -1,14 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/app_bar.dart';
-import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/configs/components/primary_container.dart';
-import 'package:padel_mobile/configs/components/primary_text_feild.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/presentations/auth/sign_up/sign_up_controller.dart';
-
-import '../../../generated/assets.dart';
+import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 
 class SignUpScreen extends GetView<SignUpController> {
   const SignUpScreen({super.key});
@@ -39,11 +29,11 @@ class SignUpScreen extends GetView<SignUpController> {
     return Column(
       children: [
         Text(
-          "Create Account",
+          AppStrings.createAccount,
           style: Theme.of(context).textTheme.titleLarge,
         ).paddingOnly(bottom: Get.height * 0.02,top: Get.height*0.02),
         Text(
-          "Create an account so you can explore all the existing jobs",
+          AppStrings.createAnAccountSo,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.06),
@@ -55,13 +45,13 @@ class SignUpScreen extends GetView<SignUpController> {
       ()=> Column(
         children: [
           PrimaryTextField(
-            hintText: "Phone Number",
+            hintText: AppStrings.phoneNumber,
           ).paddingOnly(bottom: Get.height * 0.03),
           PrimaryTextField(
-            hintText: "Email",
+            hintText: AppStrings.email,
           ).paddingOnly(bottom: Get.height * 0.03),
           PrimaryTextField(
-            hintText: "Password",
+            hintText: AppStrings.password,
             obscureText: controller.isVisiblePassword.value,
             maxLine: 1,
             suffixIcon: IconButton(
@@ -76,7 +66,7 @@ class SignUpScreen extends GetView<SignUpController> {
             ),
           ).paddingOnly(bottom: Get.height * 0.03),
           PrimaryTextField(
-            hintText: "Confirm Password",
+            hintText: AppStrings.confirmPassword,
             obscureText: controller.isVisibleConfirmPassword.value,
             maxLine: 1,
             suffixIcon: IconButton(
@@ -111,7 +101,7 @@ class SignUpScreen extends GetView<SignUpController> {
                 ? null
                 : controller.selectedLocation!.value,
             hint: Text(
-              'Preference Location',
+              AppStrings.preferenceLocation,
               style: Theme.of(context)
                   .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
             ),
@@ -146,18 +136,18 @@ class SignUpScreen extends GetView<SignUpController> {
             child: RichText(text: TextSpan(
                 children:[
                   TextSpan(
-                      text: "Already have an account ",
+                      text: AppStrings.alreadyHaveAccount,
                       style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.darkGreyColor)
                   ),
                   TextSpan(
-                      text: "Sign In",
+                      text: AppStrings.signIn,
                       style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.primaryColor)
                   ),
                 ]
             )),
           ),
         ).paddingOnly(bottom: Get.height*0.03),
-        PrimaryButton(onTap: (){ Get.toNamed(RoutesName.bottomNav);}, text: "Create"),
+        PrimaryButton(onTap: (){ Get.toNamed(RoutesName.bottomNav);}, text: AppStrings.create),
         SizedBox(height: Get.height*0.04,)
       ],
     );
