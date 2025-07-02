@@ -33,7 +33,7 @@ import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
-  static const String initialRoute = RoutesName.splash;
+  static const String initialRoute = RoutesName.bottomNav;
 
   static const Duration defaultDuration = Duration(milliseconds: 200);
 

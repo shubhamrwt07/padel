@@ -33,17 +33,24 @@ class DetailsPage extends GetView<DetailsPageController> {
               child: Row(
                 children: [
                   Text(
-                    "₹ 2000",
+                    "₹",
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Roboto"
+                    ),
+                  ).paddingOnly(left: Get.width*.07),
+                  Text(
+                    "2000",
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: AppColors.whiteColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ).paddingOnly(
                     right: Get.width * 0.2,
-                    left: Get.width * 0.05,
                   ),
                   Text(
-                    "Book Price",
+                    "Book place ",
                     style: Theme.of(context).textTheme.headlineMedium!
                         .copyWith(
                       color: AppColors.whiteColor,
@@ -85,7 +92,7 @@ class DetailsPage extends GetView<DetailsPageController> {
               children: [
                 ListTile(
                   leading: SvgPicture.asset('assets/images/padel_icon.svg'),
-                  title: Text("Padel", style: Get.textTheme.headlineSmall),
+                  title: Text("PADEL", style: Get.textTheme.headlineSmall),
                   subtitle: Text(
                     "21 June | 9:00am - 10:00am",
                     style: Get.textTheme.labelLarge!.copyWith(
@@ -93,9 +100,7 @@ class DetailsPage extends GetView<DetailsPageController> {
                     ),
                   ),
                 ),
-                Transform.translate(
-                    offset: Offset(0,-Get.height*.007),
-                    child: Divider(color: AppColors.greyColor)),
+             Center(child: Container(height: 1,width: Get.width*.88,color: AppColors.greyColor,)),
                 Flexible(
                     child: Transform.translate(
                       offset: Offset(0,-Get.height*.008),
@@ -162,19 +167,30 @@ class DetailsPage extends GetView<DetailsPageController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("The Good Club", style: Get.textTheme.bodySmall),
-                          SvgPicture.asset(Assets.imagesDirections),
+                          SvgPicture.asset(Assets.imagesDirections,),
                         ],
                       ),
                     ),
                     SizedBox(height: 5),
                     SizedBox(
-                      height: Get.height * .09,
+                      height: Get.height * .05,
                       width: Get.width * .49,
                       child: Text(
                         "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001",
                         style: Get.textTheme.bodyLarge!.copyWith(
                           fontWeight: FontWeight.w400,
                         ),
+                      ),
+
+                    ),
+                    Text(
+                      "More Info",
+                      style: Get.textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryColor,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.primaryColor, // Blue underline
+
                       ),
                     ),
                   ],
@@ -186,11 +202,33 @@ class DetailsPage extends GetView<DetailsPageController> {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text("Information",style: Get.textTheme.titleSmall,),
           ),
-          ListTile(
-            leading: SvgPicture.asset(Assets.imagesCourt),
-            title: Text('Type of Court ( 2 court)',style: Get.textTheme.bodySmall,),
-            subtitle:   Text('Outdoor, crystal, Double)',style: Get.textTheme.headlineSmall,),
-          )
+          // ListTile(
+          //   leading: SvgPicture.asset(Assets.imagesCourt),
+          //   title: Text('Type of Court ( 2 court)',style: Get.textTheme.bodySmall,),
+          //   subtitle:   Text('Outdoor, crystal, Double',style: Get.textTheme.headlineSmall,),
+          // ),
+          Row(
+            children: [
+              SvgPicture.asset(Assets.imagesCourt),
+              const SizedBox(width: 10), // space between image and text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Type of Court (2 court)',
+                      style: Get.textTheme.bodySmall,
+                    ).paddingOnly(top: 5),
+                    Text(
+                      'Outdoor, crystal, Double',
+                      style: Get.textTheme.headlineSmall,
+                    ),
+                  ],
+                )
+              ),
+            ],
+          ).paddingOnly(top: Get.height*.01),
 
 
 
@@ -304,7 +342,7 @@ class DetailsPage extends GetView<DetailsPageController> {
           Text("Players", style: Get.textTheme.headlineSmall),
           SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               playerCard("Courtney Henry", true,Assets.imagesImgCustomerPicBooking),
               playerCard("Devon Lane", true,Assets.imagesImgCustomerPicBooking),
