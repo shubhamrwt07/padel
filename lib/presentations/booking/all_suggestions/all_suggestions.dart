@@ -148,7 +148,7 @@ class AllSuggestions extends StatelessWidget {
             _buildMatchHeader(context),
             const SizedBox(height: 12),
             _buildPlayerRow(),
-            const Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
+             Divider(thickness: 1.5, height: 0, color: AppColors.blackColor.withAlpha(50)),
             const SizedBox(height: 10),
             _buildMatchFooter(context),
           ],
@@ -181,13 +181,13 @@ class AllSuggestions extends StatelessWidget {
           children: [
             _buildPlayerSlot(
               imageUrl: Assets.imagesImgCustomerPicBooking,
-              name: 'Courtney Henry',
+              name: 'Courtney',
             ).paddingOnly(bottom: 6),
             _buildPlayerSlot(
               imageUrl: Assets.imagesImgCustomerPicBooking,
               name: 'Devon Lane',
             ).paddingOnly(bottom: 6),
-            Container(width: 1, color: AppColors.greyColor),
+            Container(width: 1, color: AppColors.blackColor.withAlpha(50)).paddingOnly(bottom: 10),
             _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
             _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
           ],

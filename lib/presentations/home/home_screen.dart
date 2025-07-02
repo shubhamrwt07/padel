@@ -39,24 +39,6 @@ class HomeScreen extends GetView<HomeController> {
               ],
             ),
           ).paddingOnly(left: Get.width * 0.03,top: Get.height*0.02),
-          action: [
-            // Container(
-            //   height: 30,
-            //   width: 30,
-            //   decoration: BoxDecoration(
-            //     shape: BoxShape.circle,
-            //     color: AppColors.whiteColor,
-            //     boxShadow: [
-            //       BoxShadow(
-            //         color: Colors.grey.shade100,
-            //         blurRadius: 1.4,
-            //         spreadRadius: 2.2,
-            //       ),
-            //     ],
-            //   ),
-            //   child: Icon(Icons.notifications_none_rounded),
-            // ).paddingOnly(right: Get.width * 0.02),
-          ],
           context: context,
         ),
         body: Column(
@@ -82,9 +64,8 @@ class HomeScreen extends GetView<HomeController> {
     return SearchField(
       suffixIcon: Image.asset(
         Assets.imagesIcSearch,
-       // your image path
-    scale: 3,
-        color: AppColors.textColor, // optional: tint color like an icon
+        scale: 3,
+        color: AppColors.textColor,
       ),
       hintText: AppStrings.search,
       onChanged: (v) {},
@@ -97,6 +78,7 @@ class HomeScreen extends GetView<HomeController> {
   }
 
   Widget clubTicketList(BuildContext context) {
+    final ScrollController scrollController = ScrollController();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -108,111 +90,122 @@ class HomeScreen extends GetView<HomeController> {
         ).paddingOnly(bottom: Get.width * 0.02),
         SizedBox(
           height: 100,
-          child: ListView.builder(
-            itemCount: 10,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              return Container(
-                height: 95,
-                width: 193,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.lightBlueColor),
-                ),
-                padding: EdgeInsets.only(left: 10, right: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 34,
-                          width: 34,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.greyColor),
-                            image: DecorationImage(
-                              image: AssetImage(Assets.imagesImgHomeLogo),
+          child: Scrollbar(
+            controller: scrollController,
+            thumbVisibility: false,
+            radius: const Radius.circular(10),
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: 10,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return Container(
+                  height: 95,
+                  width: 193,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.lightBlueColor),
+                  ),
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            height: 34,
+                            width: 34,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.greyColor),
+                              image: DecorationImage(
+                                image: AssetImage(Assets.imagesImgHomeLogo),
+                              ),
                             ),
                           ),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "The Good Club",
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            Row(
-                              children: [
-                                Image.asset(
-                                  Assets.imagesIcLocation,
-                                  scale: 3,
-                                ),
-                                Text(
-                                  "Chandigarh 160001",
-                                  style: Theme.of(context).textTheme.displayMedium,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  color: AppColors.secondaryColor,
-                                  size: 15,
-                                ),
-                                Text(
-                                  "4.9",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.directions,
-                              color: AppColors.secondaryColor,
-                              size: 13,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "29thJune’2025",
-                              style: Theme.of(context).textTheme.bodyLarge!
-                                  .copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.blackColor,
+                          Column(
+                            children: [
+                              Text(
+                                "The Good Club",
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    Assets.imagesIcLocation,
+                                    scale: 3,
                                   ),
-                            ),
-                            Text(
-                              "8:00am",
-                              style: Theme.of(context).textTheme.labelSmall!
-                                  .copyWith(color: AppColors.labelBlackColor,fontSize: 8),
-                            ).paddingOnly(left: 5),
-                            Text(
-                              "(60)",
-                              style: Theme.of(context).textTheme.labelSmall!
-                                  .copyWith(color: AppColors.labelBlackColor),
-                            ).paddingOnly(left: Get.width*.1),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ).paddingOnly(right: 10);
-            },
+                                  Text(
+                                    "Chandigarh 160001",
+                                    style: Theme.of(context).textTheme.displayMedium,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: AppColors.secondaryColor,
+                                    size: 15,
+                                  ),
+                                  Text(
+                                    "4.9",
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
+                              Icon(
+                                Icons.directions,
+                                color: AppColors.secondaryColor,
+                                size: 13,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "29thJune",
+                                    style: Theme.of(context).textTheme.bodyLarge!
+                                        .copyWith(
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.blackColor,
+                                        ),
+                                  ),
+                                  Text(
+                                    "8:00am",
+                                    style: Theme.of(context).textTheme.labelSmall!
+                                        .copyWith(color: AppColors.labelBlackColor,fontSize: 8),
+                                  ).paddingOnly(left: 5),
+                                ],
+                              ),
+                              Text(
+                                "(60m)",
+                                style: Theme.of(context).textTheme.labelSmall!
+                                    .copyWith(color: AppColors.labelBlackColor),
+                              ).paddingOnly(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ).paddingOnly(right: 10);
+              },
+            ),
           ),
         ),
       ],
@@ -442,8 +435,6 @@ class HomeScreen extends GetView<HomeController> {
       bottom: Get.height * 0.02,
     );
   }
-
-
   Widget addToCart(BuildContext context) {
     return Expanded(
       child: Scrollbar(
@@ -497,9 +488,10 @@ class HomeScreen extends GetView<HomeController> {
                                   children: [
                                     Image.asset(
                                       Assets.imagesIcLocation,
-                                      scale: 5,
-                                    ),                                    Text(
-                                      "Chandigarh 160001",
+                                      scale: 3,
+                                    ),
+                                    Text(
+                                      " Chandigarh 160001",
                                       style: Theme.of(context).textTheme.bodyLarge!
                                           .copyWith(fontWeight: FontWeight.w500),
                                     ),
@@ -586,12 +578,11 @@ class HomeScreen extends GetView<HomeController> {
                             children: [
                               TextSpan(
                                 text: '₹',
-                                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                    fontFamily: "Roboto"
-
-                                  // Keep other styles consistent
-                                ),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.blueColor,
+                                  fontSize: 15,
+                                )
                               ),
                               TextSpan(
                                 text: ' 1200',
