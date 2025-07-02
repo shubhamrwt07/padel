@@ -124,11 +124,10 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
           children: [
             Row(
               children: [
-                // Increase only Apple image size
                 if (title == "ApplePay")
                   SizedBox(
-                    width: 40,
-                    height: 40,
+                    width: 28,
+                    height: 28,
                     child: SvgPicture.asset(iconPath),
                   ).paddingOnly(right: Get.width * 0.03)
                 else

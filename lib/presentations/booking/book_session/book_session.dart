@@ -153,7 +153,7 @@ class BookSession extends StatelessWidget {
                               ),
                               Text(
                                 date.day.toString(),
-                                style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,)
+                                style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w400)
                               ),
                               Text(
                                 monthName,
@@ -188,7 +188,6 @@ class BookSession extends StatelessWidget {
                 context,
               ).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
             ),
-            SizedBox(width: Get.width * .01),
             Transform.scale(
               scale: 0.7,
               child: Obx(
@@ -237,7 +236,7 @@ class BookSession extends StatelessWidget {
                   child: Container(
                     key: ValueKey(isSelected),
                     width: tileWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected

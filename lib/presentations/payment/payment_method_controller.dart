@@ -21,7 +21,7 @@ class PaymentMethodController extends GetxController{
       "value": "apple_pay",
     },
     {
-      "name": "MasterCard",
+      "name": ".... .... .... 4698",
       "icon": Assets.imagesIcMasterCardPayment,
       "value": "mastercard",
     },
