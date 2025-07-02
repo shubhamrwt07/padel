@@ -71,7 +71,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                 SingleChildScrollView(
                   child: Column(
                     children: [
-                      Container(
+                      SizedBox(
                         height: Get.height,
                         child: ListView.builder(
                           itemCount: 20,
