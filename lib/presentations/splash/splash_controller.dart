@@ -1,11 +1,38 @@
-import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
+import 'package:get_storage/get_storage.dart';
 
-class SplashController extends GetxController{
+import '../../configs/components/snack_bars.dart';
+import '../../handler/logger.dart';
+import '../../services/network/connectivity_service.dart';
+import '../auth/login/widgets/login_exports.dart';
+
+class SplashController extends GetxController {
+  final ConnectivityService _connectivityService = ConnectivityService();
+
   @override
   void onInit() {
     super.onInit();
-    Future.delayed(Duration(seconds: 3)).then((v){
+    checkTokenAndNavigate();
+  }
+
+  void checkTokenAndNavigate() async {
+    await Future.delayed(const Duration(seconds: 3));
+
+    final storage = GetStorage();
+    String? isToken = storage.read("token");
+
+    CustomLogger.logMessage(msg: "TOKEN ---> $isToken", level: LogLevel.info);
+
+    final hasInternet = await _connectivityService.checkConnectivity();
+
+    if (isToken != null && isToken.isNotEmpty) {
+      if (!hasInternet) {
+        SnackBarUtils.showWarningSnackBar(
+          "You're offline. Some features may not work properly.",
+        );
+      }
+      Get.offAllNamed(RoutesName.bottomNav);
+    } else {
       Get.offAllNamed(RoutesName.login);
-    });
+    }
   }
 }

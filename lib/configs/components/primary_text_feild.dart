@@ -22,6 +22,7 @@ class PrimaryTextField extends StatelessWidget {
   final TextInputAction? action;
   final List<TextInputFormatter>?formatter;
   final Function(String)? onChanged;
+  final String? Function(String?)? validator;
   final String? prefixText;
   final Widget? prefix;
   final Widget? prefixIcon;
@@ -32,6 +33,7 @@ class PrimaryTextField extends StatelessWidget {
     super.key,
     this.action,
     this.onFieldSubmitted,
+    this.validator,
     required this.hintText,
     this.maxLength,
     this.maxLine,
@@ -55,56 +57,59 @@ class PrimaryTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height??50,
-      width: width?? Get.width,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        // border:border??Border.all(color: AppColors.primaryColor,),
-        shape: BoxShape.rectangle,
-        color: AppColors.textFieldColor
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: TextField(
-          obscureText: obscureText??false,
-          obscuringCharacter: "*",
-          scrollPadding: scrollPadding?? const EdgeInsets.all(0),
-          inputFormatters: formatter,
-          onSubmitted:onFieldSubmitted ,
-          readOnly: readOnly??false,
-          controller: controller,
-          enabled: enabled,
-          maxLength: maxLength,
-          style:style?? Theme.of(context)
-              .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
-          keyboardType: keyboardType??TextInputType.text,
-          maxLines: maxLine,
-          minLines: minLine,
-          onChanged:  onChanged,
-          textInputAction:action,
-          decoration: InputDecoration(
-            suffixIcon:suffixIcon,
-            prefixText:prefixText,
-            prefix:prefix ,
-            prefixIcon: prefixIcon,
-            // contentPadding: EdgeInsets.only(left: Get.width*0.04),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: Get.width * 0.04,
-              vertical: (height ?? 57) * 0.25,
-            ),
-            counterText: "",
-            hintText: hintText,
-            hintStyle:hintStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
-            border: InputBorder.none,
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primaryColor,width: 2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            fillColor: color??AppColors.textFieldColor,
-          ),
+    return TextFormField(
+
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: validator,
+      obscureText: obscureText??false,
+      obscuringCharacter: "●",
+      scrollPadding: scrollPadding?? const EdgeInsets.all(0),
+      inputFormatters: formatter,
+      onFieldSubmitted:onFieldSubmitted ,
+      readOnly: readOnly??false,
+      controller: controller,
+      enabled: enabled,
+      maxLength: maxLength,
+      style:style?? Theme.of(context)
+          .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
+      keyboardType: keyboardType??TextInputType.text,
+      maxLines: maxLine,
+      minLines: minLine,
+      onChanged:  onChanged,
+      textInputAction:action,
+      decoration: InputDecoration(
+
+        suffixIcon:suffixIcon,
+        prefixText:prefixText,
+        prefix:prefix ,
+        prefixIcon: prefixIcon,
+        // contentPadding: EdgeInsets.only(left: Get.width*0.04),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: Get.width * 0.04,
+          vertical: (height ?? 57) * 0.30,
         ),
+        counterText: "",
+        hintText: hintText,
+        hintStyle:hintStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
+        border:  OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.transparent,width: 2),
+          borderRadius: BorderRadius.circular(12),
+
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.primaryColor,width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.textFieldColor,width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.redColor,width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: color??AppColors.textFieldColor,
       ),
     );
   }

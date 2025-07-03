@@ -1,5 +1,7 @@
 import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
 
+import '../../../configs/components/loader_widgets.dart';
+
 class LoginScreen extends GetView<LoginController> {
   const LoginScreen({super.key});
 
@@ -13,7 +15,7 @@ class LoginScreen extends GetView<LoginController> {
           body: SingleChildScrollView(
             child: Column(
               children: [
-                Column(children: [topTexts(context), formFields(context)]),
+                Column(children: [headerContent(context), formFields(context)]),
                 bottomButtonAndContent(context),
               ],
             ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
@@ -23,7 +25,7 @@ class LoginScreen extends GetView<LoginController> {
     );
   }
 
-  Widget topTexts(BuildContext context) {
+  Widget headerContent(BuildContext context) {
     return Column(
       children: [
         Text(
@@ -42,102 +44,76 @@ class LoginScreen extends GetView<LoginController> {
   }
 
   Widget formFields(BuildContext context) {
-    return Column(
-      children: [
-        Obx(
-          () => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PrimaryTextField(
-                controller: controller.emailController,
-                focusNode: controller.emailFocusNode,
-                hintText: AppStrings.email,
-                keyboardType: TextInputType.emailAddress,
-                action: TextInputAction.next,
-                onFieldSubmitted: (_) =>
-                    controller.passwordFocusNode.requestFocus(),
-                onChanged: controller.onEmailChanged,
-              ),
+    return Form(
+      key: controller.formKey,
+      child: Column(
+        children: [
+          PrimaryTextField(
+            controller: controller.emailController,
+            focusNode: controller.emailFocusNode,
+            hintText: AppStrings.email,
+            keyboardType: TextInputType.emailAddress,
+            action: TextInputAction.next,
+            validator: (v) {
+              return controller.validateEmail(v);
+            },
+            onFieldSubmitted: (_) => controller.onFieldSubmitted,
+          ).paddingOnly(bottom: Get.height * 0.03),
 
-              if (controller.emailError.value.isNotEmpty)
-                Padding(
-                  padding: EdgeInsets.only(top: 8, left: Get.width * 0.04),
-                  child: Text(
-                    controller.emailError.value,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.red,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ).paddingOnly(bottom: Get.height * 0.03),
-
-        Obx(
-          () => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PrimaryTextField(
-                controller: controller.passwordController,
-                focusNode: controller.passwordFocusNode,
-                hintText: AppStrings.password,
-                obscureText: controller.isVisible.value,
-                maxLine: 1,
-                action: TextInputAction.done,
-                onFieldSubmitted: (_) => controller.handleLogin(),
-                onChanged: controller.onPasswordChanged,
-                suffixIcon: IconButton(
-                  onPressed: () => controller.eyeToggle(),
-                  icon: Image.asset(
+          Obx(
+            () => PrimaryTextField(
+              controller: controller.passwordController,
+              focusNode: controller.passwordFocusNode,
+              hintText: AppStrings.password,
+              obscureText: controller.isVisible.value,
+              maxLine: 1,
+              action: TextInputAction.done,
+              validator: (v) {
+                return controller.validatePassword(v);
+              },
+              onFieldSubmitted: (_) => controller.onFieldSubmitted,
+              suffixIcon: IconButton(
+                onPressed: () => controller.eyeToggle(),
+                icon: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: Image.asset(
                     controller.isVisible.value
                         ? Assets.imagesIcEyeOff
                         : Assets.imagesIcEye,
                     color: AppColors.textColor,
-                    height: Get.height * .05,
-                    width: Get.width * .05,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
 
-              if (controller.passwordError.value.isNotEmpty)
-                Padding(
-                  padding: EdgeInsets.only(top: 8, left: Get.width * 0.04),
-                  child: Text(
-                    controller.passwordError.value,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.red,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
+            ).paddingOnly(bottom: Get.height * 0.02),
           ),
-        ).paddingOnly(bottom: Get.height * 0.02),
 
-        Align(
-          alignment: Alignment.centerRight,
-          child: GestureDetector(
-            onTap: () {
-              Get.toNamed(RoutesName.forgotPassword);
-              FocusManager.instance.primaryFocus!.unfocus();
-            },
-            child: Container(
-              color: Colors.transparent,
-              child: Text(
-                AppStrings.forgotYourPassword,
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  color: AppColors.primaryColor,
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () {
+                Get.toNamed(RoutesName.forgotPassword);
+                FocusManager.instance.primaryFocus!.unfocus();
+              },
+              child: Container(
+                color: Colors.transparent,
+                child: Text(
+                  AppStrings.forgotYourPassword,
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    color: AppColors.primaryColor,
+                  ),
                 ),
               ),
             ),
+          ).paddingOnly(
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                ? Get.height * 0.03
+                : Get.height * 0.32,
           ),
-        ).paddingOnly(
-          bottom: MediaQuery.of(context).viewInsets.bottom > 0
-              ? Get.height * 0.03
-              : Get.height * 0.32,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -145,7 +121,7 @@ class LoginScreen extends GetView<LoginController> {
     return Column(
       children: [
         GestureDetector(
-          onTap: () => Get.toNamed(RoutesName.signUp),
+          onTap: () => Get.offNamed(RoutesName.signUp),
           child: Container(
             color: Colors.transparent,
             child: Text(
@@ -159,12 +135,13 @@ class LoginScreen extends GetView<LoginController> {
 
         Obx(
           () => PrimaryButton(
-            onTap: () {
-              controller.handleLogin();
+            onTap: ()async {
+            await  controller.onLogin();
             },
-            text: controller.isLoading.value
-                ? "Signing In..."
-                : AppStrings.signIn,
+            text:
+
+                 AppStrings.signIn,
+            child:controller.isLoading.value?AppLoader(size: 35,strokeWidth: 4,):null,
           ),
         ),
 
@@ -173,3 +150,5 @@ class LoginScreen extends GetView<LoginController> {
     );
   }
 }
+
+
