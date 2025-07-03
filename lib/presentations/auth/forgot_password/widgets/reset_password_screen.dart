@@ -32,35 +32,39 @@ class ResetPasswordScreen extends GetView<ForgotPasswordController> {
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
             textAlign: TextAlign.center,
           ).paddingOnly(bottom: Get.height * 0.05),
-          PrimaryTextField(
-            hintText: AppStrings.password,
-            obscureText: controller.isVisiblePassword.value,
-            maxLine: 1,
-            suffixIcon: IconButton(
-              onPressed: () => controller.passwordToggle(),
-              icon: Image.asset(
-                controller.isVisiblePassword.value
-                    ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
-                color: AppColors.textColor,
-                height: 24,
-                width: 24,
+          Obx(
+           ()=> PrimaryTextField(
+              hintText: AppStrings.password,
+              obscureText: controller.isVisiblePassword.value,
+              maxLine: 1,
+              suffixIcon: IconButton(
+                onPressed: () => controller.passwordToggle(),
+                icon: Image.asset(
+                  controller.isVisiblePassword.value
+                      ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
+                  color: AppColors.textColor,
+                  height: 24,
+                  width: 24,
+                ),
               ),
-            ),
-          ).paddingOnly(bottom: Get.height * 0.03),
-          PrimaryTextField(
-            hintText: AppStrings.confirmPassword,
-            obscureText: controller.isVisibleConfirmPassword.value,
-            maxLine: 1,
-            suffixIcon: IconButton(
-              onPressed: () => controller.confirmPasswordToggle(),
-              icon: Image.asset(
-                controller.isVisibleConfirmPassword.value
-                    ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
-                color: AppColors.textColor,
-                height: 24,
-                width: 24,
-              ),
-            ),          ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
+            ).paddingOnly(bottom: Get.height * 0.03),
+          ),
+          Obx(
+            ()=> PrimaryTextField(
+              hintText: AppStrings.confirmPassword,
+              obscureText: controller.isVisibleConfirmPassword.value,
+              maxLine: 1,
+              suffixIcon: IconButton(
+                onPressed: () => controller.confirmPasswordToggle(),
+                icon: Image.asset(
+                  controller.isVisibleConfirmPassword.value
+                      ? Assets.imagesIcEyeOff: Assets.imagesIcEye,
+                  color: AppColors.textColor,
+                  height: 24,
+                  width: 24,
+                ),
+              ),          ).paddingOnly(bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? Get.height * 0.03 : Get.height * 0.335),
+          ),
           PrimaryButton(onTap: ()=>Get.to(()=>WelcomeBackScreen(),transition: Transition.rightToLeft), text: AppStrings.changePassword).paddingOnly(bottom: Get.height*0.03),
 
         ],
