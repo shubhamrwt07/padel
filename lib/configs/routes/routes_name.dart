@@ -4,6 +4,7 @@ class RoutesName {
 
   //Auth routes name
   static const String login = '/login_screen' ;
+  static const String otp = '/otp' ;
   static const String signUp = '/signUp' ;
   static const String forgotPassword = '/forgotPassword' ;
 
