@@ -96,7 +96,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall!
-                .copyWith(color: AppColors.labelBlackColor)),
+                .copyWith(color: AppColors.labelBlackColor,fontWeight: FontWeight.w600)),
       ],
     ).paddingOnly(bottom: Get.height * 0.01);
   }
@@ -181,6 +181,10 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                     .textTheme
                     .labelLarge!
                     .copyWith(color: AppColors.labelBlackColor),
+              ),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.labelBlackColor,
               ),
               items: controller.cancellationReasons
                   .map((reason) => DropdownMenuItem(

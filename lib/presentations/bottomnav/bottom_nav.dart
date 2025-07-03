@@ -10,16 +10,7 @@ import 'bottom_nav_controller.dart';
 class BottomNavUi extends StatelessWidget {
   BottomNavUi({super.key});
 
-  final BottomNavigationController _controller =
-  Get.put(BottomNavigationController());
-
-  Shader getGradientShader(Rect bounds) {
-    return const LinearGradient(
-      colors: [AppColors.primaryColor, AppColors.secondaryColor],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ).createShader(bounds);
-  }
+  final BottomNavigationController _controller = Get.put(BottomNavigationController());
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +35,7 @@ class BottomNavUi extends StatelessWidget {
             height: 60,
             decoration: const BoxDecoration(
               color: Colors.white,
+              image: DecorationImage(image: AssetImage(Assets.imagesImgBackgroundBottomBar),fit: BoxFit.cover)
             ),
             child: Obx(
                   () => GNav(
@@ -57,7 +49,7 @@ class BottomNavUi extends StatelessWidget {
                   _controller.updateIndex(index);
                 },
                 tabs: List.generate(4, (index) {
-                  final tab = _tabs[index];
+                  final tab = _controller.tabs[index];
                   final isSelected =
                       _controller.selectedIndex.value == index;
                   final isSvg = tab['isSvg'] == true;
@@ -95,6 +87,9 @@ class BottomNavUi extends StatelessWidget {
                       : null;
 
                   return GButton(
+                    haptic: true,
+                    gap: 10,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // tighter padding
                     icon: isSvg ? Icons.circle : tab['icon'],
                     text: tab['label'],
                     iconColor: Colors.black,
@@ -106,7 +101,7 @@ class BottomNavUi extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       foreground: Paint()
                         ..shader = getGradientShader(
-                          Rect.fromLTWH(0, 0, 100, 20),
+                          Rect.fromLTWH(0, 0, 100, 60),
                         ),
                     )
                         : const TextStyle(
@@ -123,11 +118,11 @@ class BottomNavUi extends StatelessWidget {
       ).paddingOnly(left: 16,right: 16,bottom: 24),
     );
   }
-
-  final List<Map<String, dynamic>> _tabs = [
-    {'icon': Icons.home_outlined, 'label': 'Home', 'size': 28.0},
-    {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 22.0},
-    {'icon': Icons.shopping_cart, 'label': 'Cart', 'size': 24.0},
-    {'icon':  Assets.imagesIcProfile, 'label': 'Profile', 'isSvg': true, 'size': 22.0},
-  ];
+  Shader getGradientShader(Rect bounds) {
+    return const LinearGradient(
+      colors: [AppColors.primaryColor, AppColors.secondaryColor],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ).createShader(bounds);
+  }
 }

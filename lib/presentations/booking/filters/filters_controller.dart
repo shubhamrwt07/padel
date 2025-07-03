@@ -3,6 +3,7 @@ import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart'
 class FiltersController extends GetxController{
   RxString selectedLocation = ''.obs;
   RxBool isAmPm = false.obs;
+  Rx<bool> viewUnavailableSlots = false.obs;
 
   List<String> locations = ["New Delhi", "Mumbai", "Bangalore"];
 

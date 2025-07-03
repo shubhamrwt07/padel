@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController{
-  final RxList<String> selectedLocations = <String>[].obs;
+  final RxString selectedLocation = ''.obs;
   final List<String> dummyLocations = [
     'Delhi',
     'Mumbai',

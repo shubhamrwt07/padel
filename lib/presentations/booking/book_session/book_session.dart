@@ -32,16 +32,24 @@ class BookSession extends StatelessWidget {
             width: Get.width*0.9,
               child: Row(
                 children: [
-                  Text(
-                    "₹ 2000",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ).paddingOnly(
-                    right: Get.width * 0.2,
-                    left: Get.width * 0.05,
-                  ),
+                  RichText(text: TextSpan(
+                    children:[
+                      TextSpan(
+                        text: "₹ ",
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: AppColors.whiteColor,fontFamily: "Roboto",
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "2000",
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: AppColors.whiteColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    ]
+                  )).paddingOnly(right: Get.width * 0.2, left: Get.width * 0.05,),
                   Text(
                     "Add to cart",
                     style: Theme.of(context).textTheme.headlineMedium!
@@ -65,12 +73,10 @@ class BookSession extends StatelessWidget {
             children: [
               _buildDatePicker(),
               Transform.translate(
-                offset: Offset(0, -5),
+                offset: Offset(0, -Get.height*0.03),
                 child: _buildSlotHeader(context),
               ),
-              SizedBox(height: Get.height * .0009),
               _buildTimeSlots(),
-              SizedBox(height: Get.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -80,7 +86,6 @@ class BookSession extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: Get.height * 0.02),
               _buildMatchCard(context),
               _buildMatchCard(context),
               _buildMatchCard(context),
@@ -97,84 +102,73 @@ class BookSession extends StatelessWidget {
       children: [
         Text("Select date", style: Get.textTheme.labelLarge),
         Obx(
-          () => EasyDateTimeLinePicker.itemBuilder(
-            headerOptions: HeaderOptions(
-              headerBuilder: (_, context, date) => const SizedBox.shrink(),
-            ),
-            selectionMode: SelectionMode.alwaysFirst(),
-            firstDate: DateTime(2025, 1, 1),
-            lastDate: DateTime(2030, 3, 18),
-            focusedDate: controller.selectedDate.value,
-            itemExtent: 72,
-            itemBuilder:
-                (context, date, isSelected, isDisabled, isToday, onTap) {
-                  final dayName = DateFormat('E').format(date);
-                  final monthName = DateFormat('MMMM').format(date);
+          () => Transform.translate(
+            offset: Offset(0,-12),
+            child: EasyDateTimeLinePicker.itemBuilder(
+              headerOptions: HeaderOptions(
+                headerBuilder: (_, context, date) => const SizedBox.shrink(),
+              ),
+              selectionMode: SelectionMode.alwaysFirst(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2030, 3, 18),
+              focusedDate: controller.selectedDate.value,
+              itemExtent: 70,
+              itemBuilder:
+                  (context, date, isSelected, isDisabled, isToday, onTap) {
+                    final dayName = DateFormat('E').format(date);
+                    final monthName = DateFormat('MMMM').format(date);
 
-                  return GestureDetector(
-                    onTap: onTap,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 1000),
-                      switchInCurve: Curves.easeIn,
-                      switchOutCurve: Curves.easeOut,
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: Container(
-                        key: ValueKey(isSelected),
-                        alignment: Alignment.center,
-                        margin: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: isSelected
-                              ? Colors.black
-                              : AppColors.playerCardBackgroundColor,
-                          border: Border.all(
+                    return GestureDetector(
+                      onTap: onTap,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 1000),
+                        switchInCurve: Curves.easeIn,
+                        switchOutCurve: Curves.easeOut,
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(opacity: animation, child: child);
+                        },
+                        child: Container(
+                          height: Get.height*0.08,
+                          width: Get.width*0.15,
+                          key: ValueKey(isSelected),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
                             color: isSelected
-                                ? Colors.transparent
-                                : AppColors.blackColor.withAlpha(10),
-                            width: 1,
+                                ? Colors.black
+                                : AppColors.playerCardBackgroundColor,
+                            border: Border.all(
+                              color: isSelected
+                                  ? Colors.transparent
+                                  : AppColors.blackColor.withAlpha(10),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                dayName,
+                                style: Get.textTheme.bodySmall!.copyWith(color: isSelected ? Colors.white : Colors.black,)
+                              ),
+                              Text(
+                                date.day.toString(),
+                                style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w400)
+                              ),
+                              Text(
+                                monthName,
+                                style: Get.textTheme.bodySmall!.copyWith(color: isSelected ? Colors.white : Colors.black,)
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              dayName,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            Text(
-                              date.day.toString(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.darkGrey,
-                              ),
-                            ),
-                            Text(
-                              monthName,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  ).paddingOnly(
-                    top: Get.height * .01,
-                    bottom: Get.height * .01,
-                  );
-                },
-            onDateChange: (date) {
-              controller.selectedDate.value = date;
-            },
+                    );
+                  },
+              onDateChange: (date) {
+                controller.selectedDate.value = date;
+              },
+            ),
           ),
         ),
       ],
@@ -189,12 +183,11 @@ class BookSession extends StatelessWidget {
         Row(
           children: [
             Text(
-              'View Unavailable Slots',
+              'Show Unavailable Slots',
               style: Theme.of(
                 context,
               ).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
             ),
-            SizedBox(width: Get.width * .01),
             Transform.scale(
               scale: 0.7,
               child: Obx(
@@ -216,54 +209,57 @@ class BookSession extends StatelessWidget {
   }
 
   Widget _buildTimeSlots() {
-    return GetBuilder<BookSessionController>(
-      builder: (controller) {
-          double spacing = Get.width*.02;
-        final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
+    return Transform.translate(
+      offset: Offset(0, -Get.height*0.025),
+      child: GetBuilder<BookSessionController>(
+        builder: (controller) {
+            double spacing = Get.width*.02;
+          final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: Get.height * 0.015,
-          children: controller.timeSlots.map((time) {
-            final isSelected = controller.selectedTime == time;
+          return Wrap(
+            spacing: spacing,
+            runSpacing: Get.height * 0.015,
+            children: controller.timeSlots.map((time) {
+              final isSelected = controller.selectedTime == time;
 
-            return GestureDetector(
-              onTap: () {
-                controller.selectedTime = time;
-                controller.update();
-              },
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                switchInCurve: Curves.easeIn,
-                switchOutCurve: Curves.easeOut,
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: Container(
-                  key: ValueKey(isSelected),
-                  width: tileWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.black
-                        : AppColors.timeTileBackgroundColor,
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      color: AppColors.blackColor.withAlpha(10),
+              return GestureDetector(
+                onTap: () {
+                  controller.selectedTime = time;
+                  controller.update();
+                },
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 800),
+                  switchInCurve: Curves.easeIn,
+                  switchOutCurve: Curves.easeOut,
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: Container(
+                    key: ValueKey(isSelected),
+                    width: tileWidth,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.black
+                          : AppColors.timeTileBackgroundColor,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        color: AppColors.blackColor.withAlpha(10),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    time,
-                    style: Get.textTheme.labelLarge?.copyWith(
-                      color: isSelected ? Colors.white : Colors.black,
+                    child: Text(
+                      time,
+                      style: Get.textTheme.labelLarge?.copyWith(
+                        color: isSelected ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
-        );
-      },
+              );
+            }).toList(),
+          );
+        },
+      ),
     );
   }
 

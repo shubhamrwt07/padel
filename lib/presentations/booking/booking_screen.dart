@@ -26,8 +26,8 @@ class BookingScreen extends GetView<BookingController> {
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Color.fromRGBO(61, 190, 100, 0.4),
                         Color.fromRGBO(31, 65, 187, 0.4),
+                        Color.fromRGBO(61, 190, 100, 0.4),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
