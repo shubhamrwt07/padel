@@ -17,6 +17,7 @@ class SearchField extends StatelessWidget {
   final Widget? suffix;
   final TextEditingController? controller;
   final  void Function(String) onChanged;   final  TapRegionCallback? onTabOutSide;
+  final TextStyle? hintStyle;
   const SearchField({
     super.key,
     required this.hintText,
@@ -33,7 +34,7 @@ class SearchField extends StatelessWidget {
     required this.onChanged,
     this.onTabOutSide,
     this.suffixIcon,
-    this.suffix
+    this.suffix,this.hintStyle
   });
 
   @override
@@ -59,7 +60,7 @@ class SearchField extends StatelessWidget {
           suffix: suffix,
           counterText: "",
           hintText: hintText,
-          hintStyle: Theme.of(context)
+          hintStyle:hintStyle?? Theme.of(context)
               .textTheme.labelLarge!
               .copyWith(color: AppColors.textColor),
           filled: true,
