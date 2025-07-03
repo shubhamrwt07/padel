@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
@@ -35,7 +36,7 @@ import 'routes_name.dart';
 class Routes {
   static const String initialRoute = RoutesName.bottomNav;
 
-  static const Duration defaultDuration = Duration(milliseconds: 200);
+  static const Duration defaultDuration = Duration(milliseconds: 500);
 
   static final route = [
     GetPage(
@@ -56,11 +57,12 @@ class Routes {
       name: RoutesName.signUp,
       page: () => const SignUpScreen(),
       binding: SignUpBinding(),
-      transition: Transition.downToUp,
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
     GetPage(
       name: RoutesName.forgotPassword,
+      curve: Curves.easeIn,
       page: () => const ForgotPasswordScreen(),
       binding: ForgotPasswordBinding(),
       transition: Transition.rightToLeft,

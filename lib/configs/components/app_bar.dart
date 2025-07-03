@@ -24,7 +24,7 @@ AppBar primaryAppBar({
         ? leading ??
         GestureDetector(
           onTap: () {
-            Navigator.pop(context);
+            Get.back();
           },
           child: Container(
             color: Colors.transparent,
