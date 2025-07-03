@@ -1,13 +1,13 @@
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
- import '../../data/request_models/authentication_models/login_model.dart';
+import '../../data/request_models/authentication_models/login_model.dart';
 import '../../handler/logger.dart';
 
 class LoginRepository {
   static final LoginRepository _instance = LoginRepository._internal();
   final DioClient dioClient = DioClient();
 
-   factory LoginRepository() {
+  factory LoginRepository() {
     return _instance;
   }
 
