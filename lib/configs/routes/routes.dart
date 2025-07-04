@@ -2,6 +2,8 @@ import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_binding.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
@@ -34,7 +36,7 @@ import 'routes_name.dart';
 class Routes {
   static const String initialRoute = RoutesName.splash;
 
-  static const Duration defaultDuration = Duration(milliseconds: 500);
+  static const Duration defaultDuration = Duration(milliseconds: 300);
 
   static final route = [
     GetPage(
@@ -49,6 +51,13 @@ class Routes {
       page: () => const LoginScreen(),
       binding: LoginBinding(),
       transition: Transition.fadeIn,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.otp,
+      page: () => const OtpScreen(),
+      binding: OtpBinding(),
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
     GetPage(
