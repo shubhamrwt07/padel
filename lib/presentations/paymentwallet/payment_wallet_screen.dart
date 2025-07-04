@@ -108,7 +108,7 @@ class PaymentWalletScreen extends StatelessWidget {
                       .textTheme
                       .bodyMedium!
                       .copyWith(
-///
+///////
                     color: AppColors.blackColor,
                   ),
                 ),
