@@ -19,6 +19,7 @@ class HomeScreen extends GetView<HomeController> {
     return GestureDetector(
       onTap: ()=>FocusManager.instance.primaryFocus!.unfocus(),
       child: Scaffold(
+
         appBar: primaryAppBar(
           showLeading: false,
           title: RichText(
@@ -38,7 +39,7 @@ class HomeScreen extends GetView<HomeController> {
                 ),
               ],
             ),
-          ).paddingOnly(left: Get.width * 0.03,top: Get.height*0.02),
+          ).paddingOnly(left: Get.width * 0.0,),
           context: context,
         ),
         body: Column(
@@ -50,12 +51,12 @@ class HomeScreen extends GetView<HomeController> {
               AppStrings.newBooking,
               style: Theme.of(
                 context,
-              ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
-            ).paddingOnly(bottom: Get.width * 0.02, left: Get.width * 0.05),
+              ).textTheme.headlineMedium!.copyWith(),
+            ).paddingOnly(bottom: Get.width * 0.02, left: Get.width * 0.02),
             locationAndDateTime(context),
             addToCart(context),
           ],
-        ).paddingOnly(),
+        ).paddingOnly(left: Get.width*.02,right: Get.width*.02),
       ),
     );
   }
@@ -64,16 +65,18 @@ class HomeScreen extends GetView<HomeController> {
     return SearchField(
       suffixIcon: Image.asset(
         Assets.imagesIcSearch,
-        scale: 3,
+        scale: 4,
         color: AppColors.textColor,
       ),
       hintText: AppStrings.search,
+      hintStyle: Get.textTheme
+          .bodyLarge!
+          .copyWith(color: AppColors.textColor),
       onChanged: (v) {},
     ).paddingOnly(
-      top: Get.height * 0.01,
       bottom: Get.height * 0.02,
-      left: Get.width * 0.05,
-      right: Get.width * 0.05,
+      left: Get.width * 0.02,
+      right: Get.width * 0.02,
     );
   }
 
@@ -86,12 +89,11 @@ class HomeScreen extends GetView<HomeController> {
           AppStrings.yourBooking,
           style: Theme.of(
             context,
-          ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
+          ).textTheme.headlineMedium!.copyWith(),
         ).paddingOnly(bottom: Get.width * 0.02),
         SizedBox(
           height: 100,
           child: Scrollbar(
-            controller: scrollController,
             thumbVisibility: false,
             radius: const Radius.circular(10),
             child: ListView.builder(
@@ -101,17 +103,17 @@ class HomeScreen extends GetView<HomeController> {
               itemBuilder: (context, index) {
                 return Container(
                   height: 95,
-                  width: 193,
+                  width: 230,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.lightBlueColor),
+                    border: Border.all(color: AppColors.tabColor),
                   ),
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                         children: [
                           Container(
                             height: 34,
@@ -124,24 +126,25 @@ class HomeScreen extends GetView<HomeController> {
                               ),
                             ),
                           ),
-                          Column(
+                          Column(mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
                                 "The Good Club",
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
+                                style: Theme.of(context).textTheme.labelLarge!.copyWith(color: AppColors.blackColor),
+                              ).paddingOnly(right: Get.width*.08),
                               Row(
                                 children: [
                                   Image.asset(
                                     Assets.imagesIcLocation,
                                     scale: 3,
+                                    color: AppColors.blackColor,
                                   ),
                                   Text(
                                     "Chandigarh 160001",
-                                    style: Theme.of(context).textTheme.displayMedium,
-                                  ),
+                                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: AppColors.blackColor)
+                                  ).paddingOnly(left: 4)
                                 ],
-                              ),
+                              ).paddingOnly(top: 0,left: 6),
                             ],
                           ),
                           Column(
@@ -152,18 +155,18 @@ class HomeScreen extends GetView<HomeController> {
                                   Icon(
                                     Icons.star,
                                     color: AppColors.secondaryColor,
-                                    size: 15,
+                                    size: 13,
                                   ),
                                   Text(
                                     "4.9",
                                     style: Theme.of(context).textTheme.bodySmall,
-                                  ),
+                                  )
                                 ],
-                              ),
+                              ).paddingOnly(bottom: 10),
                               Icon(
                                 Icons.directions,
                                 color: AppColors.secondaryColor,
-                                size: 13,
+                                size: 15,
                               ),
                             ],
                           ),
@@ -188,14 +191,14 @@ class HomeScreen extends GetView<HomeController> {
                                   Text(
                                     "8:00am",
                                     style: Theme.of(context).textTheme.labelSmall!
-                                        .copyWith(color: AppColors.labelBlackColor,fontSize: 8),
+                                        .copyWith(color: AppColors.blackColor,),
                                   ).paddingOnly(left: 5),
                                 ],
                               ),
                               Text(
                                 "(60m)",
                                 style: Theme.of(context).textTheme.labelSmall!
-                                    .copyWith(color: AppColors.labelBlackColor),
+                                    .copyWith(color: AppColors.blackColor,),
                               ).paddingOnly(),
                             ],
                           ),
@@ -209,7 +212,7 @@ class HomeScreen extends GetView<HomeController> {
           ),
         ),
       ],
-    ).paddingOnly(left: Get.width * 0.05, bottom: Get.height * 0.02);
+    ).paddingOnly(left: Get.width * 0.02, bottom: Get.height * 0.02);
   }
 
   Widget locationAndDateTime(BuildContext context) {
@@ -350,7 +353,7 @@ class HomeScreen extends GetView<HomeController> {
           },
           child: Container(
             height: 30,
-            width: Get.width * 0.62,
+            width: Get.width * 0.6,
             decoration: BoxDecoration(
               color: AppColors.textFieldColor,
               borderRadius: BorderRadius.circular(8),
@@ -406,7 +409,7 @@ class HomeScreen extends GetView<HomeController> {
               color: AppColors.textFieldColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.03),
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.018),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -415,13 +418,14 @@ class HomeScreen extends GetView<HomeController> {
                     DateFormat('dd/MM/yyyy')
                         .format(controller.selectedDate.value),
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      fontSize: 12,
                       color: AppColors.textColor,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.calendar_month_outlined,
-                  size: 17,
+                  size: 13,
                   color: AppColors.textColor,
                 ),
               ],
@@ -430,8 +434,8 @@ class HomeScreen extends GetView<HomeController> {
         ),
       ],
     ).paddingOnly(
-      left: Get.width * 0.05,
-      right: Get.width * 0.05,
+      left: Get.width * 0.02,
+      right: Get.width * 0.02,
       bottom: Get.height * 0.02,
     );
   }
@@ -452,7 +456,7 @@ class HomeScreen extends GetView<HomeController> {
                 height: Get.height * 0.13,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.lightBlueColor),
+                  border: Border.all(color: AppColors.tabColor),
                 ),
                 padding: EdgeInsets.all(10),
                 // color: Colors.red,
@@ -464,7 +468,7 @@ class HomeScreen extends GetView<HomeController> {
                       children: [
                         Container(
                           height: 95,
-                          width: 113,
+                          width: 118,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
@@ -489,11 +493,12 @@ class HomeScreen extends GetView<HomeController> {
                                     Image.asset(
                                       Assets.imagesIcLocation,
                                       scale: 3,
+                                      color: AppColors.blackColor,
                                     ),
                                     Text(
-                                      " Chandigarh 160001",
+                                      " Chandigarh, 160001",
                                       style: Theme.of(context).textTheme.bodyLarge!
-                                          .copyWith(fontWeight: FontWeight.w500),
+                                          .copyWith(fontWeight: FontWeight.w500,color: AppColors.blackColor),
                                     ),
                                   ],
                                 ),
@@ -501,12 +506,12 @@ class HomeScreen extends GetView<HomeController> {
                                   "4 Courts | Free parking | Shed",
                                   style: Theme.of(context).textTheme.bodyLarge!
                                       .copyWith(color: AppColors.labelBlackColor),
-                                ).paddingOnly(top: 5),
+                                ).paddingOnly(top: 0,bottom: 0),
                               ],
                             ),
                             PrimaryButton(
                               height: 25,
-                              textStyle: Theme.of(context).textTheme.displayLarge!.copyWith(color: AppColors.whiteColor,fontSize: 7),
+                              textStyle: Theme.of(context).textTheme.displayLarge!.copyWith(color: AppColors.whiteColor,fontSize: 10),
                               width: Get.width * 0.2,
                               onTap: () {
                                 Get.toNamed(RoutesName.booking);
@@ -556,19 +561,19 @@ class HomeScreen extends GetView<HomeController> {
                                 Icon(
                                   Icons.star,
                                   color: AppColors.secondaryColor,
-                                  size: 15,
+                                  size: 11,
                                 ),
                                 Text(
                                   "4.9",
                                   style: Theme.of(context).textTheme.bodyLarge!
-                                      .copyWith(fontWeight: FontWeight.w500),
-                                ),
+                                      .copyWith(),
+                                ).paddingOnly(),
                               ],
                             ),
                             Icon(
                               Icons.directions,
                               color: AppColors.secondaryColor,
-                              size: 13,
+                              size: 15,
                             ),
                           ],
                         ),
@@ -587,7 +592,7 @@ class HomeScreen extends GetView<HomeController> {
                               TextSpan(
                                 text: ' 1200',
                                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: AppColors.blueColor
                                   // Keep other styles consistent
                                 ),
@@ -600,8 +605,8 @@ class HomeScreen extends GetView<HomeController> {
                   ],
                 ),
               ).paddingOnly(
-                left: Get.width * 0.05,
-                right: Get.width * 0.05,
+                left: Get.width * 0.02,
+                right: Get.width * 0.02,
                 bottom: 8,
               ),
             );

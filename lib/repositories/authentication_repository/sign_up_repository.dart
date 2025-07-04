@@ -1,4 +1,7 @@
+import 'package:padel_mobile/data/request_models/authentication_models/otp_model.dart';
+import 'package:padel_mobile/data/request_models/authentication_models/reset_password.model.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
+import 'package:padel_mobile/data/request_models/common_model.dart';
 
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
@@ -38,6 +41,83 @@ class SignUpRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Login failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  Future<OTPModel> sendOTP({required Map<String, dynamic> body}) async {
+    try {
+      CustomLogger.logMessage(msg: "OTP BODY:-> $body", level: LogLevel.info);
+      final response = await dioClient.post(AppEndpoints.sendOTP, data: body);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "OTP send successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return OTPModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          "OTP send failed with status code: ${response.statusCode}",
+        );
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "OTP send failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  Future<CommonModel> verifyOTP({required Map<String, dynamic> body}) async {
+    try {
+      CustomLogger.logMessage(msg: "OTP BODY:-> $body", level: LogLevel.info);
+      final response = await dioClient.post(AppEndpoints.verifyOTP, data: body);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "OTP Verified successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return CommonModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          "OTP verification failed with status code: ${response.statusCode}",
+        );
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "OTP verification failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+  Future<ResetPasswordModel> resetPassword({required Map<String, dynamic> body}) async {
+    try {
+      CustomLogger.logMessage(msg: "Reset Password body:-> $body", level: LogLevel.info);
+      final response = await dioClient.put(AppEndpoints.resetPassword, data: body);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Reset Password successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return ResetPasswordModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          "Reset Password failed with status code: ${response.statusCode}",
+        );
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Reset Password failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );

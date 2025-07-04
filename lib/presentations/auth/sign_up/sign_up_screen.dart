@@ -203,7 +203,7 @@ class SignUpScreen extends GetView<SignUpController> {
         Obx(
           () => PrimaryButton(
             onTap: () async {
-              await controller.createAccount();
+              await controller.onCreate();
             },
             text: AppStrings.create,
             child: controller.isLoading.value

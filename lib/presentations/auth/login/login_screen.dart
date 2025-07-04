@@ -3,7 +3,9 @@ import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart
 import '../../../configs/components/loader_widgets.dart';
 
 class LoginScreen extends GetView<LoginController> {
-  const LoginScreen({super.key});
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+   LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +17,13 @@ class LoginScreen extends GetView<LoginController> {
           body: SingleChildScrollView(
             child: Column(
               children: [
-                Column(children: [headerContent(context), formFields(context)]),
-                bottomButtonAndContent(context),
+                Column(
+                  children: [
+                    headerContent(context),
+                    formFields(context, formKey),
+                  ],
+                ),
+                bottomButtonAndContent(context, formKey),
               ],
             ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
           ),
@@ -43,9 +50,9 @@ class LoginScreen extends GetView<LoginController> {
     );
   }
 
-  Widget formFields(BuildContext context) {
+  Widget formFields(BuildContext context, GlobalKey<FormState> key) {
     return Form(
-      key: controller.formKey,
+      key: key,
       child: Column(
         children: [
           PrimaryTextField(
@@ -86,7 +93,6 @@ class LoginScreen extends GetView<LoginController> {
                   ),
                 ),
               ),
-
             ).paddingOnly(bottom: Get.height * 0.02),
           ),
 
@@ -117,7 +123,7 @@ class LoginScreen extends GetView<LoginController> {
     );
   }
 
-  Widget bottomButtonAndContent(BuildContext context) {
+  Widget bottomButtonAndContent(BuildContext context, GlobalKey<FormState> key) {
     return Column(
       children: [
         GestureDetector(
@@ -135,13 +141,15 @@ class LoginScreen extends GetView<LoginController> {
 
         Obx(
           () => PrimaryButton(
-            onTap: ()async {
-            await  controller.onLogin();
+            onTap: () async {
+              if (key.currentState!.validate()) {
+                await controller.onLogin();
+              }
             },
-            text:
-
-                 AppStrings.signIn,
-            child:controller.isLoading.value?AppLoader(size: 35,strokeWidth: 4,):null,
+            text: AppStrings.signIn,
+            child: controller.isLoading.value
+                ? AppLoader(size: 35, strokeWidth: 4)
+                : null,
           ),
         ),
 
@@ -150,5 +158,3 @@ class LoginScreen extends GetView<LoginController> {
     );
   }
 }
-
-
