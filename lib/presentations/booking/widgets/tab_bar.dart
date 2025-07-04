@@ -4,7 +4,7 @@ PreferredSizeWidget myTabBar(TabController tabController, BuildContext context,)
   return TabBar(
     controller: tabController,
     isScrollable: true,
-    unselectedLabelStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 10,color: AppColors.textColor,fontWeight: FontWeight.w400),
+    unselectedLabelStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 12,color: AppColors.textColor,fontWeight: FontWeight.w500),
     labelStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 12,color: AppColors.primaryColor,fontWeight: FontWeight.w500),
     // indicatorSize: TabBarIndicatorSize.tab,
     dividerHeight: 0.5,

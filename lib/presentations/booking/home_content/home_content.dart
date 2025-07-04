@@ -344,7 +344,7 @@ class HomeContent extends StatelessWidget {
           ).paddingOnly(bottom: Get.height * 0.01),
           Container(
             height: controller.isShowAllReviews.value ? Get.height * 0.55 : Get
-                .height * 0.3,
+                .height * 0.29,
             color: Colors.transparent,
             child: ListView.builder(
               itemCount: 10,physics: controller.isShowAllReviews.value?ScrollPhysics():NeverScrollableScrollPhysics(),

@@ -9,7 +9,7 @@ class BookingSuccessfulScreen extends StatelessWidget {
       body: Column(
         children: [
           Center(
-            child: Image.asset(Assets.imagesImgBookingSuccessful, scale: 7),
+            child: Image.asset(Assets.imagesImgBookingSuccessful, scale: 9),
           ).paddingOnly(top: Get.height * 0.2),
           Text(
             AppStrings.bookingSuccessful,

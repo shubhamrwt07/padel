@@ -246,7 +246,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
               }
             },
             text: AppStrings.submit,
-          ).paddingOnly(top:controller.selectedReason.value == 'Other'?Get.height*0.155:Get.height*0.29),
+          ).paddingOnly(top:controller.selectedReason.value == 'Other'?Get.height*0.14:Get.height*0.29),
       ],
     );
   }
