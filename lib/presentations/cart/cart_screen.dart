@@ -48,8 +48,8 @@ class CartScreen extends StatelessWidget {
                   children: [
                     Text(
                       "Padel Haus",
-                      style: Theme.of(context).textTheme.headlineSmall!
-                          .copyWith(fontWeight: FontWeight.w500),
+                      style: Theme.of(context).textTheme.labelLarge!
+                          .copyWith(),
                     ),
                   ],
                 ).paddingOnly(
@@ -65,12 +65,12 @@ class CartScreen extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: "27June 2025 ",
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
+                            style: Theme.of(context).textTheme.labelLarge!
+                                .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
                           ),
                           TextSpan(
                             text: "8:00am (60m)",
-                            style: Theme.of(context).textTheme.bodyLarge!
+                            style: Theme.of(context).textTheme.labelLarge!
                                 .copyWith(
                               fontWeight: FontWeight.w500,
                               color: AppColors.textColor,
@@ -83,12 +83,12 @@ class CartScreen extends StatelessWidget {
                       children: [
                         Text(
                           "₹ ",
-                          style: Theme.of(context).textTheme.labelMedium!
+                          style: Theme.of(context).textTheme.labelLarge!
                               .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
                         ),
                         Text(
                           "1000",
-                          style: Theme.of(context).textTheme.labelMedium!
+                          style: Theme.of(context).textTheme.labelLarge!
                               .copyWith(fontWeight: FontWeight.w500),
                         ),
                         Image.asset(
@@ -111,12 +111,12 @@ class CartScreen extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: "30June 2025 ",
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
+                            style: Theme.of(context).textTheme.labelLarge!
+                                .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
                           ),
                           TextSpan(
                             text: "8:00am (60m)",
-                            style: Theme.of(context).textTheme.bodyLarge!
+                            style: Theme.of(context).textTheme.labelLarge!
                                 .copyWith(
                               fontWeight: FontWeight.w500,
                               color: AppColors.textColor,
@@ -129,12 +129,12 @@ class CartScreen extends StatelessWidget {
                       children: [
                         Text(
                           "₹ ",
-                          style: Theme.of(context).textTheme.labelMedium!
+                          style: Theme.of(context).textTheme.labelLarge!
                               .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
                         ),
                         Text(
                           "1000",
-                          style: Theme.of(context).textTheme.labelMedium!
+                          style: Theme.of(context).textTheme.labelLarge!
                               .copyWith(fontWeight: FontWeight.w500),
                         ),
                         Image.asset(

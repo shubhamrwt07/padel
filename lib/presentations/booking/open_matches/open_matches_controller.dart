@@ -1,9 +1,11 @@
-import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
-class OpenMatchesController extends GetxController{
+class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
-  String? selectedTime;
+  RxList<String> selectedTimes = <String>[].obs;
   Rx<DateTime> selectedDate = DateTime.now().obs;
+
   final List<String> timeSlots = [
     "8:00am",
     "8:10am",

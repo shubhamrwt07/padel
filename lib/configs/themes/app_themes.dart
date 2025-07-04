@@ -94,7 +94,7 @@ class AppThemes {
         fontWeight: FontWeight.w600,
         fontFamily: "Lato",
         color: AppColors.textColor,
-        fontSize: 10,
+        fontSize: 12,
       ),
       displayLarge: TextStyle(
         fontWeight: FontWeight.w600,

@@ -135,17 +135,17 @@ class DetailsPage extends GetView<DetailsPageController> {
           gameCard(),
           SizedBox(height: Get.height * .015),
           Container(
-            height: Get.height * .16,
+            // height: Get.height * .16,
             width: Get.width,
             decoration: BoxDecoration(
               color: AppColors.playerCardBackgroundColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.greyColor),
             ),
-            child: Row(
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  height: Get.height * .14,
+                  height: Get.height * .12,
                   width: Get.width * .3,
 
                   decoration: BoxDecoration(
@@ -157,44 +157,37 @@ class DetailsPage extends GetView<DetailsPageController> {
                       borderRadius: BorderRadius.circular(8),
                       child: Image.asset(Assets.imagesImgDummy2,fit: BoxFit.cover,)),
                 ),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: Get.width * .49,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Container(
+                  width: Get.width*.51,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("The Good Club", style: Get.textTheme.bodySmall),
                           SvgPicture.asset(Assets.imagesDirections,),
+
                         ],
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    SizedBox(
-                      height: Get.height * .05,
-                      width: Get.width * .49,
-                      child: Text(
+                      Text(
                         "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001",
                         style: Get.textTheme.bodyLarge!.copyWith(
                           fontWeight: FontWeight.w400,
                         ),
                       ),
+                      Text(
+                        "More Info",
+                        style: Get.textTheme.bodyLarge!.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.primaryColor, // Blue underline
 
-                    ),
-                    Text(
-                      "More Info",
-                      style: Get.textTheme.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.primaryColor,
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppColors.primaryColor, // Blue underline
-
+                        ),
                       ),
-                    ),
-                  ],
-                ).paddingOnly(right: 10),
+                    ],
+                  ).paddingOnly(right: 0),
+                ),
               ],
             ).paddingAll(15),
           ),
@@ -329,7 +322,7 @@ class DetailsPage extends GetView<DetailsPageController> {
 
   Widget gameCard() {
     return Container(
-      height: Get.height * .2,
+      // height: Get.height * .22,
       width: Get.width,
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.greyColor),
@@ -340,11 +333,11 @@ class DetailsPage extends GetView<DetailsPageController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Players", style: Get.textTheme.headlineSmall),
-          SizedBox(height: 10),
+          SizedBox(height: 5),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              playerCard("Courtney Henry", true,Assets.imagesImgCustomerPicBooking),
+              playerCard("Courtney", true,Assets.imagesImgCustomerPicBooking),
               playerCard("Devon Lane", true,Assets.imagesImgCustomerPicBooking),
               Container(
                 height: Get.height * .09,
@@ -352,16 +345,15 @@ class DetailsPage extends GetView<DetailsPageController> {
                 color: AppColors.greyColor,
               ),
               playerCard("Add me", false,''),
-              playerCard("", false,''),
+              playerCard("Add me", false,''),
             ],
           ),
-          SizedBox(height: Get.height*.016),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [Text("Team A"), Text("Team B")],
-          ),
+          ).paddingOnly(top: 10),
         ],
-      ).paddingOnly(left: 15, right: 15, top: 15),
+      ).paddingOnly(left: 15, right: 15, top: 10,bottom: 5),
     );
   }
 }

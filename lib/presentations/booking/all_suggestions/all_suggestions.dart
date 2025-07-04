@@ -53,8 +53,8 @@ class AllSuggestions extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSlotSelector(context),
-            const SizedBox(height: 10),
+            // _buildSlotSelector(context),
+            // const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -89,48 +89,44 @@ class AllSuggestions extends StatelessWidget {
     );
   }
 
-  Widget _buildSlotSelector(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Slots", style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 5),
-        Obx(
-              () => Row(
-            children: controller.slots.map((slot) {
-              final isSelected = controller.selectedSlot.value == slot;
-              return Padding(
-                padding: const EdgeInsets.all(.0),
-                child: GestureDetector(
-                  onTap: () => controller.selectSlot(slot),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.black
-                          : AppColors.playerCardBackgroundColor,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: isSelected ? Colors.black : Colors.grey.shade400,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      slot,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ).paddingOnly(left: 10),
-                ),
-              );
-            }).toList(),
-          ).paddingOnly(top: 10),
-        ),
-      ],
-    ).paddingOnly(left: Get.width*.03,right: Get.width*.03);
-  }
+  // Widget _buildSlotSelector(BuildContext context) {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text("Slots", style: Theme.of(context).textTheme.headlineSmall),
+  //       Obx(
+  //             () => Row(
+  //           children: controller.slots.map((slot) {
+  //             final isSelected = controller.selectedSlot.value == slot;
+  //             return GestureDetector(
+  //               onTap: () => controller.selectSlot(slot),
+  //               child: Container(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+  //                 decoration: BoxDecoration(
+  //                   color: isSelected
+  //                       ? Colors.black
+  //                       : AppColors.playerCardBackgroundColor,
+  //                   borderRadius: BorderRadius.circular(30),
+  //                   border: Border.all(
+  //                     color: isSelected ? Colors.black : Colors.grey.shade400,
+  //                     width: 1,
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   slot,
+  //                   style: TextStyle(
+  //                     color: isSelected ? Colors.white : Colors.black,
+  //                     fontWeight: FontWeight.w500,
+  //                   ),
+  //                 ),
+  //               ).paddingOnly(left: 10),
+  //             );
+  //           }).toList(),
+  //         ),
+  //       ),
+  //     ],
+  //   ).paddingOnly(left: Get.width*.03,right: Get.width*.03);
+  // }
 
   Widget _buildMatchCard(BuildContext context) {
     return InkWell(
@@ -198,28 +194,32 @@ class AllSuggestions extends StatelessWidget {
 
   Widget _buildMatchFooter(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 5, bottom: 15, left: 15),
+      padding: const EdgeInsets.only(top: 5, bottom: 15, left: 15,right: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("The Good Club", style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
             children: [
-              Image.asset(
-                Assets.imagesIcLocation,
-                scale: 3,
-              ),
-              SizedBox(
-                width: Get.width * .61,
+              Row(
+                children: [
+                  Image.asset(
+                    Assets.imagesIcLocation,
+                    scale: 3,
+                  ),
+                  SizedBox(
+                    // width: Get.width * .61,61
 
-                child:
+                    child:
 
-                Text(
-                  'Chandigarh 160001',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                    Text(
+                      'Chandigarh 160001',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                ],
               ),
               Container(
                 alignment: Alignment.center,
@@ -229,8 +229,8 @@ class AllSuggestions extends StatelessWidget {
                     Text(
                       '₹',
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: AppColors.primaryColor,
-                        fontFamily: "Roboto"
+                          color: AppColors.primaryColor,
+                          fontFamily: "Roboto"
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -243,7 +243,8 @@ class AllSuggestions extends StatelessWidget {
                     ),
                   ],
                 ),
-              ).paddingOnly(right: Get.width * .04),
+              ).paddingOnly(right: Get.width * .00),
+
             ],
           ),
         ],

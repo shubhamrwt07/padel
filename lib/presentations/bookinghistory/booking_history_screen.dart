@@ -110,7 +110,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                 "Padel Haus",
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headlineSmall!
+                                    .labelLarge!
                                     .copyWith(
                                   color: AppColors.blackColor,
                                 ),
