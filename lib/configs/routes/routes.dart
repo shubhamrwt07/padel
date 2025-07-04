@@ -2,6 +2,8 @@ import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_binding.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_screen.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_binding.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
@@ -11,7 +13,6 @@ import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_
 import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
-import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
@@ -29,14 +30,13 @@ import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
-import '../../presentations/editProfile/edit_profile_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
-  static const String initialRoute = RoutesName.bottomNav;
+  static const String initialRoute = RoutesName.splash;
 
-  static const Duration defaultDuration = Duration(milliseconds: 500);
+  static const Duration defaultDuration = Duration(milliseconds: 300);
 
   static final route = [
     GetPage(
@@ -51,6 +51,13 @@ class Routes {
       page: () => const LoginScreen(),
       binding: LoginBinding(),
       transition: Transition.fadeIn,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.otp,
+      page: () => const OtpScreen(),
+      binding: OtpBinding(),
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
     GetPage(
@@ -87,13 +94,6 @@ class Routes {
       page: () => ProfileUi(),
       binding: ProfileBinding(),
       transition: Transition.fadeIn,
-      transitionDuration: defaultDuration,
-    ),
-    GetPage(
-      name: RoutesName.editProfile,
-      page: () => EditProfileUi(),
-      binding: EditProfileBinding(),
-      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
 
