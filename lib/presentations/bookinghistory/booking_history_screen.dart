@@ -112,8 +112,6 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                     .textTheme
                                     .headlineSmall!
                                     .copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
                                   color: AppColors.blackColor,
                                 ),
                               ),
@@ -131,8 +129,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                           .textTheme
                                           .bodyLarge!
                                           .copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 8,
+
                                         color: AppColors.darkGrey,
                                       ),
                                     ),
@@ -146,7 +143,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                     children: [
                                       Icon(
                                         Icons.alarm,
-                                        size: 10,
+                                        size: 15,
                                       ),
                                       Text(
                                         "Thu,27June",
@@ -154,19 +151,17 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                             .textTheme
                                             .headlineSmall!
                                             .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 8,
+
                                           color: AppColors.blackColor,
                                         ),
-                                      ).paddingOnly(left: 2),
+                                      ).paddingOnly(left: 5),
                                       Text(
                                         "8:00am",
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineSmall!
                                             .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 8,
+
                                           color: AppColors.blackColor,
                                         ),
                                       ).paddingOnly(left: 5),
@@ -176,8 +171,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                             .textTheme
                                             .headlineSmall!
                                             .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 8,
+
                                           color: AppColors
                                               .labelBlackColor,
                                         ),
@@ -186,7 +180,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi>
                                   ),
                                   PrimaryButton(
                                     height: 25,
-                                    textStyle: Theme.of(context).textTheme.displayLarge!.copyWith(color: AppColors.whiteColor,fontSize: 7),
+                                    textStyle: Theme.of(context).textTheme.displayLarge!.copyWith(color: AppColors.whiteColor,),
                                     width: Get.width * 0.17,
                                     onTap: () {
                                       Get.toNamed(

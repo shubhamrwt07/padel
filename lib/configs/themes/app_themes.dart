@@ -85,10 +85,10 @@ class AppThemes {
         fontSize: 13,
       ),
       bodyMedium: TextStyle(
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         fontFamily: "Lato",
         color: AppColors.textColor,
-        fontSize: 12,
+        fontSize: 16,
       ),
       bodySmall: TextStyle(
         fontWeight: FontWeight.w600,

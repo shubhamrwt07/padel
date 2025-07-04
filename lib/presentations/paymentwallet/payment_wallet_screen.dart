@@ -70,8 +70,7 @@ class PaymentWalletScreen extends StatelessWidget {
                           Text(
                             "Available balance",
                             style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10,
+
                               color: AppColors.labelBlackColor,
                             ),
                           ).paddingOnly(top: 5),
@@ -81,7 +80,6 @@ class PaymentWalletScreen extends StatelessWidget {
                         "₹",
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           color: AppColors.primaryColor,
-
                           fontFamily: "Roboto"
                         ),
                       ).paddingOnly(left: Get.width * .4),
@@ -110,9 +108,8 @@ class PaymentWalletScreen extends StatelessWidget {
                       .textTheme
                       .bodyMedium!
                       .copyWith(
-                    fontWeight: FontWeight.w500,
+
                     color: AppColors.blackColor,
-                    fontSize: 13,
                   ),
                 ),
                 GestureDetector(
@@ -148,21 +145,12 @@ class PaymentWalletScreen extends StatelessWidget {
                                 style: Theme
                                     .of(context)
                                     .textTheme
-                                    .bodySmall!
+                                    .labelLarge!
                                     .copyWith(
-                                  color: AppColors.labelBlackColor,
+                                  color: AppColors.blackColor,
                                 ),
                               ),
-                              Text(
-                                "Gpay",
-                                style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .bodySmall!
-                                    .copyWith(
-                                  color: AppColors.labelBlackColor,
-                                ),
-                              ),
+
                             ],
                           ),
                         ],
