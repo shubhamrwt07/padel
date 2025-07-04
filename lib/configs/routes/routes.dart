@@ -13,7 +13,6 @@ import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_
 import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
-import 'package:padel_mobile/presentations/editProfile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
@@ -31,7 +30,6 @@ import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
-import '../../presentations/editProfile/edit_profile_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
@@ -96,13 +94,6 @@ class Routes {
       page: () => ProfileUi(),
       binding: ProfileBinding(),
       transition: Transition.fadeIn,
-      transitionDuration: defaultDuration,
-    ),
-    GetPage(
-      name: RoutesName.editProfile,
-      page: () => EditProfileUi(),
-      binding: EditProfileBinding(),
-      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
 

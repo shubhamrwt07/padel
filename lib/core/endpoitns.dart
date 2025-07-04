@@ -4,4 +4,6 @@ class AppEndpoints {
   static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
   static const String login = "${BASE_URL}customerLogin";
   static const String signUp = "${BASE_URL}customerSignup";
+  static const String fetchUserProfile = "${BASE_URL}getCustomer";
+  static const String updateUserProfile = "${BASE_URL}updateCustomer";
 }

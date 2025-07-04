@@ -1,7 +1,9 @@
+import 'package:padel_mobile/presentations/profile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
 class ProfileUi extends GetView<ProfileController> {
   const ProfileUi({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,10 +12,9 @@ class ProfileUi extends GetView<ProfileController> {
         showLeading: false,
         title: Text(
           AppStrings.profile,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
         ).paddingOnly(left: Get.width * 0.02),
         context: context,
       ),
@@ -26,7 +27,7 @@ class ProfileUi extends GetView<ProfileController> {
                 alignment: Alignment.bottomRight,
                 children: [
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Get.toNamed(RoutesName.editProfile);
                     },
                     child: Container(
@@ -36,8 +37,11 @@ class ProfileUi extends GetView<ProfileController> {
                         color: AppColors.tabSelectedColor,
                         borderRadius: BorderRadius.circular(50),
                       ),
-                      child: Icon(Icons.person,
-                          size: 90, color: AppColors.labelBlackColor),
+                      child: Icon(
+                        Icons.person,
+                        size: 90,
+                        color: AppColors.labelBlackColor,
+                      ),
                     ),
                   ),
                   Positioned(
@@ -49,10 +53,7 @@ class ProfileUi extends GetView<ProfileController> {
                         color: AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
-                      child:  Image.asset(
-                        Assets.imagesIcCamara,
-                        scale: 5,
-                      ),
+                      child: Image.asset(Assets.imagesIcCamara, scale: 5),
                     ),
                   ),
                 ],
@@ -61,29 +62,25 @@ class ProfileUi extends GetView<ProfileController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Jane Cooper",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall!
-                        .copyWith(
+                    controller.profileModel.value.response!.name ??
+                        'Unknown',
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(left: 5),
                   Text(
-                    "jackson.graham@example.com",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    controller.profileModel.value.response!.email ??
+                        'unknown@gmail.com',
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       fontWeight: FontWeight.w500,
                       color: AppColors.labelBlackColor,
                     ),
                   ).paddingOnly(left: 5),
                   GestureDetector(
                     onTap: () {
-                      Get.toNamed(RoutesName.editProfile);
+                      Get.to(() => EditProfileUi());
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -103,16 +100,13 @@ class ProfileUi extends GetView<ProfileController> {
                       ),
                       child: Text(
                         AppStrings.editProfile,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 8,
-                          fontWeight: FontWeight.w600
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ).paddingOnly(top: 10,left: 5),
+                    ).paddingOnly(top: 10, left: 5),
                   ),
                 ],
               ).paddingOnly(left: 10),
@@ -134,10 +128,7 @@ class ProfileUi extends GetView<ProfileController> {
                   ),
                   Text(
                     AppStrings.booking,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: AppColors.labelBlackColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -155,19 +146,12 @@ class ProfileUi extends GetView<ProfileController> {
               color: Colors.transparent,
               child: Row(
                 children: [
-                  Image.asset(
-                    Assets.imagesIcBalanceWallet,
-                    scale: 5,
-                  ),
+                  Image.asset(Assets.imagesIcBalanceWallet, scale: 5),
                   Text(
                     AppStrings.payments,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: AppColors.labelBlackColor,
                       fontWeight: FontWeight.w600,
-
                     ),
                   ).paddingOnly(left: Get.width * .1),
                 ],
@@ -177,7 +161,10 @@ class ProfileUi extends GetView<ProfileController> {
           GestureDetector(
             onTap: () {
               // Get.toNamed(RoutesName.cart);
-              Get.to(()=>CartScreen(buttonType: "true"),transition: Transition.rightToLeft);
+              Get.to(
+                () => CartScreen(buttonType: "true"),
+                transition: Transition.rightToLeft,
+              );
             },
             child: Container(
               color: Colors.transparent,
@@ -191,10 +178,7 @@ class ProfileUi extends GetView<ProfileController> {
                   ),
                   Text(
                     AppStrings.cart,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: AppColors.labelBlackColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -204,7 +188,7 @@ class ProfileUi extends GetView<ProfileController> {
             ),
           ),
           GestureDetector(
-            onTap: ()=>Get.toNamed(RoutesName.support),
+            onTap: () => Get.toNamed(RoutesName.support),
             child: Container(
               color: Colors.transparent,
               height: 60,
@@ -217,10 +201,7 @@ class ProfileUi extends GetView<ProfileController> {
                   ),
                   Text(
                     AppStrings.helpSupport,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: AppColors.labelBlackColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -234,19 +215,12 @@ class ProfileUi extends GetView<ProfileController> {
             height: 60,
             child: Row(
               children: [
-                Image.asset(
-                  Assets.imagesIcPrivacy,
-                  scale: 5,
-                ),
+                Image.asset(Assets.imagesIcPrivacy, scale: 5),
                 Text(
                   AppStrings.privacy,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: AppColors.labelBlackColor,
                     fontWeight: FontWeight.w600,
-
                   ),
                 ).paddingOnly(left: Get.width * .1),
               ],
@@ -268,13 +242,9 @@ class ProfileUi extends GetView<ProfileController> {
                   ).paddingOnly(left: 3),
                   Text(
                     AppStrings.logout,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: Colors.red,
                       fontWeight: FontWeight.w600,
-
                     ),
                   ).paddingOnly(left: Get.width * .11),
                 ],
@@ -285,5 +255,4 @@ class ProfileUi extends GetView<ProfileController> {
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
     );
   }
-
 }

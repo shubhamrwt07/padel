@@ -24,6 +24,7 @@ class PrimaryTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final String? Function(String?)? validator;
   final String? prefixText;
+  final String? initialValue;
   final Widget? prefix;
   final Widget? prefixIcon;
   final EdgeInsets? scrollPadding;
@@ -32,6 +33,7 @@ class PrimaryTextField extends StatelessWidget {
   const PrimaryTextField({
     super.key,
     this.action,
+    this.initialValue,
     this.onFieldSubmitted,
     this.validator,
     required this.hintText,
@@ -58,7 +60,7 @@ class PrimaryTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-
+      initialValue: initialValue,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: validator,
       obscureText: obscureText??false,
