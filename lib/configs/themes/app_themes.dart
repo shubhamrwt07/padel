@@ -100,13 +100,13 @@ class AppThemes {
         fontWeight: FontWeight.w600,
         fontFamily: "Lato",
         color: AppColors.textColor,
-        fontSize: 10,
+        fontSize: 6,
       ),
       displayMedium: TextStyle(
         fontWeight: FontWeight.w500,
         fontFamily: "Lato",
         color: AppColors.textColor,
-        fontSize: 11,
+        fontSize: 6,
       ),
     ),
   );

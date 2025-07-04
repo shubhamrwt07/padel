@@ -1,10 +1,11 @@
 // ✅ FILE: profile_controller.dart
-import 'dart:convert';
+ import 'dart:developer';
+ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
@@ -158,8 +159,9 @@ class ProfileController extends GetxController {
                       SizedBox(height: 16),
 
                       // Cancel button
+ 
                       Container(
-                        width: double.infinity,
+                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: () => Get.back(),
                           style: OutlinedButton.styleFrom(

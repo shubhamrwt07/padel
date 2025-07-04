@@ -48,7 +48,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.login,
-      page: () => const LoginScreen(),
+      page: () =>   LoginScreen(),
       binding: LoginBinding(),
       transition: Transition.fadeIn,
       transitionDuration: defaultDuration,
