@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';

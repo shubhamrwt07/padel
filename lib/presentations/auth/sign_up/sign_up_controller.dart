@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
-import 'package:padel_mobile/presentations/auth/login/login_controller.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_controller.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
 import 'package:padel_mobile/repositories/authentication_repository/sign_up_repository.dart';
@@ -14,7 +14,8 @@ import '../../../data/request_models/authentication_models/login_model.dart';
 class SignUpController extends GetxController {
   //Sing up repository
   SignUpRepository signUpRepository = SignUpRepository();
-  LoginRepository loginRepository= LoginRepository();
+  LoginRepository loginRepository = LoginRepository();
+
   //Form key
   final formKey = GlobalKey<FormState>();
 
@@ -50,6 +51,7 @@ class SignUpController extends GetxController {
     } else if (!GetUtils.isEmail(emailController.text)) {
       return AppStrings.invalidEmail;
     }
+    return null;
   }
 
   String? validatePhone() {
@@ -58,6 +60,7 @@ class SignUpController extends GetxController {
     } else if (!GetUtils.isPhoneNumber(phoneController.text)) {
       return AppStrings.invalidPhone;
     }
+    return null;
   }
 
   String? validatePassword() {
@@ -66,6 +69,7 @@ class SignUpController extends GetxController {
     } else if (!passwordController.text.isValidPassword) {
       return AppStrings.invalidPassword;
     }
+    return null;
   }
 
   String? validateConfirmPassword() {
@@ -74,9 +78,10 @@ class SignUpController extends GetxController {
     } else if (confirmPasswordController.text != passwordController.text) {
       return AppStrings.invalidConfirmPassword;
     }
+    return null;
   }
 
-  void onFieldSubmit()async {
+  void onFieldSubmit() async {
     if (phoneFocusNode.hasFocus) {
       phoneFocusNode.unfocus();
       emailFocusNode.requestFocus();
@@ -86,50 +91,73 @@ class SignUpController extends GetxController {
     } else if (passwordFocusNode.hasFocus) {
       passwordFocusNode.unfocus();
       confirmPasswordFocusNode.requestFocus();
-    await  createAccount();
+      await sendOTP();
     }
   }
 
-  Future<void> createAccount() async {
+  Future<void> onCreate() async {
     if (formKey.currentState!.validate()) {
       try {
         if (isLoading.value) return;
 
         isLoading.value = true;
-        SignUpModel result = await signUpRepository.createAccount(
-          body: {
-            "email": emailController.text.trim(),
-            "countryCode": "+91",
-            "phoneNumber": phoneController.text.trim(),
-            "password": passwordController.text.trim(),
-            "city": selectedLocation?.value ?? "",
-            "agreeTermsAndCondition": true,
-            "location": {
-              "type": "Point",
-              "coordinates": [77.5946, 12.9716],
-            },
-          },
-        );
-        if (result.status == "200") {
-           LoginModel result = await loginRepository.loginUser(
-            body: {
-              "email": emailController.text.trim(),
-              "password": passwordController.text.trim(),
-            },
-          );
-          if (result.status == "200") {
-            storage.write('token', result.response!.token);
-            storage.write('userId', result.response!.user!.id);
-            Get.offAllNamed(RoutesName.bottomNav);
-          }
-        } else {
-          SnackBarUtils.showErrorSnackBar(result.message!);
-        }
+
+        await sendOTP();
       } catch (e) {
         log(e.toString());
       } finally {
         isLoading.value = false;
       }
+    }
+  }
+
+  Future<void> sendOTP() async {
+    Map<String, dynamic> body = {
+      "email": emailController.text.trim(),
+      "type": "Signup",
+      "countryCode": "+91",
+      "phoneNumber": phoneController.text.trim(),
+    };
+    var result = await signUpRepository.sendOTP(body: body);
+    if (result.status == "200") {
+       Get.toNamed(
+        RoutesName.otp,
+        arguments: {"email": emailController.text.trim(),"type":OtpScreenType.createAccount},
+      );
+    } else {
+      SnackBarUtils.showErrorSnackBar(result.message!);
+    }
+  }
+
+  Future<void> createAccount() async {
+    SignUpModel result = await signUpRepository.createAccount(
+      body: {
+        "email": emailController.text.trim(),
+        "countryCode": "+91",
+        "phoneNumber": phoneController.text.trim(),
+        "password": passwordController.text.trim(),
+        "city": selectedLocation?.value ?? "",
+        "agreeTermsAndCondition": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [77.5946, 12.9716],
+        },
+      },
+    );
+    if (result.status == "200") {
+      LoginModel result = await loginRepository.loginUser(
+        body: {
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+        },
+      );
+      if (result.status == "200") {
+        storage.write('token', result.response!.token);
+        storage.write('userId', result.response!.user!.id);
+        Get.offAllNamed(RoutesName.bottomNav);
+      }
+    } else {
+      SnackBarUtils.showErrorSnackBar(result.message!);
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:padel_mobile/configs/routes/routes.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
@@ -25,8 +24,6 @@ class LoginController extends GetxController {
   RxBool isVisible = true.obs;
   RxBool isLoading = false.obs;
 
-  //Form key
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   // Toggle password visibility
   void eyeToggle() {
@@ -62,7 +59,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> onLogin() async {
-    if (formKey.currentState!.validate()) {
+
       try {
         if (isLoading.value) return;
 
@@ -84,7 +81,7 @@ class LoginController extends GetxController {
         log(e.toString());
       } finally {
         isLoading.value = false;
-      }
+
     }
   }
 
