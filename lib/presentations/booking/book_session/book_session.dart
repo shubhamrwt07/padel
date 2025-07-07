@@ -116,7 +116,7 @@ class BookSession extends StatelessWidget {
               itemBuilder:
                   (context, date, isSelected, isDisabled, isToday, onTap) {
                     final dayName = DateFormat('E').format(date);
-                    final monthName = DateFormat('MMMM').format(date);
+                    final monthName = DateFormat('MMM').format(date);
 
                     return GestureDetector(
                       onTap: onTap,
@@ -128,7 +128,7 @@ class BookSession extends StatelessWidget {
                           return FadeTransition(opacity: animation, child: child);
                         },
                         child: Container(
-                          height: Get.height*0.08,
+                          height: Get.height*0.09,
                           width: Get.width*0.15,
                           key: ValueKey(isSelected),
                           alignment: Alignment.center,
@@ -153,7 +153,7 @@ class BookSession extends StatelessWidget {
                               ),
                               Text(
                                 date.day.toString(),
-                                style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w400)
+                                style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w600)
                               ),
                               Text(
                                 monthName,
@@ -208,61 +208,59 @@ class BookSession extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeSlots() {
-    return Transform.translate(
-      offset: Offset(0, -Get.height*0.025),
-      child: GetBuilder<BookSessionController>(
-        builder: (controller) {
-            double spacing = Get.width*.02;
-          final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
-
-          return Wrap(
-            spacing: spacing,
-            runSpacing: Get.height * 0.015,
-            children: controller.timeSlots.map((time) {
-              final isSelected = controller.selectedTime == time;
-
-              return GestureDetector(
-                onTap: () {
-                  controller.selectedTime = time;
-                  controller.update();
-                },
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 800),
-                  switchInCurve: Curves.easeIn,
-                  switchOutCurve: Curves.easeOut,
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Container(
-                    key: ValueKey(isSelected),
-                    width: tileWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.black
-                          : AppColors.timeTileBackgroundColor,
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(
-                        color: AppColors.blackColor.withAlpha(10),
-                      ),
-                    ),
-                    child: Text(
-                      time,
-                      style: Get.textTheme.labelLarge?.copyWith(
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          );
-        },
-      ),
-    );
-  }
-
+   Widget _buildTimeSlots() {
+     return Transform.translate(
+       offset: Offset(0, -Get.height*0.025),
+       child: GetBuilder<BookSessionController>(
+         builder: (controller) {
+           double spacing = Get.width * 0.02;
+           final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
+           return Obx(
+             ()=> Wrap(
+               spacing: spacing,
+               runSpacing: Get.height * 0.015,
+               children: controller.timeSlots.map((time) {
+                 final isSelected = controller.selectedTimes.contains(time);
+                 return GestureDetector(
+                   onTap: () {
+                     controller.toggleTimeSlot(time); // Toggle selection
+                   },
+                   child: AnimatedSwitcher(
+                     duration: const Duration(milliseconds: 800),
+                     switchInCurve: Curves.easeIn,
+                     switchOutCurve: Curves.easeOut,
+                     transitionBuilder: (child, animation) =>
+                         FadeTransition(opacity: animation, child: child),
+                     child: Container(
+                       key: ValueKey(isSelected),
+                       width: tileWidth,
+                       padding: const EdgeInsets.symmetric(vertical: 5),
+                       alignment: Alignment.center,
+                       decoration: BoxDecoration(
+                         color: isSelected
+                             ? Colors.black
+                             : AppColors.timeTileBackgroundColor,
+                         borderRadius: BorderRadius.circular(40),
+                         border: Border.all(
+                           color: AppColors.blackColor.withAlpha(10),
+                         ),
+                       ),
+                       child: Text(
+                         time,
+                         style: Get.textTheme.labelLarge?.copyWith(
+                           color: isSelected ? Colors.white : Colors.black,
+                         ),
+                       ),
+                     ),
+                   ),
+                 );
+               }).toList(),
+             ),
+           );
+         },
+       ),
+     );
+   }
 
   Widget _buildMatchCard(BuildContext context) {
     return Container(

@@ -89,7 +89,7 @@ class OpenMatches extends StatelessWidget {
               itemBuilder:
                   (context, date, isSelected, isDisabled, isToday, onTap) {
                     final dayName = DateFormat('E').format(date);
-                    final monthName = DateFormat('MMMM').format(date);
+                    final monthName = DateFormat('MMM').format(date);
 
                     return GestureDetector(
                       onTap: onTap,
@@ -101,7 +101,7 @@ class OpenMatches extends StatelessWidget {
                           return FadeTransition(opacity: animation, child: child);
                         },
                         child: Container(
-                          height: Get.height*0.08,
+                          height: Get.height*0.09,
                           width: Get.width*0.15,
                           key: ValueKey(isSelected),
                           alignment: Alignment.center,
@@ -126,7 +126,7 @@ class OpenMatches extends StatelessWidget {
                               ),
                               Text(
                                 date.day.toString(),
-                                  style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w400)
+                                  style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w600)
                               ),
                               Text(
                                 monthName,
@@ -186,33 +186,31 @@ class OpenMatches extends StatelessWidget {
 
   Widget _buildTimeSlots() {
     return Transform.translate(
-      offset: Offset(0, -Get.height*0.025),
+      offset: Offset(0, -Get.height * 0.025),
       child: GetBuilder<OpenMatchesController>(
         builder: (controller) {
           double spacing = Get.width * .02;
           final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
-          return Wrap(
-            spacing: spacing,
-            runSpacing: Get.height * 0.015,
-            children: controller.timeSlots.map((time) {
-              final isSelected = controller.selectedTime == time;
+          return Obx(
+            ()=> Wrap(
+              spacing: spacing,
+              runSpacing: Get.height * 0.015,
+              children: controller.timeSlots.map((time) {
+                final isSelected = controller.selectedTimes.contains(time);
 
-              return GestureDetector(
-                onTap: () {
-                  controller.selectedTime = time;
-                  controller.update();
-                },
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 800),
-                  switchInCurve: Curves.easeIn,
-                  switchOutCurve: Curves.easeOut,
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Container(
-                    key: ValueKey(isSelected),
+                return GestureDetector(
+                  onTap: () {
+                    if (isSelected) {
+                      controller.selectedTimes.remove(time);
+                    } else {
+                      controller.selectedTimes.add(time);
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
                     width: tileWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 5),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
@@ -230,15 +228,14 @@ class OpenMatches extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           );
         },
       ),
     );
   }
-
   Widget _buildMatchHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

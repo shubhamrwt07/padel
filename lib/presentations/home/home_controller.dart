@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 class HomeController extends GetxController{
   final RxString selectedLocation = ''.obs;
+  ScrollController scrollController=ScrollController();
   final List<String> dummyLocations = [
     'Delhi',
     'Mumbai',
