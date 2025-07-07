@@ -5,6 +5,7 @@ import 'package:padel_mobile/data/response_models/home_models/profile_model.dart
 
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
+import '../../data/request_models/home_models/update_profile_model.dart';
 import '../../handler/logger.dart';
 
 class ProfileRepository {
@@ -42,11 +43,8 @@ class ProfileRepository {
     }
   }
 
-  Future<void> updateUserProfile({
-    required String email,
+  Future<UpdateProfileModel> updateUserProfile({
     required String name,
-    required String countryCode,
-    required String phoneNumber,
     required String gender,
     required String dob,
     required String city,
@@ -54,12 +52,9 @@ class ProfileRepository {
     File? profileImage,
   }) async {
     try {
-
       FormData formData = FormData.fromMap({
-        'email': email,
         'name': name,
-        'countryCode': countryCode,
-        // 'phoneNumber': phoneNumber,
+
         'gender': gender,
         'dob': dob,
         'city': "Chandigarh",
@@ -90,11 +85,7 @@ class ProfileRepository {
       final response = await dioClient.put(
         AppEndpoints.updateUserProfile,
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       if (response.statusCode == 200) {
@@ -102,7 +93,7 @@ class ProfileRepository {
           msg: "Profile update successful: ${response.data}",
           level: LogLevel.info,
         );
-        return response.data;
+        return UpdateProfileModel.fromJson(response.data);
       } else {
         throw Exception(
           "Profile update failed with status code: ${response.statusCode}",
@@ -117,6 +108,4 @@ class ProfileRepository {
       rethrow;
     }
   }
-
-
 }

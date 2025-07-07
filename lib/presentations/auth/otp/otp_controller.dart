@@ -18,6 +18,7 @@ class OtpController extends GetxController {
   RxBool isLoading = false.obs;
 
   Future<void> verifyOTP() async {
+    FocusManager.instance.primaryFocus!.unfocus();
     try {
       if (isLoading.value) return;
       isLoading.value = true;

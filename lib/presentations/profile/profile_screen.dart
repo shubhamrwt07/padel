@@ -61,15 +61,16 @@ class ProfileUi extends GetView<ProfileController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    controller.profileModel.value.response!.name ??
-                        'Unknown',
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: AppColors.labelBlackColor,
-                    ),
-                  ).paddingOnly(left: 5),
+                  Obx(
+                  ()=> Text(
+                      controller.profileModel.value.response!.name ?? 'Unknown',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: AppColors.labelBlackColor,
+                      ),
+                    ).paddingOnly(left: 5),
+                  ),
                   Text(
                     controller.profileModel.value.response!.email ??
                         'unknown@gmail.com',
