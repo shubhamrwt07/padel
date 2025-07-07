@@ -9,7 +9,7 @@ class RoutesName {
   static const String forgotPassword = '/forgotPassword' ;
 
   //Home routes name
-  static const String home = '/home' ;
+  static const String home = '/home_models' ;
   static const String bottomNav = '/bottomNav' ;
   static const String profile = '/profile' ;
   static const String editProfile = '/editProfile' ;

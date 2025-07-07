@@ -36,6 +36,7 @@ class ProfileController extends GetxController {
   RxString selectedGender = ''.obs;
   Rx<XFile?> profileImage = Rx<XFile?>(null);
   RxBool isProfileUpdated = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -49,9 +50,8 @@ class ProfileController extends GetxController {
     emailController.text = profileModel.value.response?.email ?? '';
     phoneController.text =
         profileModel.value.response?.phoneNumber.toString() ?? '';
-    selectedGender.value=profileModel.value.response!.gender??"";
+    selectedGender.value = profileModel.value.response!.gender ?? "";
     dobController.value.text = profileModel.value.response?.dob ?? '';
-
   }
 
   void selectDate(BuildContext context) async {
@@ -114,11 +114,7 @@ class ProfileController extends GetxController {
                 ),
 
                 // Divider
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey[200],
-                ),
+                Divider(height: 1, thickness: 1, color: Colors.grey[200]),
 
                 // Options
                 Padding(
@@ -187,52 +183,44 @@ class ProfileController extends GetxController {
       },
     );
   }
+
   Future<void> updateProfile() async {
+    FocusManager.instance.primaryFocus!.unfocus();
     try {
+      if (isLoading.value) return;
       isLoading.value = true;
 
-      Map<String,dynamic> locationJson =  {
+      Map<String, dynamic> locationJson = {
         "type": "Point",
-        "coordinates": [77.5947, 12.9717]
+        "coordinates": [77.5947, 12.9717],
       };
-
-      // Format date to ISO 8601 with milliseconds
       String formattedDate;
       if (dobController.value.text.isNotEmpty) {
-        // Parse DD/MM/YYYY format from the UI
         DateTime dateTime = parseDateFromString(dobController.value.text);
         formattedDate = dateTime.toIso8601String();
       } else {
-        // Use current date if no date is provided
         formattedDate = DateTime.now().toIso8601String();
       }
 
       final updatedProfile = await profileRepository.updateUserProfile(
-        email: emailController.text.trim(),
         name: nameController.text.trim(),
-        countryCode: "+91",
-        phoneNumber: phoneController.text.trim(),
+        // countryCode: "+91",
+        // phoneNumber: phoneController.text.trim(),
         gender: selectedGender.value,
         dob: formattedDate,
         city: "city",
-        location: locationJson, // Pass as string
-
+        location: locationJson,
       );
 
-
-      Get.snackbar(
-        'Success',
-        'Profile updated successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-
+      if (updatedProfile.status == "200") {
+        Get.back();
+        fetchUserProfile();
+      } else {
+        log("UPDATE PROFILE ERROR");
+      }
     } catch (e, st) {
       log('Error updating profile: $e');
       log('Stack trace: $st');
-
-
     } finally {
       isLoading.value = false;
     }
@@ -240,7 +228,6 @@ class ProfileController extends GetxController {
 
   DateTime parseDateFromString(String dateString) {
     try {
-
       if (dateString.contains('/')) {
         List<String> parts = dateString.split('/');
         if (parts.length == 3) {
@@ -275,12 +262,12 @@ class ProfileController extends GetxController {
     }
   }
 
-// Helper method to format date properly
+  // Helper method to format date properly
   String formatDateForServer(DateTime dateTime) {
     return dateTime.toIso8601String();
   }
 
-// Alternative helper method if you need more control over the format
+  // Alternative helper method if you need more control over the format
   String formatDateForServerCustom(DateTime dateTime) {
     return '${dateTime.year.toString().padLeft(4, '0')}-'
         '${dateTime.month.toString().padLeft(2, '0')}-'
@@ -290,6 +277,7 @@ class ProfileController extends GetxController {
         '${dateTime.second.toString().padLeft(2, '0')}.'
         '${dateTime.millisecond.toString().padLeft(3, '0')}';
   }
+
   Future<void> pickImage(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source);
@@ -298,6 +286,7 @@ class ProfileController extends GetxController {
       profileImage.value = image;
     }
   }
+
   Widget _buildOptionTile({
     required BuildContext context,
     required IconData icon,
@@ -325,11 +314,7 @@ class ProfileController extends GetxController {
                   color: iconColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 24,
-                ),
+                child: Icon(icon, color: iconColor, size: 24),
               ),
               SizedBox(width: 16),
               Expanded(
@@ -347,26 +332,18 @@ class ProfileController extends GetxController {
                     SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
             ],
           ),
         ),
       ),
     );
   }
-
 
   Future<void> fetchUserProfile() async {
     try {

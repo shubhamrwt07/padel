@@ -24,7 +24,6 @@ class LoginController extends GetxController {
   RxBool isVisible = true.obs;
   RxBool isLoading = false.obs;
 
-
   // Toggle password visibility
   void eyeToggle() {
     isVisible.value = !isVisible.value;
@@ -59,29 +58,28 @@ class LoginController extends GetxController {
   }
 
   Future<void> onLogin() async {
+    FocusManager.instance.primaryFocus!.unfocus();
+    try {
+      if (isLoading.value) return;
 
-      try {
-        if (isLoading.value) return;
-
-        isLoading.value = true;
-        LoginModel result = await loginRepository.loginUser(
-          body: {
-            "email": emailController.text.trim(),
-            "password": passwordController.text.trim(),
-          },
-        );
-        if (result.status == "200") {
-          storage.write('token', result.response!.token);
-          storage.write('userId', result.response!.user!.id);
-          Get.offAllNamed(RoutesName.bottomNav);
-        } else {
-          SnackBarUtils.showErrorSnackBar(result.message!);
-        }
-      } catch (e) {
-        log(e.toString());
-      } finally {
-        isLoading.value = false;
-
+      isLoading.value = true;
+      LoginModel result = await loginRepository.loginUser(
+        body: {
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+        },
+      );
+      if (result.status == "200") {
+        storage.write('token', result.response!.token);
+        storage.write('userId', result.response!.user!.id);
+        Get.offAllNamed(RoutesName.bottomNav);
+      } else {
+        SnackBarUtils.showErrorSnackBar(result.message!);
+      }
+    } catch (e) {
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 

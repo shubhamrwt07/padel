@@ -12,7 +12,7 @@ class ForgotPasswordController extends GetxController {
   TextEditingController pwdController = TextEditingController();
   TextEditingController cnfPwdController = TextEditingController();
   SignUpRepository signUpRepository = SignUpRepository();
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   GlobalKey<FormState> resetFormKey = GlobalKey<FormState>();
   RxBool isLoading = false.obs;
   RxBool isOTPLoading = false.obs;
@@ -55,33 +55,29 @@ class ForgotPasswordController extends GetxController {
   }
 
   Future<void> sendOTP() async {
-    if (formKey.currentState!.validate()) {
-      try {
-        if (isOTPLoading.value) return;
-        isOTPLoading.value = true;
-        Map<String, dynamic> body = {
-          "email": emailController.text.trim(),
-          "type": "Forgot",
-          "countryCode": "+91",
-          "phoneNumber": 0,
-        };
-        var result = await signUpRepository.sendOTP(body: body);
-        if (result.status == "200") {
-          Get.toNamed(
-            RoutesName.otp,
-            arguments: {
-              "email": emailController.text.trim(),
-              "type": OtpScreenType.forgotPassword,
-            },
-          );
-        } else {
-          SnackBarUtils.showErrorSnackBar(result.message!);
-        }
-      } finally {
-        isOTPLoading.value = false;
+    try {
+      if (isOTPLoading.value) return;
+      isOTPLoading.value = true;
+      Map<String, dynamic> body = {
+        "email": emailController.text.trim(),
+        "type": "Forgot",
+        "countryCode": "+91",
+        "phoneNumber": 0,
+      };
+      var result = await signUpRepository.sendOTP(body: body);
+      if (result.status == "200") {
+        Get.toNamed(
+          RoutesName.otp,
+          arguments: {
+            "email": emailController.text.trim(),
+            "type": OtpScreenType.forgotPassword,
+          },
+        );
+      } else {
+        SnackBarUtils.showErrorSnackBar(result.message!);
       }
-    } else {
-      SnackBarUtils.showErrorSnackBar(AppStrings.invalidEmail);
+    } finally {
+      isOTPLoading.value = false;
     }
   }
 
@@ -97,7 +93,6 @@ class ForgotPasswordController extends GetxController {
         var response = await signUpRepository.resetPassword(body: body);
         if (response.status == "200") {
           Get.off(LoginScreen());
-
         } else {
           SnackBarUtils.showErrorSnackBar(response.message!);
         }
@@ -108,4 +103,14 @@ class ForgotPasswordController extends GetxController {
       }
     }
   }
+
+  @override
+  void onClose() {
+    super.onClose();
+    emailController.dispose();
+    pwdController.dispose();
+    cnfPwdController.dispose();
+  }
+
+
 }
