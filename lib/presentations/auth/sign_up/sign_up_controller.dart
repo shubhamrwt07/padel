@@ -96,6 +96,7 @@ class SignUpController extends GetxController {
   }
 
   Future<void> onCreate() async {
+    FocusManager.instance.primaryFocus!.unfocus();
     if (formKey.currentState!.validate()) {
       try {
         if (isLoading.value) return;

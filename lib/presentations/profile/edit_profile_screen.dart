@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -95,12 +96,17 @@ class EditProfileUi extends GetView<ProfileController> {
               ),
             ],
           ),
-          child: PrimaryButton(
-            height: 50,
-            onTap: () {
-              controller.updateProfile();
-            },
-            text: "Update",
+          child: Obx(
+            () => PrimaryButton(
+              height: 50,
+              onTap: () {
+                controller.updateProfile();
+              },
+              text: "Update",
+              child: controller.isLoading.value
+                  ? AppLoader(size: 30, strokeWidth: 5)
+                  : null,
+            ),
           ),
         ).paddingOnly(bottom: Get.height * 0.03),
       ),

@@ -1,6 +1,7 @@
 import 'package:padel_mobile/presentations/auth/forgot_password/widgets/forgot_password_exports.dart';
 
 import '../../../configs/components/loader_widgets.dart';
+import '../../../configs/components/snack_bars.dart';
 
 class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   const ForgotPasswordScreen({super.key});
@@ -23,6 +24,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
     BuildContext context,
     ForgotPasswordController controller,
   ) {
+    GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -40,7 +42,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             textAlign: TextAlign.center,
           ).paddingOnly(bottom: Get.height * 0.05),
           Form(
-            key: controller.formKey,
+            key: formKey,
             child:
                 PrimaryTextField(
                   validator: (v) {
@@ -55,13 +57,18 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                 ),
           ),
           Obx(
-            ()=> PrimaryButton(
+            () => PrimaryButton(
               onTap: () {
-                controller.sendOTP();
+                if (formKey.currentState!.validate()) {
+                  controller.sendOTP();
+                } else {
+                  SnackBarUtils.showErrorSnackBar(AppStrings.invalidEmail);
+                }
               },
               text: AppStrings.sendOtp,
-              child:controller.isOTPLoading.value?AppLoader(size: 35,strokeWidth: 4,):null,
-
+              child: controller.isOTPLoading.value
+                  ? AppLoader(size: 35, strokeWidth: 4)
+                  : null,
             ).paddingOnly(bottom: Get.height * 0.03, top: Get.height * 0.06),
           ),
         ],
