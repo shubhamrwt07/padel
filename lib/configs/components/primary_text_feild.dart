@@ -30,6 +30,7 @@ class PrimaryTextField extends StatelessWidget {
   final EdgeInsets? scrollPadding;
   final bool? obscureText;
   final TextStyle? hintStyle;
+  final EdgeInsetsGeometry? contentPadding;
   const PrimaryTextField({
     super.key,
     this.action,
@@ -54,7 +55,7 @@ class PrimaryTextField extends StatelessWidget {
     this.keyboardType,
     this.onChanged,
     this.prefixText,
-    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText, this.hintStyle,
+    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText, this.hintStyle, this.contentPadding,
   });
 
   @override
@@ -86,7 +87,7 @@ class PrimaryTextField extends StatelessWidget {
         prefix:prefix ,
         prefixIcon: prefixIcon,
         // contentPadding: EdgeInsets.only(left: Get.width*0.04),
-        contentPadding: EdgeInsets.symmetric(
+        contentPadding:contentPadding?? EdgeInsets.symmetric(
           horizontal: Get.width * 0.04,
           vertical: (height ?? 57) * 0.30,
         ),

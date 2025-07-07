@@ -4,12 +4,14 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
 import '../../generated/assets.dart';
 
 class CartScreen extends StatelessWidget {
   final String buttonType;
-  const CartScreen({super.key, required this.buttonType});
+  final CartController controller = Get.put(CartController());
+   CartScreen({super.key, required this.buttonType});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class CartScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            cartList(),
+            cartList(controller),
             totalSlot(context),
             button(context)
           ],
@@ -32,13 +34,16 @@ class CartScreen extends StatelessWidget {
       ),
     );
   }
-  Widget cartList(){
+  Widget cartList(CartController controller){
     return SizedBox(
       height:buttonType=="true"? Get.height * 0.68:Get.height * 0.6,
       child: Scrollbar(
         thickness: 5,
+        controller: controller.scrollController,
+        thumbVisibility: false,
         radius: Radius.circular(8),
         child: ListView.builder(
+          controller: controller.scrollController,
           itemCount: 10,
           itemBuilder: (BuildContext context, index) {
             return Column(
@@ -234,7 +239,7 @@ class CartScreen extends StatelessWidget {
             Text(
               "₹ ",
               style: Theme.of(context).textTheme.titleMedium!
-                  .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto",
+                  .copyWith(fontWeight: FontWeight.w600,fontFamily: "Roboto",
                 color: AppColors.whiteColor,
               ),
             ).paddingOnly(left: 30,),
@@ -243,10 +248,10 @@ class CartScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 color: AppColors.whiteColor,
 
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ).paddingOnly(
-              right: Get.width * 0.2,
+              right: Get.width * 0.3,
             ),
             Text(
               "Payment",

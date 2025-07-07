@@ -4,17 +4,14 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
-  Rx<DateTime> selectedDate = DateTime.now().obs;
+  var selectedDates = <DateTime>[].obs;
 
-  final List<String> timeSlots = [
-    "8:00am",
-    "8:10am",
-    "8:30am",
-    "8:40am",
-    "9:00am",
-    "9:20am",
-    "9:40am",
-    "10:00am",
-    "10:20am",
-  ];
+  final List<String> timeSlots = List.generate(19, (index) {
+    final hour = 6 + index;
+    if (hour == 24) return '12:00am';
+
+    final period = hour >= 12 ? 'pm' : 'am';
+    final formattedHour = hour > 12 ? hour - 12 : hour;
+    return '${formattedHour == 0 ? 12 : formattedHour}:00$period';
+  });
 }

@@ -10,42 +10,7 @@ class OpenMatches extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Container(
-        height: Get.height * .09,
-        padding: const EdgeInsets.only(top: 10),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Align(
-          alignment: Alignment.center,
-          child: CustomButton(
-            width: Get.width * 0.9,
-            child: Text(
-              "+ Book the first spot",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
-            ).paddingOnly(right: Get.width * 0.14),
-            onTap: () {
-              Get.to(
-                () => AllSuggestions(),
-                transition: Transition.rightToLeft,
-              );
-            },
-          ),
-        ),
-      ),
+      bottomNavigationBar: bottomButton(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -69,14 +34,51 @@ class OpenMatches extends StatelessWidget {
     );
   }
 
+  Widget bottomButton(){
+    return Container(
+      height: Get.height * .12,
+      padding: const EdgeInsets.only(top: 10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40),
+          topRight: Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Align(
+        alignment: Alignment.center,
+        child: CustomButton(
+          width: Get.width * 0.9,
+          child: Text(
+            "+ Book the first spot",
+            style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
+          ).paddingOnly(right: Get.width * 0.14),
+          onTap: () {
+            Get.to(
+                  () => AllSuggestions(),
+              transition: Transition.rightToLeft,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildDatePicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Select date", style: Get.textTheme.labelLarge),
         Obx(
-          () => Transform.translate(
-            offset: Offset(0,-12),
+              () => Transform.translate(
+            offset: const Offset(0, -12),
             child: EasyDateTimeLinePicker.itemBuilder(
               headerOptions: HeaderOptions(
                 headerBuilder: (_, context, date) => const SizedBox.shrink(),
@@ -84,65 +86,84 @@ class OpenMatches extends StatelessWidget {
               selectionMode: SelectionMode.alwaysFirst(),
               firstDate: DateTime.now(),
               lastDate: DateTime(2030, 3, 18),
-              focusedDate: controller.selectedDate.value,
+              focusedDate: controller.selectedDates.isEmpty
+                  ? DateTime.now()
+                  : controller.selectedDates.first,
               itemExtent: 70,
-              itemBuilder:
-                  (context, date, isSelected, isDisabled, isToday, onTap) {
-                    final dayName = DateFormat('E').format(date);
-                    final monthName = DateFormat('MMM').format(date);
+              itemBuilder: (context, date, _, isDisabled, isToday, onTap) {
+                final dayName = DateFormat('E').format(date);
+                final monthName = DateFormat('MMM').format(date);
+                final bool isSelected = controller.selectedDates
+                    .any((d) => d.year == date.year && d.month == date.month && d.day == date.day);
 
-                    return GestureDetector(
-                      onTap: onTap,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 1000),
-                        switchInCurve: Curves.easeIn,
-                        switchOutCurve: Curves.easeOut,
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(opacity: animation, child: child);
-                        },
-                        child: Container(
-                          height: Get.height*0.09,
-                          width: Get.width*0.15,
-                          key: ValueKey(isSelected),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: isSelected
-                                ? Colors.black
-                                : AppColors.playerCardBackgroundColor,
-                            border: Border.all(
-                              color: isSelected
-                                  ? Colors.transparent
-                                  : AppColors.blackColor.withAlpha(10),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                dayName,
-                                  style: Get.textTheme.bodySmall!.copyWith(color: isSelected ? Colors.white : Colors.black,)
-                              ),
-                              Text(
-                                date.day.toString(),
-                                  style: Get.textTheme.titleMedium!.copyWith(fontSize: 22,color: isSelected ? Colors.white :AppColors.textColor,fontWeight: FontWeight.w600)
-                              ),
-                              Text(
-                                monthName,
-                                  style: Get.textTheme.bodySmall!.copyWith(color: isSelected ? Colors.white : Colors.black,)
-                              ),
-                            ],
-                          ),
+                return GestureDetector(
+                  onTap: () {
+                    if (isSelected) {
+                      controller.selectedDates.removeWhere((d) =>
+                      d.year == date.year &&
+                          d.month == date.month &&
+                          d.day == date.day);
+                    } else {
+                      controller.selectedDates.add(date);
+                    }
+                  },
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 1000),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                    child: Container(
+                      height: Get.height * 0.09,
+                      width: Get.width * 0.15,
+                      key: ValueKey(isSelected),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: isSelected
+                            ? Colors.black
+                            : AppColors.playerCardBackgroundColor,
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.transparent
+                              : AppColors.blackColor.withAlpha(10),
+                          width: 1,
                         ),
                       ),
-                    ).paddingOnly(
-                      top: Get.height * .01,
-                      bottom: Get.height * .01,
-                    );
-                  },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            dayName,
+                            style: Get.textTheme.bodySmall!.copyWith(
+                              color: isSelected ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          Text(
+                            date.day.toString(),
+                            style: Get.textTheme.titleMedium!.copyWith(
+                              fontSize: 22,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            monthName,
+                            style: Get.textTheme.bodySmall!.copyWith(
+                              color: isSelected ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
               onDateChange: (date) {
-                controller.selectedDate.value = date;
+                // Optional: ignore if handling inside onTap above.
               },
             ),
           ),
@@ -290,8 +311,7 @@ class OpenMatches extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelSmall,
               ),
             ],
-          ).paddingOnly(top: 15, bottom: 10, right: 15, left: 15),
-          const SizedBox(height: 12),
+          ).paddingOnly(top: 10, bottom: 10, right: 15, left: 15),
           Column(
             children: [
               Padding(
@@ -321,42 +341,32 @@ class OpenMatches extends StatelessWidget {
             ],
           ),
           Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
-
-          const SizedBox(height: 10),
-          Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'The Good Club',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: Get.width * .64,
-                    child: Text(
-                      'Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001',
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
+                  Text(
+                    'The Good Club',
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  Container(
-                    alignment: Alignment.center,
-
-                    width: Get.width * .16,
-                    child: Text(
-                      '₹2000',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: AppColors.primaryColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ).paddingOnly(right: Get.width * .04),
+                  Text(
+                    'Chandigarh 160001',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
                 ],
               ),
+              Text(
+                '₹ 2000',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: AppColors.primaryColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ).paddingOnly(top: Get.width * .02),
             ],
-          ).paddingOnly(top: 5, bottom: 15, left: 15),
+          ).paddingOnly(top: 5,bottom: 10, left: 15,right: 15),
         ],
       ),
     );
@@ -372,7 +382,7 @@ class OpenMatches extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         Text(
-          "Available",
+          "Courtney",
           style: Get.textTheme.bodySmall!.copyWith(
             color: AppColors.primaryColor,
           ),

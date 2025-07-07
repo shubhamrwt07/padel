@@ -10,68 +10,40 @@ class AllSuggestions extends StatelessWidget {
     return Scaffold(
       appBar: primaryAppBar(
         centerTitle: true,
-
         title: const Text("All Suggestions"),
         context: context,
       ),
-      bottomNavigationBar: Container(
-        height: Get.height * .12,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Align(
-          alignment: Alignment.center,
-          child: CustomButton(
-            width: Get.width * 0.9,
-            child: Text(
-              "+ Start a match",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                color: AppColors.whiteColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w600
-              ),
-            ).paddingOnly(right: Get.width * 0.14),
-            onTap: () {
-              Get.to(() => DetailsPage(), transition: Transition.rightToLeft);
-            },
-          ),
-        ),
-      ),
+      bottomNavigationBar: bottomButton(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // _buildSlotSelector(context),
-            // const SizedBox(height: 10),
+            _buildSlotSelector(context),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "For your level",
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: Get.textTheme.headlineLarge,
                 ),
                 InkWell(
                   onTap: () => Get.to(Filters()),
-                  child: Image.asset(
-                    Assets.imagesIcFilter,
-                    height: 40,
-                    width: 20,
+                  child: Container(
+                    height: 35,
+                    width: 35,
+                    decoration: BoxDecoration(
+                        color: AppColors.playerCardBackgroundColor,
+                      borderRadius: BorderRadius.circular(5)
+                    ),
+                    child: Image.asset(
+                      Assets.imagesIcFilter,
+                      scale: 3.5,
+                    ),
                   ),
                 ),
               ],
-            ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
+            ).paddingOnly(left: Get.width*.025,right: Get.width*.025,top: Get.height*0.01),
             ListView.builder(
               physics: const ClampingScrollPhysics(),
               itemCount: 4,
@@ -89,50 +61,65 @@ class AllSuggestions extends StatelessWidget {
     );
   }
 
-  // Widget _buildSlotSelector(BuildContext context) {
-  //   return Row(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text("Slots", style: Theme.of(context).textTheme.headlineSmall),
-  //       Obx(
-  //             () => Row(
-  //           children: controller.slots.map((slot) {
-  //             final isSelected = controller.selectedSlot.value == slot;
-  //             return GestureDetector(
-  //               onTap: () => controller.selectSlot(slot),
-  //               child: Container(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-  //                 decoration: BoxDecoration(
-  //                   color: isSelected
-  //                       ? Colors.black
-  //                       : AppColors.playerCardBackgroundColor,
-  //                   borderRadius: BorderRadius.circular(30),
-  //                   border: Border.all(
-  //                     color: isSelected ? Colors.black : Colors.grey.shade400,
-  //                     width: 1,
-  //                   ),
-  //                 ),
-  //                 child: Text(
-  //                   slot,
-  //                   style: TextStyle(
-  //                     color: isSelected ? Colors.white : Colors.black,
-  //                     fontWeight: FontWeight.w500,
-  //                   ),
-  //                 ),
-  //               ).paddingOnly(left: 10),
-  //             );
-  //           }).toList(),
-  //         ),
-  //       ),
-  //     ],
-  //   ).paddingOnly(left: Get.width*.03,right: Get.width*.03);
-  // }
+  Widget _buildSlotSelector(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.03),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("Slots :", style: Get.textTheme.headlineSmall),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Obx(
+                  () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: controller.slots.map((slot) {
+                    final isSelected = controller.selectedSlot.value == slot;
+                    return GestureDetector(
+                      onTap: () => controller.selectSlot(slot),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 3),
+                        margin: const EdgeInsets.only(left: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.black
+                              : AppColors.playerCardBackgroundColor,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: isSelected ? Colors.black : Colors.grey.shade400,
+                            width: 1,
+                          ),
+                        ),
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 300),
+                          style: Get.textTheme.headlineLarge!.copyWith(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          child: Text(slot),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildMatchCard(BuildContext context) {
     return InkWell(
       onTap: () => Get.to(DetailsPage()),
       child: Container(
         width: double.infinity,
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: AppColors.playerCardBackgroundColor,
@@ -142,10 +129,8 @@ class AllSuggestions extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMatchHeader(context),
-            const SizedBox(height: 12),
             _buildPlayerRow(),
-             Divider(thickness: 1.5, height: 0, color: AppColors.blackColor.withAlpha(50)),
-            const SizedBox(height: 10),
+             Divider(thickness: 1.5, height: 0, color: AppColors.blackColor.withAlpha(50)).paddingOnly(bottom: 3),
             _buildMatchFooter(context),
           ],
         ),
@@ -154,101 +139,82 @@ class AllSuggestions extends StatelessWidget {
   }
 
   Widget _buildMatchHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 15, bottom: 10, right: 15, left: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("21 June | 9:00am", style: Theme.of(context).textTheme.headlineSmall),
-          Text("The first player sets the match type",
-              style: Theme.of(context).textTheme.labelSmall),
-        ],
-      ),
-    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("21 June | 9:00am", style: Get.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w600,fontSize: 13)),
+        Text("Competitive",
+            style: Get.textTheme.labelSmall),
+      ],
+    ).paddingOnly(bottom: 8);
   }
 
   Widget _buildPlayerRow() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildPlayerSlot(
-              imageUrl: Assets.imagesImgCustomerPicBooking,
-              name: 'Courtney',
-            ).paddingOnly(bottom: 6),
-            _buildPlayerSlot(
-              imageUrl: Assets.imagesImgCustomerPicBooking,
-              name: 'Devon Lane',
-            ).paddingOnly(bottom: 6),
-            Container(width: 1, color: AppColors.blackColor.withAlpha(50)).paddingOnly(bottom: 10),
-            _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
-            _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
-          ],
-        ),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildPlayerSlot(
+            imageUrl: Assets.imagesImgCustomerPicBooking,
+            name: 'Courtney',
+          ).paddingOnly(bottom: 6),
+          _buildPlayerSlot(
+            imageUrl: Assets.imagesImgCustomerPicBooking,
+            name: 'Devon Lane',
+          ).paddingOnly(bottom: 6),
+          Container(width: 1, color: AppColors.blackColor.withAlpha(50)).paddingOnly(bottom: 10),
+          _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
+          _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
+        ],
       ),
     );
   }
 
   Widget _buildMatchFooter(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5, bottom: 15, left: 15,right: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("The Good Club", style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 6),
-          Row(                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-            children: [
-              Row(
-                children: [
-                  Image.asset(
-                    Assets.imagesIcLocation,
-                    scale: 3,
-                  ),
-                  SizedBox(
-                    // width: Get.width * .61,61
-
-                    child:
-
-                    Text(
-                      'Chandigarh 160001',
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.center,
-                width: Get.width * .16,
-                child: Row(
-                  children: [
-                    Text(
-                      '₹',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: AppColors.primaryColor,
-                          fontFamily: "Roboto"
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '2000',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: AppColors.primaryColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("The Good Club", style: Get.textTheme.labelLarge!.copyWith(fontSize: 11)),
+            Row(
+              children: [
+                Image.asset(
+                  Assets.imagesIcLocation,
+                  scale: 3,
                 ),
-              ).paddingOnly(right: Get.width * .00),
+                Text(
+                  'Chandigarh 160001',
+                  style: Get.textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              '₹ ',
+              style: Get.textTheme.titleMedium!.copyWith(
+                  color: AppColors.primaryColor,
+                  fontFamily: "Roboto"
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '2000',
+              style: Get.textTheme.titleMedium!.copyWith(
+                color: AppColors.primaryColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
 
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -274,14 +240,46 @@ class AllSuggestions extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 7),
         Text(
           name.isNotEmpty ? name : 'Available',
           style: Get.textTheme.bodySmall!.copyWith(
-            color: name.isNotEmpty ? AppColors.darkGreyColor : AppColors.primaryColor,
+            color: name.isNotEmpty ? AppColors.darkGreyColor : AppColors.primaryColor,fontSize: 11
           ),
-        ),
+        ).paddingOnly(top: Get.height*0.003),
       ],
+    );
+  }
+  
+  Widget bottomButton(){
+    return Container(
+      height: Get.height * .14,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40),
+          topRight: Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Align(
+        alignment: Alignment.center,
+        child: CustomButton(
+          width: Get.width * 0.9,
+          child: Text(
+            "+ Start a match",
+            style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
+          ).paddingOnly(right: Get.width * 0.14),
+          onTap: () {
+            Get.to(() => DetailsPage(), transition: Transition.rightToLeft);
+          },
+        ),
+      ),
     );
   }
 }
