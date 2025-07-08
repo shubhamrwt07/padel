@@ -127,7 +127,7 @@ class LoginScreen extends GetView<LoginController> {
     return Column(
       children: [
         GestureDetector(
-          onTap: () => Get.offNamed(RoutesName.signUp),
+          onTap: () => Get.toNamed(RoutesName.signUp),
           child: Container(
             color: Colors.transparent,
             child: Text(

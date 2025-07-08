@@ -56,7 +56,7 @@ class DetailsPage extends GetView<DetailsPageController> {
                         child: Row(
                           children: [
                             Expanded(child: gameDetails("Gender", "All Players")),
-                            Expanded(child: gameDetails("Game Level", "0.92 - 0.132")),
+                            Expanded(child: gameDetails("Game Level", "B/C")),
                             Expanded(child: gameDetails("Price", "₹2000")),
                           ],
         
@@ -345,7 +345,7 @@ class DetailsPage extends GetView<DetailsPageController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               playerCard("Courtney", true,Assets.imagesImgCustomerPicBooking),
-              playerCard("Devon Lane", true,Assets.imagesImgCustomerPicBooking),
+              playerCard("Courtney", true,Assets.imagesImgCustomerPicBooking),
               Container(
                 height: Get.height * .09,
                 width: 2,

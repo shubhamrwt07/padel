@@ -2,8 +2,10 @@ import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart'
 import 'package:latlong2/latlong.dart';
 
 class HomeContent extends StatelessWidget {
-   HomeContent({super.key});
- final HomeContentController controller = Get.put(HomeContentController());
+  HomeContent({super.key});
+
+  final HomeContentController controller = Get.put(HomeContentController());
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -16,11 +18,12 @@ class HomeContent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Court Information", style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineLarge!
-                    .copyWith(color: AppColors.labelBlackColor),),
+                Text(
+                  "Court Information",
+                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                    color: AppColors.labelBlackColor,
+                  ),
+                ),
                 Row(
                   children: [
                     RatingBar.builder(
@@ -33,52 +36,49 @@ class HomeContent extends StatelessWidget {
                       itemCount: 5,
                       itemPadding: EdgeInsets.zero,
                       // No padding
-                      itemBuilder: (context, _) =>
-                          Container(
-                            width: 5.0,
-                            height: 30.0,
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.star,
-                              size: 27.0, // Adjust the size if needed
-                              color: AppColors.secondaryColor,
-                            ),
-                          ),
+                      itemBuilder: (context, _) => Container(
+                        width: 5.0,
+                        height: 30.0,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.star,
+                          size: 27.0, // Adjust the size if needed
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
                       onRatingUpdate: (rating) {},
                     ).paddingOnly(right: Get.width * 0.02),
                     Text(
                       "4.5",
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(fontWeight: FontWeight.w500,
-                          color: AppColors.labelBlackColor),
-                    )
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.labelBlackColor,
+                          ),
+                    ),
                   ],
                 ),
-
               ],
             ).paddingOnly(top: Get.height * 0.02, bottom: Get.height * 0.005),
-            Text("5 Available courts", style: Theme
-                .of(context)
-                .textTheme
-                .labelLarge!
-                .copyWith(color: AppColors.textColor),).paddingOnly(
-                bottom: Get.height * 0.02),
-            Text("Facilities", style: Theme
-                .of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(color: AppColors.labelBlackColor),).paddingOnly(
-                bottom: Get.height * 0.01),
+            Text(
+              "5 Available courts",
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge!.copyWith(color: AppColors.textColor),
+            ).paddingOnly(bottom: Get.height * 0.02),
+            Text(
+              "Facilities",
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.labelBlackColor,
+              ),
+            ).paddingOnly(bottom: Get.height * 0.01),
             SizedBox(
               height: 25,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 3,
                 itemBuilder: (BuildContext context, index) {
-                  return facilities(context,index);
+                  return facilities(context, index);
                 },
               ),
             ).paddingOnly(bottom: Get.height * 0.02),
@@ -95,26 +95,33 @@ class HomeContent extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return Obx(() {
                       final item = controller.homeOptionsList[index];
-                      final isSelected = controller.selectedIndex.value == index;
+                      final isSelected =
+                          controller.selectedIndex.value == index;
 
                       final Widget iconWidget = item['isSvg']
                           ? SvgPicture.asset(
-                        item['image'],
-                        height: 24,
-                        width: 24,
-                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
-                      )
+                              item['image'],
+                              height: 24,
+                              width: 24,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.labelBlackColor,
+                            )
                           : Icon(
-                        item['icon'],
-                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
-                      );
+                              item['icon'],
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.labelBlackColor,
+                            );
 
                       return GestureDetector(
                         onTap: () {
                           if (index != 1) {
                             controller.selectedIndex.value = index;
-                            if (index != 2) controller.isShowAllReviews.value = false;
-                            if (index != 3) controller.isShowAllPhotos.value = false;
+                            if (index != 2)
+                              controller.isShowAllReviews.value = false;
+                            if (index != 3)
+                              controller.isShowAllPhotos.value = false;
                           }
                         },
                         child: homeOptionItem(
@@ -127,26 +134,25 @@ class HomeContent extends StatelessWidget {
                     });
                   },
                 ),
-
               ),
             ),
-            Obx(() =>
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  switchInCurve: Curves.easeIn,
-                  switchOutCurve: Curves.easeOut,
-                  transitionBuilder: (Widget child,
-                      Animation<double> animation) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.0, 0.3),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: FadeTransition(opacity: animation, child: child),
-                    );
-                  },
-                  child: getSelectedView(controller.selectedIndex.value),
-                )),
+            Obx(
+              () => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.3),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: FadeTransition(opacity: animation, child: child),
+                  );
+                },
+                child: getSelectedView(controller.selectedIndex.value),
+              ),
+            ),
             Obx(() {
               if (controller.selectedIndex.value == 0) {
                 return const SizedBox.shrink();
@@ -161,7 +167,7 @@ class HomeContent extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    width: Get.width*0.2,
+                    width: Get.width * 0.2,
                     height: 20,
                     color: Colors.transparent,
                     child: Row(
@@ -170,25 +176,22 @@ class HomeContent extends StatelessWidget {
                         Text(
                           controller.selectedIndex.value == 2
                               ? (controller.isShowAllReviews.value
-                              ? "Show Less"
-                              : "Show All")
+                                    ? "Show Less"
+                                    : "Show All")
                               : (controller.isShowAllPhotos.value
-                              ? "Show Less"
-                              : "Show All"),
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .labelMedium!
+                                    ? "Show Less"
+                                    : "Show All"),
+                          style: Theme.of(context).textTheme.labelMedium!
                               .copyWith(color: AppColors.primaryColor),
                         ),
                         Icon(
                           controller.selectedIndex.value == 2
                               ? (controller.isShowAllReviews.value
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down)
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down)
                               : (controller.isShowAllPhotos.value
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down),
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down),
                           size: 15,
                           color: AppColors.primaryColor,
                         ),
@@ -197,84 +200,93 @@ class HomeContent extends StatelessWidget {
                   ),
                 ),
               );
-            }
-                ).paddingOnly(top: Get.height * 0.01),
+            }).paddingOnly(top: Get.height * 0.01),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Opening Hours", style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(color: AppColors.labelBlackColor),),
+                Text(
+                  "Opening Hours",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: AppColors.labelBlackColor,
+                  ),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Sunday-Saturday", style: Theme
-                        .of(context)
-                        .textTheme
-                        .labelLarge!
-                        .copyWith(color: AppColors.textColor),),
-                    Text("8:00am-11:00pm", style: Theme
-                        .of(context)
-                        .textTheme
-                        .labelLarge!
-                        .copyWith(color: AppColors.textColor),),
+                    Text(
+                      "Sunday-Saturday",
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: AppColors.textColor,
+                      ),
+                    ),
+                    Text(
+                      "8:00am-11:00pm",
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: AppColors.textColor,
+                      ),
+                    ),
                   ],
                 ),
               ],
-            ).paddingOnly(top: Get.height * 0.01)
-
+            ).paddingOnly(top: Get.height * 0.01),
           ],
         ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
       ),
     );
   }
 
-  Widget facilities(BuildContext context,index) {
+  Widget facilities(BuildContext context, index) {
     return Row(
       children: [
-        Icon(Icons.ac_unit,size: 10,color: AppColors.primaryColor,).paddingOnly(right: 5),
-        Text("${index+1}. Free parking", style: Theme
-            .of(context)
-            .textTheme
-            .displayMedium!
-            .copyWith(color: AppColors.primaryColor,fontWeight: FontWeight.w500),),
+        Icon(
+          Icons.ac_unit,
+          size: 10,
+          color: AppColors.primaryColor,
+        ).paddingOnly(right: 5),
+        Text(
+          "${index + 1}. Free parking",
+          style: Theme.of(context).textTheme.displayMedium!.copyWith(
+            color: AppColors.primaryColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
       ],
     ).paddingOnly(right: 10);
   }
 
-   Widget homeOptionItem(
-       BuildContext context, {
-         required Widget iconWidget,
-         required String label,
-         required bool isSelected,
-       }) {
-     return Column(
-       children: [
-         Container(
-           height: 45,
-           width: 45,
-           decoration: BoxDecoration(
-             shape: BoxShape.circle,
-             color: isSelected ? AppColors.labelBlackColor : AppColors.whiteColor,
-             border: Border.all(color: Colors.grey.withOpacity(0.2)),
-           ),
-           child: Center(child: iconWidget),
-         ).paddingOnly(bottom: 5),
-         Text(
-           label,
-           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-             fontWeight: FontWeight.w500,
-             color: isSelected ? AppColors.labelBlackColor : Colors.black,
-           ),
-         ),
-       ],
-     ).paddingOnly(right: Get.width * 0.07);
-   }
+  Widget homeOptionItem(
+    BuildContext context, {
+    required Widget iconWidget,
+    required String label,
+    required bool isSelected,
+  }) {
+    return Column(
+      children: [
+        Container(
+          height: 45,
+          width: 45,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isSelected
+                ? AppColors.labelBlackColor
+                : AppColors.whiteColor,
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          ),
+          child: Center(child: iconWidget),
+        ).paddingOnly(bottom: 5),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            fontWeight: FontWeight.w500,
+            color: isSelected ? AppColors.labelBlackColor : Colors.black,
+          ),
+        ),
+      ],
+    ).paddingOnly(right: Get.width * 0.07);
+  }
 
-
-   Widget getSelectedView(int index) {
+  Widget getSelectedView(int index) {
     final height = Get.height * 0.33;
     switch (index) {
       case 0:
@@ -290,18 +302,21 @@ class HomeContent extends StatelessWidget {
           child: const Center(child: Text("Call View")),
         );
       case 2:
-        return Obx(() =>
-            SizedBox(
-              key: ValueKey(2),
-              height: controller.isShowAllReviews.value ? Get.height * 0.6 : Get
-                  .height * 0.33,
-              child: reviewContent(Get.context!),
-            ));
+        return Obx(
+          () => SizedBox(
+            key: ValueKey(2),
+            height: controller.isShowAllReviews.value
+                ? Get.height * 0.6
+                : Get.height * 0.33,
+            child: reviewContent(Get.context!),
+          ),
+        );
       case 3:
         return SizedBox(
           key: ValueKey(3),
-          height: controller.isShowAllPhotos.value ? Get.height * 0.6 : Get
-              .height * 0.33,
+          height: controller.isShowAllPhotos.value
+              ? Get.height * 0.6
+              : Get.height * 0.33,
           child: photoGallery(Get.context!),
         );
       default:
@@ -311,43 +326,50 @@ class HomeContent extends StatelessWidget {
 
   Widget reviewContent(BuildContext context) {
     return SizedBox(
-      height: controller.isShowAllReviews.value ? Get.height * 0.6 : Get
-          .height * 0.33,
+      height: controller.isShowAllReviews.value
+          ? Get.height * 0.6
+          : Get.height * 0.33,
       width: Get.width,
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Customer reviews", style: Theme
-                  .of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(color: AppColors.labelBlackColor),),
+              Text(
+                "Customer reviews",
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  color: AppColors.labelBlackColor,
+                ),
+              ),
               GestureDetector(
                 onTap: () => addReview(context),
                 child: Container(
                   color: Colors.transparent,
                   child: Row(
                     children: [
-                      Icon(Icons.add, color: AppColors.primaryColor, size: 14,),
-                      Text("Review", style: Theme
-                          .of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(color: AppColors.primaryColor),)
+                      Icon(Icons.add, color: AppColors.primaryColor, size: 14),
+                      Text(
+                        "Review",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ).paddingOnly(bottom: Get.height * 0.01),
           Container(
-            height: controller.isShowAllReviews.value ? Get.height * 0.55 : Get
-                .height * 0.29,
+            height: controller.isShowAllReviews.value
+                ? Get.height * 0.55
+                : Get.height * 0.29,
             color: Colors.transparent,
             child: ListView.builder(
-              itemCount: 10,physics: controller.isShowAllReviews.value?ScrollPhysics():NeverScrollableScrollPhysics(),
+              itemCount: 10,
+              physics: controller.isShowAllReviews.value
+                  ? ScrollPhysics()
+                  : NeverScrollableScrollPhysics(),
               padding: EdgeInsetsGeometry.zero,
               itemBuilder: (context, index) {
                 return Container(
@@ -355,98 +377,107 @@ class HomeContent extends StatelessWidget {
                   width: Get.width,
                   padding: EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                      color: AppColors.lightBlueColor.withAlpha(40),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: AppColors.labelBlackColor.withValues(
-                              alpha: 0.1))
+                    color: AppColors.lightBlueColor.withAlpha(40),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.labelBlackColor.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(children: [
-                            CircleAvatar(
-                              radius: 15,
-                              backgroundImage: AssetImage(
-                                  Assets.imagesImgCustomerPicBooking),
-                            ).paddingOnly(right: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Darrell Steward", style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .labelSmall!
-                                    .copyWith(
-                                    color: AppColors.labelBlackColor),),
-                                Transform.translate(
-                                  offset: Offset(-Get.width * 0.015, 0),
-                                  child: Row(
-                                    children: [
-                                      RatingBar.builder(
-                                        itemSize: 12,
-                                        initialRating: 4,
-                                        minRating: 0,
-                                        unratedColor: AppColors
-                                            .starUnselectedColor,
-                                        direction: Axis.horizontal,
-                                        allowHalfRating: true,
-                                        itemCount: 5,
-                                        itemPadding: EdgeInsets.zero,
-                                        // No padding
-                                        itemBuilder: (context, _) =>
-                                            Container(
-                                              width: 5.0,
-                                              height: 30.0,
-                                              alignment: Alignment.center,
-                                              child: Icon(
-                                                Icons.star,
-                                                size: 27.0,
-                                                // Adjust the size if needed
-                                                color: AppColors.secondaryColor,
-                                              ),
-                                            ),
-                                        onRatingUpdate: (rating) {},
-                                      ).paddingOnly(right: Get.width * 0.02),
-                                      Text(
-                                        "4.5",
-                                        style: Theme
-                                            .of(context)
-                                            .textTheme
-                                            .bodySmall!
-                                            .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.labelBlackColor,
-                                            fontSize: 7),
-                                      )
-                                    ],
-                                  ),
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 15,
+                                backgroundImage: AssetImage(
+                                  Assets.imagesImgCustomerPicBooking,
                                 ),
-                              ],
-                            )
-                          ],),
-                          Text(" Post Date : 22/07/2025", style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(fontWeight: FontWeight.w500,
-                              color: AppColors.textColor),)
+                              ).paddingOnly(right: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Darrell Steward",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall!
+                                        .copyWith(
+                                          color: AppColors.labelBlackColor,
+                                        ),
+                                  ),
+                                  Transform.translate(
+                                    offset: Offset(-Get.width * 0.015, 0),
+                                    child: Row(
+                                      children: [
+                                        RatingBar.builder(
+                                          itemSize: 12,
+                                          initialRating: 4,
+                                          minRating: 0,
+                                          unratedColor:
+                                              AppColors.starUnselectedColor,
+                                          direction: Axis.horizontal,
+                                          allowHalfRating: true,
+                                          itemCount: 5,
+                                          itemPadding: EdgeInsets.zero,
+                                          // No padding
+                                          itemBuilder: (context, _) =>
+                                              Container(
+                                                width: 5.0,
+                                                height: 30.0,
+                                                alignment: Alignment.center,
+                                                child: Icon(
+                                                  Icons.star,
+                                                  size: 27.0,
+                                                  // Adjust the size if needed
+                                                  color:
+                                                      AppColors.secondaryColor,
+                                                ),
+                                              ),
+                                          onRatingUpdate: (rating) {},
+                                        ).paddingOnly(right: Get.width * 0.02),
+                                        Text(
+                                          "4.5",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color:
+                                                    AppColors.labelBlackColor,
+                                                fontSize: 7,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          Text(
+                            " Post Date : 22/07/2025",
+                            style: Theme.of(context).textTheme.bodyLarge!
+                                .copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textColor,
+                                ),
+                          ),
                         ],
                       ).paddingOnly(bottom: 5),
                       Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .displayMedium!.copyWith(fontSize: 7,height: 1.1,),)
+                        style: Theme.of(context).textTheme.displayMedium!
+                            .copyWith(fontSize: 12, height: 1.1),
+                      ),
                     ],
                   ),
                 ).paddingOnly(bottom: 10);
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -486,15 +517,9 @@ class HomeContent extends StatelessWidget {
             flex: 2,
             child: Row(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildImage(imageUrls[0]),
-                ),
+                Expanded(flex: 2, child: _buildImage(imageUrls[0])),
                 SizedBox(width: 10),
-                Expanded(
-                  flex: 1,
-                  child: _buildImage(imageUrls[1]),
-                ),
+                Expanded(flex: 1, child: _buildImage(imageUrls[1])),
               ],
             ),
           ),
@@ -521,15 +546,9 @@ class HomeContent extends StatelessWidget {
               flex: 2,
               child: Row(
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: _buildImage(imageUrls[0]),
-                  ),
+                  Expanded(flex: 2, child: _buildImage(imageUrls[0])),
                   SizedBox(width: 10),
-                  Expanded(
-                    flex: 1,
-                    child: _buildImage(imageUrls[1]),
-                  ),
+                  Expanded(flex: 1, child: _buildImage(imageUrls[1])),
                 ],
               ),
             ),

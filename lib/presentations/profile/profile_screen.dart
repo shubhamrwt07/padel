@@ -44,18 +44,18 @@ class ProfileUi extends GetView<ProfileController> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 8,
-                    child: Container(
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset(Assets.imagesIcCamara, scale: 5),
-                    ),
-                  ),
+                  // Positioned(
+                  //   bottom: 0,
+                  //   right: 8,
+                  //   child: Container(
+                  //     padding: EdgeInsets.all(6),
+                  //     decoration: BoxDecoration(
+                  //       color: AppColors.primaryColor,
+                  //       shape: BoxShape.circle,
+                  //     ),
+                  //     child: Image.asset(Assets.imagesIcCamara, scale: 5),
+                  //   ),
+                  // ),
                 ],
               ),
               Column(
