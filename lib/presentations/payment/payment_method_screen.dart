@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 
@@ -59,7 +60,11 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
           CustomButton(
               width: Get.width * 0.9,
               onTap: () {
-                Get.to(() => BookingSuccessfulScreen(), transition: Transition.rightToLeft);
+                if(controller.option.value.isNotEmpty){
+                  Get.to(() => BookingSuccessfulScreen(), transition: Transition.rightToLeft);
+                }else{
+                  SnackBarUtils.showWarningSnackBar("Please select payment method");
+                }
 
               },
               child: Row(
