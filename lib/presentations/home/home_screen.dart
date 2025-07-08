@@ -530,10 +530,8 @@ class HomeScreen extends GetView<HomeController> {
                       image: AssetImage(Assets.imagesImgCart),
                     ),
                   ),
-                ),
-                Container(
-                  width: Get.width*0.56,
-                  color: Colors.transparent,
+                ).paddingOnly(right: Get.width*0.02),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

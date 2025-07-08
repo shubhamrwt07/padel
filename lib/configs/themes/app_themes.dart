@@ -4,7 +4,7 @@ import '../app_colors.dart';
 
 class AppThemes {
   AppThemes._();
-
+///
   static ThemeData appTheme = ThemeData(
     primaryColor: AppColors.primaryColor,
     canvasColor: AppColors.primaryColor,
