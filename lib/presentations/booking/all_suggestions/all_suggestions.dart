@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class AllSuggestions extends StatelessWidget {
@@ -28,7 +29,9 @@ class AllSuggestions extends StatelessWidget {
                   style: Get.textTheme.headlineLarge,
                 ),
                 InkWell(
-                  onTap: () => Get.to(Filters()),
+                  onTap: (){
+                    controller.showFilter.toggle();
+                  },
                   child: Container(
                     height: 35,
                     width: 35,
@@ -44,6 +47,23 @@ class AllSuggestions extends StatelessWidget {
                 ),
               ],
             ).paddingOnly(left: Get.width*.025,right: Get.width*.025,top: Get.height*0.01),
+            Obx(
+                  () => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return SizeTransition(
+                    sizeFactor: animation,
+                    axisAlignment: -1.0,
+                    child: FadeTransition(opacity: animation, child: child),
+                  );
+                },
+                child: controller.showFilter.value
+                    ? filters(context)
+                    : const SizedBox.shrink(key: ValueKey('empty')),
+              ),
+            ),
             ListView.builder(
               physics: const ClampingScrollPhysics(),
               itemCount: 4,
@@ -59,6 +79,86 @@ class AllSuggestions extends StatelessWidget {
         ).paddingOnly(bottom: 10),
       ),
     );
+  }
+
+  Widget filters(BuildContext context){
+    return Container(
+      key: const ValueKey('filter'),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            height: 35,
+            width: Get.width * 0.59,
+            decoration: BoxDecoration(
+              color: AppColors.textFieldColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.03),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                    width: Get.width * 0.45,
+                    color: Colors.transparent,
+                    child: Text(
+                      "Select Category",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: AppColors.textColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 20,
+                  color: AppColors.textColor,
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              controller.selectDate(context);
+            },
+            child: Container(
+              height: 35,
+              width: Get.width * 0.27,
+              decoration: BoxDecoration(
+                color: AppColors.textFieldColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: Get.width * 0.018),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Obx(
+                        () => Text(
+                      DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(controller.selectedDate.value),
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        fontSize: 12,
+                        color: AppColors.textColor,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.calendar_month_outlined,
+                    size: 13,
+                    color: AppColors.textColor,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ).paddingOnly(
+        left: Get.width * 0.02,
+        right: Get.width * 0.02,
+        bottom: Get.height * 0.02,
+      ),
+    ).paddingOnly(top: 5);
   }
 
   Widget _buildSlotSelector(BuildContext context) {
@@ -154,7 +254,7 @@ class AllSuggestions extends StatelessWidget {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildPlayerSlot(
             imageUrl: Assets.imagesImgCustomerPicBooking,
@@ -162,13 +262,13 @@ class AllSuggestions extends StatelessWidget {
           ).paddingOnly(bottom: 6),
           _buildPlayerSlot(
             imageUrl: Assets.imagesImgCustomerPicBooking,
-            name: 'Devon Lane',
+            name: 'Courtney',
           ).paddingOnly(bottom: 6),
           Container(width: 1, color: AppColors.blackColor.withAlpha(50)).paddingOnly(bottom: 10),
           _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
           _buildPlayerSlot(imageUrl: '', name: '').paddingOnly(bottom: 6),
         ],
-      ),
+      ).paddingOnly(),
     );
   }
 

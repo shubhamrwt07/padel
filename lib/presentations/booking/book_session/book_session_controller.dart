@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 class BookSessionController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
-  var selectedDates = <DateTime>[].obs;
+  final selectedDate = Rxn<DateTime>();
 
   final List<String> timeSlots = List.generate(19, (index) {
     final hour = 6 + index;

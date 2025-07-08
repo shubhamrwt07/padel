@@ -4,7 +4,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
-  var selectedDates = <DateTime>[].obs;
+  final selectedDate = Rxn<DateTime>();
 
   final List<String> timeSlots = List.generate(19, (index) {
     final hour = 6 + index;

@@ -30,15 +30,15 @@ class BookSession extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                 ],
-              ),
-              SizedBox(
-                height: Get.height*0.2,
-                child: ListView.builder(
-                  itemCount: 5,
-                  itemBuilder: (BuildContext context,index){
-                    return _buildMatchCard(context);
-                  },
-                ),
+              ).paddingOnly(bottom: Get.height*0.01),
+              ListView.builder(
+                itemCount: 3,
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (BuildContext context,index){
+                  return _buildMatchCard(context);
+                },
               )
             ],
           ),
@@ -53,95 +53,110 @@ class BookSession extends StatelessWidget {
        children: [
          Text("Select date", style: Get.textTheme.labelLarge),
          Obx(
-               () => Transform.translate(
-             offset: const Offset(0, -12),
-             child: EasyDateTimeLinePicker.itemBuilder(
-               headerOptions: HeaderOptions(
-                 headerBuilder: (_, context, date) => const SizedBox.shrink(),
-               ),
-               selectionMode: SelectionMode.alwaysFirst(),
-               firstDate: DateTime.now(),
-               lastDate: DateTime(2030, 3, 18),
-               focusedDate: controller.selectedDates.isEmpty
-                   ? DateTime.now()
-                   : controller.selectedDates.first,
-               itemExtent: 70,
-               itemBuilder: (context, date, _, isDisabled, isToday, onTap) {
-                 final dayName = DateFormat('E').format(date);
-                 final monthName = DateFormat('MMM').format(date);
-                 final bool isSelected = controller.selectedDates
-                     .any((d) => d.year == date.year && d.month == date.month && d.day == date.day);
+               () => EasyDateTimeLinePicker.itemBuilder(
+             headerOptions: HeaderOptions(
+               headerBuilder: (_, context, date) => const SizedBox.shrink(),
+             ),
+             selectionMode: SelectionMode.alwaysFirst(),
+             firstDate: DateTime.now(),
+             lastDate: DateTime(2030, 3, 18),
+             focusedDate: controller.selectedDate.value,
+             itemExtent: 70,
+             itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+               final dayName = DateFormat('E').format(date);
+               final monthName = DateFormat('MMM').format(date);
 
-                 return GestureDetector(
-                   onTap: () {
-                     if (isSelected) {
-                       controller.selectedDates.removeWhere((d) =>
-                       d.year == date.year &&
-                           d.month == date.month &&
-                           d.day == date.day);
-                     } else {
-                       controller.selectedDates.add(date);
-                     }
-                   },
-                   child: AnimatedSwitcher(
-                     duration: const Duration(milliseconds: 1000),
-                     switchInCurve: Curves.easeIn,
-                     switchOutCurve: Curves.easeOut,
-                     transitionBuilder: (child, animation) {
-                       return FadeTransition(opacity: animation, child: child);
-                     },
-                     child: Container(
-                       height: Get.height * 0.09,
-                       width: Get.width * 0.15,
-                       key: ValueKey(isSelected),
-                       alignment: Alignment.center,
-                       decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(10),
-                         color: isSelected
-                             ? Colors.black
-                             : AppColors.playerCardBackgroundColor,
-                         border: Border.all(
+               return GestureDetector(
+                 onTap: onTap,
+                 child: Stack(
+                   children: [
+                     AnimatedSwitcher(
+                       duration: const Duration(milliseconds: 1000),
+                       switchInCurve: Curves.easeIn,
+                       switchOutCurve: Curves.easeOut,
+                       transitionBuilder: (child, animation) {
+                         return FadeTransition(opacity: animation, child: child);
+                       },
+                       child: Container(
+                         height: Get.height * 0.09,
+                         width: Get.width * 0.15,
+                         key: ValueKey(isSelected),
+                         alignment: Alignment.center,
+                         decoration: BoxDecoration(
+                           borderRadius: BorderRadius.circular(10),
                            color: isSelected
-                               ? Colors.transparent
-                               : AppColors.blackColor.withAlpha(10),
-                           width: 1,
+                               ? Colors.black
+                               : AppColors.playerCardBackgroundColor,
+                           border: Border.all(
+                             color: isSelected
+                                 ? Colors.transparent
+                                 : AppColors.blackColor.withAlpha(10),
+                             width: 1,
+                           ),
+                         ),
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Text(
+                               dayName,
+                               style: Get.textTheme.bodySmall!.copyWith(
+                                 color: isSelected ? Colors.white : Colors.black,
+                               ),
+                             ),
+                             Text(
+                               date.day.toString(),
+                               style: Get.textTheme.titleMedium!.copyWith(
+                                 fontSize: 22,
+                                 color: isSelected
+                                     ? Colors.white
+                                     : AppColors.textColor,
+                                 fontWeight: FontWeight.w600,
+                               ),
+                             ),
+                             Text(
+                               monthName,
+                               style: Get.textTheme.bodySmall!.copyWith(
+                                 color: isSelected ? Colors.white : Colors.black,
+                               ),
+                             ),
+                           ],
                          ),
                        ),
-                       child: Column(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-                           Text(
-                             dayName,
-                             style: Get.textTheme.bodySmall!.copyWith(
-                               color: isSelected ? Colors.white : Colors.black,
-                             ),
-                           ),
-                           Text(
-                             date.day.toString(),
-                             style: Get.textTheme.titleMedium!.copyWith(
-                               fontSize: 22,
-                               color: isSelected
-                                   ? Colors.white
-                                   : AppColors.textColor,
-                               fontWeight: FontWeight.w600,
-                             ),
-                           ),
-                           Text(
-                             monthName,
-                             style: Get.textTheme.bodySmall!.copyWith(
-                               color: isSelected ? Colors.white : Colors.black,
-                             ),
-                           ),
-                         ],
-                       ),
                      ),
-                   ),
-                 );
-               },
-               onDateChange: (date) {
-                 // Optional: ignore if handling inside onTap above.
-               },
-             ),
+
+                     if (isSelected)
+                       Positioned(
+                         top: 0,
+                         right: 12,
+                         child: Obx(() {
+                           final selectedCount = controller.selectedTimes.length;
+                           if (selectedCount == 0) return const SizedBox.shrink();
+
+                           return Container(
+                             padding: const EdgeInsets.all(4),
+                             decoration: const BoxDecoration(
+                               shape: BoxShape.circle,
+                               color: Colors.white,
+                             ),
+                             child: Text(
+                               '$selectedCount',
+                               style: const TextStyle(
+                                 color: Colors.black,
+                                 fontSize: 10,
+                                 fontWeight: FontWeight.bold,
+                               ),
+                             ),
+                           );
+                         }),
+                       ),
+                   ],
+                 ),
+               );
+             },
+             onDateChange: (date) {
+               controller.selectedDate.value = date;
+               controller.selectedTimes.clear();
+             },
            ),
          ),
        ],
@@ -257,7 +272,7 @@ class BookSession extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: AppColors.blueColor,
-                          fontSize: 16,
+                          fontSize: 18,
                         ),
                       ),
                       TextSpan(
@@ -267,19 +282,19 @@ class BookSession extends StatelessWidget {
                             .headlineLarge
                             ?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.blueColor,fontSize: 16
+                            color: AppColors.blueColor,fontSize: 18
                           // Keep other styles consistent
                         ),
                       ),
                     ],
                   ),
                 ).paddingOnly(right: Get.width*0.05),
-                Icon(Icons.shopping_cart_outlined)
+                Icon(Icons.shopping_cart_outlined,size: 20,)
               ],
             )
           ],
         ),
-        Divider(thickness: 0.2,color: AppColors.textColor,)
+        Divider(thickness: 0.5,color: AppColors.textColor,)
       ],
     ).paddingOnly(bottom: Get.height*0.01);
   }
