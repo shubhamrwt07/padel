@@ -544,7 +544,7 @@ class HomeScreen extends GetView<HomeController> {
                             "Padel Haus",
                             style: Theme.of(context)
                                 .textTheme
-                                .headlineSmall!
+                                .headlineLarge!
                                 .copyWith(fontWeight: FontWeight.w600),
                           ),
                           Row(

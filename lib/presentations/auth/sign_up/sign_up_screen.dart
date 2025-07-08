@@ -55,6 +55,7 @@ class SignUpScreen extends GetView<SignUpController> {
             PrimaryTextField(
               keyboardType: TextInputType.phone,
               action: TextInputAction.next,
+              maxLength: 10,
               onFieldSubmitted: (v) => controller.onFieldSubmit,
               controller: controller.phoneController,
               focusNode: controller.phoneFocusNode,
