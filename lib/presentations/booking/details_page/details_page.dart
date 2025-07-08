@@ -222,7 +222,7 @@ class DetailsPage extends GetView<DetailsPageController> {
                     fontWeight: FontWeight.w600,
                   ),
                 ).paddingOnly(
-                  right: Get.width * 0.3,
+                  right: Get.width * 0.29,
                 ),
                 Text(
                   "Book Now",

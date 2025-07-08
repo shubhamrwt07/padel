@@ -74,7 +74,7 @@ class BookingScreen extends GetView<BookingController> {
                             ],
                           ),
                         ],
-                      ).paddingOnly(top: Get.height * 0.045),
+                      ).paddingOnly(top: Get.height * 0.06),
                       Text(
                         "The Good Club",
                         style: Theme.of(context)

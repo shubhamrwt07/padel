@@ -41,7 +41,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
             ).paddingOnly(top: Get.height * 0.02),
           ),
           SizedBox(
-            height: Get.height * 0.72,
+            height: Get.height * 0.7,
             child: ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               itemCount: controller.paymentList.length,
