@@ -51,7 +51,7 @@ class BookSession extends StatelessWidget {
      return Column(
        crossAxisAlignment: CrossAxisAlignment.start,
        children: [
-         Text("Select date", style: Get.textTheme.labelLarge),
+         Text("Select date", style: Get.textTheme.labelLarge).paddingOnly(bottom: 5),
          Obx(
                () => EasyDateTimeLinePicker.itemBuilder(
              headerOptions: HeaderOptions(

@@ -53,15 +53,6 @@ flutter:
         - asset: fonts/Poppins/Poppins-Regular.ttf
           weight: 400
 
-    - family: Figtree
-      fonts:
-        - asset: fonts/Figtree/Figtree-Bold.ttf
-          weight: 400
-        - asset: fonts/Figtree/Figtree-Medium.ttf
-          weight: 500
-        - asset: fonts/Figtree/Figtree-Bold.ttf
-          weight: 700
-
     - family: Lato
       fonts:
         - asset: fonts/Lato/Lato-Regular.ttf

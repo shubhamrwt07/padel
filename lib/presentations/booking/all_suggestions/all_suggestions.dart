@@ -28,7 +28,7 @@ class AllSuggestions extends StatelessWidget {
                   "For your level",
                   style: Get.textTheme.headlineLarge,
                 ),
-                InkWell(
+                GestureDetector(
                   onTap: (){
                     controller.showFilter.toggle();
                   },
@@ -46,7 +46,7 @@ class AllSuggestions extends StatelessWidget {
                   ),
                 ),
               ],
-            ).paddingOnly(left: Get.width*.025,right: Get.width*.025,top: Get.height*0.01),
+            ).paddingOnly(left: Get.width*.025,right: Get.width*.025,top: Get.height*0.01,bottom: 5),
             Obx(
                   () => AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -68,15 +68,16 @@ class AllSuggestions extends StatelessWidget {
               physics: const ClampingScrollPhysics(),
               itemCount: 4,
               shrinkWrap: true,
+              padding: EdgeInsets.zero,
               itemBuilder: (context, int index) {
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(left: 8.0,right: 8.0,bottom: 8),
                   child: _buildMatchCard(context),
                 );
               },
             ),
           ],
-        ).paddingOnly(bottom: 10),
+        ),
       ),
     );
   }
@@ -87,36 +88,46 @@ class AllSuggestions extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            height: 35,
-            width: Get.width * 0.59,
-            decoration: BoxDecoration(
-              color: AppColors.textFieldColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.03),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                    width: Get.width * 0.45,
-                    color: Colors.transparent,
-                    child: Text(
-                      "Select Category",
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: AppColors.textColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 20,
-                  color: AppColors.textColor,
+          Obx(() {
+            return GestureDetector(
+              key: controller.dropdownKey,
+              onTap: () => _showDropdown(context),
+              child: Container(
+                height: 35,
+                width: Get.width * 0.59,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-          ),
+                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.03),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: Get.width * 0.45,
+                      color: Colors.transparent,
+                      child: Text(
+                       controller. selectedCategory.value,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
+                          color: AppColors.textColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 20,
+                      color: AppColors.textColor,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
           GestureDetector(
             onTap: () {
               controller.selectDate(context);
@@ -159,6 +170,41 @@ class AllSuggestions extends StatelessWidget {
         bottom: Get.height * 0.02,
       ),
     ).paddingOnly(top: 5);
+  }
+  void _showDropdown(BuildContext context) {
+    final RenderBox renderBox = controller.dropdownKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final Size size = renderBox.size;
+
+    final double dropdownWidth = Get.width * 0.48;
+
+    showMenu<String>(
+      context: context,
+      color: AppColors.whiteColor,
+      position: RelativeRect.fromLTRB(
+        offset.dx,
+        offset.dy + size.height,
+        offset.dx + dropdownWidth,
+        0,
+      ),
+      items: controller.categories.map((String value) {
+        return PopupMenuItem<String>(
+          value: value,
+          child: SizedBox(
+            width: dropdownWidth,
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        );
+      }).toList(),
+    ).then((String? newValue) {
+      if (newValue != null) {
+        controller.selectedCategory.value = newValue;
+      }
+    });
   }
 
   Widget _buildSlotSelector(BuildContext context) {

@@ -4,6 +4,12 @@ class AllSuggestionsController extends GetxController{
   RxString selectedSlot = 'Morning'.obs;
   RxBool showFilter = false.obs;
   final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
+  final RxString selectedCategory = 'Select Category'.obs;
+
+  //SELECT CATEGORY-------------------------------------------------------------
+
+  final List<String> categories = ['Level A', 'Level B', 'Level C'];
+  final GlobalKey dropdownKey = GlobalKey();
 
   void selectSlot(String slot) {
     selectedSlot.value = slot;

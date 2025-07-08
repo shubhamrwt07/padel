@@ -25,13 +25,13 @@ class EditProfileUi extends GetView<ProfileController> {
           centerTitle: true,
           title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
           action: [
-            GestureDetector(
-              onTap: () => Get.back(),
-              child: Icon(
-                Icons.check,
-                color: AppColors.blueColor,
-              ).paddingOnly(right: Get.width * 0.02),
-            ),
+            // GestureDetector(
+            //   onTap: () => Get.back(),
+            //   child: Icon(
+            //     Icons.check,
+            //     color: AppColors.blueColor,
+            //   ).paddingOnly(right: Get.width * 0.02),
+            // ),
           ],
           context: context,
         ),
