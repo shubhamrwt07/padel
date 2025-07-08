@@ -60,12 +60,15 @@ class BookingScreen extends GetView<BookingController> {
                                   Assets.imagesIcShareBooking,
                                 ),
                               ).paddingOnly(right: 15),
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: AppColors.whiteColor,
-                                child: Icon(
-                                  Icons.shopping_cart_outlined,
-                                  color: AppColors.blackColor,
+                              GestureDetector(
+                                onTap: ()=>Get.to(()=>CartScreen(buttonType: "true")),
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: AppColors.whiteColor,
+                                  child: Icon(
+                                    Icons.shopping_cart_outlined,
+                                    color: AppColors.blackColor,
+                                  ),
                                 ),
                               ),
                             ],

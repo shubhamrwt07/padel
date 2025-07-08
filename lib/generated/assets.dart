@@ -10,6 +10,7 @@ class Assets {
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
+  static const String imagesIcCelebration = 'assets/images/ic_celebration.svg';
   static const String imagesIcDummyIcon = 'assets/images/ic_dummy_icon.png';
   static const String imagesIcEye = 'assets/images/ic_eye.png';
   static const String imagesIcEyeOff = 'assets/images/ic_eye_off.png';

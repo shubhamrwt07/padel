@@ -64,7 +64,7 @@ class SearchField extends StatelessWidget {
               .textTheme.labelLarge!
               .copyWith(color: AppColors.textColor),
           filled: true,
-          fillColor: color ?? Color(0XFFF6F8FF),
+          fillColor: color ?? AppColors.searchBarColor,
           contentPadding:
           EdgeInsets.symmetric(vertical: Get.height * .005, horizontal: 12),
           border: OutlineInputBorder(

@@ -236,10 +236,10 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         PrimaryButton(
             onTap: () {
               if (controller.selectedReason.value.isEmpty) {
-                SnackBarUtils.showErrorSnackBar("Please select a reason");
+                SnackBarUtils.showWarningSnackBar("Please select a reason");
               } else if (controller.selectedReason.value == 'Other' &&
                   controller.otherReasonController.text.trim().isEmpty) {
-                SnackBarUtils.showErrorSnackBar("Please write a reason");
+                SnackBarUtils.showWarningSnackBar("Please write a reason");
               } else {
                 Get.to(()=>ConfirmCancellation());
                 SnackBarUtils.showSuccessSnackBar("Your booking has been cancelled");

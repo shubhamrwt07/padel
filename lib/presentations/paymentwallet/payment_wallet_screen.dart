@@ -15,14 +15,13 @@ class PaymentWalletScreen extends StatelessWidget {
       appBar: primaryAppBar(
         showLeading: true,
         centerTitle: true,
-        title: Text("Payment ").paddingOnly(left: Get.width * 0.02),
+        title: Text("Payment").paddingOnly(left: Get.width * 0.02),
         context: context,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              height: Get.height * .08,
               width: Get.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -30,16 +29,16 @@ class PaymentWalletScreen extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Color(0x99d5dcf1), // 60% opacity for fade effect
-                    Color(0x99dbf1e3), // 60% opacity for fade effect
+                    Color(0x99d5dcf1),
+                    Color(0x99dbf1e3),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.lightBlueColor.withOpacity(0.2), // Shadow color
-                    spreadRadius: 1, // Spread of the shadow
-                    blurRadius: 4, // Softness of the shadow
-                    offset: Offset(0, 2), // Offset in x and y direction
+                    color: AppColors.lightBlueColor.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),

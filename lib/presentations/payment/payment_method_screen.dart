@@ -69,17 +69,17 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: AppColors.whiteColor,
                       fontFamily: "Roboto",
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ).paddingOnly(left: 30, right: 5),
                   Text(
                     "7000",
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ).paddingOnly(
-                    right: Get.width * 0.2,
+                    right: Get.width * 0.3,
                   ),
                   Text(
                     "Payment",

@@ -3,21 +3,18 @@ import 'package:get/get.dart';
 
 class BookSessionController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
-  Rx<DateTime> selectedDate = DateTime.now().obs;
-  // Change from String? to List<String>
   RxList<String> selectedTimes = <String>[].obs;
+  final selectedDate = Rxn<DateTime>();
 
-  final List<String> timeSlots = [
-    "8:00am",
-    "8:10am",
-    "8:30am",
-    "8:40am",
-    "9:00am",
-    "9:20am",
-    "9:40am",
-    "10:00am",
-    "10:20am",
-  ];
+  final List<String> timeSlots = List.generate(19, (index) {
+    final hour = 6 + index;
+    if (hour == 24) return '12:00am';
+
+    final period = hour >= 12 ? 'pm' : 'am';
+    final formattedHour = hour > 12 ? hour - 12 : hour;
+    return '${formattedHour == 0 ? 12 : formattedHour}:00$period';
+  });
+
 
   // Helper method to toggle selection
   void toggleTimeSlot(String time) {

@@ -15,53 +15,60 @@ class EditProfileUi extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      bottomNavigationBar: _bottomBar(context),
-      appBar: primaryAppBar(
-        showLeading: true,
-        centerTitle: true,
-        title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
-        action: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Icon(
-              Icons.check,
-              color: AppColors.blueColor,
-            ).paddingOnly(right: Get.width * 0.02),
-          ),
-        ],
-        context: context,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _profileImage(context),
-            _textFieldWithLabel(
-              "Full Name",
-              controller.nameController,
-              context,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.whiteColor,
+        bottomNavigationBar: _bottomBar(context),
+        appBar: primaryAppBar(
+          showLeading: true,
+          centerTitle: true,
+          title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
+          action: [
+            GestureDetector(
+              onTap: () => Get.back(),
+              child: Icon(
+                Icons.check,
+                color: AppColors.blueColor,
+              ).paddingOnly(right: Get.width * 0.02),
             ),
-            _textFieldWithLabel("Email", controller.emailController, context),
-            _textFieldWithLabel(
-              "Phone",
-              controller.phoneController,
-              context,
-              keyboardType: TextInputType.phone,
-            ),
-            _genderSelection(context),
-            _dobField(context),
-            _textFieldWithLabel("Location / City", null, context),
           ],
-        ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
+          context: context,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _profileImage(context),
+              _textFieldWithLabel(
+                "Full Name",
+                controller.nameController,
+                context,
+              ),
+              _textFieldWithLabel(
+                "Email",
+                controller.emailController,
+                context,
+               ),
+              _textFieldWithLabel(
+                "Phone",
+                controller.phoneController,
+                context,
+                 keyboardType: TextInputType.phone,
+              ),
+              _genderSelection(context),
+              _dobField(context),
+              _textFieldWithLabel("Location / City", null, context),
+            ],
+          ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
+        ),
       ),
     );
   }
 
   Widget _bottomBar(BuildContext context) {
     return Container(
-      height: Get.height * .1,
+      height: Get.height * .12,
       padding: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -178,6 +185,11 @@ class EditProfileUi extends GetView<ProfileController> {
           controller: controller,
           readOnly: readOnly,
           keyboardType: keyboardType,
+          // scrollPadding: EdgeInsets.only(bottom: Get.height*0.3),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: Get.width * 0.04,
+            vertical: (57) * 0.22,
+          ),
         ).paddingOnly(top: 10),
       ],
     );
@@ -237,20 +249,27 @@ class EditProfileUi extends GetView<ProfileController> {
           ),
         ).paddingOnly(top: Get.height * .02),
         Obx(
-          () => PrimaryTextField(
-            readOnly: true,
-            controller: controller.dobController.value,
-            hintText: "Select Date of Birth",
-            suffixIcon: IconButton(
-              icon: Icon(
-                Icons.calendar_month_outlined,
-                color: AppColors.iconColor,
+              () => GestureDetector(
+            onTap: () => controller.selectDate(context),
+            child: AbsorbPointer(
+              child: PrimaryTextField(
+                readOnly: true,
+                controller: controller.dobController.value,
+                hintText: "Select Date of Birth",
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: Get.width * 0.04,
+                  vertical: 57 * 0.22,
+                ),
+                suffixIcon: Icon(
+                  Icons.calendar_month_outlined,
+                  color: AppColors.iconColor,
+                ),
               ),
-              onPressed: () => controller.selectDate(context),
             ),
           ).paddingOnly(top: 10),
         ),
       ],
     );
   }
+
 }
