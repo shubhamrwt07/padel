@@ -87,7 +87,7 @@ class HomeContent extends StatelessWidget {
               child: Container(
                 color: Colors.transparent,
                 height: Get.height * 0.1,
-                width: Get.width * 0.68,
+                width: Get.width * 0.7,
                 child: ListView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   scrollDirection: Axis.horizontal,

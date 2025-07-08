@@ -7,59 +7,7 @@ class DetailsPage extends GetView<DetailsPageController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Container(
-        height: Get.height * .1,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Align(
-          alignment: Alignment.center,
-          child: CustomButton(
-              width: Get.width*0.85,
-              onTap: (){
-                Get.toNamed(RoutesName.paymentMethod);
-              },
-              child: Row(
-                children: [
-                  Text(
-                    "₹",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: "Roboto"
-                    ),
-                  ).paddingOnly(left: Get.width*.07),
-                  Text(
-                    "2000",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ).paddingOnly(
-                    right: Get.width * 0.2,
-                  ),
-                  Text(
-                    "Book place ",
-                    style: Theme.of(context).textTheme.headlineMedium!
-                        .copyWith(
-                      color: AppColors.whiteColor,
-                    ),
-                  ),
-                ],
-              )).paddingOnly(left: 20,right: 20),
-        ),
-      ),
+      bottomNavigationBar: bottomButton(),
       appBar: primaryAppBar(
         title: Text("Details"),
         context: context,
@@ -76,160 +24,219 @@ class DetailsPage extends GetView<DetailsPageController> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: Get.height * .16,
-            width: Get.width,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: AppColors.playerCardBackgroundColor,
-              border: Border.all(color: AppColors.greyColor),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  leading: SvgPicture.asset('assets/images/padel_icon.svg'),
-                  title: Text("PADEL", style: Get.textTheme.headlineSmall),
-                  subtitle: Text(
-                    "21 June | 9:00am - 10:00am",
-                    style: Get.textTheme.labelLarge!.copyWith(
-                      color: AppColors.darkGreyColor,
-                    ),
-                  ),
-                ),
-             Center(child: Container(height: 1,width: Get.width*.88,color: AppColors.greyColor,)),
-                Flexible(
-                    child: Transform.translate(
-                      offset: Offset(0,-Get.height*.008),
-                      child: Row(
-                        children: [
-                          Expanded(child: gameDetails("Gender", "All Players")),
-                          Expanded(child: gameDetails("Level", "0.92 - 0.132")),
-                          Expanded(child: gameDetails("Price", "₹2000")),
-                        ],
-
-                                        ),
-                    ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: Get.height * .015),
-          Container(
-            height: Get.height * .05,
-            width: Get.width,
-            decoration: BoxDecoration(
-              color: AppColors.playerCardBackgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.greyColor),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text("Court Number"), Text('1')],
-            ).paddingOnly(left: 15, right: 15),
-          ),
-          SizedBox(height: Get.height * .015),
-          gameCard(),
-          SizedBox(height: Get.height * .015),
-          Container(
-            // height: Get.height * .16,
-            width: Get.width,
-            decoration: BoxDecoration(
-              color: AppColors.playerCardBackgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.greyColor),
-            ),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  height: Get.height * .12,
-                  width: Get.width * .3,
-
-                  decoration: BoxDecoration(
-                    color: AppColors.playerCardBackgroundColor,
-                    border: Border.all(color: AppColors.greyColor),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(Assets.imagesImgDummy2,fit: BoxFit.cover,)),
-                ),
-                Container(
-                  width: Get.width*.51,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("The Good Club", style: Get.textTheme.bodySmall),
-                          SvgPicture.asset(Assets.imagesDirections,),
-
-                        ],
-                      ),
-                      Text(
-                        "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001",
-                        style: Get.textTheme.bodyLarge!.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        "More Info",
-                        style: Get.textTheme.bodyLarge!.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primaryColor,
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.primaryColor, // Blue underline
-
-                        ),
-                      ),
-                    ],
-                  ).paddingOnly(right: 0),
-                ),
-              ],
-            ).paddingAll(15),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text("Information",style: Get.textTheme.titleSmall,),
-          ),
-          // ListTile(
-          //   leading: SvgPicture.asset(Assets.imagesCourt),
-          //   title: Text('Type of Court ( 2 court)',style: Get.textTheme.bodySmall,),
-          //   subtitle:   Text('Outdoor, crystal, Double',style: Get.textTheme.headlineSmall,),
-          // ),
-          Row(
-            children: [
-              SvgPicture.asset(Assets.imagesCourt),
-              const SizedBox(width: 10), // space between image and text
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Type of Court (2 court)',
-                      style: Get.textTheme.bodySmall,
-                    ).paddingOnly(top: 5),
-                    Text(
-                      'Outdoor, crystal, Double',
-                      style: Get.textTheme.headlineSmall,
-                    ),
-                  ],
-                )
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: Get.height * .16,
+              width: Get.width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: AppColors.playerCardBackgroundColor,
+                border: Border.all(color: AppColors.greyColor),
               ),
-            ],
-          ).paddingOnly(top: Get.height*.01),
-
-
-
-        ],
-      ).paddingAll(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    leading: SvgPicture.asset('assets/images/padel_icon.svg'),
+                    title: Text("PADEL", style: Get.textTheme.headlineSmall),
+                    subtitle: Text(
+                      "21 June | 9:00am - 10:00am",
+                      style: Get.textTheme.labelLarge!.copyWith(
+                        color: AppColors.darkGreyColor,
+                      ),
+                    ),
+                  ),
+               Center(child: Container(height: 1,width: Get.width*.88,color: AppColors.greyColor,)),
+                  Flexible(
+                      child: Transform.translate(
+                        offset: Offset(0,-Get.height*.008),
+                        child: Row(
+                          children: [
+                            Expanded(child: gameDetails("Gender", "All Players")),
+                            Expanded(child: gameDetails("Game Level", "0.92 - 0.132")),
+                            Expanded(child: gameDetails("Price", "₹2000")),
+                          ],
+        
+                                          ),
+                      ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: Get.height * .015),
+            Container(
+              height: Get.height * .05,
+              width: Get.width,
+              decoration: BoxDecoration(
+                color: AppColors.playerCardBackgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.greyColor),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [Text("Court Number"), Text('1')],
+              ).paddingOnly(left: 15, right: 15),
+            ),
+            SizedBox(height: Get.height * .015),
+            gameCard(),
+            SizedBox(height: Get.height * .015),
+            Container(
+              // height: Get.height * .16,
+              width: Get.width,
+              decoration: BoxDecoration(
+                color: AppColors.playerCardBackgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.greyColor),
+              ),
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    height: Get.height * .12,
+                    width: Get.width * .3,
+        
+                    decoration: BoxDecoration(
+                      color: AppColors.playerCardBackgroundColor,
+                      border: Border.all(color: AppColors.greyColor),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(Assets.imagesImgDummy2,fit: BoxFit.cover,)),
+                  ),
+                  SizedBox(
+                    width: Get.width*.51,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("The Good Club", style: Get.textTheme.bodySmall),
+                            SvgPicture.asset(Assets.imagesDirections,),
+        
+                          ],
+                        ),
+                        Text(
+                          "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001",
+                          style: Get.textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          "More Info",
+                          style: Get.textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primaryColor,
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.primaryColor, // Blue underline
+        
+                          ),
+                        ),
+                      ],
+                    ).paddingOnly(right: 0),
+                  ),
+                ],
+              ).paddingAll(15),
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 8.0),
+            //   child: Text("Information",style: Get.textTheme.titleSmall,),
+            // ),
+            // // ListTile(
+            // //   leading: SvgPicture.asset(Assets.imagesCourt),
+            // //   title: Text('Type of Court ( 2 court)',style: Get.textTheme.bodySmall,),
+            // //   subtitle:   Text('Outdoor, crystal, Double',style: Get.textTheme.headlineSmall,),
+            // // ),
+            // Row(
+            //   children: [
+            //     SvgPicture.asset(Assets.imagesCourt),
+            //     const SizedBox(width: 10), // space between image and text
+            //     Expanded(
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         mainAxisAlignment: MainAxisAlignment.center,
+            //         children: [
+            //           Text(
+            //             'Type of Court (2 court)',
+            //             style: Get.textTheme.bodySmall,
+            //           ).paddingOnly(top: 5),
+            //           Text(
+            //             'Outdoor, crystal, Double',
+            //             style: Get.textTheme.headlineSmall,
+            //           ),
+            //         ],
+            //       )
+            //     ),
+            //   ],
+            // ).paddingOnly(top: Get.height*.01),
+        
+        
+        
+          ],
+        ).paddingAll(16),
+      ),
     );
   }
 
+  Widget bottomButton(){
+    return Container(
+      height: Get.height * .14,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40),
+          topRight: Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Align(
+        alignment: Alignment.center,
+        child: CustomButton(
+            width: Get.width*0.9,
+            onTap: (){
+              Get.toNamed(RoutesName.paymentMethod);
+            },
+            child: Row(
+              children: [
+                Text(
+                  "₹ ",
+                  style: Get.textTheme.titleMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: "Roboto"
+                  ),
+                ).paddingOnly(left: Get.width*.07),
+                Text(
+                  "2000",
+                  style: Get.textTheme.titleMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ).paddingOnly(
+                  right: Get.width * 0.3,
+                ),
+                Text(
+                  "Book Now",
+                  style: Get.textTheme.headlineMedium!
+                      .copyWith(
+                    color: AppColors.whiteColor,
+                  ),
+                ),
+              ],
+            )).paddingOnly(left: 20,right: 20),
+      ),
+    );
+  }
+  
   Widget appBarAction(Color backgroundColor, Widget child) {
     return Container(
       decoration: BoxDecoration(
@@ -268,7 +275,7 @@ class DetailsPage extends GetView<DetailsPageController> {
             ),
           ),
           SizedBox(height: Get.height * .01),
-          Text(subtitle, style: Get.textTheme.labelLarge),
+          Text(subtitle, style: Get.textTheme.headlineLarge),
         ],
       ),
     );
@@ -350,7 +357,7 @@ class DetailsPage extends GetView<DetailsPageController> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text("Team A"), Text("Team B")],
+            children: [Text("Team A",style: Get.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),), Text("Team B",style: Get.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),)],
           ).paddingOnly(top: 10),
         ],
       ).paddingOnly(left: 15, right: 15, top: 10,bottom: 5),

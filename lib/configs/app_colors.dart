@@ -27,5 +27,6 @@ class AppColors {
   static const Color tabSelectedColor = Color(0xFFeff2ff);
   static const Color textHintColor = Color(0xFF374151);
   static const Color iconColor = Color(0xFF9b9b9d);
+  static const Color searchBarColor = Color(0XFFF6F8FF);
 
 }
