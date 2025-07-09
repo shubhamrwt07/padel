@@ -14,6 +14,8 @@ class ForgotPasswordController extends GetxController {
   SignUpRepository signUpRepository = SignUpRepository();
 
   GlobalKey<FormState> resetFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   RxBool isLoading = false.obs;
   RxBool isOTPLoading = false.obs;
   RxBool isVisiblePassword = true.obs;
@@ -73,6 +75,7 @@ class ForgotPasswordController extends GetxController {
             "type": OtpScreenType.forgotPassword,
           },
         );
+        SnackBarUtils.showInfoSnackBar("OTP sent successfully");
       } else {
         SnackBarUtils.showErrorSnackBar(result.message!);
       }
@@ -93,6 +96,7 @@ class ForgotPasswordController extends GetxController {
         var response = await signUpRepository.resetPassword(body: body);
         if (response.status == "200") {
           Get.off(LoginScreen());
+          SnackBarUtils.showSuccessSnackBar("Password Updated Successfully");
         } else {
           SnackBarUtils.showErrorSnackBar(response.message!);
         }
@@ -111,6 +115,12 @@ class ForgotPasswordController extends GetxController {
     pwdController.dispose();
     cnfPwdController.dispose();
   }
-
+  @override
+  void onInit() {
+    super.onInit();
+    emailController.clear();
+    pwdController.clear();
+    cnfPwdController.clear();
+  }
 
 }

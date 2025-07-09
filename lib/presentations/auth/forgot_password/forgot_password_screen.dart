@@ -13,7 +13,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
       child: PrimaryContainer(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: primaryAppBar(title: SizedBox(), context: context),
+          appBar: primaryAppBar(title: Text(""), context: context),
           body: forgotPassword(context, controller),
         ),
       ),
@@ -24,7 +24,6 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
     BuildContext context,
     ForgotPasswordController controller,
   ) {
-    GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -42,7 +41,7 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
             textAlign: TextAlign.center,
           ).paddingOnly(bottom: Get.height * 0.05),
           Form(
-            key: formKey,
+            key: controller.formKey,
             child:
                 PrimaryTextField(
                   validator: (v) {
@@ -52,14 +51,14 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                   hintText: AppStrings.email,
                 ).paddingOnly(
                   bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                      ? Get.height * 0.03
-                      : Get.height * 0.36,
+                      ? Get.height * 0.0
+                      : Get.height * 0.32,
                 ),
           ),
           Obx(
             () => PrimaryButton(
               onTap: () {
-                if (formKey.currentState!.validate()) {
+                if (controller.formKey.currentState!.validate()) {
                   controller.sendOTP();
                 } else {
                   SnackBarUtils.showErrorSnackBar(AppStrings.invalidEmail);
