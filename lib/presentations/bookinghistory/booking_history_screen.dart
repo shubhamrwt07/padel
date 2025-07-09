@@ -40,7 +40,8 @@ class BookingHistoryUi extends StatelessWidget {
       },
     );
   }
-  Widget tabBar(BookingHistoryController controller){
+
+  Widget tabBar(BookingHistoryController controller) {
     return Container(
       color: Colors.white,
       child: TabBar(
@@ -60,101 +61,98 @@ class BookingHistoryUi extends StatelessWidget {
   }
 
   Widget _tabContent(BuildContext context, {required bool isCompleted}) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(top: 10, left: Get.width * .03, right: Get.width * .03),
-      child: Column(
-        children: [
-          SizedBox(
-            height: Get.height,
-            child: ListView.builder(
-              itemCount: 20,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    if (isCompleted) {
-                      Get.to(() => BookingCompletedReview(), transition: Transition.rightToLeft);
-                    } else {
-                      Get.toNamed(RoutesName.bookingConfirmAndCancel);
-                    }
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: EdgeInsets.only(
-                      left: Get.width * .03,
-                      right: Get.width * .03,
-                      top: Get.height * .01,
-                      bottom: Get.width * .01,
-                    ),
-                    width: Get.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: AppColors.containerBorderColor,
-                        width: 2.0,
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(), // Smooth scrolling effect
+      itemCount: 20,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            if (isCompleted) {
+              Get.to(() =>  BookingCompletedReview(),
+                  transition: Transition.rightToLeft);
+            } else {
+              Get.toNamed(RoutesName.bookingConfirmAndCancel);
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 0),
+            padding: EdgeInsets.only(
+              left: Get.width * .03,
+              right: Get.width * .03,
+              top: Get.height * .01,
+              bottom: Get.width * .01,
+            ),
+            width: Get.width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: AppColors.containerBorderColor,
+                width: 2.0,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Padel Haus",
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: AppColors.blackColor,
                       ),
-                      borderRadius: BorderRadius.circular(16.0),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Transform.translate(
+                      offset: const Offset(-2, 0),
+                      child: Row(
+                        children: [
+                          Image.asset(Assets.imagesIcLocation, scale: 2),
+                          Text(
+                            "Chandigarh, 160101",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(color: AppColors.darkGrey),
+                          ),
+                        ],
+                      ).paddingOnly(top: 3, bottom: 3),
+                    ),
+                    Row(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Padel Haus",
-                              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                                color: AppColors.blackColor,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(-2, 0),
-                              child: Row(
-                                children: [
-                                  Image.asset(Assets.imagesIcLocation, scale: 2),
-                                  Text(
-                                    "Chandigarh, 160101",
-                                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                      color: AppColors.darkGrey,
-                                    ),
-                                  ),
-                                ],
-                              ).paddingOnly(top: 3, bottom: 3),
-                            ),
-                            Row(
-                              children: [
-                                const Icon(Icons.alarm, size: 15),
-                                Text("Thu,27June",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall!
-                                        .copyWith(color: AppColors.blackColor))
-                                    .paddingOnly(left: 5),
-                                Text("8:00am",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall!
-                                        .copyWith(color: AppColors.blackColor))
-                                    .paddingOnly(left: 5),
-                                Text("(60m)",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall!
-                                        .copyWith(color: AppColors.labelBlackColor))
-                                    .paddingOnly(left: 5),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Icon(Icons.arrow_forward_ios, size: 18, color: AppColors.textColor),
+                        const Icon(Icons.alarm, size: 15),
+                        Text(
+                          "Thu, 27 June",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: AppColors.blackColor),
+                        ).paddingOnly(left: 5),
+                        Text(
+                          "8:00am",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: AppColors.blackColor),
+                        ).paddingOnly(left: 5),
+                        Text(
+                          "(60m)",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: AppColors.labelBlackColor),
+                        ).paddingOnly(left: 5),
                       ],
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    size: 18, color: AppColors.textColor),
+              ],
             ),
-          ),
-        ],
-      ),
+          ).paddingOnly(left: Get.width*.03,right: Get.width*.03,top: 10,bottom: 0),
+        );
+      },
     );
   }
 }

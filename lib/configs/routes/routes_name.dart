@@ -31,6 +31,7 @@ class RoutesName {
   static const String bookingConfirmAndCancel = '/bookingConfirmAndCancel' ;
   static const String paymentFilter = '/paymentFilter';
   static const String support = '/support';
+  static const String chat = '/chat';
 
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -53,18 +54,23 @@ class SupportScreen extends StatelessWidget {
               ).paddingOnly(left: 10),
             ],
           ).paddingOnly(top: 20),
-          Row(
-            children: [
-              Icon(Icons.chat, color: AppColors.primaryColor),
-              Text(
-                "Chat",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
-                ),
-              ).paddingOnly(left: 10),
-            ],
-          ).paddingOnly(top: 20),
+          GestureDetector(onTap: (){Get.toNamed(RoutesName.chat);},
+            child: Container(
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  Icon(Icons.chat, color: AppColors.primaryColor),
+                  Text(
+                    "Chat",
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryColor,
+                    ),
+                  ).paddingOnly(left: 10),
+                ],
+              ).paddingOnly(top: 20),
+            ),
+          ),
         ],
       ).paddingOnly(left: Get.width * .09, right: Get.width * .07, top: 20),
     );

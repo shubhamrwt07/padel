@@ -81,7 +81,6 @@ class PrimaryTextField extends StatelessWidget {
       onChanged:  onChanged,
       textInputAction:action,
       decoration: InputDecoration(
-
         suffixIcon:suffixIcon,
         prefixText:prefixText,
         prefix:prefix ,
@@ -89,7 +88,7 @@ class PrimaryTextField extends StatelessWidget {
         // contentPadding: EdgeInsets.only(left: Get.width*0.04),
         contentPadding:contentPadding?? EdgeInsets.symmetric(
           horizontal: Get.width * 0.04,
-          vertical: (height ?? 57) * 0.30,
+          vertical: (height ?? 57) * 0.26,
         ),
         counterText: "",
         hintText: hintText,

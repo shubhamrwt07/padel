@@ -1,7 +1,7 @@
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/widgets/forgot_password_exports.dart';
-class WelcomeBackScreen extends StatelessWidget {
-  const WelcomeBackScreen({super.key});
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
