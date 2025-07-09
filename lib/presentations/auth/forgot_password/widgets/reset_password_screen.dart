@@ -12,7 +12,7 @@ class ResetPasswordScreen extends GetView<ForgotPasswordController> {
       child: PrimaryContainer(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: primaryAppBar(title: SizedBox(), context: context),
+          appBar: primaryAppBar(title: Text(""), context: context),
           body: resetPassword(context, controller),
         ),
       ),
@@ -84,7 +84,7 @@ class ResetPasswordScreen extends GetView<ForgotPasswordController> {
                   ).paddingOnly(
                     bottom: MediaQuery.of(context).viewInsets.bottom > 0
                         ? Get.height * 0.03
-                        : Get.height * 0.335,
+                        : Get.height * 0.29,
                   ),
             ),
             Obx(

@@ -89,17 +89,21 @@ class OtpScreen extends GetView<OtpController> {
             right: Get.width * 0.06,
             bottom: Get.height * 0.02,
           ),
-          Text(
-            "00:00",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
-            textAlign: TextAlign.center,
-          ).paddingOnly(
-            bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                ? Get.height * 0.03
-                : Get.height * 0.295,
-          ),
+          // Countdown timer
+          Obx(() {
+            final minutes = (controller.secondsRemaining.value ~/ 60).toString().padLeft(2, '0');
+            final seconds = (controller.secondsRemaining.value % 60).toString().padLeft(2, '0');
+            return Text(
+              "$minutes:$seconds",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            ).paddingOnly(
+              bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                  ? Get.height * 0.03
+                  : Get.height * 0.25,
+            );
+          }),
+
           RichText(
             text: TextSpan(
               children: [
@@ -109,15 +113,31 @@ class OtpScreen extends GetView<OtpController> {
                     color: AppColors.darkGreyColor,
                   ),
                 ),
-                TextSpan(
-                  text: AppStrings.resend,
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: AppColors.primaryColor,
+                WidgetSpan(
+                  child: GestureDetector(
+                    onTap: controller.secondsRemaining.value == 0
+                        ? controller.resendOtp
+                        : null,
+                    child: Obx(
+                      ()=> Container(
+                        color: Colors.transparent,
+                        child: Text(
+                          AppStrings.resend,
+                          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                            color: controller.secondsRemaining.value == 0
+                                ? AppColors.primaryColor
+                                : Colors.grey, // disabled look
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+
           Obx(
     ()=> PrimaryButton(
               onTap: () {
