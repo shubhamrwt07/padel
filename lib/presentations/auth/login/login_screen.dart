@@ -3,9 +3,9 @@ import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart
 import '../../../configs/components/loader_widgets.dart';
 
 class LoginScreen extends GetView<LoginController> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-   LoginScreen({super.key});
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,7 @@ class LoginScreen extends GetView<LoginController> {
           ),
         ),
 
-        SizedBox(height: Get.height * 0.05),
+        SizedBox(height: Get.height * 0.03),
       ],
     );
   }
