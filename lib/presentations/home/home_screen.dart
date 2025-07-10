@@ -11,7 +11,6 @@ import 'package:padel_mobile/presentations/home/home_controller.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -102,7 +101,7 @@ class HomeScreen extends GetView<HomeController> {
             controller.showLocationAndDate.toggle(); // Toggle visibility
           },
           child: Obx(
-            ()=> Container(
+                ()=> Container(
               height: 40,
               width: 40,
               decoration: BoxDecoration(
@@ -468,9 +467,9 @@ class HomeScreen extends GetView<HomeController> {
                                         .textTheme
                                         .bodyLarge!
                                         .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.blackColor,
-                                        ),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.blackColor,
+                                    ),
                                   ),
                                   Text(
                                     "8:00am",
@@ -501,160 +500,161 @@ class HomeScreen extends GetView<HomeController> {
     ).paddingOnly(left: Get.width * 0.02, bottom: Get.height * 0.01);
   }
   Widget addToCart(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: 10,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Get.toNamed(RoutesName.booking);
-            FocusManager.instance.primaryFocus!.unfocus();
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.tabColor),
-            ),
-            padding: EdgeInsets.all(8),
-            // color: Colors.red,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  height: 95,
-                  width: 118,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: AssetImage(Assets.imagesImgCart),
-                    ),
-                  ),
-                ).paddingOnly(right: Get.width*0.02),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+      return Obx(() {
+        final courtsData = controller.courtsData.value;
+
+        // Show loading while data is not yet available
+        if (courtsData.data == null || courtsData.data!.courts == null) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        // If courts list is empty
+        if (courtsData.data!.courts!.isEmpty) {
+          return Center(child: Text("No courts available"));
+        }
+
+        // If data is available and not empty
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: courtsData.data!.courts!.length,
+          itemBuilder: (context, index) {
+            final clubs = courtsData.data!.courts![index];
+
+            return GestureDetector(
+              onTap: () {
+                Get.toNamed(RoutesName.booking,arguments: {"id":clubs.id});
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.tabColor),
+                ),
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Club Image
+                    Container(
+                      height: 95,
+                      width: 118,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: AssetImage(Assets.imagesImgCart),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ).paddingOnly(right: Get.width * 0.02),
+
+                    // Club Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Padel Haus",
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineLarge!
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
+                          // Club Name and Rating
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                Icons.star,
-                                color: AppColors.secondaryColor,
-                                size: 11,
-                              ),
                               Text(
-                                "4.9",
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge!.copyWith(),
-                              ).paddingOnly(),
+                                clubs.clubName ?? "N/A",
+                                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Icon(Icons.star, color: AppColors.secondaryColor, size: 11),
+                                  Text("4.9", style: Theme.of(context).textTheme.bodyLarge),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+
+                          // Address
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Image.asset(
                                 Assets.imagesIcLocation,
                                 scale: 3,
                                 color: AppColors.blackColor,
                               ),
-                              Text(
-                                " Chandigarh, 160001",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 10,
-                                      color: AppColors.blackColor,
-                                    ),
+                              SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "${clubs.city ?? ''}, ${clubs.address ?? ''}",
+                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 10,
+                                    color: AppColors.blackColor,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
+                                ),
                               ),
                             ],
                           ),
-                          Icon(
-                            Icons.directions,
-                            color: AppColors.secondaryColor,
-                            size: 15,
+
+                          // Tags
+                          Text(
+                            "${clubs.courtCount ?? 0} Courts | Free parking | Shed",
+                            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 10,
+                              color: AppColors.blackColor,
+                            ),
                           ),
+
+                          // Price and arrow
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '₹',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.blueColor,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' 1200',
+                                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.blueColor,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ).paddingOnly(bottom: 0),
+                              Container(
+                                alignment: Alignment.center,
+                                height: 20,
+                                width: 25,
+                                child: Icon(Icons.arrow_forward_ios, size: 15),
+                              ),
+                            ],
+                          ).paddingOnly(top: 10),
                         ],
                       ),
-                      Text(
-                        "4 Courts | Free parking | Shed",
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 10,
-                          color: AppColors.blackColor,
-                        ),
-                      ),
-                      Container(
-                        color: Colors.transparent,
-                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: '₹',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.blueColor,
-                                      fontSize: 17,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' 1200',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge
-                                        ?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.blueColor,fontSize: 17
-                                      // Keep other styles consistent
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ).paddingOnly(bottom: 0,),
-
-                            Container(
-                              alignment: Alignment.center,
-                              height: 20,
-                              width: 25,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(Icons.arrow_forward_ios,size: 15,),
-                            ),
-
-                          ],).paddingOnly(top: 10),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ).paddingOnly(left: Get.width * 0.02, right: Get.width * 0.02, bottom: 5),
+              ).paddingOnly(left: Get.width * 0.02, right: Get.width * 0.02, bottom: 5),
+            );
+          },
         );
-      },
-    );
+      });
+
+
   }
 }
 

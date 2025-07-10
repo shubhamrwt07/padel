@@ -98,7 +98,6 @@ class Routes {
       transition: Transition.fadeIn,
       transitionDuration: defaultDuration,
     ),
-
     GetPage(
       name: RoutesName.booking,
       page: () => BookingScreen(),
@@ -126,7 +125,8 @@ class Routes {
       binding: BookingHistoryBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    ),    GetPage(
+    ),
+    GetPage(
       name: RoutesName.paymentWallet,
       page: () => PaymentWalletScreen(),
       binding: PaymentWalletBinding(),
@@ -139,13 +139,15 @@ class Routes {
       binding: BookingConfirmAndCancelBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    ),  GetPage(
+    ),
+    GetPage(
       name: RoutesName.paymentFilter,
       page: () => PaymentFilterUi(),
       binding: PaymentFilterBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    ),GetPage(
+    ),
+    GetPage(
       name: RoutesName.support,
       page: () => SupportScreen(),
       binding: SupportBinding(),
