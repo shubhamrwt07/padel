@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/data/request_models/home_models/get_available_court.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class BookSession extends StatelessWidget {
@@ -31,15 +32,33 @@ class BookSession extends StatelessWidget {
                   ),
                 ],
               ).paddingOnly(bottom: Get.height*0.01),
-              ListView.builder(
-                itemCount: 3,
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (BuildContext context,index){
-                  return _buildMatchCard(context);
-                },
-              )
+              Obx(() {
+                if (controller.isLoadingCourts.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.courtErrorMessage.isNotEmpty) {
+                  return Center(child: Text("Error: ${controller.courtErrorMessage.value}"));
+                }
+
+                final courts = controller.availableCourtData.value?.data;
+
+                if (courts == null || courts.isEmpty) {
+                  return Center(child: Text("No available courts"));
+                }
+
+                return ListView.builder(
+                  itemCount: courts.length,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    final court = courts[index];
+                    return _buildMatchCard(context, court); // Pass court to the card
+                  },
+                );
+              })
+
             ],
           ),
         ),
@@ -239,54 +258,23 @@ class BookSession extends StatelessWidget {
      );
    }
 
-  Widget _buildMatchCard(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(radius: 23,backgroundColor: AppColors.greyColor,backgroundImage:AssetImage(Assets.imagesImgDummy2,),).paddingOnly(right: Get.width*0.04),
-                Text("Court 1", style: Get.textTheme.headlineLarge),
-              ],
-            ),
-            Row(
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '₹',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.blueColor,
-                          fontSize: 18,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' 1200',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineLarge
-                            ?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.blueColor,fontSize: 18
-                          // Keep other styles consistent
-                        ),
-                      ),
-                    ],
-                  ),
-                ).paddingOnly(right: Get.width*0.05),
-                Icon(Icons.shopping_cart_outlined,size: 20,)
-              ],
-            )
-          ],
-        ),
-        Divider(thickness: 0.5,color: AppColors.textColor,)
-      ],
-    ).paddingOnly(bottom: Get.height*0.01);
-  }
+   Widget _buildMatchCard(BuildContext context,AvailableCourtsData court ) {
+     return Card(
+       margin: const EdgeInsets.symmetric(vertical: 8),
+       child: Padding(
+         padding: const EdgeInsets.all(16),
+         child: Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             Text(court.name ?? 'Court Name', style: TextStyle(fontWeight: FontWeight.bold)),
+             SizedBox(height: 8),
+              Text("Status: ${court.status ?? 'Unavailable'}"),
+             // Add any other court fields here
+           ],
+         ),
+       ),
+     );
+   }
 
   Widget _bottomButton(){
     return Container(

@@ -10,7 +10,7 @@ class AppStrings{
   static const String forgotYourPassword = "Forgot your password?";
   static const String createNewAccount = "Create new account";
   static const String signIn = "Sign in";
-  //Auth Errors -----------------------------------------------------------------
+  //Auth Errors ----------------------------------------------------------------
   static const String emailRequired = "Email is required";
   static const String invalidEmail = "Invalid Email";
   static const String passwordRequired = "Password is required";
