@@ -95,7 +95,7 @@ class ForgotPasswordController extends GetxController {
         };
         var response = await signUpRepository.resetPassword(body: body);
         if (response.status == "200") {
-          Get.off(LoginScreen());
+          Get.offAll(()=>LoginScreen());
           SnackBarUtils.showSuccessSnackBar("Password Updated Successfully");
         } else {
           SnackBarUtils.showErrorSnackBar(response.message!);

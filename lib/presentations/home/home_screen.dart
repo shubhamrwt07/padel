@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +9,8 @@ import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
+
+import '../../data/request_models/home_models/get_club_name_model.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -70,42 +73,31 @@ class HomeScreen extends GetView<HomeController> {
                   if (controller.isLoadingClub.value && !controller.isInitialized.value) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        _buildLoadingState(context),
-                      ],
+                      children: [_buildLoadingState(context)],
                     );
                   }
 
                   if (controller.clubError.value.isNotEmpty && !controller.hasCourtsData) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        _buildErrorState(context),
-                      ],
+                      children: [_buildErrorState(context)],
                     );
                   }
 
-                  if (controller.isInitialized.value &&
-                      (courtsData == null ||
-                          courtsData.data == null ||
-                          courtsData.data!.courts == null ||
-                          courtsData.data!.courts!.isEmpty)) {
+                  final courts = courtsData?.data?.courts;
+                  if (courts == null || courts.isEmpty) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        _buildEmptyState(context),
-                      ],
+                      children: [_buildEmptyState(context)],
                     );
                   }
 
                   return ListView.builder(
                     controller: controller.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: 2 + courtsData!.data!.courts!.length + (controller.isLoadingMore.value ? 1 : 0),
+                    itemCount: 2 + courts.length + (controller.isLoadingMore.value ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return clubTicketList(context);
-                      }
+                      if (index == 0) return clubTicketList(context);
                       if (index == 1) {
                         return Text(
                           AppStrings.newBooking,
@@ -117,20 +109,17 @@ class HomeScreen extends GetView<HomeController> {
                       }
 
                       final courtIndex = index - 2;
-
-                      if (courtIndex < courtsData.data!.courts!.length) {
-                        final clubs = courtsData.data!.courts![courtIndex];
-                        return _buildCourtCard(context, clubs, courtIndex);
+                      if (courtIndex < courts.length) {
+                        return _buildCourtCard(context, courts[courtIndex], courtIndex);
                       }
 
-                      // Loading more indicator
                       return _buildLoadMoreIndicator();
                     },
                   );
                 }),
+
               ),
             ),
-
           ],
         ).paddingOnly(left: Get.width * .02, right: Get.width * .02),
       ),
@@ -774,11 +763,12 @@ class HomeScreen extends GetView<HomeController> {
     );
   }
 
-  Widget _buildCourtCard(BuildContext context, dynamic clubs, int index) {
+  Widget _buildCourtCard(BuildContext context, Courts clubs, int index) {
     return GestureDetector(
       onTap: () {
         if (clubs.id != null) {
-          Get.toNamed(RoutesName.booking, arguments: {"id": clubs.id});
+          controller.bookingController.courtsData.value=clubs;
+          Get.toNamed(RoutesName.booking, arguments: {"data": clubs});
           FocusManager.instance.primaryFocus?.unfocus();
         }
       },
@@ -795,14 +785,29 @@ class HomeScreen extends GetView<HomeController> {
             Container(
               height: 95,
               width: 118,
-              decoration: BoxDecoration(
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                image: const DecorationImage(
-                  image: AssetImage(Assets.imagesImgCart),
+                child: clubs.courtImage != null && clubs.courtImage!.isNotEmpty
+                    ? CachedNetworkImage(
+                  imageUrl: clubs.courtImage![0],
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  errorWidget: (context, url, error) => const Center(
+                    child: Icon(Icons.broken_image, color: Colors.grey),
+                  ),
+                  fadeInDuration: Duration(milliseconds: 300),
+                  memCacheHeight: 200, // Optional: reduce memory usage
+                  useOldImageOnUrlChange: true, // Optional: keeps previous image while updating
+                )
+                    : const Center(
+                  child: Icon(Icons.photo, color: Colors.grey, size: 40),
                 ),
               ),
             ).paddingOnly(right: Get.width * 0.02),
+
+
 
             // Club Info
             Expanded(
@@ -852,7 +857,7 @@ class HomeScreen extends GetView<HomeController> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          _formatAddress(clubs.city, clubs.address),
+                          _formatAddress(clubs.address, clubs.city),
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w500,
@@ -871,8 +876,8 @@ class HomeScreen extends GetView<HomeController> {
 
                   // Tags
                   Text(
-                    "${clubs.courtCount ?? 0} Courts | Free parking | Shed",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    "${clubs.courtCount ?? 0} Courts | ${clubs.features?.replaceAll(',', ' | ') ?? ''}",
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       fontWeight: FontWeight.w500,
                       fontSize: 10,
                       color: AppColors.blackColor,
@@ -897,7 +902,7 @@ class HomeScreen extends GetView<HomeController> {
                               ),
                             ),
                             TextSpan(
-                              text: ' ${clubs.totalAmount ?? 1200}',
+                              text: ' ${clubs.totalAmount ?? 00}',
                               style: Theme.of(context).textTheme.headlineLarge
                                   ?.copyWith(
                                     fontWeight: FontWeight.w800,
