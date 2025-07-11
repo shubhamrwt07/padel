@@ -9,6 +9,8 @@ class AppEndpoints {
   static const String sendOTP = "${BASE_URL}sentOtp";
   static const String verifyOTP = "${BASE_URL}verifyOtp";
   static const String resetPassword = "${BASE_URL}forgotPassword";
-  static const String getClub = "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
-  static const String getActiveCourt = "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
+  static const String getClub =
+      "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
+  static const String getActiveCourt =
+      "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
 }

@@ -8,7 +8,7 @@ class CourtsModel {
   CourtsModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    data = json['data'] != null ? CourtsData.fromJson(json['data']) : null;
+    data = json['data'] != null ? new CourtsData.fromJson(json['data']) : null;
   }
 }
 
@@ -31,7 +31,7 @@ class CourtsData {
     if (json['courts'] != null) {
       courts = <Courts>[];
       json['courts'].forEach((v) {
-        courts!.add(Courts.fromJson(v));
+        courts!.add(new Courts.fromJson(v));
       });
     }
     currentPage = json['currentPage'];
@@ -46,6 +46,7 @@ class Courts {
   String? ownerId;
   String? clubName;
   String? courtType;
+  List<String>? courtImage;
   int? courtCount;
   String? businessHours;
   String? description;
@@ -56,15 +57,18 @@ class Courts {
   bool? isDeleted;
   bool? isVerified;
   bool? isFeatured;
+  String? features;
   String? createdAt;
   String? updatedAt;
   int? iV;
+  int? totalAmount;
 
   Courts({
     this.id,
     this.ownerId,
     this.clubName,
     this.courtType,
+    this.courtImage,
     this.courtCount,
     this.businessHours,
     this.description,
@@ -75,9 +79,11 @@ class Courts {
     this.isDeleted,
     this.isVerified,
     this.isFeatured,
+    this.features,
     this.createdAt,
     this.updatedAt,
     this.iV,
+    this.totalAmount,
   });
 
   Courts.fromJson(Map<String, dynamic> json) {
@@ -85,11 +91,12 @@ class Courts {
     ownerId = json['ownerId'];
     clubName = json['clubName'];
     courtType = json['courtType'];
+    courtImage = json['courtImage'].cast<String>();
     courtCount = json['courtCount'];
     businessHours = json['businessHours'];
     description = json['description'];
     location = json['location'] != null
-        ? Location.fromJson(json['location'])
+        ? new Location.fromJson(json['location'])
         : null;
     city = json['city'];
     address = json['address'];
@@ -97,9 +104,11 @@ class Courts {
     isDeleted = json['isDeleted'];
     isVerified = json['isVerified'];
     isFeatured = json['isFeatured'];
+    features = json['features'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    totalAmount = json['totalAmount'];
   }
 }
 
