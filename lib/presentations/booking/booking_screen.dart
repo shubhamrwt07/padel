@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class BookingScreen extends GetView<BookingController> {
@@ -12,14 +13,25 @@ class BookingScreen extends GetView<BookingController> {
           children: [
             Stack(
               children: [
+
                 SizedBox(
                   height: Get.height * 0.25,
                   width: Get.width,
-                  child: Image.asset(
-                    Assets.imagesImgBookingBackground,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Obx(() {
+                    final imageUrl = controller.courtsData.value.courtImage?.isNotEmpty == true
+                        ? controller.courtsData.value.courtImage!.first
+                        : '';
+                    return imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    )
+                        : SizedBox.shrink();
+                  }),
                 ),
+
+
                 Container(
                   height: Get.height * 0.25,
                   width: Get.width,
@@ -75,21 +87,33 @@ class BookingScreen extends GetView<BookingController> {
                           ),
                         ],
                       ).paddingOnly(top: Get.height * 0.06),
-                      Text(
-                        "The Good Club",
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(color: AppColors.whiteColor),
-                      ).paddingOnly(top: Get.height * 0.02),
-                      Text(
-                        "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal,\nChandigarh 160001",
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge!
-                            .copyWith(color: AppColors.whiteColor),
-                        textAlign: TextAlign.center,
-                      ).paddingOnly(),
+                      Obx(() {
+                        final clubName = controller.courtsData.value.clubName ?? 'Unknown Club';
+                        return Text(
+                          clubName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(color: AppColors.whiteColor),
+                        ).paddingOnly(top: Get.height * 0.02);
+                      }),
+
+                      Obx(() {
+                        final address = controller.courtsData.value.address ?? 'Address not available';
+                        final city = controller.courtsData.value.city ?? '';
+                        final fullAddress = city.isNotEmpty ? "$address, $city" : address;
+
+                        return Text(
+                          fullAddress,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge!
+                              .copyWith(color: AppColors.whiteColor),
+                          textAlign: TextAlign.center,
+                        ).paddingOnly();
+                      }),
+
+
                     ],
                   ).paddingOnly(
                     left: Get.width * 0.03,

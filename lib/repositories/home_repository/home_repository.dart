@@ -10,10 +10,8 @@ class HomeRepository {
   final DioClient dioClient = DioClient();
 
   Future<CourtsModel> fetchClubData({String limit = "10", required String page, String search = ""}) async {
-    log("message  data");
-    try {
-      final url = "${AppEndpoints.getClub}?limit=$limit&page=$page&search=$search";
-      log("API URL: $url");
+     try {
+      final url = "${AppEndpoints.getClub}$limit&page=$page&search=$search";
 
       final response = await dioClient.get(url);
 

@@ -258,7 +258,7 @@ class BookSession extends StatelessWidget {
      );
    }
 
-   Widget _buildMatchCard(BuildContext context,AvailableCourtsData court ) {
+   Widget _buildMatchCard(BuildContext context, AvailableCourtsData court) {
      return Card(
        margin: const EdgeInsets.symmetric(vertical: 8),
        child: Padding(
@@ -266,16 +266,33 @@ class BookSession extends StatelessWidget {
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             Text(court.name ?? 'Court Name', style: TextStyle(fontWeight: FontWeight.bold)),
+             Text(
+               court.name ?? 'Court Name',
+               style: TextStyle(fontWeight: FontWeight.bold),
+             ),
              SizedBox(height: 8),
-              Text("Price: ${court.hourlyRate ?? 'Unavailable'}"),
-             // Add any other court fields here
+             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+               children: [
+                 Text(
+                   court.courtType ?? '',
+                   style: TextStyle(fontWeight: FontWeight.bold),
+                 ),
+                 Text(
+                   "Price: ${court.slotTimes != null && court.slotTimes!.isNotEmpty ? (court.slotTimes!.first.amount?.toString() ?? 'Unavailable') : 'Unavailable'}",
+                   style: TextStyle(
+                     fontSize: 16,
+                     fontWeight: FontWeight.w600,
+                     color: AppColors.primaryColor, // Replace with your desired color
+                   ),
+                 ),
+               ],
+             ),
+
            ],
          ),
        ),
      );
    }
-
   Widget _bottomButton(){
     return Container(
       height: Get.height * .12,
