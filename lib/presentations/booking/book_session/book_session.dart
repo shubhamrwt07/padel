@@ -268,7 +268,7 @@ class BookSession extends StatelessWidget {
            children: [
              Text(court.name ?? 'Court Name', style: TextStyle(fontWeight: FontWeight.bold)),
              SizedBox(height: 8),
-              Text("Status: ${court.status ?? 'Unavailable'}"),
+              Text("Price: ${court.hourlyRate ?? 'Unavailable'}"),
              // Add any other court fields here
            ],
          ),
