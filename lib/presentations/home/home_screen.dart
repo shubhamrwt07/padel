@@ -874,18 +874,15 @@ class HomeScreen extends GetView<HomeController> {
 
                   const SizedBox(height: 4),
 
-                  // Tags
                   Text(
-                    "${clubs.courtCount ?? 0} Courts | ${clubs.features?.replaceAll(',', ' | ') ?? ''}",
+                    "${clubs.courtCount ?? 0} Courts | ${clubs.features?.join(' | ') ?? ''}",
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       fontWeight: FontWeight.w500,
                       fontSize: 10,
                       color: AppColors.blackColor,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   // Price and arrow
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

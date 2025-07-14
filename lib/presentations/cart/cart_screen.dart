@@ -52,11 +52,11 @@ class CartScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      item.,
-                      style: Theme.of(context).textTheme.labelLarge!
-                          .copyWith(),
-                    ),
+                    // Text(
+                    //   item.,
+                    //   style: Theme.of(context).textTheme.labelLarge!
+                    //       .copyWith(),
+                    // ),
                   ],
                 ).paddingOnly(
                   bottom: Get.height * 0.01,

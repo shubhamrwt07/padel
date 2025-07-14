@@ -31,7 +31,6 @@ class BookSessionController extends GetxController {
   //Init
   @override
   void onInit() {
-
     super.onInit();
     argument=Get.arguments['data'];
     log("argument fetch${argument.id}");
@@ -50,12 +49,12 @@ class BookSessionController extends GetxController {
   }
 
   /// Fetch available courts by court ID
-  Future<void> getAvailableCourtsById(String registerClubId) async {
+  Future<void> getAvailableCourtsById(String registerClubId, [String searchTime = '']) async {
     log("message details courts");
     isLoadingCourts.value = true;
     courtErrorMessage.value = '';
     try {
-      final result = await repository.fetchAvailableCourtsById(id: registerClubId);
+      final result = await repository.fetchAvailableCourtsById(id: registerClubId, time: searchTime);
       availableCourtData.value = result;
       log("message details courts 200");
     } catch (e) {
