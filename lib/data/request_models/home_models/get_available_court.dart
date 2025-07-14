@@ -1,12 +1,15 @@
 class AvailableCourtModel {
+  String? status;
   bool? success;
   int? count;
   List<String>? allTimeSlots;
   List<AvailableCourtsData>? data;
 
-  AvailableCourtModel({this.success, this.count, this.allTimeSlots, this.data});
+  AvailableCourtModel(
+      {this.status, this.success, this.count, this.allTimeSlots, this.data});
 
   AvailableCourtModel.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
     success = json['success'];
     count = json['count'];
     allTimeSlots = json['allTimeSlots'].cast<String>();
@@ -20,6 +23,7 @@ class AvailableCourtModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
     data['success'] = this.success;
     data['count'] = this.count;
     data['allTimeSlots'] = this.allTimeSlots;

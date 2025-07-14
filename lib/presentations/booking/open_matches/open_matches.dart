@@ -36,8 +36,8 @@ class OpenMatches extends StatelessWidget {
 
   Widget bottomButton(){
     return Container(
-      height: Get.height * .12,
-      padding: const EdgeInsets.only(top: 10),
+      height: Get.height * .09,
+      padding: const EdgeInsets.only(top: 0),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
