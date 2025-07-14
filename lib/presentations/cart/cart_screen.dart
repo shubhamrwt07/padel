@@ -44,15 +44,16 @@ class CartScreen extends StatelessWidget {
         radius: Radius.circular(8),
         child: ListView.builder(
           controller: controller.scrollController,
-          itemCount: 10,
+          itemCount: controller.cartItems.length,
           itemBuilder: (BuildContext context, index) {
+            final item = controller.cartItems[index];
             return Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Padel Haus",
+                      item.,
                       style: Theme.of(context).textTheme.labelLarge!
                           .copyWith(),
                     ),
@@ -262,5 +263,11 @@ class CartScreen extends StatelessWidget {
             ),
           ],
         ));
+  }
+
+  Widget emptyState(){
+    return Center(
+      child: Text("No itmes in cart"),
+    );
   }
 }
