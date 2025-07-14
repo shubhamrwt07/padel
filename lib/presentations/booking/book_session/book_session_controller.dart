@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 import '../../../data/request_models/home_models/get_available_court.dart';
+import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../repositories/home_repository/home_repository.dart';
 
 class BookSessionController extends GetxController {
@@ -12,7 +13,7 @@ class BookSessionController extends GetxController {
   RxBool viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
   final selectedDate = Rxn<DateTime>();
-   var argument;
+  Courts argument=Courts();
   final List<String> timeSlots = List.generate(19, (index) {
     final hour = 6 + index;
     if (hour == 24) return '12:00am';
@@ -32,9 +33,10 @@ class BookSessionController extends GetxController {
   void onInit() {
 
     super.onInit();
-    argument=Get.arguments['id'];
+    argument=Get.arguments['data'];
+    log("argument fetch${argument.id}");
     WidgetsBinding.instance.addPostFrameCallback((v){
-        getAvailableCourtsById(argument);
+        getAvailableCourtsById(argument.id!);
     });
   }
 

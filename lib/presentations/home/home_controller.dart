@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import '../../repositories/home_repository/home_repository.dart';
 
@@ -9,7 +10,7 @@ class HomeController extends GetxController {
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
   ScrollController scrollController = ScrollController();
-
+BookingController bookingController=Get.put(BookingController());
   final List<String> dummyLocations = [
     'Delhi',
     'Mumbai',
@@ -219,6 +220,7 @@ class HomeController extends GetxController {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
+
         loadMore();
       }
     });
