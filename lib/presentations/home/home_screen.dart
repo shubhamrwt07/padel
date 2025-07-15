@@ -782,7 +782,7 @@ class HomeScreen extends GetView<HomeController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Club Image
-            Container(
+            SizedBox(
               height: 95,
               width: 118,
               child: ClipRRect(

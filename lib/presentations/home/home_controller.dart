@@ -102,45 +102,41 @@ BookingController bookingController=Get.put(BookingController());
       log("Courts length ${result.data!.courts!.length}");
 
       // Handle successful response
-      if (result != null) {
-        if (isRefresh || currentPage.value == 1) {
-          courtsData.value = result;
-        } else {
-          if (courtsData.value != null &&
-              courtsData.value!.data != null &&
-              courtsData.value!.data!.courts != null &&
-              result.data != null &&
-              result.data!.courts != null) {
-            final existingCourts = courtsData.value!.data!.courts!;
-            final newCourts = result.data!.courts!;
-
-            // Merge courts data
-            existingCourts.addAll(newCourts);
-
-            // Update total count
-            totalCourts.value = existingCourts.length;
-
-            // Check if more data is available
-            hasMoreData.value = newCourts.length >= limit;
-          }
-        }
-
-        // Update total count
-        if (courtsData.value?.data?.courts != null) {
-          totalCourts.value = courtsData.value!.data!.courts!.length;
-        }
-
-        // Clear any existing errors
-        clubError.value = '';
-        isInitialized.value = true;
-
-        log(
-          "Successfully fetched ${courtsData.value?.data?.courts?.length ?? 0} courts",
-        );
+      if (isRefresh || currentPage.value == 1) {
+        courtsData.value = result;
       } else {
-        throw Exception("No data received from server");
+        if (courtsData.value != null &&
+            courtsData.value!.data != null &&
+            courtsData.value!.data!.courts != null &&
+            result.data != null &&
+            result.data!.courts != null) {
+          final existingCourts = courtsData.value!.data!.courts!;
+          final newCourts = result.data!.courts!;
+
+          // Merge courts data
+          existingCourts.addAll(newCourts);
+
+          // Update total count
+          totalCourts.value = existingCourts.length;
+
+          // Check if more data is available
+          hasMoreData.value = newCourts.length >= limit;
+        }
       }
-    } catch (e) {
+
+      // Update total count
+      if (courtsData.value?.data?.courts != null) {
+        totalCourts.value = courtsData.value!.data!.courts!.length;
+      }
+
+      // Clear any existing errors
+      clubError.value = '';
+      isInitialized.value = true;
+
+      log(
+        "Successfully fetched ${courtsData.value?.data?.courts?.length ?? 0} courts",
+      );
+        } catch (e) {
       log("Error fetching clubs: $e");
 
       // Set appropriate error message

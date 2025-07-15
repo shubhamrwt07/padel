@@ -9,7 +9,7 @@ class CartItemsModel {
     if (json['cartItems'] != null) {
       cartItems = <CartItems>[];
       json['cartItems'].forEach((v) {
-        cartItems!.add(new CartItems.fromJson(v));
+        cartItems!.add(CartItems.fromJson(v));
       });
     }
   }
@@ -42,11 +42,11 @@ class CartItems {
     if (json['courtNames'] != null) {
       courtNames = <CourtData>[];
       json['courtNames'].forEach((v) {
-        courtNames!.add(new CourtData.fromJson(v));
+        courtNames!.add(CourtData.fromJson(v));
       });
     }
     registerClubId = json['register_club_id'] != null
-        ? new RegisterClubId.fromJson(json['register_club_id'])
+        ? RegisterClubId.fromJson(json['register_club_id'])
         : null;
     totalAmount = json['totalAmount'];
     iV = json['__v'];
@@ -80,7 +80,7 @@ class CourtData {
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
-        slotTimes!.add(new SlotTimes.fromJson(v));
+        slotTimes!.add(SlotTimes.fromJson(v));
       });
     }
     id = json['_id'];
@@ -148,7 +148,7 @@ class RegisterClubId {
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
-        ? new Location.fromJson(json['location'])
+        ? Location.fromJson(json['location'])
         : null;
     id = json['_id'];
     ownerId = json['ownerId'];

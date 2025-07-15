@@ -30,17 +30,14 @@ class ConnectivityService extends GetxService {
   Future<ConnectivityService> init() async {
     // Prevent duplicate initialization
     if (_isInitialized) {
-      print('ConnectivityService: Already initialized, skipping init');
       return this;
     }
     
-    print('ConnectivityService: Initializing');
     _isInitialized = true;
     
     // Get initial connectivity status
     connectivity.value = (await Connectivity().checkConnectivity())[0];
-    print('ConnectivityService: Initial device connectivity: ${connectivity.value}');
-    
+
     // Schedule a connectivity check after UI has settled (important for hot restart)
     _scheduleConnectivityCheck();
     
@@ -56,7 +53,6 @@ class ConnectivityService extends GetxService {
     
     // Listen for connectivity changes
     _subscription = Connectivity().onConnectivityChanged.listen((result) {
-      print('ConnectivityService: Connectivity changed to $result');
       connectivity.value = result[0];
       
       // Schedule a check when connectivity changes
@@ -73,7 +69,6 @@ class ConnectivityService extends GetxService {
       final wasConnected = isConnected.value;
       final hasConnection = await _hasRealInternetConnectivity();
       
-      print('ConnectivityService: Internet check result: $hasConnection (was: $wasConnected)');
       isConnected.value = hasConnection;
       
       // Show snackbar if connection was lost
@@ -91,7 +86,6 @@ class ConnectivityService extends GetxService {
   // Check for actual internet connectivity by trying multiple reliable domains
   Future<bool> _hasRealInternetConnectivity() async {
     if (connectivity.value == ConnectivityResult.none) {
-      print('ConnectivityService: Device reports no connectivity');
       return false;
     }
     
@@ -105,28 +99,22 @@ class ConnectivityService extends GetxService {
     
     for (final domain in domains) {
       try {
-        print('ConnectivityService: Checking connection to $domain');
         // Set a timeout to avoid hanging
         final result = await InternetAddress.lookup(domain)
             .timeout(Duration(seconds: 2));
             
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          print('ConnectivityService: Successfully connected to $domain');
           return true;
         }
       } on SocketException catch (_) {
-        print('ConnectivityService: Socket exception for $domain');
         continue; // Try next domain
       } on TimeoutException catch (_) {
-        print('ConnectivityService: Timeout for $domain');
         continue; // Try next domain
       } catch (e) {
-        print('ConnectivityService: Error checking $domain: $e');
         continue; // Try next domain
       }
     }
     
-    print('ConnectivityService: No internet connection detected after trying all domains');
     return false;
   }
   
@@ -135,7 +123,6 @@ class ConnectivityService extends GetxService {
     if (_isShowingNoInternetSnackBar) return;
     
     _isShowingNoInternetSnackBar = true;
-    print('ConnectivityService: Showing no internet snackbar');
     SnackBarUtils.showErrorSnackBar('No internet connection. Please check your network settings.');
     
     // Start cooldown timer
@@ -152,8 +139,7 @@ class ConnectivityService extends GetxService {
     final result = await Connectivity().checkConnectivity();
     connectivity.value = result[0];
     
-    print('ConnectivityService: Manual connectivity check - device reports: $result');
-    
+
     // Then verify actual internet connection
     final hasConnection = await _hasRealInternetConnectivity();
     isConnected.value = hasConnection;

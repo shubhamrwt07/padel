@@ -22,11 +22,11 @@ class AvailableCourtModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['success'] = this.success;
-    data['count'] = this.count;
-    data['allTimeSlots'] = this.allTimeSlots;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['success'] = success;
+    data['count'] = count;
+    data['allTimeSlots'] = allTimeSlots;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -74,20 +74,20 @@ class AvailableCourtsData {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['status'] = this.status;
-    data['courtType'] = this.courtType;
-    if (this.slotTimes != null) {
-      data['slotTimes'] = this.slotTimes!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['status'] = status;
+    data['courtType'] = courtType;
+    if (slotTimes != null) {
+      data['slotTimes'] = slotTimes!.map((v) => v.toJson()).toList();
     }
-    if (this.owner != null) {
-      data['owner'] = this.owner!.toJson();
+    if (owner != null) {
+      data['owner'] = owner!.toJson();
     }
-    data['registeredCourtId'] = this.registeredCourtId;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
+    data['registeredCourtId'] = registeredCourtId;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
     return data;
   }
 }
@@ -108,11 +108,11 @@ class SlotTimes {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['time'] = this.time;
-    data['amount'] = this.amount;
-    data['_id'] = this.sId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['time'] = time;
+    data['amount'] = amount;
+    data['_id'] = sId;
     return data;
   }
 }
@@ -129,9 +129,9 @@ class Owner {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['email'] = this.email;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['email'] = email;
     return data;
   }
 }

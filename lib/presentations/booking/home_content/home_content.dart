@@ -118,10 +118,12 @@ class HomeContent extends StatelessWidget {
                         onTap: () {
                           if (index != 1) {
                             controller.selectedIndex.value = index;
-                            if (index != 2)
+                            if (index != 2) {
                               controller.isShowAllReviews.value = false;
-                            if (index != 3)
+                            }
+                            if (index != 3) {
                               controller.isShowAllPhotos.value = false;
+                            }
                           }
                         },
                         child: homeOptionItem(
