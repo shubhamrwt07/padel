@@ -69,7 +69,7 @@ class Courts {
   String? courtType;
   List<String>? courtImage;
   int? courtCount;
-  String? businessHours;
+  List<BusinessHours>? businessHours;
   String? description;
   Location? location;
   String? city;
@@ -79,7 +79,6 @@ class Courts {
   bool? isVerified;
   bool? isFeatured;
   List<String>? features;
-  bool? publicHolidayStatus;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -102,7 +101,6 @@ class Courts {
         this.isVerified,
         this.isFeatured,
         this.features,
-        this.publicHolidayStatus,
         this.createdAt,
         this.updatedAt,
         this.iV,
@@ -114,13 +112,27 @@ class Courts {
     clubName = json['clubName'];
     courtType = json['courtType'];
 
-    // Safely handle both List and single String
-    courtImage = json['courtImage'] is List
-        ? List<String>.from(json['courtImage'])
-        : (json['courtImage'] != null ? [json['courtImage']] : []);
+    // Safely cast to List<String> or wrap single String in a List
+    var imageData = json['courtImage'];
+    if (imageData is List) {
+      courtImage = imageData.cast<String>();
+    } else if (imageData is String) {
+      courtImage = [imageData];
+    } else {
+      courtImage = [];
+    }
 
     courtCount = json['courtCount'];
-    businessHours = json['businessHours'];
+
+    // Ensure businessHours is a list before iterating
+    if (json['businessHours'] is List) {
+      businessHours = (json['businessHours'] as List)
+          .map((v) => BusinessHours.fromJson(v))
+          .toList();
+    } else {
+      businessHours = [];
+    }
+
     description = json['description'];
     location = json['location'] != null
         ? Location.fromJson(json['location'])
@@ -132,18 +144,22 @@ class Courts {
     isVerified = json['isVerified'];
     isFeatured = json['isFeatured'];
 
-    // Same handling for features
-    features = json['features'] is List
-        ? List<String>.from(json['features'])
-        : (json['features'] != null ? [json['features']] : []);
+    // Safely cast to List<String> or wrap single String in a List
+    var featuresData = json['features'];
+    if (featuresData is List) {
+      features = featuresData.cast<String>();
+    } else if (featuresData is String) {
+      features = [featuresData];
+    } else {
+      features = [];
+    }
 
-    publicHolidayStatus = json['publicHolidayStatus'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
     totalAmount = json['totalAmount'];
   }
-
+///
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.id;
@@ -152,7 +168,10 @@ class Courts {
     data['courtType'] = this.courtType;
     data['courtImage'] = this.courtImage;
     data['courtCount'] = this.courtCount;
-    data['businessHours'] = this.businessHours;
+    if (this.businessHours != null) {
+      data['businessHours'] =
+          this.businessHours!.map((v) => v.toJson()).toList();
+    }
     data['description'] = this.description;
     if (this.location != null) {
       data['location'] = this.location!.toJson();
@@ -164,11 +183,32 @@ class Courts {
     data['isVerified'] = this.isVerified;
     data['isFeatured'] = this.isFeatured;
     data['features'] = this.features;
-    data['publicHolidayStatus'] = this.publicHolidayStatus;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
     data['totalAmount'] = this.totalAmount;
+    return data;
+  }
+}
+
+class BusinessHours {
+  String? time;
+  String? day;
+  String? sId;
+
+  BusinessHours({this.time, this.day, this.sId});
+
+  BusinessHours.fromJson(Map<String, dynamic> json) {
+    time = json['time'];
+    day = json['day'];
+    sId = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['time'] = this.time;
+    data['day'] = this.day;
+    data['_id'] = this.sId;
     return data;
   }
 }
