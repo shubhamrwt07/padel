@@ -32,7 +32,7 @@ class HomeRepository {
       }
     }
   }
-  Future<AvailableCourtModel> fetchAvailableCourtsById({required String id}) async {
+  Future<AvailableCourtModel> fetchAvailableCourtsById({required String id,required time}) async {
     final url = "${AppEndpoints.getActiveCourt}$id";
     log("Fetching available courts by ID: $url");
 ///
