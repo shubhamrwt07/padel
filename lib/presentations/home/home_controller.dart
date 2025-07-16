@@ -83,11 +83,9 @@ BookingController bookingController=Get.put(BookingController());
       log(
         "Fetching clubs - Page: ${currentPage.value}, Search: ${searchQuery.value}",
       );
-
-      // Set loading state
       if (isRefresh || currentPage.value == 1) {
         isLoadingClub.value = true;
-        clubError.value = ''; // Clear previous errors
+        clubError.value = '';
       } else {
         isLoadingMore.value = true;
       }

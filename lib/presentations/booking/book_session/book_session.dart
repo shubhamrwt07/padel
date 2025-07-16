@@ -246,39 +246,50 @@ class BookSession extends StatelessWidget {
           double spacing = Get.width * 0.02;
           final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
           return Obx(
-            () => Wrap(
+                () => Wrap(
               spacing: spacing,
               runSpacing: Get.height * 0.015,
               children: controller.timeSlots.map((time) {
                 final isSelected = controller.selectedTimes.contains(time);
-                return GestureDetector(
-                  onTap: () {
-                    controller.toggleTimeSlot(time); // Toggle selection
-                  },
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 800),
-                    switchInCurve: Curves.easeIn,
-                    switchOutCurve: Curves.easeOut,
-                    transitionBuilder: (child, animation) =>
-                        FadeTransition(opacity: animation, child: child),
-                    child: Container(
-                      key: ValueKey(isSelected),
-                      width: tileWidth,
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.black
-                            : AppColors.timeTileBackgroundColor,
-                        borderRadius: BorderRadius.circular(40),
-                        border: Border.all(
-                          color: AppColors.blackColor.withAlpha(10),
-                        ),
-                      ),
-                      child: Text(
+                final isPast = controller.isPastTimeSlot(time);
+
+                return Opacity(
+                  opacity: isPast ? 0.4 : 1.0,
+                  child: GestureDetector(
+                    onTap: isPast
+                        ? null
+                        : () {
+                      controller.toggleTimeSlot(time);
+                      controller.getAvailableCourtsById(
+                        controller.argument.id!,
                         time,
-                        style: Get.textTheme.labelLarge?.copyWith(
-                          color: isSelected ? Colors.white : Colors.black,
+                      );
+                    },
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 800),
+                      switchInCurve: Curves.easeIn,
+                      switchOutCurve: Curves.easeOut,
+                      transitionBuilder: (child, animation) =>
+                          FadeTransition(opacity: animation, child: child),
+                      child: Container(
+                        key: ValueKey(isSelected),
+                        width: tileWidth,
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.black
+                              : AppColors.timeTileBackgroundColor,
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            color: AppColors.blackColor.withAlpha(10),
+                          ),
+                        ),
+                        child: Text(
+                          time,
+                          style: Get.textTheme.labelLarge?.copyWith(
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ),
@@ -355,7 +366,7 @@ class BookSession extends StatelessWidget {
           width: Get.width * 0.9,
           child: Row(
             children: [
-              RichText(
+              Obx(() => RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
@@ -367,7 +378,7 @@ class BookSession extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: "2000",
+                      text: controller.selectedAmount.value,
                       style: Get.textTheme.titleMedium!.copyWith(
                         color: AppColors.whiteColor,
                         fontWeight: FontWeight.w600,
@@ -375,7 +386,7 @@ class BookSession extends StatelessWidget {
                     ),
                   ],
                 ),
-              ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
+              )).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
               Text(
                 "Book Now",
                 style: Get.textTheme.headlineMedium!.copyWith(
