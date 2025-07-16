@@ -16,13 +16,17 @@ class BookSessionController extends GetxController {
   RxList<String> selectedTimes = <String>[].obs;
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
-  final List<String> timeSlots = List.generate(19, (index) {
+
+  final List<String> timeSlots = List.generate(18, (index) {
     final hour = 6 + index;
     if (hour == 24) return '12:00am';
+
     final period = hour >= 12 ? 'pm' : 'am';
     final formattedHour = hour > 12 ? hour - 12 : hour;
+
     return '${formattedHour == 0 ? 12 : formattedHour}:00$period';
   });
+
 
   // Available courts logic
   final HomeRepository repository = HomeRepository();
@@ -64,7 +68,7 @@ class BookSessionController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final now = DateTime.now();
       final nextSlot = timeSlots.firstWhere(
-        (time) => !isPastTimeSlot(time),
+            (time) => !isPastTimeSlot(time),
         orElse: () => timeSlots.last,
       );
 
@@ -83,13 +87,16 @@ class BookSessionController extends GetxController {
   }
 
   /// Fetch available courts by court ID
-  Future<void> getAvailableCourtsById(
-    String registerClubId, [
+  Future<void> getAvailableCourtsById(String registerClubId, [
     String searchTime = '',
-  ]) async {
+  ])
+  async {
     log("Fetching courts for time: $searchTime");
     isLoadingCourts.value = true;
     courtErrorMessage.value = '';
+    availableCourtData.value = null;
+
+
     try {
       final result = await repository.fetchAvailableCourtsById(
         id: registerClubId,
@@ -100,8 +107,8 @@ class BookSessionController extends GetxController {
       final courts = result.data;
       if (courts != null && courts.isNotEmpty) {
         final firstCourt = courts.first;
-        final amount = firstCourt.slotTimes?.first.amount?.toString();
-        selectedAmount.value = amount ?? '0';
+        // final amount = firstCourt.slotTimes?.first.amount?.toString();
+        // selectedAmount.value = amount ?? '0';
       } else {
         selectedAmount.value = '0';
       }
@@ -115,4 +122,5 @@ class BookSessionController extends GetxController {
       isLoadingCourts.value = false;
     }
   }
+
 }
