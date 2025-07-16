@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:collection/collection.dart';
 
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart';
@@ -10,9 +11,10 @@ class BookSessionController extends GetxController {
   // UI state
   RxBool viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
-  RxMap<String, double> selectedSlotAmounts = <String, double>{}.obs;
+  RxMap<String, int> selectedSlotAmounts = <String, int>{}.obs;
 
-  double get totalAmount => selectedSlotAmounts.values.fold(0, (sum, amt) => sum + amt);
+  double get totalAmount =>
+      selectedSlotAmounts.values.fold(0, (sum, amt) => sum + amt);
 
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
@@ -33,32 +35,65 @@ class BookSessionController extends GetxController {
   void onInit() {
     super.onInit();
     argument = Get.arguments['data'];
-    log("argument fetch ${argument.id}");
     selectedDate.value = DateTime.now();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final nextSlot = timeSlots.firstWhere(
             (time) => !isPastTimeSlot(time),
         orElse: () => timeSlots.last,
       );
 
-      selectedTimes.add(nextSlot);
-      getAvailableCourtsById(argument.id!, nextSlot);
+      await getAvailableCourtsById(argument.id!, nextSlot);
+
+      // Select first available slot and amount
+      autoSelectFirstAvailableSlot();
     });
   }
 
+  /// Automatically select the first available (non-past) slot
+  void autoSelectFirstAvailableSlot() {
+    final courts = availableCourtData.value?.data;
+    if (courts == null || courts.isEmpty) return;
+
+    final slotTimes = courts[0].slot?.first.slotTimes;
+    if (slotTimes == null || slotTimes.isEmpty) return;
+
+    if (selectedTimes.isEmpty) {
+      final firstAvailable = slotTimes.firstWhereOrNull(
+            (s) => !isPastTimeSlot(s.time!),
+      );
+
+      if (firstAvailable != null && firstAvailable.amount != null) {
+        selectedTimes.add(firstAvailable.time!);
+        selectedSlotAmounts[firstAvailable.time!] = firstAvailable.amount!;
+        update(); // Notify GetBuilder/UI to rebuild
+      }
+    }
+  }
+
   void toggleTimeSlot(String time) {
+    final courts = availableCourtData.value?.data;
+    final slotTimes = courts?[0].slot?[0].slotTimes;
+    final slot = slotTimes?.firstWhereOrNull((s) => s.time == time);
+
     if (selectedTimes.contains(time)) {
       selectedTimes.remove(time);
       selectedSlotAmounts.remove(time);
     } else {
       selectedTimes.add(time);
-      // getAvailableCourtsById(argument.id!, time);
+      if (slot != null && slot.amount != null) {
+        selectedSlotAmounts[time] = slot.amount!;
+      }
     }
+
+    update(); // Ensure UI reflects the changes
   }
 
+  /// ✅ Updated: Check if the given time is in the past
   bool isPastTimeSlot(String timeLabel) {
-    final selected = selectedDate.value ?? DateTime.now();
+    final now = DateTime.now();
+    final selected = selectedDate.value ?? now;
+
     final match = RegExp(r'(\d+):00(am|pm)', caseSensitive: false).firstMatch(timeLabel);
     if (match == null) return false;
 
@@ -75,11 +110,20 @@ class BookSessionController extends GetxController {
       hour,
     );
 
-    return slotDateTime.isBefore(DateTime.now());
+    // Only mark past for today's date
+    final today = DateTime(now.year, now.month, now.day);
+    final isToday = selected.year == today.year &&
+        selected.month == today.month &&
+        selected.day == today.day;
+
+    return isToday && slotDateTime.isBefore(now);
   }
 
   /// Fetch available courts with proper time/date/day
-  Future<void> getAvailableCourtsById(String registerClubId, [String searchTime = '']) async {
+  Future<void> getAvailableCourtsById(
+      String registerClubId, [
+        String searchTime = '',
+      ]) async {
     log("Fetching courts for time: $searchTime");
     isLoadingCourts.value = true;
     courtErrorMessage.value = '';
@@ -88,16 +132,18 @@ class BookSessionController extends GetxController {
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDate =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2,'0')}";
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
+
       final result = await repository.fetchAvailableCourtsById(
         id: registerClubId,
         time: searchTime,
         date: formattedDate,
         day: formattedDay,
       );
+
       availableCourtData.value = result;
-      log("Available courts fetched for ${result.data![0].slot!.length}");
+      log("Available courts fetched: ${result.data?[0].slot?.length ?? 0}");
     } catch (e) {
       courtErrorMessage.value = "Something went wrong";
       selectedSlotAmounts[searchTime] = 0;

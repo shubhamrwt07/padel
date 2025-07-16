@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/data/request_models/home_models/get_available_court.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:collection/collection.dart';
 
 class BookSession extends StatelessWidget {
   BookSession({super.key});
@@ -24,46 +25,6 @@ class BookSession extends StatelessWidget {
                 child: _buildSlotHeader(context),
               ),
               _buildTimeSlots(),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     Text(
-              //       "Available Court",
-              //       style: Theme.of(context).textTheme.headlineLarge,
-              //     ),
-              //   ],
-              // ).paddingOnly(bottom: Get.height * 0.01),
-              // Obx(() {
-              //   if (controller.isLoadingCourts.value) {
-              //     return Center(child: CircularProgressIndicator());
-              //   }
-              //
-              //   if (controller.courtErrorMessage.isNotEmpty) {
-              //     return Center(
-              //       child: Text("Error: ${controller.courtErrorMessage.value}"),
-              //     );
-              //   }
-              //
-              //   final courts = controller.availableCourtData.value?.data;
-              //
-              //   if (courts == null || courts.isEmpty) {
-              //     return Center(child: Text("No available courts"));
-              //   }
-              //
-              //   return ListView.builder(
-              //     itemCount: courts.length,
-              //     shrinkWrap: true,
-              //     padding: EdgeInsets.zero,
-              //     physics: NeverScrollableScrollPhysics(),
-              //     itemBuilder: (BuildContext context, int index) {
-              //       final court = courts[index];
-              //       // return _buildMatchCard(
-              //       //   context,
-              //       //   court,
-              //       // ); // Pass court to the card
-              //     },
-              //   );
-              // }),
             ],
           ),
         ),
@@ -80,23 +41,22 @@ class BookSession extends StatelessWidget {
           style: Get.textTheme.labelLarge,
         ).paddingOnly(bottom: 5),
         Obx(
-              () => EasyDateTimeLinePicker.itemBuilder(
+          () => EasyDateTimeLinePicker.itemBuilder(
             headerOptions: HeaderOptions(
               headerBuilder: (_, context, date) => const SizedBox.shrink(),
             ),
             selectionMode: SelectionMode.alwaysFirst(),
-            firstDate: DateTime.now(), // Start from today
-            lastDate: DateTime(2030, 3, 18), // End date
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2030, 3, 18),
             focusedDate: controller.selectedDate.value,
             itemExtent: 70,
             itemBuilder:
                 (context, date, isSelected, isDisabled, isToday, onTap) {
-              // Hide past dates manually (just in case plugin does not respect firstDate properly)
               final now = DateTime.now();
               final today = DateTime(now.year, now.month, now.day);
               final currentDate = DateTime(date.year, date.month, date.day);
               if (currentDate.isBefore(today)) {
-                return const SizedBox.shrink(); // Don’t show past dates
+                return const SizedBox.shrink();
               }
 
               final dayName = DateFormat('E').format(date);
@@ -108,9 +68,8 @@ class BookSession extends StatelessWidget {
                   duration: const Duration(milliseconds: 1000),
                   switchInCurve: Curves.easeIn,
                   switchOutCurve: Curves.easeOut,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
                   child: SizedBox(
                     height: Get.height * 0.14,
                     child: Stack(
@@ -180,7 +139,6 @@ class BookSession extends StatelessWidget {
                                 alignment: Alignment.center,
                                 height: 20,
                                 width: 20,
-                                padding: const EdgeInsets.all(0),
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: AppColors.secondaryColor,
@@ -211,7 +169,7 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-///
+
   Widget _buildSlotHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -248,108 +206,76 @@ class BookSession extends StatelessWidget {
   Widget _buildTimeSlots() {
     return Transform.translate(
       offset: Offset(0, -Get.height * 0.025),
-      child: GetBuilder<BookSessionController>(
-        builder: (controller) {
-          double spacing = Get.width * 0.02;
-          final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
-          return Obx(
-                () => Wrap(
-              spacing: spacing,
-              runSpacing: Get.height * 0.015,
-              children: controller.availableCourtData.value!.data![0].slot![0].slotTimes!.map((data) {
-                final isSelected = controller.selectedTimes.contains(data.time!);
-                final isPast = controller.isPastTimeSlot(data.time!);
+      child: Obx(() {
+        if (controller.isLoadingCourts.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                return Opacity(
-                  opacity: isPast ? 0.4 : 1.0,
-                  child: GestureDetector(
-                    onTap: isPast
-                        ? null
-                        : () {
-                      controller.toggleTimeSlot(data.time!);
-                      // controller.getAvailableCourtsById(
-                      //   controller.argument.id!,
-                      //   data.time!,
-                      // );
-                    },
+        final courts = controller.availableCourtData.value?.data;
+        if (courts == null || courts.isEmpty) {
+          return const Center(child: Text("No courts available"));
+        }
 
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 800),
-                      switchInCurve: Curves.easeIn,
-                      switchOutCurve: Curves.easeOut,
-                      transitionBuilder: (child, animation) =>
-                          FadeTransition(opacity: animation, child: child),
-                      child: Container(
-                        key: ValueKey(isSelected),
-                        width: tileWidth,
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Colors.black
-                              : AppColors.timeTileBackgroundColor,
-                          borderRadius: BorderRadius.circular(40),
-                          border: Border.all(
-                            color: AppColors.blackColor.withAlpha(10),
-                          ),
-                        ),
-                        child: Text(
-                          data.time!,
-                          style: Get.textTheme.labelLarge?.copyWith(
-                            color: isSelected ? Colors.white : Colors.black,
-                          ),
-                        ),
+        final slots = courts[0].slot;
+        if (slots == null || slots.isEmpty || slots[0].slotTimes == null) {
+          return const Center(child: Text("No time slots available"));
+        }
+
+        final slotTimes = slots[0].slotTimes!;
+        double spacing = Get.width * 0.02;
+        final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
+
+        return Wrap(
+          key: ValueKey(controller.selectedTimes.join(',')),
+          spacing: spacing,
+          runSpacing: Get.height * 0.015,
+          children: slotTimes.map((data) {
+            final isSelected = controller.selectedTimes.contains(data.time!);
+            final isPast = controller.isPastTimeSlot(data.time!);
+
+            return Opacity(
+              opacity: isPast ? 0.4 : 1.0,
+              child: GestureDetector(
+                onTap: isPast
+                    ? null
+                    : () {
+                  controller.toggleTimeSlot(data.time!);
+                },
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 800),
+                  switchInCurve: Curves.easeIn,
+                  switchOutCurve: Curves.easeOut,
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: Container(
+                    key: ValueKey('${data.time}-${isSelected}'),
+                    width: tileWidth,
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.black
+                          : AppColors.timeTileBackgroundColor,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        color: AppColors.blackColor.withAlpha(10),
+                      ),
+                    ),
+                    child: Text(
+                      data.time!,
+                      style: Get.textTheme.labelLarge?.copyWith(
+                        color: isSelected ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          );
-        },
-      ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      }),
     );
   }
-
-
-  // Widget _buildMatchCard(BuildContext context, AvailableCourtsData court) {
-  //   return Card(
-  //     margin: const EdgeInsets.symmetric(vertical: 8),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             court.name ?? 'Court Name',
-  //             style: TextStyle(fontWeight: FontWeight.bold),
-  //           ),
-  //           SizedBox(height: 8),
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               Text(
-  //                 court.courtType ?? '',
-  //                 style: TextStyle(fontWeight: FontWeight.bold),
-  //               ),
-  //               Text(
-  //                 "Price: ${court.slotTimes != null && court.slotTimes!.isNotEmpty ?
-  //                 (court.slotTimes!.first.amount?.toString() ?? 'Unavailable') :
-  //                 'Unavailable'}",
-  //                 style: TextStyle(
-  //                   fontSize: 16,
-  //                   fontWeight: FontWeight.w600,
-  //                   color: AppColors
-  //                       .primaryColor, // Replace with your desired color
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _bottomButton() {
     return Container(
