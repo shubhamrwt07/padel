@@ -16,7 +16,7 @@ class AvailableCourtModel {
     if (json['data'] != null) {
       data = <AvailableCourtsData>[];
       json['data'].forEach((v) {
-        data!.add(new AvailableCourtsData.fromJson(v));
+        data!.add(AvailableCourtsData.fromJson(v));
       });
     }
   }
@@ -64,10 +64,10 @@ class AvailableCourtsData {
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
-        slotTimes!.add(new SlotTimes.fromJson(v));
+        slotTimes!.add(SlotTimes.fromJson(v));
       });
     }
-    owner = json['owner'] != null ? new Owner.fromJson(json['owner']) : null;
+    owner = json['owner'] != null ? Owner.fromJson(json['owner']) : null;
     registeredCourtId = json['registeredCourtId'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
