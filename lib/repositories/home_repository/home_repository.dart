@@ -32,12 +32,26 @@ class HomeRepository {
       }
     }
   }
-  Future<AvailableCourtModel> fetchAvailableCourtsById({required String id,required time}) async {
+  Future<AvailableCourtModel> fetchAvailableCourtsById({
+    required String id,
+    required String time,
+    required String date,
+    required String day,
+  }) async {
     final url = "${AppEndpoints.getActiveCourt}$id";
+
     log("Fetching available courts by ID: $url");
-///
+    log("Time: $time, Date: $date, Day: $day");
+
     try {
-      final response = await dioClient.get(url);
+      final response = await dioClient.get(
+        url,
+        queryParameters: {
+          'time': time,
+          'date': date,
+          'day': day,
+        },
+      );
 
       if (response.statusCode == 200) {
         debugPrint("Available Courts Response: ${response.data}");

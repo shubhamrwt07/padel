@@ -211,7 +211,7 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-
+///
   Widget _buildSlotHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -371,43 +371,46 @@ class BookSession extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.center,
-        child: CustomButton(
-          width: Get.width * 0.9,
-          child: Row(
-            children: [
-              Obx(() => RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "₹ ",
-                      style: Get.textTheme.titleMedium!.copyWith(
-                        color: AppColors.whiteColor,
-                        fontFamily: "Roboto",
-                        fontWeight: FontWeight.w600,
+        child: Obx(() {
+          final totalAmount = controller.totalAmount;
+          return CustomButton(
+            width: Get.width * 0.9,
+            child: Row(
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "₹ ",
+                        style: Get.textTheme.titleMedium!.copyWith(
+                          color: AppColors.whiteColor,
+                          fontFamily: "Roboto",
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: controller.selectedAmount.value,
-                      style: Get.textTheme.titleMedium!.copyWith(
-                        color: AppColors.whiteColor,
-                        fontWeight: FontWeight.w600,
+                      TextSpan(
+                        text: totalAmount.toStringAsFixed(0),
+                        style: Get.textTheme.titleMedium!.copyWith(
+                          color: AppColors.whiteColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
+                Text(
+                  "Book Now",
+                  style: Get.textTheme.headlineMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                  ),
                 ),
-              )).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
-              Text(
-                "Book Now",
-                style: Get.textTheme.headlineMedium!.copyWith(
-                  color: AppColors.whiteColor,
-                ),
-              ),
-            ],
-          ),
-          onTap: () {
-            Get.to(() => CartScreen(buttonType: "true"));
-          },
-        ),
+              ],
+            ),
+            onTap: () {
+              Get.to(() => CartScreen(buttonType: "true"));
+            },
+          );
+        }),
       ),
     );
   }
