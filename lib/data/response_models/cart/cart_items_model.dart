@@ -1,106 +1,122 @@
 class CartItemsModel {
+  int? status;
   String? message;
   List<CartItems>? cartItems;
 
-  CartItemsModel({this.message, this.cartItems});
+  CartItemsModel({this.status, this.message, this.cartItems});
 
   CartItemsModel.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
     message = json['message'];
     if (json['cartItems'] != null) {
       cartItems = <CartItems>[];
       json['cartItems'].forEach((v) {
-        cartItems!.add(new CartItems.fromJson(v));
+        cartItems!.add(CartItems.fromJson(v));
       });
     }
   }
+
+ 
 }
 
 class CartItems {
   String? id;
   String? userId;
-  List<CourtData>? courtNames;
+  List<Slot>? slot;
   RegisterClubId? registerClubId;
   int? totalAmount;
-  int? iV;
   String? createdAt;
   String? updatedAt;
+  int? iV;
 
-  CartItems({
-    this.id,
-    this.userId,
-    this.courtNames,
-    this.registerClubId,
-    this.totalAmount,
-    this.iV,
-    this.createdAt,
-    this.updatedAt,
-  });
+  CartItems(
+      {this.id,
+        this.userId,
+        this.slot,
+        this.registerClubId,
+        this.totalAmount,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
 
   CartItems.fromJson(Map<String, dynamic> json) {
     id = json['_id'];
     userId = json['userId'];
-    if (json['courtNames'] != null) {
-      courtNames = <CourtData>[];
-      json['courtNames'].forEach((v) {
-        courtNames!.add(new CourtData.fromJson(v));
+    if (json['slot'] != null) {
+      slot = <Slot>[];
+      json['slot'].forEach((v) {
+        slot!.add(Slot.fromJson(v));
       });
     }
     registerClubId = json['register_club_id'] != null
-        ? new RegisterClubId.fromJson(json['register_club_id'])
+        ? RegisterClubId.fromJson(json['register_club_id'])
         : null;
     totalAmount = json['totalAmount'];
-    iV = json['__v'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    iV = json['__v'];
   }
+ 
 }
 
-class CourtData {
-  String? name;
-  String? status;
-  String? courtType;
-  String? courtId;
+class Slot {
+  String? slotId;
+  List<BusinessHours>? businessHours;
   List<SlotTimes>? slotTimes;
   String? id;
 
-  CourtData({
-    this.name,
-    this.status,
-    this.courtType,
-    this.courtId,
-    this.slotTimes,
-    this.id,
-  });
+  Slot({this.slotId, this.businessHours, this.slotTimes, this.id});
 
-  CourtData.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    status = json['status'];
-    courtType = json['courtType'];
-    courtId = json['courtId'];
+  Slot.fromJson(Map<String, dynamic> json) {
+    slotId = json['slotId'];
+    if (json['businessHours'] != null) {
+      businessHours = <BusinessHours>[];
+      json['businessHours'].forEach((v) {
+        businessHours!.add(BusinessHours.fromJson(v));
+      });
+    }
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
-        slotTimes!.add(new SlotTimes.fromJson(v));
+        slotTimes!.add(SlotTimes.fromJson(v));
       });
     }
     id = json['_id'];
   }
+
+ 
+}
+
+class BusinessHours {
+  String? time;
+  String? day;
+  String? id;
+
+  BusinessHours({this.time, this.day, this.id});
+
+  BusinessHours.fromJson(Map<String, dynamic> json) {
+    time = json['time'];
+    day = json['day'];
+    id = json['_id'];
+  }
+
+ 
 }
 
 class SlotTimes {
-  String? status;
   String? time;
   int? amount;
   String? id;
 
-  SlotTimes({this.status, this.time, this.amount, this.id});
+  SlotTimes({this.time, this.amount, this.id});
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
     time = json['time'];
     amount = json['amount'];
     id = json['_id'];
   }
+
+ 
 }
 
 class RegisterClubId {
@@ -111,7 +127,7 @@ class RegisterClubId {
   String? courtType;
   List<String>? courtImage;
   int? courtCount;
-  String? businessHours;
+  List<BusinessHours>? businessHours;
   String? description;
   String? city;
   String? address;
@@ -119,36 +135,35 @@ class RegisterClubId {
   bool? isDeleted;
   bool? isVerified;
   bool? isFeatured;
-  String? features;
+  List<String>? features;
   String? createdAt;
   String? updatedAt;
   int? iV;
 
-  RegisterClubId({
-    this.location,
-    this.id,
-    this.ownerId,
-    this.clubName,
-    this.courtType,
-    this.courtImage,
-    this.courtCount,
-    this.businessHours,
-    this.description,
-    this.city,
-    this.address,
-    this.isActive,
-    this.isDeleted,
-    this.isVerified,
-    this.isFeatured,
-    this.features,
-    this.createdAt,
-    this.updatedAt,
-    this.iV,
-  });
+  RegisterClubId(
+      {this.location,
+        this.id,
+        this.ownerId,
+        this.clubName,
+        this.courtType,
+        this.courtImage,
+        this.courtCount,
+        this.businessHours,
+        this.description,
+        this.city,
+        this.address,
+        this.isActive,
+        this.isDeleted,
+        this.isVerified,
+        this.isFeatured,
+        this.features,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
-        ? new Location.fromJson(json['location'])
+        ? Location.fromJson(json['location'])
         : null;
     id = json['_id'];
     ownerId = json['ownerId'];
@@ -156,7 +171,12 @@ class RegisterClubId {
     courtType = json['courtType'];
     courtImage = json['courtImage'].cast<String>();
     courtCount = json['courtCount'];
-    businessHours = json['businessHours'];
+    if (json['businessHours'] != null) {
+      businessHours = <BusinessHours>[];
+      json['businessHours'].forEach((v) {
+        businessHours!.add(BusinessHours.fromJson(v));
+      });
+    }
     description = json['description'];
     city = json['city'];
     address = json['address'];
@@ -164,12 +184,13 @@ class RegisterClubId {
     isDeleted = json['isDeleted'];
     isVerified = json['isVerified'];
     isFeatured = json['isFeatured'];
-    features = json['features'];
+    features = json['features'].cast<String>();
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
   }
-}
+
+ }
 
 class Location {
   String? type;
@@ -181,4 +202,6 @@ class Location {
     type = json['type'];
     coordinates = json['coordinates'].cast<double>();
   }
+
+ 
 }

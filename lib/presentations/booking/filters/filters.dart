@@ -294,7 +294,7 @@ class Filters extends StatelessWidget {
                     },
                   );
                   if (picked != null) {
-                    controller.startTime.value = picked.format(context);
+                    controller.startTime.value = picked.format(Get.context!);
                   }
                 },
                 icon: CupertinoIcons.timer,
@@ -322,7 +322,7 @@ class Filters extends StatelessWidget {
                     initialTime: TimeOfDay.now(),
                   );
                   if (picked != null) {
-                    controller.endTime.value = picked.format(context);
+                    controller.endTime.value = picked.format(Get.context!);
                   }
                 },
                 icon: CupertinoIcons.timer,

@@ -746,13 +746,13 @@ class HomeScreen extends GetView<HomeController> {
                   const SizedBox(width: 12),
                   OutlinedButton(
                     onPressed: controller.clearSearch,
-                    child: const Text('Clear Search'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,
                       ),
                     ),
+                    child: const Text('Clear Search'),
                   ),
                 ],
               ],
@@ -782,7 +782,7 @@ class HomeScreen extends GetView<HomeController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Club Image
-            Container(
+            SizedBox(
               height: 95,
               width: 118,
               child: ClipRRect(

@@ -134,7 +134,7 @@ class PaymentFilterUi extends GetView<PaymentFilterController> {
                           // Open date picker with current selected date or today as initial date
                           final DateTime? pickedDate = await showDatePicker(
                             context: context,
-                            initialDate: date ?? DateTime.now(),
+                            initialDate: date,
                             firstDate: DateTime(2000),
                             lastDate: DateTime(2100),
                           );

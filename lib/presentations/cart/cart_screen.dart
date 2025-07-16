@@ -52,109 +52,63 @@ class CartScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Text(
-                    //   item.,
-                    //   style: Theme.of(context).textTheme.labelLarge!
-                    //       .copyWith(),
-                    // ),
+                    Text(
+                      item.registerClubId!.clubName.toString(),
+                      style: Theme.of(context).textTheme.labelLarge!
+                          .copyWith(),
+                    ),
                   ],
                 ).paddingOnly(
                   bottom: Get.height * 0.01,
                   left: Get.width * 0.03,
                   right: Get.width * 0.03,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "27June 2025 ",
-                            style: Theme.of(context).textTheme.labelLarge!
-                                .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
-                          ),
-                          TextSpan(
-                            text: "8:00am (60m)",
-                            style: Theme.of(context).textTheme.labelLarge!
-                                .copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: item.slot!.length,
+                    itemBuilder: (context,int childIndex) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "₹ ",
-                          style: Theme.of(context).textTheme.labelLarge!
-                              .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
-                        ),
-                        Text(
-                          "1000",
-                          style: Theme.of(context).textTheme.labelLarge!
-                              .copyWith(fontWeight: FontWeight.w500),
-                        ),
-                        Image.asset(
-                          Assets.imagesIcRemove,
-                          scale: 3,
-                        ).paddingOnly(left: 10),
-                      ],
-                    ),
-                  ],
-                ).paddingOnly(
-                  bottom: Get.height * 0.01,
-                  left: Get.width * 0.03,
-                  right: Get.width * 0.03,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "30June 2025 ",
-                            style: Theme.of(context).textTheme.labelLarge!
-                                .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "${ item.slot![index].slotTimes}",
+                                style: Theme.of(context).textTheme.labelLarge!
+                                    .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
+                              ),
+
+                            ],
                           ),
-                          TextSpan(
-                            text: "8:00am (60m)",
-                            style: Theme.of(context).textTheme.labelLarge!
-                                .copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textColor,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "₹ ",
+                              style: Theme.of(context).textTheme.labelLarge!
+                                  .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "₹ ",
-                          style: Theme.of(context).textTheme.labelLarge!
-                              .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
+                            Text(
+                              "${ item.slot![index].slotTimes}",
+                              style: Theme.of(context).textTheme.labelLarge!
+                                  .copyWith(fontWeight: FontWeight.w500),
+                            ),
+                            Image.asset(
+                              Assets.imagesIcRemove,
+                              scale: 3,
+                            ).paddingOnly(left: 10),
+                          ],
                         ),
-                        Text(
-                          "1000",
-                          style: Theme.of(context).textTheme.labelLarge!
-                              .copyWith(fontWeight: FontWeight.w500),
-                        ),
-                        Image.asset(
-                          Assets.imagesIcRemove,
-                          scale: 3,
-                        ).paddingOnly(left: 10),
                       ],
-                    ),
-                  ],
-                ).paddingOnly(
-                  bottom: Get.height * 0.01,
-                  left: Get.width * 0.03,
-                  right: Get.width * 0.03,
+                    ).paddingOnly(
+                      bottom: Get.height * 0.01,
+                      left: Get.width * 0.03,
+                      right: Get.width * 0.03,
+                    );
+                  }
                 ),
+
                 Container(
                   height: 1,
                   width: Get.width,

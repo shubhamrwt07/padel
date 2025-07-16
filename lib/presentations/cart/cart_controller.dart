@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +34,9 @@ class CartController extends GetxController {
       }
       log("Cart Items length: ${cartItems.length}");
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     } finally {
       isLoading.value = false;
     }
