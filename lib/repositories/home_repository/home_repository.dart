@@ -46,11 +46,7 @@ class HomeRepository {
     try {
       final response = await dioClient.get(
         url,
-        queryParameters: {
-          'time': time,
-          'date': date,
-          'day': day,
-        },
+
       );
 
       if (response.statusCode == 200) {

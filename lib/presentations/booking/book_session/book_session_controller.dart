@@ -53,7 +53,7 @@ class BookSessionController extends GetxController {
       selectedSlotAmounts.remove(time);
     } else {
       selectedTimes.add(time);
-      getAvailableCourtsById(argument.id!, time);
+      // getAvailableCourtsById(argument.id!, time);
     }
   }
 

@@ -256,9 +256,9 @@ class BookSession extends StatelessWidget {
                 () => Wrap(
               spacing: spacing,
               runSpacing: Get.height * 0.015,
-              children: controller.timeSlots.map((time) {
-                final isSelected = controller.selectedTimes.contains(time);
-                final isPast = controller.isPastTimeSlot(time);
+              children: controller.availableCourtData.value!.data![0].slot![0].slotTimes!.map((data) {
+                final isSelected = controller.selectedTimes.contains(data.time!);
+                final isPast = controller.isPastTimeSlot(data.time!);
 
                 return Opacity(
                   opacity: isPast ? 0.4 : 1.0,
@@ -266,11 +266,11 @@ class BookSession extends StatelessWidget {
                     onTap: isPast
                         ? null
                         : () {
-                      controller.toggleTimeSlot(time);
-                      controller.getAvailableCourtsById(
-                        controller.argument.id!,
-                        time,
-                      );
+                      controller.toggleTimeSlot(data.time!);
+                      // controller.getAvailableCourtsById(
+                      //   controller.argument.id!,
+                      //   data.time!,
+                      // );
                     },
 
                     child: AnimatedSwitcher(
@@ -294,7 +294,7 @@ class BookSession extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          time,
+                          data.time!,
                           style: Get.textTheme.labelLarge?.copyWith(
                             color: isSelected ? Colors.white : Colors.black,
                           ),
