@@ -1,8 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import 'package:padel_mobile/data/request_models/home_models/get_available_court.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-import 'package:collection/collection.dart';
 
 class BookSession extends StatelessWidget {
   BookSession({super.key});
@@ -160,10 +160,26 @@ class BookSession extends StatelessWidget {
                 ),
               );
             },
-            onDateChange: (date) {
+            onDateChange: (date) async {
               controller.selectedDate.value = date;
               controller.selectedTimes.clear();
+              controller.selectedSlotAmounts.clear();
+
+              log('Selected date: $date'); // ✅ Debug here
+
+              final nextSlot = controller.timeSlots.firstWhere(
+                    (time) => !controller.isPastTimeSlot(time),
+                orElse: () => controller.timeSlots.last,
+              );
+
+              await controller.getAvailableCourtsById(controller.argument.id!, nextSlot);
+              controller.autoSelectFirstAvailableSlot();
+              controller.update(); // Force UI refresh
             },
+
+
+
+
           ),
         ),
       ],
@@ -231,41 +247,52 @@ class BookSession extends StatelessWidget {
           runSpacing: Get.height * 0.015,
           children: slotTimes.map((data) {
             final isSelected = controller.selectedTimes.contains(data.time!);
-            final isPast = controller.isPastTimeSlot(data.time!);
+            final selectedDate = controller.selectedDate.value ?? DateTime.now();
+            final now = DateTime.now();
+            final isToday = selectedDate.year == now.year &&
+                selectedDate.month == now.month &&
+                selectedDate.day == now.day;
 
-            return Opacity(
-              opacity: isPast ? 0.4 : 1.0,
-              child: GestureDetector(
-                onTap: isPast
-                    ? null
-                    : () {
-                  controller.toggleTimeSlot(data.time!);
-                },
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 800),
-                  switchInCurve: Curves.easeIn,
-                  switchOutCurve: Curves.easeOut,
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Container(
-                    key: ValueKey('${data.time}-${isSelected}'),
-                    width: tileWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.black
-                          : AppColors.timeTileBackgroundColor,
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(
-                        color: AppColors.blackColor.withAlpha(10),
-                      ),
+            final isPast = isToday && controller.isPastTimeSlot(data.time!);
+
+            // 🐞 Debug log
+            debugPrint('${data.time!} isPast: $isPast');
+
+            return GestureDetector(
+              onTap: isPast
+                  ? null
+                  : () => controller.toggleTimeSlot(data.time!),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 800),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                child: Container(
+                  key: ValueKey('${data.time}-${isSelected}-${isPast}'),
+                  width: tileWidth,
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isPast
+                        ? Colors.red
+                        : isSelected
+                        ? Colors.black
+                        : AppColors.lightBlueColor,
+                    borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: Colors.black.withAlpha(10),
                     ),
-                    child: Text(
-                      data.time!,
-                      style: Get.textTheme.labelLarge?.copyWith(
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
+                  ),
+                  child: Text(
+                    data.time!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isPast
+                          ? Colors.white
+                          : isSelected
+                          ? Colors.white
+                          : Colors.black,
                     ),
                   ),
                 ),
@@ -276,7 +303,7 @@ class BookSession extends StatelessWidget {
       }),
     );
   }
-
+//
   Widget _bottomButton() {
     return Container(
       height: Get.height * .09,
@@ -299,9 +326,29 @@ class BookSession extends StatelessWidget {
         alignment: Alignment.center,
         child: Obx(() {
           final totalAmount = controller.totalAmount;
+          final isLoading = controller.isLoading.value;
+
           return CustomButton(
             width: Get.width * 0.9,
-            child: Row(
+            onTap: () async {
+              await controller.addSelectedSlotsToCart();
+
+              if (!controller.isLoading.value) {
+                Get.to(() => CartScreen(buttonType: "true"));
+              }
+            },
+            child: isLoading
+                ? const Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+            )
+                : Row(
               children: [
                 RichText(
                   text: TextSpan(
@@ -332,9 +379,6 @@ class BookSession extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () {
-              Get.to(() => CartScreen(buttonType: "true"));
-            },
           );
         }),
       ),

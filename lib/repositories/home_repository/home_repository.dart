@@ -38,7 +38,7 @@ class HomeRepository {
     required String date,
     required String day,
   }) async {
-    final url = "${AppEndpoints.getActiveCourt}$id";
+    final url = "${AppEndpoints.getActiveCourt}$id&day=$day";
 
     log("Fetching available courts by ID: $url");
     log("Time: $time, Date: $date, Day: $day");

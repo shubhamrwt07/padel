@@ -65,34 +65,31 @@ class CartScreen extends StatelessWidget {
                 ),
                 ListView.builder(
                   shrinkWrap: true,
-                  itemCount: item.slot!.length,
-                    itemBuilder: (context,int childIndex) {
+                  itemCount: item.slot?.length ?? 0,
+                  itemBuilder: (context, int childIndex) {
+                    final slot = item.slot![childIndex];
+
+                    // Combine time and amount from slotTimes
+                    final timesText = slot.slotTimes!.map((e) => e.time).join(", ");
+                    final amountsText = slot.slotTimes!.map((e) => "₹ ${e.amount}").join(", ");
+
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${ item.slot![index].slotTimes}",
-                                style: Theme.of(context).textTheme.labelLarge!
-                                    .copyWith(fontWeight: FontWeight.w500,  color: AppColors.textColor,),
-                              ),
-
-                            ],
+                        Text(
+                          timesText,
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textColor,
                           ),
                         ),
                         Row(
                           children: [
                             Text(
-                              "₹ ",
-                              style: Theme.of(context).textTheme.labelLarge!
-                                  .copyWith(fontWeight: FontWeight.w500,fontFamily: "Roboto"),
-                            ),
-                            Text(
-                              "${ item.slot![index].slotTimes}",
-                              style: Theme.of(context).textTheme.labelLarge!
-                                  .copyWith(fontWeight: FontWeight.w500),
+                              amountsText,
+                              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             Image.asset(
                               Assets.imagesIcRemove,
@@ -106,7 +103,7 @@ class CartScreen extends StatelessWidget {
                       left: Get.width * 0.03,
                       right: Get.width * 0.03,
                     );
-                  }
+                  },
                 ),
 
                 Container(
