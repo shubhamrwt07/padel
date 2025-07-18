@@ -134,7 +134,7 @@ class BookSessionController extends GetxController {
       final result = await repository.fetchAvailableCourtsById(
         id: registerClubId,
         time: searchTime,
-        date: formattedDate, // ✅ FIXED: pass correct date here
+        date: formattedDate,
         day: formattedDay,
       );
 
@@ -153,67 +153,91 @@ class BookSessionController extends GetxController {
       Get.snackbar("Error", "Please select at least one time slot.");
       return;
     }
+
     final formattedDate = selectedDate.value!.toIso8601String();
     final courts = availableCourtData.value?.data;
-    if (courts == null || courts.isEmpty || courts[0].slot == null || courts[0].slot!.isEmpty) {
-      Get.snackbar("Error", "Slot ID not found.");
-      return;
-    }
-    final slot = courts[0].slot![0];
-    final slotId = slot.sId;
-    if (slotId == null) {
-      Get.snackbar("Error", "Invalid slot ID.");
-      return;
-    }
-    // 🔍 Check if same slotId and any of the times already exist in cart
-    final existingMatch = addedCartSlots.any((cartSlot) {
-      final isSameSlot = cartSlot["slotId"] == slotId;
-      final isSameDate = cartSlot["bookingDate"] == formattedDate;
-      final existingTimes = (cartSlot["slotTimes"] as List).cast<String>().toSet();
-      final overlap = existingTimes.intersection(selectedTimes.toSet());
-      return isSameSlot && isSameDate && overlap.isNotEmpty;
-    });
 
-    if (existingMatch) {
-      Get.snackbar("Info", "This slot already exists in your cart.");
+    if (courts == null || courts.isEmpty) {
+      Get.snackbar("Error", "Court data not found.");
       return;
     }
 
-    // ✅ Convert selected times to payload format (avoid duplicates)
-    final slotTimes = selectedTimes.toSet().map((time) {
-      final amount = selectedSlotAmounts[time] ?? 0;
-      return {
-        "time": time,
-        "amount": amount,
-      };
-    }).toList();
+    final List<Map<String, dynamic>> slotList = [];
+    bool anySlotSkipped = false;
+
+    for (final court in courts) {
+      final slots = court.slot;
+      if (slots == null || slots.isEmpty) continue;
+
+      for (final slot in slots) {
+        final slotId = slot.sId;
+        if (slotId == null) continue;
+
+        // 🔁 Skip if already in cart
+        final alreadyInCart = addedCartSlots.any((cartSlot) =>
+        cartSlot["slotId"] == slotId &&
+            cartSlot["bookingDate"] == formattedDate);
+
+        if (alreadyInCart) {
+          anySlotSkipped = true;
+          log("Slot already in cart, skipping: $slotId");
+          continue;
+        }
+
+        // ⏱️ Filter matching selectedTimes for this slot
+        final slotTimes = selectedTimes
+            .where((time) => selectedSlotAmounts.containsKey(time))
+            .map((time) => {
+          "time": time,
+          "amount": selectedSlotAmounts[time] ?? 0,
+        })
+            .toList();
+
+        if (slotTimes.isEmpty) continue;
+
+        slotList.add({
+          "slotId": slotId,
+          "businessHours": slot.businessHours
+              ?.map((hour) => {
+            "time": hour.time,
+            "day": hour.day,
+          })
+              .toList() ??
+              [],
+          "slotTimes": slotTimes,
+        });
+      }
+    }
+
+    if (slotList.isEmpty) {
+      final msg = anySlotSkipped
+          ? "Selected slot(s) already exist in cart and were skipped."
+          : "No valid slots to add.";
+      Get.snackbar("Info", msg);
+      return;
+    }
 
     final slotData = {
-      "slot": [
-        {
-          "slotId": slotId,
-          "businessHours": slot.businessHours ?? [],
-          "slotTimes": slotTimes,
-        }
-      ],
+      "slot": slotList,
       "register_club_id": argument.id,
       "bookingDate": formattedDate,
     };
 
-    log("Slot Data to Add to Cart: ${jsonEncode(slotData)}");
+    log("📦 Final Payload to POST: ${jsonEncode(slotData)}");
 
     isLoading.value = true;
     try {
       await cartRepository.addCartItems(data: slotData);
 
-      // ✅ Save this to local memory to prevent re-adding
-      addedCartSlots.add({
-        "slotId": slotId,
-        "bookingDate": formattedDate,
-        "slotTimes": selectedTimes.toList(), // Defensive copy
-      });
+      for (var slot in slotList) {
+        addedCartSlots.add({
+          "slotId": slot["slotId"],
+          "bookingDate": formattedDate,
+          "slotTimes":
+          (slot["slotTimes"] as List).map((e) => e["time"] as String).toList(),
+        });
+      }
 
-      // ✅ Clear selections after successful add
       selectedTimes.clear();
       selectedSlotAmounts.clear();
       update();
@@ -221,10 +245,10 @@ class BookSessionController extends GetxController {
       Get.snackbar("Success", "Selected slots added to cart.");
     } catch (e) {
       if (e is DioException) {
-        log("Dio error: ${e.message}");
-        log("Dio response data: ${e.response?.data}");
+        log("❌ Dio error: ${e.message}");
+        log("❌ Dio response data: ${e.response?.data}");
       } else {
-        log("Unexpected error: $e");
+        log("❌ Unexpected error: $e");
       }
 
       Get.snackbar("Error", "Failed to add items to cart.");
@@ -232,8 +256,6 @@ class BookSessionController extends GetxController {
       isLoading.value = false;
     }
   }
-
-
   String _getWeekday(int weekday) {
     switch (weekday) {
       case 1:

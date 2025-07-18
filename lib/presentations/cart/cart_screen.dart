@@ -34,6 +34,7 @@ class CartScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget cartList(CartController controller){
     return SizedBox(
       height:buttonType=="true"? Get.height * 0.65:Get.height * 0.56,
@@ -47,7 +48,7 @@ class CartScreen extends StatelessWidget {
           itemCount: controller.cartItems.length,
           itemBuilder: (BuildContext context, index) {
             final item = controller.cartItems[index];
-            return Column(
+            return Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,9 +61,14 @@ class CartScreen extends StatelessWidget {
                   ],
                 ).paddingOnly(
                   bottom: Get.height * 0.01,
-                  left: Get.width * 0.03,
-                  right: Get.width * 0.03,
+
                 ),
+                Text(
+                  item.registerClubId!.createdAt.toString(),
+                  style: Theme.of(context).textTheme.labelLarge!
+                      .copyWith(),
+                ),
+
                 ListView.builder(
                   shrinkWrap: true,
                   itemCount: item.slot?.length ?? 0,
@@ -100,19 +106,18 @@ class CartScreen extends StatelessWidget {
                       ],
                     ).paddingOnly(
                       bottom: Get.height * 0.01,
-                      left: Get.width * 0.03,
-                      right: Get.width * 0.03,
+
                     );
                   },
                 ),
-
                 Container(
                   height: 1,
                   width: Get.width,
                   color: AppColors.containerBorderColor,
                 ),
               ],
-            ).paddingOnly(bottom: Get.height * 0.01);
+            ).paddingOnly(bottom: Get.height * 0.01,left: Get.width * 0.03,
+              right: Get.width * 0.03,);
           },
         ),
       ),

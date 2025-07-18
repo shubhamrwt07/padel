@@ -8,6 +8,7 @@ import '../../data/response_models/cart/cart_items_model.dart';
 import '../../repositories/cart/cart_repository.dart';
 
 class CartController extends GetxController {
+
   CartRepository cartRepository = CartRepository();
   ScrollController scrollController = ScrollController();
 

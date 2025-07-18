@@ -13,7 +13,6 @@ class AppEndpoints {
       "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getActiveCourt =
       "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
-
   // Cart Urls
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
