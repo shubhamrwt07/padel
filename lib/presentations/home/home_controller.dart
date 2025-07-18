@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/services/notification_service/firebase_notification.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import '../../repositories/home_repository/home_repository.dart';
 
@@ -10,9 +11,10 @@ class HomeController extends GetxController {
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
   ScrollController scrollController = ScrollController();
-BookingController bookingController=Get.put(BookingController());
-  final List<String> dummyLocations = [
-    'Delhi',
+  BookingController bookingController = Get.put(BookingController());
+
+  // NotificationService notificationService = NotificationService();
+  final List<String> dummyLocations = [    'Delhi',
     'Mumbai',
     'Bangalore',
     'Hyderabad',
@@ -24,7 +26,7 @@ BookingController bookingController=Get.put(BookingController());
     'Chandigarh',
   ];
 
-  // DATE ----------------------------------------------------------------------
+  // DATE -------------------------
   var selectedDate = DateTime.now().obs;
 
   Future<void> selectDate(BuildContext context) async {
@@ -73,7 +75,6 @@ BookingController bookingController=Get.put(BookingController());
   RxString searchQuery = ''.obs;
   RxBool hasMoreData = true.obs;
 
-  // Additional state management
   RxBool isInitialized = false.obs;
   RxInt totalCourts = 0.obs;
 
@@ -134,7 +135,7 @@ BookingController bookingController=Get.put(BookingController());
       log(
         "Successfully fetched ${courtsData.value?.data?.courts?.length ?? 0} courts",
       );
-        } catch (e) {
+    } catch (e) {
       log("Error fetching clubs: $e");
 
       // Set appropriate error message
@@ -209,12 +210,14 @@ BookingController bookingController=Get.put(BookingController());
   @override
   void onInit() {
     super.onInit();
+  //   notificationService.initialize();
+  //   var token = notificationService.getToken();
+  // log("Firebase Token $token");
 
     // Initialize scroll controller listener for pagination
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
-
         loadMore();
       }
     });
