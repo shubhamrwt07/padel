@@ -1,18 +1,21 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:collection/collection.dart';
 
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart';
+import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
 
 class BookSessionController extends GetxController {
-  // UI state
   RxBool viewUnavailableSlots = false.obs;
   RxList<String> selectedTimes = <String>[].obs;
   RxMap<String, int> selectedSlotAmounts = <String, int>{}.obs;
-
+  RxBool isLoading = false.obs;
+  List<Map<String, dynamic>> addedCartSlots = [];
   double get totalAmount =>
       selectedSlotAmounts.values.fold(0, (sum, amt) => sum + amt);
 
@@ -27,6 +30,8 @@ class BookSessionController extends GetxController {
   });
 
   final HomeRepository repository = HomeRepository();
+  final CartRepository cartRepository = CartRepository(); // ✅ Inject cart repo
+
   Rx<AvailableCourtModel?> availableCourtData = Rx<AvailableCourtModel?>(null);
   RxBool isLoadingCourts = false.obs;
   RxString courtErrorMessage = ''.obs;
@@ -35,7 +40,7 @@ class BookSessionController extends GetxController {
   void onInit() {
     super.onInit();
     argument = Get.arguments['data'];
-    selectedDate.value = DateTime.now();
+    selectedDate.value = DateTime.now(); // ✅ Ensure it's initialized
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final nextSlot = timeSlots.firstWhere(
@@ -44,13 +49,10 @@ class BookSessionController extends GetxController {
       );
 
       await getAvailableCourtsById(argument.id!, nextSlot);
-
-      // Select first available slot and amount
       autoSelectFirstAvailableSlot();
     });
   }
 
-  /// Automatically select the first available (non-past) slot
   void autoSelectFirstAvailableSlot() {
     final courts = availableCourtData.value?.data;
     if (courts == null || courts.isEmpty) return;
@@ -66,7 +68,7 @@ class BookSessionController extends GetxController {
       if (firstAvailable != null && firstAvailable.amount != null) {
         selectedTimes.add(firstAvailable.time!);
         selectedSlotAmounts[firstAvailable.time!] = firstAvailable.amount!;
-        update(); // Notify GetBuilder/UI to rebuild
+        update();
       }
     }
   }
@@ -86,10 +88,9 @@ class BookSessionController extends GetxController {
       }
     }
 
-    update(); // Ensure UI reflects the changes
+    update();
   }
 
-  /// ✅ Updated: Check if the given time is in the past
   bool isPastTimeSlot(String timeLabel) {
     final now = DateTime.now();
     final selected = selectedDate.value ?? now;
@@ -110,20 +111,15 @@ class BookSessionController extends GetxController {
       hour,
     );
 
-    // Only mark past for today's date
-    final today = DateTime(now.year, now.month, now.day);
-    final isToday = selected.year == today.year &&
-        selected.month == today.month &&
-        selected.day == today.day;
+    // Compare only if selected date is today
+    final isToday = selected.year == now.year &&
+        selected.month == now.month &&
+        selected.day == now.day;
 
     return isToday && slotDateTime.isBefore(now);
   }
 
-  /// Fetch available courts with proper time/date/day
-  Future<void> getAvailableCourtsById(
-      String registerClubId, [
-        String searchTime = '',
-      ]) async {
+  Future<void> getAvailableCourtsById(String registerClubId, [String searchTime = '']) async {
     log("Fetching courts for time: $searchTime");
     isLoadingCourts.value = true;
     courtErrorMessage.value = '';
@@ -152,8 +148,114 @@ class BookSessionController extends GetxController {
       isLoadingCourts.value = false;
     }
   }
+  Future<void> addSelectedSlotsToCart() async {
+    if (selectedTimes.isEmpty || selectedDate.value == null) {
+      Get.snackbar("Error", "Please select at least one time slot.");
+      return;
+    }
 
-  /// Helper to convert int weekday to string
+    final formattedDate = selectedDate.value!.toIso8601String();
+    final courts = availableCourtData.value?.data;
+
+    if (courts == null || courts.isEmpty) {
+      Get.snackbar("Error", "Court data not found.");
+      return;
+    }
+
+    final List<Map<String, dynamic>> slotList = [];
+    bool anySlotSkipped = false;
+
+    for (final court in courts) {
+      final slots = court.slot;
+      if (slots == null || slots.isEmpty) continue;
+
+      for (final slot in slots) {
+        final slotId = slot.sId;
+        if (slotId == null) continue;
+
+        // 🔁 Skip if already in cart
+        final alreadyInCart = addedCartSlots.any((cartSlot) =>
+        cartSlot["slotId"] == slotId &&
+            cartSlot["bookingDate"] == formattedDate);
+
+        if (alreadyInCart) {
+          anySlotSkipped = true;
+          log("Slot already in cart, skipping: $slotId");
+          continue;
+        }
+
+        // ⏱️ Filter matching selectedTimes for this slot
+        final slotTimes = selectedTimes
+            .where((time) => selectedSlotAmounts.containsKey(time))
+            .map((time) => {
+          "time": time,
+          "amount": selectedSlotAmounts[time] ?? 0,
+        })
+            .toList();
+
+        if (slotTimes.isEmpty) continue;
+
+        slotList.add({
+          "slotId": slotId,
+          "businessHours": slot.businessHours
+              ?.map((hour) => {
+            "time": hour.time,
+            "day": hour.day,
+          })
+              .toList() ??
+              [],
+          "slotTimes": slotTimes,
+        });
+      }
+    }
+
+    if (slotList.isEmpty) {
+      final msg = anySlotSkipped
+          ? "Selected slot(s) already exist in cart and were skipped."
+          : "No valid slots to add.";
+      Get.snackbar("Info", msg);
+      return;
+    }
+
+    final slotData = {
+      "slot": slotList,
+      "register_club_id": argument.id,
+      "bookingDate": formattedDate,
+    };
+
+    log("📦 Final Payload to POST: ${jsonEncode(slotData)}");
+
+    isLoading.value = true;
+    try {
+      await cartRepository.addCartItems(data: slotData);
+
+      for (var slot in slotList) {
+        addedCartSlots.add({
+          "slotId": slot["slotId"],
+          "bookingDate": formattedDate,
+          "slotTimes":
+          (slot["slotTimes"] as List).map((e) => e["time"] as String).toList(),
+        });
+      }
+
+      selectedTimes.clear();
+      selectedSlotAmounts.clear();
+      update();
+
+      Get.snackbar("Success", "Selected slots added to cart.");
+    } catch (e) {
+      if (e is DioException) {
+        log("❌ Dio error: ${e.message}");
+        log("❌ Dio response data: ${e.response?.data}");
+      } else {
+        log("❌ Unexpected error: $e");
+      }
+
+      Get.snackbar("Error", "Failed to add items to cart.");
+    } finally {
+      isLoading.value = false;
+    }
+  }
   String _getWeekday(int weekday) {
     switch (weekday) {
       case 1:

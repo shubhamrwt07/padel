@@ -2,11 +2,17 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - fluttertoast (0.0.2):
+    - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - razorpay-pod (1.4.3)
+  - razorpay_flutter (1.1.10):
+    - Flutter
+    - razorpay-pod
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -14,29 +20,42 @@ PODS:
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - razorpay_flutter (from `.symlinks/plugins/razorpay_flutter/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - razorpay-pod
 
 EXTERNAL SOURCES:
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   Flutter:
     :path: Flutter
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  razorpay_flutter:
+    :path: ".symlinks/plugins/razorpay_flutter/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
 
 SPEC CHECKSUMS:
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  razorpay-pod: af9d52abe715ed5cc3eed9fdf6fd74340443d0b9
+  razorpay_flutter: 0e98e4fcaae27ad50e011d85f66d85e0a008754a
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
-PODFILE CHECKSUM: 20e260c9bb3f61194c661a4ba028da86e4f3ed96
+PODFILE CHECKSUM: 180e5f6303011a5f1ac871f198e977b05f9e7fa4
 
 COCOAPODS: 1.16.2
