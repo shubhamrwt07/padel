@@ -165,7 +165,7 @@ class BookSession extends StatelessWidget {
               controller.selectedTimes.clear();
               controller.selectedSlotAmounts.clear();
 
-              log('Selected date: $date'); // ✅ Debug here
+              log('Selected date: $date');
 
               final nextSlot = controller.timeSlots.firstWhere(
                     (time) => !controller.isPastTimeSlot(time),
@@ -218,7 +218,6 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildTimeSlots() {
     return Transform.translate(
       offset: Offset(0, -Get.height * 0.025),
@@ -260,7 +259,7 @@ class BookSession extends StatelessWidget {
 
             return GestureDetector(
               onTap: isPast
-                  ? null
+                  ? null // ✅ Disable tap for past slots
                   : () => controller.toggleTimeSlot(data.time!),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 800),
@@ -275,25 +274,33 @@ class BookSession extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isPast
-                        ? Colors.red
+                        ? Colors.grey.shade300
                         : isSelected
                         ? Colors.black
                         : AppColors.lightBlueColor,
                     borderRadius: BorderRadius.circular(40),
                     border: Border.all(
-                      color: Colors.black.withAlpha(10),
+                      color: isPast
+                          ? Colors.grey.shade400
+                          : Colors.black.withAlpha(10),
                     ),
                   ),
-                  child: Text(
-                    data.time!,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isPast
-                          ? Colors.white
-                          : isSelected
-                          ? Colors.white
-                          : Colors.black,
-                    ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        data.time!,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isPast
+                              ? Colors.grey.shade600
+                              : isSelected
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+
+                    ],
                   ),
                 ),
               ),
@@ -303,7 +310,6 @@ class BookSession extends StatelessWidget {
       }),
     );
   }
-//
   Widget _bottomButton() {
     return Container(
       height: Get.height * .09,
@@ -331,11 +337,14 @@ class BookSession extends StatelessWidget {
           return CustomButton(
             width: Get.width * 0.9,
             onTap: () async {
+
+            if(controller.selectedTimes.isNotEmpty){
               await controller.addSelectedSlotsToCart();
 
               if (!controller.isLoading.value) {
                 Get.to(() => CartScreen(buttonType: "true"));
               }
+            }
             },
             child: isLoading
                 ? const Center(

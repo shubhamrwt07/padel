@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import '../../configs/components/snack_bars.dart';
@@ -18,9 +20,11 @@ class LoggerInterceptor extends Interceptor {
     logger.d('Error type: ${err.error} \n'
         'Error message: ${err.message}');
     logger.d("TOKEN: ${storage.read('token')}");
-
+    if (err.response?.statusCode == 401) {
+      log("Not found");
+    }
     // Check if it's a connectivity error
-    if (err.type == DioExceptionType.connectionError ||
+    else if (err.type == DioExceptionType.connectionError ||
         err.type == DioExceptionType.connectionTimeout ||
         err.error is Exception && err.error.toString().contains('SocketException')) {
 

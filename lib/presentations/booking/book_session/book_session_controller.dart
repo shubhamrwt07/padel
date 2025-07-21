@@ -21,6 +21,33 @@ class BookSessionController extends GetxController {
 
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
+  bool isPastTimeSlot(String slotTime) {
+    try {
+      final now = DateTime.now();
+      final result = selectedDate.value ?? now;
+
+      // Normalize slotTime to lowercase
+      final timeParts = slotTime.toLowerCase().split(' ');
+      int hour = int.parse(timeParts[0]); // "9" from "9 am"
+      int minute = 0;
+
+      if (timeParts[1] == 'pm' && hour != 12) hour += 12;
+      if (timeParts[1] == 'am' && hour == 12) hour = 0;
+
+      final slotDateTime = DateTime(
+        result.year,
+        result.month,
+        result.day,
+        hour,
+        minute,
+      );
+
+      return slotDateTime.isBefore(now);
+    } catch (e) {
+      debugPrint("⚠️ Error parsing time slot: $slotTime, error: $e");
+      return false;
+    }
+  }
 
   final List<String> timeSlots = List.generate(18, (index) {
     final hour = 6 + index;
@@ -91,33 +118,6 @@ class BookSessionController extends GetxController {
     update();
   }
 
-  bool isPastTimeSlot(String timeLabel) {
-    final now = DateTime.now();
-    final selected = selectedDate.value ?? now;
-
-    final match = RegExp(r'(\d+):00(am|pm)', caseSensitive: false).firstMatch(timeLabel);
-    if (match == null) return false;
-
-    int hour = int.parse(match.group(1)!);
-    String period = match.group(2)!;
-
-    if (period.toLowerCase() == 'pm' && hour != 12) hour += 12;
-    if (period.toLowerCase() == 'am' && hour == 12) hour = 0;
-
-    final slotDateTime = DateTime(
-      selected.year,
-      selected.month,
-      selected.day,
-      hour,
-    );
-
-    // Compare only if selected date is today
-    final isToday = selected.year == now.year &&
-        selected.month == now.month &&
-        selected.day == now.day;
-
-    return isToday && slotDateTime.isBefore(now);
-  }
 
   Future<void> getAvailableCourtsById(String registerClubId, [String searchTime = '']) async {
     log("Fetching courts for time: $searchTime");
