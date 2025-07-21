@@ -1,85 +1,14 @@
 PODS:
   - connectivity_plus (0.0.1):
     - Flutter
-  - Firebase/CoreOnly (10.25.0):
-    - FirebaseCore (= 10.25.0)
-  - Firebase/Messaging (10.25.0):
-    - Firebase/CoreOnly
-    - FirebaseMessaging (~> 10.25.0)
-  - firebase_core (2.32.0):
-    - Firebase/CoreOnly (= 10.25.0)
-    - Flutter
-  - firebase_messaging (14.7.10):
-    - Firebase/Messaging (= 10.25.0)
-    - firebase_core
-    - Flutter
-  - FirebaseCore (10.25.0):
-    - FirebaseCoreInternal (~> 10.0)
-    - GoogleUtilities/Environment (~> 7.12)
-    - GoogleUtilities/Logger (~> 7.12)
-  - FirebaseCoreInternal (10.29.0):
-    - "GoogleUtilities/NSData+zlib (~> 7.8)"
-  - FirebaseInstallations (10.29.0):
-    - FirebaseCore (~> 10.0)
-    - GoogleUtilities/Environment (~> 7.8)
-    - GoogleUtilities/UserDefaults (~> 7.8)
-    - PromisesObjC (~> 2.1)
-  - FirebaseMessaging (10.25.0):
-    - FirebaseCore (~> 10.0)
-    - FirebaseInstallations (~> 10.0)
-    - GoogleDataTransport (~> 9.3)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
-    - GoogleUtilities/Environment (~> 7.8)
-    - GoogleUtilities/Reachability (~> 7.8)
-    - GoogleUtilities/UserDefaults (~> 7.8)
-    - nanopb (< 2.30911.0, >= 2.30908.0)
   - Flutter (1.0.0)
-  - flutter_local_notifications (0.0.1):
-    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
-  - GoogleDataTransport (9.4.1):
-    - GoogleUtilities/Environment (~> 7.7)
-    - nanopb (< 2.30911.0, >= 2.30908.0)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.13.3):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Network
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (7.13.3):
-    - GoogleUtilities/Privacy
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.13.3):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (7.13.3):
-    - GoogleUtilities/Logger
-    - "GoogleUtilities/NSData+zlib"
-    - GoogleUtilities/Privacy
-    - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.13.3)":
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (7.13.3)
-  - GoogleUtilities/Reachability (7.13.3):
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/UserDefaults (7.13.3):
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Privacy
   - image_picker_ios (0.0.1):
     - Flutter
-  - nanopb (2.30910.0):
-    - nanopb/decode (= 2.30910.0)
-    - nanopb/encode (= 2.30910.0)
-  - nanopb/decode (2.30910.0)
-  - nanopb/encode (2.30910.0)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - permission_handler_apple (9.3.0):
-    - Flutter
-  - PromisesObjC (2.4.0)
   - razorpay-pod (1.4.3)
   - razorpay_flutter (1.1.10):
     - Flutter
@@ -90,49 +19,28 @@ PODS:
 
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
-  - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
-  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
-  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - razorpay_flutter (from `.symlinks/plugins/razorpay_flutter/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
 SPEC REPOS:
   trunk:
-    - Firebase
-    - FirebaseCore
-    - FirebaseCoreInternal
-    - FirebaseInstallations
-    - FirebaseMessaging
-    - GoogleDataTransport
-    - GoogleUtilities
-    - nanopb
-    - PromisesObjC
     - razorpay-pod
 
 EXTERNAL SOURCES:
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
-  firebase_core:
-    :path: ".symlinks/plugins/firebase_core/ios"
-  firebase_messaging:
-    :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
-  flutter_local_notifications:
-    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  permission_handler_apple:
-    :path: ".symlinks/plugins/permission_handler_apple/ios"
   razorpay_flutter:
     :path: ".symlinks/plugins/razorpay_flutter/ios"
   sqflite_darwin:
@@ -140,27 +48,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
-  Firebase: 0312a2352584f782ea56f66d91606891d4607f06
-  firebase_core: 3b49a055ff54114cae400581c13671fe53936c36
-  firebase_messaging: 394589dcda43e42ec9807558a409a975e285c45b
-  FirebaseCore: 7ec4d0484817f12c3373955bc87762d96842d483
-  FirebaseCoreInternal: df84dd300b561c27d5571684f389bf60b0a5c934
-  FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
-  FirebaseMessaging: 88950ba9485052891ebe26f6c43a52bb62248952
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
-  GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
-  GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
-  nanopb: 438bc412db1928dac798aa6fd75726007be04262
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   razorpay-pod: af9d52abe715ed5cc3eed9fdf6fd74340443d0b9
   razorpay_flutter: 0e98e4fcaae27ad50e011d85f66d85e0a008754a
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
-PODFILE CHECKSUM: 20e260c9bb3f61194c661a4ba028da86e4f3ed96
+PODFILE CHECKSUM: 180e5f6303011a5f1ac871f198e977b05f9e7fa4
 
 COCOAPODS: 1.16.2
