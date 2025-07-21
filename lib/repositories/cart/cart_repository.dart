@@ -30,10 +30,11 @@ class CartRepository {
           level: LogLevel.info,
         );
         return CartItemsModel.fromJson(response.data);
-      } else {
-        throw Exception(
-          "Cart items failed with status code: ${response.statusCode}",
-        );
+      } else if(response.statusCode == 404) {
+        return CartItemsModel.fromJson(response.data);
+
+      }else{
+        throw Exception("Error");
       }
     } catch (e, st) {
       CustomLogger.logMessage(

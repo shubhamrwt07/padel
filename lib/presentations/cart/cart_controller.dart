@@ -16,7 +16,7 @@ class CartController extends GetxController {
   RxInt totalSlot = 0.obs;
   RxBool isLoading = false.obs;
   RxBool isBooking = false.obs;
-  List<CartItems> cartItems = <CartItems>[];
+  RxList<CartItems> cartItems = <CartItems>[].obs;
 
   @override
   void onInit() {
@@ -39,28 +39,35 @@ class CartController extends GetxController {
       isLoading.value = false;
     }
   }
-// Remove cart items
+
+  // Remove cart items
   Future<void> removeCartItemsFromCart({required List<String> slotIds}) async {
     try {
-      log("message 1");
+      log("slots ids for remove ${slotIds[0]}");
+      if (isLoading.value) return;
       isLoading.value = true;
 
       await cartRepository.removeCartItems(slotIds: slotIds);
 
-      // await getCartItems();
+      await getCartItems();
 
-      Get.snackbar("Success", "Selected items removed from cart.",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Success",
+        "Selected items removed from cart.",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
       log("message 2");
-
     } catch (e) {
       log("Remove cart error: $e");
-      Get.snackbar("Error", "Failed to remove items: ${e.toString()}",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Failed to remove items: ${e.toString()}",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -71,24 +78,32 @@ class CartController extends GetxController {
     try {
       isBooking.value = true;
 
-      CarteBookingModel bookingResult = await cartRepository.booking(data: data);
+      CarteBookingModel bookingResult = await cartRepository.booking(
+        data: data,
+      );
 
       // ✅ Do something with bookingResult if needed
       log("Booking successful: ${bookingResult.toJson()}");
 
-      Get.snackbar("Success", "Booking completed successfully",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Success",
+        "Booking completed successfully",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
 
       // Optionally refresh cart items
       await getCartItems();
     } catch (e) {
       log("Booking error: $e");
-      Get.snackbar("Error", "Booking failed: ${e.toString()}",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Booking failed: ${e.toString()}",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isBooking.value = false;
     }

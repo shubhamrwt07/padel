@@ -15,6 +15,6 @@ class AppEndpoints {
   // Cart Urls
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
-  static const String removeCartItems = "${BASE_URL}cart/removeUserCart";
+  static const String removeCartItems = "${BASE_URL}court/cart/removeUserCart";
   static const String carteBooking = "${BASE_URL}court/booking/createBooking";
 }

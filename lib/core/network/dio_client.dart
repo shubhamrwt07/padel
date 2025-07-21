@@ -105,7 +105,7 @@ class DioClient {
   }
 
   // DELETE METHOD
-  Future<dynamic> delete(
+  Future<Response> delete(
     String url, {
     required Map<String, dynamic> data,
     Map<String, dynamic>? queryParameters,
@@ -120,7 +120,7 @@ class DioClient {
         options: options,
         cancelToken: cancelToken,
       );
-      return response.data;
+      return response;
     } catch (e) {
       CustomLogger.logMessage(
         msg: "DELETE request failed: $e",
