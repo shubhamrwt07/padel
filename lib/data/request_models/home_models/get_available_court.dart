@@ -221,27 +221,14 @@ class OwnerId {
 class Slot {
 
   List<BusinessHours>? businessHours;
-
   List<SlotTimes>? slotTimes;
-
   String? sId;
-
-
-
   Slot({this.businessHours, this.slotTimes, this.sId});
-
-
-
   Slot.fromJson(Map<String, dynamic> json) {
-
     if (json['businessHours'] != null) {
-
       businessHours = <BusinessHours>[];
-
       json['businessHours'].forEach((v) {
-
         businessHours!.add(new BusinessHours.fromJson(v));
-
       });
 
     }
@@ -255,7 +242,6 @@ class Slot {
         slotTimes!.add(new SlotTimes.fromJson(v));
 
       });
-
     }
 
     sId = json['_id'];

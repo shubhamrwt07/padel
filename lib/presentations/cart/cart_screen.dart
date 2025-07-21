@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -92,14 +94,23 @@ class CartScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Image.asset(
-                              Assets.imagesIcRemove,
-                              scale: 3,
-                            ).paddingOnly(left: 10),
+                            GestureDetector(
+                              onTap: () async {
+                                log("data remove");
+                                await controller.removeCartItemsFromCart(
+                                  slotIds: [slot.id!],
+                                );
+                              },
+                              child: Image.asset(
+                                Assets.imagesIcRemove,
+                                scale: 3,
+                              ).paddingOnly(left: 10),
+                            ),
                           ],
                         ),
                       ],
                     ).paddingOnly(bottom: Get.height * 0.01);
+
                   },
                 ),
                 Container(
@@ -182,10 +193,24 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget button(BuildContext context) {
+    final CartController cartController = Get.find<CartController>();
+
+    final bookingData = {
+      "slot": [
+        {
+          "slotId": "yourSlotId",
+          "businessHours": [
+            {"time": "6:00 AM To 10:00 PM", "day": "Thursday"}
+          ]
+        }
+      ],
+      "totalPrice": 7000
+    };
+
     return CustomButton(
       width: Get.width * 0.9,
-      onTap: () {
-        Get.toNamed(RoutesName.paymentMethod);
+      onTap: () async {
+        await cartController.bookCart(data: bookingData);
       },
       child: Row(
         children: [
