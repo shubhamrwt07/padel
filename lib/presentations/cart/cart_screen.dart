@@ -47,84 +47,86 @@ class CartScreen extends StatelessWidget {
         controller: controller.scrollController,
         thumbVisibility: false,
         radius: Radius.circular(8),
-        child: ListView.builder(
-          controller: controller.scrollController,
-          itemCount: controller.cartItems.length,
-          itemBuilder: (BuildContext context, index) {
-            final item = controller.cartItems[index];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      item.registerClubId!.clubName.toString(),
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-                    ),
-                  ],
-                ).paddingOnly(bottom: Get.height * 0.01),
-                Text(
-                  formatCreatedAt(item.registerClubId!.createdAt.toString()),
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: item.slot?.length ?? 0,
-                  itemBuilder: (context, int childIndex) {
-                    final slot = item.slot![childIndex];
-                    final timesText = slot.slotTimes!.map((e) => e.time).join(", ");
-                    final amountsText = slot.slotTimes!.map((e) => "₹ ${e.amount}").join(", ");
+        child: Obx(
+          ()=> ListView.builder(
+            controller: controller.scrollController,
+            itemCount: controller.cartItems.length,
+            itemBuilder: (BuildContext context, index) {
+              final item = controller.cartItems[index];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        item.registerClubId!.clubName.toString(),
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+                      ),
+                    ],
+                  ).paddingOnly(bottom: Get.height * 0.01),
+                  Text(
+                    formatCreatedAt(item.registerClubId!.createdAt.toString()),
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: item.slot?.length ?? 0,
+                    itemBuilder: (context, int childIndex) {
+                      final slot = item.slot![childIndex];
+                      final timesText = slot.slotTimes!.map((e) => e.time).join(", ");
+                      final amountsText = slot.slotTimes!.map((e) => "₹ ${e.amount}").join(", ");
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          timesText,
-                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textColor,
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            timesText,
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textColor,
+                            ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              amountsText,
-                              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                                fontWeight: FontWeight.w500,
+                          Row(
+                            children: [
+                              Text(
+                                amountsText,
+                                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                log("data remove");
-                                await controller.removeCartItemsFromCart(
-                                  slotIds: [slot.id!],
-                                );
-                              },
-                              child: Image.asset(
-                                Assets.imagesIcRemove,
-                                scale: 3,
-                              ).paddingOnly(left: 10),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ).paddingOnly(bottom: Get.height * 0.01);
+                              GestureDetector(
+                                onTap: () async {
+                                  log("data remove");
+                                  await controller.removeCartItemsFromCart(
+                                    slotIds: [slot.slotId!],
+                                  );
+                                },
+                                child: Image.asset(
+                                  Assets.imagesIcRemove,
+                                  scale: 3,
+                                ).paddingOnly(left: 10),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ).paddingOnly(bottom: Get.height * 0.01);
 
-                  },
-                ),
-                Container(
-                  height: 1,
-                  width: Get.width,
-                  color: AppColors.containerBorderColor,
-                ),
-              ],
-            ).paddingOnly(
-              bottom: Get.height * 0.01,
-              left: Get.width * 0.03,
-              right: Get.width * 0.03,
-            );
-          },
+                    },
+                  ),
+                  Container(
+                    height: 1,
+                    width: Get.width,
+                    color: AppColors.containerBorderColor,
+                  ),
+                ],
+              ).paddingOnly(
+                bottom: Get.height * 0.01,
+                left: Get.width * 0.03,
+                right: Get.width * 0.03,
+              );
+            },
+          ),
         ),
       ),
     ).paddingOnly(bottom: Get.height * 0.02);

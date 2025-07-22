@@ -165,7 +165,7 @@ class BookSession extends StatelessWidget {
               controller.selectedTimes.clear();
               controller.selectedSlotAmounts.clear();
 
-              log('Selected date: $date'); // ✅ Debug here
+              log('Selected date: $date');
 
               final nextSlot = controller.timeSlots.firstWhere(
                     (time) => !controller.isPastTimeSlot(time),
@@ -218,7 +218,6 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildTimeSlots() {
     return Transform.translate(
       offset: Offset(0, -Get.height * 0.025),
@@ -238,62 +237,54 @@ class BookSession extends StatelessWidget {
         }
 
         final slotTimes = slots[0].slotTimes!;
+        final selectedDate = controller.selectedDate.value ?? DateTime.now();
+        final now = DateTime.now();
+
         double spacing = Get.width * 0.02;
         final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
         return Wrap(
-          key: ValueKey(controller.selectedTimes.join(',')),
           spacing: spacing,
           runSpacing: Get.height * 0.015,
           children: slotTimes.map((data) {
             final isSelected = controller.selectedTimes.contains(data.time!);
-            final selectedDate = controller.selectedDate.value ?? DateTime.now();
-            final now = DateTime.now();
             final isToday = selectedDate.year == now.year &&
                 selectedDate.month == now.month &&
                 selectedDate.day == now.day;
-
             final isPast = isToday && controller.isPastTimeSlot(data.time!);
-
-            // 🐞 Debug log
-            debugPrint('${data.time!} isPast: $isPast');
 
             return GestureDetector(
               onTap: isPast
                   ? null
-                  : () => controller.toggleTimeSlot(data.time!),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                switchInCurve: Curves.easeIn,
-                switchOutCurve: Curves.easeOut,
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: Container(
-                  key: ValueKey('${data.time}-${isSelected}-${isPast}'),
-                  width: tileWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
+                  : () {
+                controller.toggleTimeSlot(data.time!);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: tileWidth,
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isPast
+                      ? AppColors.greyColor
+                      : isSelected
+                      ? Colors.black
+                      : AppColors.timeTileBackgroundColor,
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(
                     color: isPast
-                        ? Colors.red
-                        : isSelected
-                        ? Colors.black
-                        : AppColors.lightBlueColor,
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      color: Colors.black.withAlpha(10),
-                    ),
+                        ? Colors.grey.shade400
+                        : Colors.black.withAlpha(10),
                   ),
-                  child: Text(
-                    data.time!,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isPast
-                          ? Colors.white
-                          : isSelected
-                          ? Colors.white
-                          : Colors.black,
-                    ),
+                ),
+                child: Text(
+                  data.time!,
+                  style: Get.textTheme.labelLarge?.copyWith(
+                    color: isPast
+                        ? Colors.grey.shade600
+                        : isSelected
+                        ? Colors.white
+                        : Colors.black,
                   ),
                 ),
               ),
@@ -303,7 +294,6 @@ class BookSession extends StatelessWidget {
       }),
     );
   }
-//
   Widget _bottomButton() {
     return Container(
       height: Get.height * .09,
@@ -331,11 +321,14 @@ class BookSession extends StatelessWidget {
           return CustomButton(
             width: Get.width * 0.9,
             onTap: () async {
+
+            if(controller.selectedTimes.isNotEmpty){
               await controller.addSelectedSlotsToCart();
 
               if (!controller.isLoading.value) {
                 Get.to(() => CartScreen(buttonType: "true"));
               }
+            }
             },
             child: isLoading
                 ? const Center(
