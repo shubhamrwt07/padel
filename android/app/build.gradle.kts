@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -50,8 +53,22 @@ flutter {
 
 dependencies {
     // Add core library desugaring for flutter_local_notifications
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
     // Add multidex support if needed
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // Firebase BOM - manages all Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+
+    // Firebase dependencies
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-analytics")
+
+    // For notification icons and styling
+    implementation("androidx.core:core:1.12.0")
+    implementation("androidx.work:work-runtime:2.9.0")
+
+    // For handling notification clicks
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 }
