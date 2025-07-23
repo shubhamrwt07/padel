@@ -67,6 +67,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                 //   SnackBarUtils.showWarningSnackBar("Please select payment method");
                 // }
                 controller.startPayment();
+                ////
               },
               child: Row(
                 children: [

@@ -62,9 +62,9 @@ class CartRepository {
           level: LogLevel.info,
         );
 
-        return RemoveToCartModel.fromJson(response.data); // ✅ RETURN
+        return RemoveToCartModel.fromJson(response.data);
       } else {
-        log("data errror 25");
+        log("data error 25");
         throw Exception("Remove cart items failed with status code: ${response.statusCode}");
       }
     } catch (e, st) {
@@ -77,7 +77,6 @@ class CartRepository {
       rethrow;
     }
   }
-
   Future<AddToCartModel> addCartItems({
     required Map<String, dynamic> data,
   }) async {
