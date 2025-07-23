@@ -1,12 +1,10 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
 import '../../generated/assets.dart';
@@ -133,113 +131,122 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget totalSlot(BuildContext context) {
-    return Container(
-      width: Get.width,
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.payColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.blackColor.withAlpha(10)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Total Slots",
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                "8(8h)",
-                style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ).paddingOnly(bottom: Get.height * 0.01),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Total Price",
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    "₹ ",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.blackColor,
-                      fontSize: 15,
-                    ),
+    final CartController cartController = Get.find<CartController>();
+
+    return Obx(() {
+      return Container(
+        width: Get.width,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.payColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+        ),
+        child: Column(
+          children: [
+            // Total Slots Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Total Slots",
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    fontWeight: FontWeight.w500,
                   ),
-                  Text(
-                    "7000",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      fontWeight: FontWeight.w500,
+                ),
+                Text(
+                  "${cartController.totalSlot.value} (${cartController.totalSlot.value}h)",
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ).paddingOnly(bottom: Get.height * 0.01),
+
+            // Total Price Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Total Price",
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "₹ ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.blackColor,
+                        fontSize: 15,
+                      ),
                     ),
-                  ).paddingOnly(),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ).paddingOnly(bottom: Get.height * 0.02);
+                    Text(
+                      "${cartController.totalPrice.value}",
+                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ).paddingOnly(bottom: Get.height * 0.02);
+    });
   }
 
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
 
-    final bookingData = {
-      "slot": [
-        {
-          "slotId": "yourSlotId",
-          "businessHours": [
-            {"time": "6:00 AM To 10:00 PM", "day": "Thursday"}
-          ]
-        }
-      ],
-      "totalPrice": 7000
-    };
-
-    return CustomButton(
-      width: Get.width * 0.9,
-      onTap: () async {
-        await cartController.bookCart(data: bookingData);
-      },
-      child: Row(
-        children: [
-          Text(
-            "₹ ",
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontWeight: FontWeight.w600,
-              fontFamily: "Roboto",
-              color: AppColors.whiteColor,
-            ),
-          ).paddingOnly(left: 30),
-          Text(
-            "7000",
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: AppColors.whiteColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ).paddingOnly(right: Get.width * 0.3),
-          Text(
-            "Payment",
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              color: AppColors.whiteColor,
-            ),
-          ),
+    return Obx(() {
+      final bookingData = {
+        "slot": [
+          {
+            "slotId": "yourSlotId",
+            "businessHours": [
+              {"time": "6:00 AM To 10:00 PM", "day": "Thursday"}
+            ]
+          }
         ],
-      ),
-    );
+        "totalPrice": cartController.totalPrice.value,
+      };
+
+      return CustomButton(
+        width: Get.width * 0.9,
+        onTap: () async {
+          await cartController.bookCart(data: bookingData);
+        },
+        child: Row(
+          children: [
+            Text(
+              "₹ ",
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.w600,
+                fontFamily: "Roboto",
+                color: AppColors.whiteColor,
+              ),
+            ).paddingOnly(left: 30),
+            Text(
+              cartController.totalPrice.value.toString(),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: AppColors.whiteColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ).paddingOnly(right: Get.width * 0.3),
+            Text(
+              "Payment",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                color: AppColors.whiteColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget emptyState() {
@@ -250,6 +257,7 @@ class CartScreen extends StatelessWidget {
 
   // Date formatting with suffix (e.g., 1st, 2nd, 3rd)
   String formatCreatedAt(String dateStr) {
+
     final date = DateTime.parse(dateStr);
     final day = date.day;
     final suffix = getDaySuffix(day);
@@ -270,4 +278,5 @@ class CartScreen extends StatelessWidget {
         return "th";
     }
   }
+
 }
