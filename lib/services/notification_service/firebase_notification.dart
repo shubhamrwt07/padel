@@ -1,551 +1,423 @@
-// import 'dart:io';
-// import 'dart:convert';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:timezone/timezone.dart' as tz;
-// import 'package:timezone/data/latest.dart' as tz;
-// import 'package:permission_handler/permission_handler.dart';
-//
-// class NotificationService {
-//   static final NotificationService _instance = NotificationService._internal();
-//   factory NotificationService() => _instance;
-//   NotificationService._internal();
-//
-//   final FlutterLocalNotificationsPlugin _localNotifications =
-//   FlutterLocalNotificationsPlugin();
-//   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-//
-//   // Notification channels
-//   static const String _defaultChannelId = 'default_channel';
-//   static const String _highPriorityChannelId = 'high_priority_channel';
-//   static const String _reminderChannelId = 'reminder_channel';
-//   static const String _newsChannelId = 'news_channel';
-//
-//   // Callbacks
-//   Function(String)? onNotificationTap;
-//   Function(RemoteMessage)? onBackgroundMessage;
-//   Function(RemoteMessage)? onForegroundMessage;
-//
-//   /// Initialize the notification service
-//   Future<void> initialize() async {
-//     await _initializeLocalNotifications();
-//     await _initializePushNotifications();
-//     await _initializeTimezone();
-//   }
-//
-//   /// Initialize local notifications
-//   Future<void> _initializeLocalNotifications() async {
-//     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-//     const iosSettings = DarwinInitializationSettings(
-//       requestAlertPermission: false,
-//       requestBadgePermission: false,
-//       requestSoundPermission: false,
-//     );
-//
-//     const initializationSettings = InitializationSettings(
-//       android: androidSettings,
-//       iOS: iosSettings,
-//     );
-//
-//     await _localNotifications.initialize(
-//       initializationSettings,
-//       onDidReceiveNotificationResponse: _onNotificationResponse,
-//     );
-//
-//     await _createNotificationChannels();
-//   }
-//
-//   /// Initialize Firebase push notifications
-//   Future<void> _initializePushNotifications() async {
-//     // Request permissions
-//     await _requestNotificationPermissions();
-//
-//     // Configure Firebase messaging
-//     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-//     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
-//     FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
-//
-//     // Handle notification when app is opened from terminated state
-//     final initialMessage = await _firebaseMessaging.getInitialMessage();
-//     if (initialMessage != null) {
-//       _handleNotificationTap(initialMessage);
-//     }
-//   }
-//
-//   /// Initialize timezone for scheduled notifications
-//   Future<void> _initializeTimezone() async {
-//     tz.initializeTimeZones();
-//   }
-//
-//   /// Create notification channels for Android
-//   Future<void> _createNotificationChannels() async {
-//     final channels = [
-//       const AndroidNotificationChannel(
-//         _defaultChannelId,
-//         'Default Notifications',
-//         description: 'General notifications',
-//         importance: Importance.defaultImportance,
-//       ),
-//       const AndroidNotificationChannel(
-//         _highPriorityChannelId,
-//         'High Priority',
-//         description: 'Important notifications that require immediate attention',
-//         importance: Importance.high,
-//         enableVibration: true,
-//         playSound: true,
-//       ),
-//       const AndroidNotificationChannel(
-//         _reminderChannelId,
-//         'Reminders',
-//         description: 'Reminder notifications',
-//         importance: Importance.high,
-//         enableVibration: true,
-//       ),
-//       const AndroidNotificationChannel(
-//         _newsChannelId,
-//         'News & Updates',
-//         description: 'News and app updates',
-//         importance: Importance.defaultImportance,
-//       ),
-//     ];
-//
-//     for (final channel in channels) {
-//       await _localNotifications
-//           .resolvePlatformSpecificImplementation<
-//           AndroidFlutterLocalNotificationsPlugin>()
-//           ?.createNotificationChannel(channel);
-//     }
-//   }
-//
-//   /// Request notification permissions
-//   Future<bool> _requestNotificationPermissions() async {
-//     if (Platform.isIOS) {
-//       final settings = await _firebaseMessaging.requestPermission(
-//         alert: true,
-//         badge: true,
-//         sound: true,
-//         provisional: false,
-//       );
-//       return settings.authorizationStatus == AuthorizationStatus.authorized;
-//     } else {
-//       final status = await Permission.notification.request();
-//       return status.isGranted;
-//     }
-//   }
-//
-//   /// Check if notifications are enabled
-//   Future<bool> areNotificationsEnabled() async {
-//     if (Platform.isIOS) {
-//       final settings = await _firebaseMessaging.getNotificationSettings();
-//       return settings.authorizationStatus == AuthorizationStatus.authorized;
-//     } else {
-//       return await Permission.notification.isGranted;
-//     }
-//   }
-//
-//   /// Get FCM token for push notifications
-//   Future<String?> getToken() async {
-//     return await _firebaseMessaging.getToken();
-//   }
-//
-//   /// Subscribe to FCM topic
-//   Future<void> subscribeToTopic(String topic) async {
-//     await _firebaseMessaging.subscribeToTopic(topic);
-//   }
-//
-//   /// Unsubscribe from FCM topic
-//   Future<void> unsubscribeFromTopic(String topic) async {
-//     await _firebaseMessaging.unsubscribeFromTopic(topic);
-//   }
-//
-//   /// Show instant notification
-//   Future<void> showInstantNotification({
-//     required String title,
-//     required String body,
-//     String? payload,
-//     NotificationPriority priority = NotificationPriority.normal,
-//     String? largeIcon,
-//     String? bigPicture,
-//     List<NotificationAction>? actions,
-//   }) async {
-//     final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-//
-//     final androidDetails = AndroidNotificationDetails(
-//       _getChannelId(priority),
-//       _getChannelName(priority),
-//       channelDescription: _getChannelDescription(priority),
-//       importance: _getImportance(priority),
-//       priority: _getPriority(priority),
-//       largeIcon: largeIcon != null ? DrawableResourceAndroidBitmap(largeIcon) : null,
-//
-//     );
-//
-//     const iosDetails = DarwinNotificationDetails(
-//       presentAlert: true,
-//       presentBadge: true,
-//       presentSound: true,
-//     );
-//
-//     final notificationDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-//
-//     await _localNotifications.show(
-//       id,
-//       title,
-//       body,
-//       notificationDetails,
-//       payload: payload,
-//     );
-//   }
-//
-//   /// Schedule notification
-//   Future<void> scheduleNotification({
-//     required String title,
-//     required String body,
-//     required DateTime scheduledTime,
-//     String? payload,
-//     NotificationPriority priority = NotificationPriority.normal,
-//     bool repeatDaily = false,
-//     bool repeatWeekly = false,
-//   }) async {
-//     final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-//
-//     final androidDetails = AndroidNotificationDetails(
-//       _getChannelId(priority),
-//       _getChannelName(priority),
-//       channelDescription: _getChannelDescription(priority),
-//       importance: _getImportance(priority),
-//       priority: _getPriority(priority),
-//     );
-//
-//     const iosDetails = DarwinNotificationDetails(
-//       presentAlert: true,
-//       presentBadge: true,
-//       presentSound: true,
-//     );
-//
-//     final notificationDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-//
-//     final scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
-//
-//     if (repeatDaily) {
-//       await _localNotifications.zonedSchedule(
-//         id,
-//         title,
-//         body,
-//         scheduledDate,
-//         notificationDetails,
-//         payload: payload,
-//         uiLocalNotificationDateInterpretation:
-//         UILocalNotificationDateInterpretation.absoluteTime,
-//         matchDateTimeComponents: DateTimeComponents.time,
-//       );
-//     } else if (repeatWeekly) {
-//       await _localNotifications.zonedSchedule(
-//         id,
-//         title,
-//         body,
-//         scheduledDate,
-//         notificationDetails,
-//         payload: payload,
-//         uiLocalNotificationDateInterpretation:
-//         UILocalNotificationDateInterpretation.absoluteTime,
-//         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-//       );
-//     } else {
-//       await _localNotifications.zonedSchedule(
-//         id,
-//         title,
-//         body,
-//         scheduledDate,
-//         notificationDetails,
-//         payload: payload,
-//         uiLocalNotificationDateInterpretation:
-//         UILocalNotificationDateInterpretation.absoluteTime,
-//       );
-//     }
-//   }
-//
-//   /// Show progress notification
-//   Future<void> showProgressNotification({
-//     required String title,
-//     required String body,
-//     required int progress,
-//     required int maxProgress,
-//     bool indeterminate = false,
-//   }) async {
-//     const id = 1001; // Fixed ID for progress notifications
-//
-//     final androidDetails = AndroidNotificationDetails(
-//       _defaultChannelId,
-//       'Default Notifications',
-//       channelDescription: 'General notifications',
-//       importance: Importance.low,
-//       priority: Priority.low,
-//       onlyAlertOnce: true,
-//       showProgress: true,
-//       maxProgress: maxProgress,
-//       progress: progress,
-//       indeterminate: indeterminate,
-//     );
-//
-//     const iosDetails = DarwinNotificationDetails(
-//       presentAlert: true,
-//       presentBadge: false,
-//       presentSound: false,
-//     );
-//
-//     final notificationDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-//
-//     await _localNotifications.show(
-//       id,
-//       title,
-//       body,
-//       notificationDetails,
-//     );
-//   }
-//
-//   /// Show big text notification
-//   Future<void> showBigTextNotification({
-//     required String title,
-//     required String body,
-//     required String bigText,
-//     String? payload,
-//   }) async {
-//     final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-//
-//     final androidDetails = AndroidNotificationDetails(
-//       _defaultChannelId,
-//       'Default Notifications',
-//       channelDescription: 'General notifications',
-//       importance: Importance.defaultImportance,
-//       priority: Priority.defaultPriority,
-//       styleInformation: BigTextStyleInformation(
-//         bigText,
-//         htmlFormatBigText: true,
-//         contentTitle: title,
-//         htmlFormatContentTitle: true,
-//         summaryText: body,
-//         htmlFormatSummaryText: true,
-//       ),
-//     );
-//
-//     const iosDetails = DarwinNotificationDetails(
-//       presentAlert: true,
-//       presentBadge: true,
-//       presentSound: true,
-//     );
-//
-//     final notificationDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-//
-//     await _localNotifications.show(
-//       id,
-//       title,
-//       body,
-//       notificationDetails,
-//       payload: payload,
-//     );
-//   }
-//
-//   /// Show inbox style notification
-//   Future<void> showInboxNotification({
-//     required String title,
-//     required String body,
-//     required List<String> messages,
-//     String? payload,
-//   }) async {
-//     final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-//
-//     final androidDetails = AndroidNotificationDetails(
-//       _defaultChannelId,
-//       'Default Notifications',
-//       channelDescription: 'General notifications',
-//       importance: Importance.defaultImportance,
-//       priority: Priority.defaultPriority,
-//       styleInformation: InboxStyleInformation(
-//         messages,
-//         htmlFormatLines: true,
-//         contentTitle: title,
-//         htmlFormatContentTitle: true,
-//         summaryText: body,
-//         htmlFormatSummaryText: true,
-//       ),
-//     );
-//
-//     const iosDetails = DarwinNotificationDetails(
-//       presentAlert: true,
-//       presentBadge: true,
-//       presentSound: true,
-//     );
-//
-//     final notificationDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-//
-//     await _localNotifications.show(
-//       id,
-//       title,
-//       body,
-//       notificationDetails,
-//       payload: payload,
-//     );
-//   }
-//
-//   /// Cancel notification by ID
-//   Future<void> cancelNotification(int id) async {
-//     await _localNotifications.cancel(id);
-//   }
-//
-//   /// Cancel all notifications
-//   Future<void> cancelAllNotifications() async {
-//     await _localNotifications.cancelAll();
-//   }
-//
-//   /// Get pending notifications
-//   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-//     return await _localNotifications.pendingNotificationRequests();
-//   }
-//
-//   /// Get active notifications
-//   Future<List<ActiveNotification>> getActiveNotifications() async {
-//     return await _localNotifications.getActiveNotifications();
-//   }
-//
-//
-//
-//
-//
-//   // Helper methods
-//   String _getChannelId(NotificationPriority priority) {
-//     switch (priority) {
-//       case NotificationPriority.high:
-//         return _highPriorityChannelId;
-//       case NotificationPriority.reminder:
-//         return _reminderChannelId;
-//       case NotificationPriority.news:
-//         return _newsChannelId;
-//       default:
-//         return _defaultChannelId;
-//     }
-//   }
-//
-//   String _getChannelName(NotificationPriority priority) {
-//     switch (priority) {
-//       case NotificationPriority.high:
-//         return 'High Priority';
-//       case NotificationPriority.reminder:
-//         return 'Reminders';
-//       case NotificationPriority.news:
-//         return 'News & Updates';
-//       default:
-//         return 'Default Notifications';
-//     }
-//   }
-//
-//   String _getChannelDescription(NotificationPriority priority) {
-//     switch (priority) {
-//       case NotificationPriority.high:
-//         return 'Important notifications that require immediate attention';
-//       case NotificationPriority.reminder:
-//         return 'Reminder notifications';
-//       case NotificationPriority.news:
-//         return 'News and app updates';
-//       default:
-//         return 'General notifications';
-//     }
-//   }
-//
-//   Importance _getImportance(NotificationPriority priority) {
-//     switch (priority) {
-//       case NotificationPriority.high:
-//       case NotificationPriority.reminder:
-//         return Importance.high;
-//       case NotificationPriority.news:
-//       case NotificationPriority.normal:
-//         return Importance.defaultImportance;
-//       default:
-//         return Importance.low;
-//     }
-//   }
-//
-//   Priority _getPriority(NotificationPriority priority) {
-//     switch (priority) {
-//       case NotificationPriority.high:
-//       case NotificationPriority.reminder:
-//         return Priority.high;
-//       case NotificationPriority.news:
-//       case NotificationPriority.normal:
-//         return Priority.defaultPriority;
-//       default:
-//         return Priority.low;
-//     }
-//   }
-//
-//   // Event handlers
-//   void _onNotificationResponse(NotificationResponse response) {
-//     if (response.payload != null && onNotificationTap != null) {
-//       onNotificationTap!(response.payload!);
-//     }
-//   }
-//
-//   void _handleForegroundMessage(RemoteMessage message) {
-//     if (onForegroundMessage != null) {
-//       onForegroundMessage!(message);
-//     }
-//
-//     // Show local notification for foreground messages
-//     showInstantNotification(
-//       title: message.notification?.title ?? 'New Message',
-//       body: message.notification?.body ?? 'You have a new message',
-//       payload: jsonEncode(message.data),
-//     );
-//   }
-//
-//   void _handleNotificationTap(RemoteMessage message) {
-//     if (onNotificationTap != null) {
-//       onNotificationTap!(jsonEncode(message.data));
-//     }
-//   }
-//
-//   static Future<void> _handleBackgroundMessage(RemoteMessage message) async {
-//     // Handle background message
-//     print('Background message: ${message.messageId}');
-//   }
-// }
-//
-// /// Notification priority levels
-// enum NotificationPriority {
-//   low,
-//   normal,
-//   high,
-//   reminder,
-//   news,
-// }
-//
-// /// Notification action for interactive notifications
-// class NotificationAction {
-//   final String id;
-//   final String title;
-//   final bool showsUserInterface;
-//   final bool destructive;
-//
-//   const NotificationAction({
-//     required this.id,
-//     required this.title,
-//     this.showsUserInterface = false,
-//     this.destructive = false,
-//   });
-// }
+import 'dart:developer';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+/// Professional notification service handling both local and Firebase notifications
+class NotificationService {
+  static final NotificationService _instance = NotificationService._internal();
+
+  factory NotificationService() => _instance;
+
+  NotificationService._internal();
+
+  // Notification channels
+  static const String _channelId = 'default_channel';
+  static const String _channelName = 'Default Notifications';
+  static const String _channelDescription = 'Default notification channel';
+
+  static const String _highPriorityChannelId = 'high_priority_channel';
+  static const String _highPriorityChannelName = 'High Priority Notifications';
+  static const String _highPriorityChannelDescription =
+      'High priority notification channel';
+
+  // Plugin instances
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+  // Notification callback handlers
+  Function(String)? onNotificationTapped;
+  Function(RemoteMessage)? onForegroundMessage;
+  Function(RemoteMessage)? onBackgroundMessage;
+
+  bool _isInitialized = false;
+
+  /// Initialize the notification service
+  Future<bool> initialize() async {
+    if (_isInitialized) return true;
+
+    try {
+      // Initialize local notifications
+      await _initializeLocalNotifications();
+
+      // Initialize Firebase messaging
+      await _initializeFirebaseMessaging();
+
+      // Request permissions
+      await _requestPermissions();
+
+      _isInitialized = true;
+      log('NotificationService initialized successfully');
+      return true;
+    } catch (e) {
+      log('Failed to initialize NotificationService: $e');
+      return false;
+    }
+  }
+
+  /// Initialize local notifications
+  Future<void> _initializeLocalNotifications() async {
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        );
+
+    const InitializationSettings settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+      macOS: iosSettings,
+    );
+
+    await _localNotifications.initialize(
+      settings,
+      onDidReceiveNotificationResponse: _onNotificationTapped,
+    );
+
+    // Create notification channels for Android
+    if (Platform.isAndroid) {
+      await _createNotificationChannels();
+    }
+  }
+
+  /// Create notification channels for Android
+  Future<void> _createNotificationChannels() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        _localNotifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+
+    if (androidImplementation != null) {
+      // Default channel
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: _channelDescription,
+          importance: Importance.defaultImportance,
+        ),
+      );
+
+      // High priority channel
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _highPriorityChannelId,
+          _highPriorityChannelName,
+          description: _highPriorityChannelDescription,
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+        ),
+      );
+    }
+  }
+
+  /// Initialize Firebase messaging
+  Future<void> _initializeFirebaseMessaging() async {
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+
+    // Handle background messages (when app is in background but not terminated)
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+
+    // Handle messages when app is opened from terminated state
+    final RemoteMessage? initialMessage = await _firebaseMessaging
+        .getInitialMessage();
+    if (initialMessage != null) {
+      _handleBackgroundMessage(initialMessage);
+    }
+  }
+
+  /// Handle foreground Firebase messages
+  void _handleForegroundMessage(RemoteMessage message) {
+    log('Received foreground message: ${message.messageId}');
+
+    // Show local notification for foreground messages
+    showNotification(
+      id: message.hashCode,
+      title: message.notification?.title ?? 'New Message',
+      body: message.notification?.body ?? '',
+      payload: message.data.toString(),
+    );
+
+    onForegroundMessage?.call(message);
+  }
+
+  /// Handle background Firebase messages
+  void _handleBackgroundMessage(RemoteMessage message) {
+    log('Handling background message: ${message.messageId}');
+    onBackgroundMessage?.call(message);
+  }
+
+  /// Handle local notification taps
+  void _onNotificationTapped(NotificationResponse response) {
+    log('Notification tapped with payload: ${response.payload}');
+    onNotificationTapped?.call(response.payload ?? '');
+  }
+
+  /// Request necessary permissions
+  Future<bool> _requestPermissions() async {
+    bool allGranted = true;
+
+    // Request notification permission
+    final notificationStatus = await Permission.notification.request();
+    if (!notificationStatus.isGranted) {
+      log('Notification permission denied');
+      allGranted = false;
+    }
+
+    // Request Firebase messaging permission (iOS)
+    final NotificationSettings firebaseSettings = await _firebaseMessaging
+        .requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+          provisional: false,
+        );
+
+    if (firebaseSettings.authorizationStatus !=
+        AuthorizationStatus.authorized) {
+      log('Firebase messaging permission denied');
+      allGranted = false;
+    }
+
+    return allGranted;
+  }
+
+  /// Show a simple notification
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+    bool highPriority = false,
+  }) async {
+    if (!_isInitialized) {
+      log('NotificationService not initialized');
+      return;
+    }
+
+    final String channelId = highPriority ? _highPriorityChannelId : _channelId;
+    final Importance importance = highPriority
+        ? Importance.high
+        : Importance.defaultImportance;
+    final Priority priority = highPriority
+        ? Priority.high
+        : Priority.defaultPriority;
+
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          channelId,
+          highPriority ? _highPriorityChannelName : _channelName,
+          channelDescription: highPriority
+              ? _highPriorityChannelDescription
+              : _channelDescription,
+          importance: importance,
+          priority: priority,
+          showWhen: true,
+          when: DateTime.now().millisecondsSinceEpoch,
+        );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+      macOS: iosDetails,
+    );
+
+    await _localNotifications.show(id, title, body, details, payload: payload);
+  }
+
+  /// Show a scheduled notification
+  Future<void> showScheduledNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+    String? payload,
+    bool highPriority = false,
+  }) async {
+    if (!_isInitialized) {
+      log('NotificationService not initialized');
+      return;
+    }
+
+    final tz.TZDateTime scheduledTZTime = tz.TZDateTime.from(
+      scheduledTime,
+      tz.local,
+    );
+
+    final String channelId = highPriority ? _highPriorityChannelId : _channelId;
+    final Importance importance = highPriority
+        ? Importance.high
+        : Importance.defaultImportance;
+    final Priority priority = highPriority
+        ? Priority.high
+        : Priority.defaultPriority;
+
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          channelId,
+          highPriority ? _highPriorityChannelName : _channelName,
+          channelDescription: highPriority
+              ? _highPriorityChannelDescription
+              : _channelDescription,
+          importance: importance,
+          priority: priority,
+        );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+      macOS: iosDetails,
+    );
+
+    await _localNotifications.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledTZTime,
+      details,
+      payload: payload,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  /// Show a notification with custom action buttons
+  Future<void> showNotificationWithActions({
+    required int id,
+    required String title,
+    required String body,
+    required List<AndroidNotificationAction> actions,
+    String? payload,
+  }) async {
+    if (!_isInitialized) {
+      log('NotificationService not initialized');
+      return;
+    }
+
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDescription,
+          importance: Importance.high,
+          priority: Priority.high,
+          actions: actions,
+        );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _localNotifications.show(id, title, body, details, payload: payload);
+  }
+
+  /// Get Firebase messaging token
+  Future<String?> getFirebaseToken() async {
+    try {
+      return await _firebaseMessaging.getToken();
+    } catch (e) {
+      log('Failed to get Firebase token: $e');
+      return null;
+    }
+  }
+
+  /// Subscribe to a Firebase topic
+  Future<bool> subscribeToTopic(String topic) async {
+    try {
+      await _firebaseMessaging.subscribeToTopic(topic);
+      log('Subscribed to topic: $topic');
+      return true;
+    } catch (e) {
+      log('Failed to subscribe to topic $topic: $e');
+      return false;
+    }
+  }
+
+  /// Unsubscribe from a Firebase topic
+  Future<bool> unsubscribeFromTopic(String topic) async {
+    try {
+      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      log('Unsubscribed from topic: $topic');
+      return true;
+    } catch (e) {
+      log('Failed to unsubscribe from topic $topic: $e');
+      return false;
+    }
+  }
+
+  /// Cancel a specific notification
+  Future<void> cancelNotification(int id) async {
+    await _localNotifications.cancel(id);
+  }
+
+  /// Cancel all notifications
+  Future<void> cancelAllNotifications() async {
+    await _localNotifications.cancelAll();
+  }
+
+  /// Get pending notifications
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await _localNotifications.pendingNotificationRequests();
+  }
+
+  /// Check if notifications are enabled
+  Future<bool> areNotificationsEnabled() async {
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+          _localNotifications
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
+      return await androidImplementation?.areNotificationsEnabled() ?? false;
+    }
+    return true; // iOS doesn't have a direct way to check this
+  }
+
+  /// Set notification callback handlers
+  void setCallbacks({
+    Function(String)? onTapped,
+    Function(RemoteMessage)? onForeground,
+    Function(RemoteMessage)? onBackground,
+  }) {
+    onNotificationTapped = onTapped;
+    onForegroundMessage = onForeground;
+    onBackgroundMessage = onBackground;
+  }
+
+  /// Dispose resources (call this when app is being destroyed)
+  void dispose() {
+    _isInitialized = false;
+    onNotificationTapped = null;
+    onForegroundMessage = null;
+    onBackgroundMessage = null;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "465334820608",
+    "project_id": "matchacha-padel",
+    "storage_bucket": "matchacha-padel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465334820608:android:5fe82498dc5b068e42dde5",
+        "android_client_info": {
+          "package_name": "com.matchacha.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBybmU6A0AYxr5ZrcmT2wmgINWu_S1G9-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

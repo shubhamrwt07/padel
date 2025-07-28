@@ -16,6 +16,8 @@ import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/chat/chat_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/notification/notification_binding.dart';
+import 'package:padel_mobile/presentations/notification/notification_ui.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_binding.dart';
@@ -158,6 +160,13 @@ class Routes {
       name: RoutesName.chat,
       page: () => ChatScreen(),
       binding: ChatBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    )  ,
+    GetPage(
+      name: RoutesName.notification,
+      page: () => NotificationSettingsScreen(),
+      binding: NotificationBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     )

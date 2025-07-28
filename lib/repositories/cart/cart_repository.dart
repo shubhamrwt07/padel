@@ -83,7 +83,7 @@ class CartRepository {
     try {
       final response = await dioClient.post(
         AppEndpoints.addCartItems,
-        data: data, // ✅ This was missing
+        data: data,
       );
 
       if (response.statusCode == 200) {

@@ -33,6 +33,9 @@ class RoutesName {
   static const String support = '/support';
   static const String chat = '/chat';
 
+  //Notification routes name
+static const String notification = '/notification';
+
 
 
 }
