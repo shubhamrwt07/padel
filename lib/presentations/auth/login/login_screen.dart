@@ -12,6 +12,9 @@ class LoginScreen extends GetView<LoginController> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
       child: PrimaryContainer(
+
+
+
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SingleChildScrollView(

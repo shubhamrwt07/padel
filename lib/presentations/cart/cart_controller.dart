@@ -31,6 +31,7 @@ class CartController extends GetxController {
       CartItemsModel result = await cartRepository.getCartItems();
       if (result.cartItems != null && result.cartItems!.isNotEmpty) {
         cartItems.assignAll(result.cartItems!);
+        totalPrice.value = result.grandTotal ?? 0; // <-- Add this line
       }
       log("Cart Items length: ${cartItems.length}");
     } catch (e) {
