@@ -257,7 +257,6 @@ class CartScreen extends StatelessWidget {
 
   // Date formatting with suffix (e.g., 1st, 2nd, 3rd)
   String formatCreatedAt(String dateStr) {
-
     final date = DateTime.parse(dateStr);
     final day = date.day;
     final suffix = getDaySuffix(day);
