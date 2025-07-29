@@ -40,6 +40,11 @@ class HomeScreen extends GetView<HomeController> {
               ],
             ),
           ).paddingOnly(left: Get.width * 0.0),
+          action: [InkWell(
+              onTap: (){
+                Get.toNamed(RoutesName.notification);
+              },
+              child: Icon(Icons.notifications))],
           context: context,
         ),
         body: Column(

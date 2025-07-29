@@ -201,7 +201,6 @@ class CartScreen extends StatelessWidget {
 
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
-
     return Obx(() {
       final bookingData = {
         "slot": [

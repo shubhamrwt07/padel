@@ -29,5 +29,10 @@ class AppColors {
   static const Color iconColor = Color(0xFF9b9b9d);
   static const Color searchBarColor = Color(0XFFF6F8FF);
   static const Color chatColor = Color(0XFFf0f0f3);
+  static const Color roundsColor = Color(0XFF617ad5);
+  static const Color darkBlue = Color(0XFF111A79);
+  static const Color appBlue = Color(0XFF1e42bb);
+  static const Color grace = Color(0XFFcbd6ff);
+  static const Color lBlack = Color(0XFF384151);
 
 }

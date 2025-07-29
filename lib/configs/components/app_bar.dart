@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../presentations/auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../app_colors.dart';
-
 AppBar primaryAppBar({
   Color? backGroundColor,
   List<Widget>? action,
@@ -11,9 +11,13 @@ AppBar primaryAppBar({
   required Widget title,
   required BuildContext context,
   PreferredSizeWidget? bottom,
+  SystemUiOverlayStyle? systemOverlayStyle,
+  Color? titleTextColor,
+  Color? leadingButtonColor,
   bool showLeading = true, // NEW: control visibility of leading
 }) {
   return AppBar(
+    systemOverlayStyle: systemOverlayStyle,
     bottom: bottom,
     toolbarHeight: 50,
     leadingWidth: leadingWidth ?? Get.width * 0.15,
@@ -32,7 +36,7 @@ AppBar primaryAppBar({
             width: 40,
             child: Icon(
               Icons.arrow_back,
-              color: AppColors.blackColor,
+              color:leadingButtonColor?? AppColors.blackColor,
               size: 22,
             ),
           ),
@@ -41,7 +45,7 @@ AppBar primaryAppBar({
 
     title: title,
     titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
-      color: AppColors.blackColor,
+      color:titleTextColor?? AppColors.blackColor,
       fontSize: 20,
     ),
     surfaceTintColor: Colors.transparent,

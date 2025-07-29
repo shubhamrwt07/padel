@@ -6,6 +6,8 @@ class Assets {
   static const String imagesCourt = 'assets/images/court.svg';
   static const String imagesDirections = 'assets/images/directions.svg';
   static const String imagesEncrypted = 'assets/images/encrypted.png';
+  static const String imagesGirl = 'assets/images/girl.png';
+  static const String imagesGirls = 'assets/images/girls.png';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
@@ -34,6 +36,7 @@ class Assets {
   static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBackgroundBottomBar = 'assets/images/img_background_bottomBar.png';
+  static const String imagesImgBackgroundScoreView = 'assets/images/img_background_score_view.svg';
   static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
   static const String imagesImgBookingConfirm = 'assets/images/img_booking_confirm.svg';
   static const String imagesImgBookingSuccessful = 'assets/images/img_booking_successful.png';
@@ -45,8 +48,12 @@ class Assets {
   static const String imagesImgDummy4 = 'assets/images/img_dummy_4.png';
   static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesImgRoundBackground = 'assets/images/img_round_background.svg';
+  static const String imagesImgScoreView = 'assets/images/img_score_view.svg';
+  static const String imagesImgVsRounds = 'assets/images/img_vs_rounds.svg';
   static const String imagesLocation = 'assets/images/location.svg';
   static const String imagesLocker = 'assets/images/locker.svg';
+  static const String imagesNum = 'assets/images/num.svg';
   static const String imagesPadelIcon = 'assets/images/padel_icon.svg';
   static const String imagesParking = 'assets/images/parking.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
