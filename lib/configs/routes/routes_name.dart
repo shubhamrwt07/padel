@@ -35,6 +35,8 @@ class RoutesName {
 
   //Notification routes name
 static const String notification = '/notification';
+static const String rounds = '/rounds';
+static const String score = '/score';
 
 
 

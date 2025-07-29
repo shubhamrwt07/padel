@@ -1,12 +1,9 @@
 import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-
 import '../../generated/assets.dart';
 import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
-
 class PaymentMethodController extends GetxController {
   var option = ''.obs;
 

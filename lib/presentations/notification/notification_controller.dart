@@ -1,5 +1,6 @@
 // controllers/notification_controller.dart
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -15,7 +16,8 @@ class NotificationController extends GetxController {
   final RxString firebaseToken = ''.obs;
   final RxBool isNotificationEnabled = false.obs;
   final RxBool isInitialized = false.obs;
-  final RxList<Map<String, dynamic>> notificationHistory = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> notificationHistory =
+      <Map<String, dynamic>>[].obs;
   final RxMap<String, bool> topicSubscriptions = <String, bool>{}.obs;
 
   // Storage keys
@@ -64,7 +66,6 @@ class NotificationController extends GetxController {
 
       if (initialized) {
         isInitialized.value = true;
-
         // Set up callback handlers
         _notificationService.setCallbacks(
           onTapped: _handleNotificationTapped,
@@ -81,12 +82,18 @@ class NotificationController extends GetxController {
         // Subscribe to stored topics
         await _restoreTopicSubscriptions();
 
-        print('✅ Notification service initialized successfully');
+        if (kDebugMode) {
+          print('✅ Notification service initialized successfully');
+        }
       } else {
-        print('❌ Failed to initialize notification service');
+        if (kDebugMode) {
+          print('❌Failed to initialize notification service');
+        }
       }
     } catch (e) {
-      print('❌ Error initializing notifications: $e');
+      if (kDebugMode) {
+        print('❌Error initializing notifications: $e');
+      }
     }
   }
 
@@ -98,16 +105,18 @@ class NotificationController extends GetxController {
     }
 
     try {
-      final NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-        criticalAlert: false,
-        announcement: false,
-      );
+      final NotificationSettings settings = await FirebaseMessaging.instance
+          .requestPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+            provisional: false,
+            criticalAlert: false,
+            announcement: false,
+          );
 
-      final bool granted = settings.authorizationStatus == AuthorizationStatus.authorized;
+      final bool granted =
+          settings.authorizationStatus == AuthorizationStatus.authorized;
       isNotificationEnabled.value = granted;
 
       await _storage.write(_notificationEnabledKey, granted);
@@ -232,7 +241,6 @@ class NotificationController extends GetxController {
     };
 
     notificationHistory.insert(0, notification);
-
     // Keep only last 50 notifications
     if (notificationHistory.length > 50) {
       notificationHistory.removeRange(50, notificationHistory.length);
@@ -244,7 +252,6 @@ class NotificationController extends GetxController {
   /// Process message data
   void _processMessageData(Map<String, dynamic> data) {
     final String? type = data['type'];
-
     switch (type) {
       case 'match_invitation':
         break;
@@ -275,11 +282,13 @@ class NotificationController extends GetxController {
     );
 
     // Add to history
-    _addToHistory(RemoteMessage(
-      messageId: DateTime.now().toString(),
-      notification: RemoteNotification(title: title, body: body),
-      data: {'type': 'local', 'payload': payload ?? ''},
-    ));
+    _addToHistory(
+      RemoteMessage(
+        messageId: DateTime.now().toString(),
+        notification: RemoteNotification(title: title, body: body),
+        data: {'type': 'local', 'payload': payload ?? ''},
+      ),
+    );
   }
 
   /// Schedule a notification

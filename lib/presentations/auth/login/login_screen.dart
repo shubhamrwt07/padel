@@ -48,9 +48,7 @@ class LoginScreen extends GetView<LoginController> {
             context,
           ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
-        ).paddingOnly(bottom: Get.height * 0.06),
-      ],
-    );
+        ).paddingOnly(bottom: Get.height * 0.06),],);
   }
 
   Widget formFields(BuildContext context, GlobalKey<FormState> key) {

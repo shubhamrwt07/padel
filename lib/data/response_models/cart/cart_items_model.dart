@@ -245,7 +245,6 @@ class RegisterClubId {
 class Location {
   String? type;
   List<double>? coordinates;
-
   Location({this.type, this.coordinates});
 
   Location.fromJson(Map<String, dynamic> json) {

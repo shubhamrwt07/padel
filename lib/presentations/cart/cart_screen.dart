@@ -201,7 +201,6 @@ class CartScreen extends StatelessWidget {
 
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
-
     return Obx(() {
       final bookingData = {
         "slot": [
@@ -257,7 +256,6 @@ class CartScreen extends StatelessWidget {
 
   // Date formatting with suffix (e.g., 1st, 2nd, 3rd)
   String formatCreatedAt(String dateStr) {
-
     final date = DateTime.parse(dateStr);
     final day = date.day;
     final suffix = getDaySuffix(day);
