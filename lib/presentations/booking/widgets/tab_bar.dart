@@ -27,7 +27,7 @@ PreferredSizeWidget myTabBar(TabController tabController, BuildContext context,)
         child: Text("Open Matches"),
       ),
       Tab(
-        child: Text("Competitions"),
+        child: Text("Americano"),
       ),
     ],
   );

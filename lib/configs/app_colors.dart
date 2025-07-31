@@ -34,5 +34,6 @@ class AppColors {
   static const Color appBlue = Color(0XFF1e42bb);
   static const Color grace = Color(0XFFcbd6ff);
   static const Color lBlack = Color(0XFF384151);
+  static const Color cartColor = Color(0XFFe0e7ff);
 
 }

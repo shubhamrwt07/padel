@@ -35,6 +35,7 @@ dependencies:
   timezone:
   permission_handler:
   firebase_core:
+  flutter_dash:
 
 
 dev_dependencies:
