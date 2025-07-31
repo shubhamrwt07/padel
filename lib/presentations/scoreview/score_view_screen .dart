@@ -245,7 +245,9 @@ class ScoreViewScreen extends GetView<ScoreViewController> {
         minChildSize: controller.selectedTab.value == 0 ? 0.5 : 0.55,
         maxChildSize: 0.9,
         builder: (context, scroll) => Container(
+          
           decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(topLeft:Radius.circular(10),topRight: Radius.circular(10)),
             color: Colors.white,
           ),
           child: CustomPaint(

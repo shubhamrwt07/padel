@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
+import 'americano/americano_screen.dart';
+
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
 
@@ -144,11 +146,7 @@ class BookingScreen extends GetView<BookingController> {
                            HomeContent(),
                            BookSession(),
                            OpenMatches(),
-                           const SizedBox(
-                            height: double.infinity,
-                            width: double.infinity,
-                            child: Center(child: Text("Coming Soon...")),
-                          ),
+                          AmericanoScreen()
                         ],
                       ),
                     ),

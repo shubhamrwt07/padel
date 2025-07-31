@@ -6,6 +6,8 @@ import 'package:padel_mobile/presentations/auth/otp/otp_binding.dart';
 import 'package:padel_mobile/presentations/auth/otp/otp_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
+import 'package:padel_mobile/presentations/booking/americano/americano_binding.dart';
+import 'package:padel_mobile/presentations/booking/americano/americano_screen.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_binding.dart';
@@ -27,6 +29,7 @@ import 'package:padel_mobile/presentations/cart/cart_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_binding.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
+import 'package:padel_mobile/presentations/registration/registration_binding.dart';
 import 'package:padel_mobile/presentations/rounds/rounds_binding.dart';
 import 'package:padel_mobile/presentations/rounds/rounds_screen.dart';
 import 'package:padel_mobile/presentations/scoreview/score_view_binding.dart';
@@ -38,11 +41,12 @@ import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
+import '../../presentations/registration/registration_americano_screen.dart';
 import '../../presentations/scoreview/score_view_screen .dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
-  static const String initialRoute = RoutesName.score;
+  static const String initialRoute = RoutesName.splash;
 
   static const Duration defaultDuration = Duration(milliseconds: 300);
 
@@ -56,7 +60,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.login,
-      page: () =>   LoginScreen(),
+      page: () => LoginScreen(),
       binding: LoginBinding(),
       transition: Transition.fadeIn,
       transitionDuration: defaultDuration,
@@ -113,7 +117,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.cart,
-      page: () => CartScreen(buttonType: '',),
+      page: () => CartScreen(buttonType: ''),
       binding: CartBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
@@ -166,7 +170,7 @@ class Routes {
       binding: ChatBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    )  ,
+    ),
     GetPage(
       name: RoutesName.notification,
       page: () => NotificationSettingsScreen(),
@@ -180,12 +184,27 @@ class Routes {
       binding: RoundsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    ), GetPage(
+    ),
+    GetPage(
       name: RoutesName.score,
       page: () => ScoreViewScreen(),
       binding: ScoreViewBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    )
+    ),
+    GetPage(
+      name: RoutesName.americano,
+      page: () => AmericanoScreen(),
+      binding: AmericanoBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.registration,
+      page: () => RegistrationView(),
+      binding: RegistrationBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
   ];
 }
