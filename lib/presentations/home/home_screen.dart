@@ -40,11 +40,14 @@ class HomeScreen extends GetView<HomeController> {
               ],
             ),
           ).paddingOnly(left: Get.width * 0.0),
-          action: [InkWell(
-              onTap: (){
+          action: [
+            InkWell(
+              onTap: () {
                 Get.toNamed(RoutesName.notification);
               },
-              child: Icon(Icons.notifications))],
+              child: Icon(Icons.notifications),
+            ),
+          ],
           context: context,
         ),
         body: Column(
@@ -75,14 +78,16 @@ class HomeScreen extends GetView<HomeController> {
                 child: Obx(() {
                   final courtsData = controller.courtsData.value;
 
-                  if (controller.isLoadingClub.value && !controller.isInitialized.value) {
+                  if (controller.isLoadingClub.value &&
+                      !controller.isInitialized.value) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [_buildLoadingState(context)],
                     );
                   }
 
-                  if (controller.clubError.value.isNotEmpty && !controller.hasCourtsData) {
+                  if (controller.clubError.value.isNotEmpty &&
+                      !controller.hasCourtsData) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [_buildErrorState(context)],
@@ -100,7 +105,10 @@ class HomeScreen extends GetView<HomeController> {
                   return ListView.builder(
                     controller: controller.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: 2 + courts.length + (controller.isLoadingMore.value ? 1 : 0),
+                    itemCount:
+                        2 +
+                        courts.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == 0) return clubTicketList(context);
                       if (index == 1) {
@@ -115,14 +123,17 @@ class HomeScreen extends GetView<HomeController> {
 
                       final courtIndex = index - 2;
                       if (courtIndex < courts.length) {
-                        return _buildCourtCard(context, courts[courtIndex], courtIndex);
+                        return _buildCourtCard(
+                          context,
+                          courts[courtIndex],
+                          courtIndex,
+                        );
                       }
 
                       return _buildLoadMoreIndicator();
                     },
                   );
                 }),
-
               ),
             ),
           ],
@@ -772,7 +783,7 @@ class HomeScreen extends GetView<HomeController> {
     return GestureDetector(
       onTap: () {
         if (clubs.id != null) {
-          controller.bookingController.courtsData.value=clubs;
+          controller.bookingController.courtsData.value = clubs;
           Get.toNamed(RoutesName.booking, arguments: {"data": clubs});
           FocusManager.instance.primaryFocus?.unfocus();
         }
@@ -794,25 +805,25 @@ class HomeScreen extends GetView<HomeController> {
                 borderRadius: BorderRadius.circular(10),
                 child: clubs.courtImage != null && clubs.courtImage!.isNotEmpty
                     ? CachedNetworkImage(
-                  imageUrl: clubs.courtImage![0],
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  errorWidget: (context, url, error) => const Center(
-                    child: Icon(Icons.broken_image, color: Colors.grey),
-                  ),
-                  fadeInDuration: Duration(milliseconds: 300),
-                  memCacheHeight: 200, // Optional: reduce memory usage
-                  useOldImageOnUrlChange: true, // Optional: keeps previous image while updating
-                )
+                        imageUrl: clubs.courtImage![0],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                        fadeInDuration: Duration(milliseconds: 300),
+                        memCacheHeight: 200,
+                        // Optional: reduce memory usage
+                        useOldImageOnUrlChange:
+                            true, // Optional: keeps previous image while updating
+                      )
                     : const Center(
-                  child: Icon(Icons.photo, color: Colors.grey, size: 40),
-                ),
+                        child: Icon(Icons.photo, color: Colors.grey, size: 40),
+                      ),
               ),
             ).paddingOnly(right: Get.width * 0.02),
-
-
 
             // Club Info
             Expanded(

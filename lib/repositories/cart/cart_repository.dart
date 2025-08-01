@@ -56,20 +56,17 @@ class CartRepository {
       );
       log("data remove 5");
       if (response.statusCode == 200) {
-        log("data remove 25");
-        CustomLogger.logMessage(
+         CustomLogger.logMessage(
           msg: "Cart items removed successfully: ${response.data}",
           level: LogLevel.info,
         );
 
         return RemoveToCartModel.fromJson(response.data);
       } else {
-        log("data error 25");
-        throw Exception("Remove cart items failed with status code: ${response.statusCode}");
+         throw Exception("Remove cart items failed with status code: ${response.statusCode}");
       }
     } catch (e, st) {
-      log("data remove 250");
-      CustomLogger.logMessage(
+       CustomLogger.logMessage(
         msg: "Remove cart items failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
@@ -80,6 +77,7 @@ class CartRepository {
   Future<AddToCartModel> addCartItems({
     required Map<String, dynamic> data,
   }) async {
+    log("POST API -${AppEndpoints.addCartItems} body ${data.toString()}");
     try {
       final response = await dioClient.post(
         AppEndpoints.addCartItems,
@@ -111,7 +109,7 @@ class CartRepository {
     try {
       final response = await dioClient.post(
         AppEndpoints.carteBooking,
-        data: data, // ✅ This was missing
+        data: data,
       );
 
       if (response.statusCode == 200) {

@@ -41,7 +41,7 @@ class BookSession extends StatelessWidget {
           style: Get.textTheme.labelLarge,
         ).paddingOnly(bottom: 5),
         Obx(
-          () => EasyDateTimeLinePicker.itemBuilder(
+              () => EasyDateTimeLinePicker.itemBuilder(
             headerOptions: HeaderOptions(
               headerBuilder: (_, context, date) => const SizedBox.shrink(),
             ),
@@ -132,9 +132,10 @@ class BookSession extends StatelessWidget {
                             right: -4,
                             child: Obx(() {
                               final selectedCount =
-                                  controller.selectedTimes.length;
-                              if (selectedCount == 0)
+                                  controller.selectedSlots.length;
+                              if (selectedCount == 0) {
                                 return const SizedBox.shrink();
+                              }
                               return Container(
                                 alignment: Alignment.center,
                                 height: 20,
@@ -162,24 +163,9 @@ class BookSession extends StatelessWidget {
             },
             onDateChange: (date) async {
               controller.selectedDate.value = date;
-              controller.selectedTimes.clear();
-              controller.selectedSlotAmounts.clear();
-
               log('Selected date: $date');
-
-              final nextSlot = controller.timeSlots.firstWhere(
-                    (time) => !controller.isPastTimeSlot(time),
-                orElse: () => controller.timeSlots.last,
-              );
-
-              await controller.getAvailableCourtsById(controller.argument.id!, nextSlot);
-              controller.autoSelectFirstAvailableSlot();
-              controller.update(); // Force UI refresh
+              await controller.getAvailableCourtsById(controller.argument.id!);
             },
-
-
-
-
           ),
         ),
       ],
@@ -191,109 +177,87 @@ class BookSession extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('Available Slots', style: Theme.of(context).textTheme.labelLarge),
-        Row(
-          children: [
-            Text(
-              'Show Unavailable Slots',
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
-            ),
-            Transform.scale(
-              scale: 0.7,
-              child: Obx(
-                () => CupertinoSwitch(
-                  value: controller.viewUnavailableSlots.value,
-                  activeTrackColor: Theme.of(context).primaryColor,
-                  inactiveTrackColor: Colors.grey.shade300,
-                  thumbColor: Colors.white,
-                  onChanged: (value) {
-                    controller.viewUnavailableSlots.value = value;
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
+
   Widget _buildTimeSlots() {
     return Transform.translate(
       offset: Offset(0, -Get.height * 0.025),
       child: Obx(() {
         if (controller.isLoadingCourts.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator())
+              .paddingOnly(top: Get.height * .15);
         }
 
-        final courts = controller.availableCourtData.value?.data;
+        final courts = controller.slots.value?.data;
         if (courts == null || courts.isEmpty) {
           return const Center(child: Text("No courts available"));
         }
 
         final slots = courts[0].slot;
         if (slots == null || slots.isEmpty || slots[0].slotTimes == null) {
-          return const Center(child: Text("No time slots available"));
+          return const Center(
+            child: Text(
+              "No time slots available",
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ).paddingOnly(top: Get.height * .15);
         }
 
         final slotTimes = slots[0].slotTimes!;
-        final selectedDate = controller.selectedDate.value ?? DateTime.now();
-        final now = DateTime.now();
-
         double spacing = Get.width * 0.02;
         final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
         return Wrap(
           spacing: spacing,
           runSpacing: Get.height * 0.015,
-          children: slotTimes.map((data) {
-            final isSelected = controller.selectedTimes.contains(data.time!);
-            final isToday = selectedDate.year == now.year &&
-                selectedDate.month == now.month &&
-                selectedDate.day == now.day;
-            final isPast = isToday && controller.isPastTimeSlot(data.time!);
+          children: slotTimes.map((slot) {
+            final isUnavailable = controller.isPastAndUnavailable(slot);
+            final isSelected = controller.selectedSlots.contains(slot);
 
             return GestureDetector(
-              onTap: isPast
+              onTap: isUnavailable
                   ? null
-                  : () {
-                controller.toggleTimeSlot(data.time!);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
+                  : () => controller.toggleSlotSelection(slot),
+              child: Container(
                 width: tileWidth,
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isPast
-                      ? AppColors.greyColor
+                  color: isUnavailable
+                      ? Colors.grey[300]
                       : isSelected
                       ? Colors.black
                       : AppColors.timeTileBackgroundColor,
                   borderRadius: BorderRadius.circular(40),
                   border: Border.all(
-                    color: isPast
-                        ? Colors.grey.shade400
-                        : Colors.black.withAlpha(10),
+                    color: isUnavailable
+                        ? Colors.grey
+                        :
+                         AppColors.blackColor,
+
+                    width:  1,
                   ),
                 ),
                 child: Text(
-                  data.time!,
+                  slot.time ?? '',
                   style: Get.textTheme.labelLarge?.copyWith(
-                    color: isPast
-                        ? Colors.grey.shade600
+                    color: isUnavailable
+                        ? Colors.grey
                         : isSelected
                         ? Colors.white
                         : Colors.black,
                   ),
                 ),
-              ),
+              )
             );
           }).toList(),
         );
       }),
     );
   }
+
   Widget _bottomButton() {
     return Container(
       height: Get.height * .09,
@@ -314,66 +278,44 @@ class BookSession extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.center,
-        child: Obx(() {
-          final totalAmount = controller.totalAmount;
-          final isLoading = controller.isLoading.value;
+        child: CustomButton(
 
-          return CustomButton(
-            width: Get.width * 0.9,
-            onTap: () async {
-
-            if(controller.selectedTimes.isNotEmpty){
-              await controller.addSelectedSlotsToCart();
-
-              if (!controller.isLoading.value) {
-                Get.to(() => CartScreen(buttonType: "true"));
-              }
-            }
-            },
-            child: isLoading
-                ? const Center(
-              child: SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+          width: Get.width * 0.9,
+          onTap: () async {
+          controller.addToCart();
+          },
+          child: Row(
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "₹ ",
+                      style: Get.textTheme.titleMedium!.copyWith(
+                        color: AppColors.whiteColor,
+                        fontFamily: "Roboto",
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "0", // Static amount since no selection logic
+                      style: Get.textTheme.titleMedium!.copyWith(
+                        color: AppColors.whiteColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
+              Text(
+                "Book Now",
+                style: Get.textTheme.headlineMedium!.copyWith(
+                  color: AppColors.whiteColor,
                 ),
               ),
-            )
-                : Row(
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "₹ ",
-                        style: Get.textTheme.titleMedium!.copyWith(
-                          color: AppColors.whiteColor,
-                          fontFamily: "Roboto",
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: totalAmount.toStringAsFixed(0),
-                        style: Get.textTheme.titleMedium!.copyWith(
-                          color: AppColors.whiteColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
-                Text(
-                  "Book Now",
-                  style: Get.textTheme.headlineMedium!.copyWith(
-                    color: AppColors.whiteColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+            ],
+          ),
+        ),
       ),
     );
   }
