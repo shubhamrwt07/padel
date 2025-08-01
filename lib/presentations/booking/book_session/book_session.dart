@@ -321,10 +321,8 @@ class BookSession extends StatelessWidget {
           return CustomButton(
             width: Get.width * 0.9,
             onTap: () async {
-
             if(controller.selectedTimes.isNotEmpty){
               await controller.addSelectedSlotsToCart();
-
               if (!controller.isLoading.value) {
                 Get.to(() => CartScreen(buttonType: "true"));
               }
