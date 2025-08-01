@@ -220,7 +220,7 @@ class CartScreen extends StatelessWidget {
           await cartController.bookCart(data: bookingData);
         },
         child: Row(
-          children: [
+          children:  [
             Text(
               "₹ ",
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
