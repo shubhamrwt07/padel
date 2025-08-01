@@ -48,9 +48,9 @@ class CartScreen extends StatelessWidget {
         child: Obx(
           ()=> ListView.builder(
             controller: controller.scrollController,
-            itemCount: controller.cartItems.length,
+            itemCount: controller.cartItems[0].slot!.length,
             itemBuilder: (BuildContext context, index) {
-              final item = controller.cartItems[index];
+              final item = controller.cartItems[0];
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -69,17 +69,15 @@ class CartScreen extends StatelessWidget {
                   ),
                   ListView.builder(
                     shrinkWrap: true,
-                    itemCount: item.slot?.length ?? 0,
+                    itemCount: item.slot![0].slotTimes!.length,
                     itemBuilder: (context, int childIndex) {
-                      final slot = item.slot![childIndex];
-                      final timesText = slot.slotTimes!.map((e) => e.time).join(", ");
-                      final amountsText = slot.slotTimes!.map((e) => "₹ ${e.amount}").join(", ");
+                      final slot = item.slot![0].slotTimes![childIndex];
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            timesText,
+                            slot.time.toString(),
                             style: Theme.of(context).textTheme.labelLarge!.copyWith(
                               fontWeight: FontWeight.w500,
                               color: AppColors.textColor,
@@ -88,7 +86,7 @@ class CartScreen extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                amountsText,
+                                slot.amount.toString(),
                                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -97,7 +95,7 @@ class CartScreen extends StatelessWidget {
                                 onTap: () async {
                                   log("data remove");
                                   await controller.removeCartItemsFromCart(
-                                    slotIds: [slot.slotId!],
+                                    slotIds: [item.slot![0].sId!],
                                   );
                                 },
                                 child: Image.asset(

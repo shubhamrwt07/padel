@@ -109,7 +109,7 @@ class DioClient {
   }
 
   // DELETE METHOD
-  Future<dynamic> delete(
+  Future<Response> delete(
       String url, {
         required Map<String, dynamic> data,
         Map<String, dynamic>? queryParameters,
