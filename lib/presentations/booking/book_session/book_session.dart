@@ -162,6 +162,7 @@ class BookSession extends StatelessWidget {
               );
             },
             onDateChange: (date) async {
+              controller.selectedSlots.clear();
               controller.selectedDate.value = date;
               log('Selected date: $date');
               await controller.getAvailableCourtsById(controller.argument.id!);
