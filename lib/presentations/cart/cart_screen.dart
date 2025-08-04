@@ -48,9 +48,9 @@ class CartScreen extends StatelessWidget {
         child: Obx(
           ()=> ListView.builder(
             controller: controller.scrollController,
-            itemCount: controller.cartItems[0].slot!.length,
+            itemCount: controller.cartItems.length,
             itemBuilder: (BuildContext context, index) {
-              final item = controller.cartItems[0];
+              final item = controller.cartItems[index];
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -58,7 +58,7 @@ class CartScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        item.registerClubId!.clubName.toString(),
+                        item.registerClubId!.clubName??"",
                         style: Theme.of(context).textTheme.labelLarge!.copyWith(),
                       ),
                     ],
