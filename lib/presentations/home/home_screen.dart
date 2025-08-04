@@ -721,6 +721,7 @@ class HomeScreen extends GetView<HomeController> {
       padding: const EdgeInsets.all(20),
       child: Center(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.location_off, size: 64, color: Colors.grey[500]),
