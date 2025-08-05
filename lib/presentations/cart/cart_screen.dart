@@ -40,89 +40,98 @@ class CartScreen extends StatelessWidget {
   Widget cartList(CartController controller) {
     return SizedBox(
       height: buttonType == "true" ? Get.height * 0.65 : Get.height * 0.56,
-      child: Scrollbar(
-        thickness: 5,
-        controller: controller.scrollController,
-        thumbVisibility: false,
-        radius: Radius.circular(8),
-        child: Obx(
-              ()=> ListView.builder(
-            controller: controller.scrollController,
-            itemCount: controller.cartItems.length,
-            itemBuilder: (BuildContext context, index) {
-              final item = controller.cartItems[index];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                       " item.registerClubId!.clubName??""",
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-                      ),
-                    ],
-                  ).paddingOnly(bottom: Get.height * 0.01),
-                  Text(
-                    formatCreatedAt(item.registerClubId!.createdAt.toString()),
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+      child: Obx(
+            () => ListView.builder(
+          controller: controller.scrollController,
+          itemCount: controller.cartItems.length,
+          itemBuilder: (BuildContext context, index) {
+            final item = controller.cartItems[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Club Name
+                Text(
+                  item.registerClubId!.clubName ?? "",
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    fontWeight: FontWeight.w600
                   ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: item.slot![0].slotTimes!.length,
-                    itemBuilder: (context, int childIndex) {
-                      final slot = item.slot![0].slotTimes![childIndex];
+                ).paddingOnly(bottom: Get.height * 0.01),
 
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            slot.time.toString(),
-                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textColor,
+                // Slot List
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: item.slot![0].slotTimes!.length,
+                  itemBuilder: (context, int childIndex) {
+                    final slot = item.slot![0].slotTimes![childIndex];
+                    final createdAt = item.registerClubId!.createdAt.toString();
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Date + Time + Duration
+                        Row(
+                          children: [
+                            Text(
+                              "${formatCreatedAt(createdAt)} ",
+                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                slot.amount.toString(),
-                                style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            Text(
+                              "${slot.time} ",
+                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                fontWeight: FontWeight.w500,
                               ),
-                              GestureDetector(
-                                onTap: () async {
-                                  log("data remove");
-                                  await controller.removeCartItemsFromCart(
-                                    slotIds: [item.slot![0].sId!],
-                                  );
-                                },
-                                child: Image.asset(
-                                  Assets.imagesIcRemove,
-                                  scale: 3,
-                                ).paddingOnly(left: 10),
+                            ),
+                            Text(
+                              "(60m)",
+                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                fontWeight: FontWeight.w400,
                               ),
-                            ],
-                          ),
-                        ],
-                      ).paddingOnly(bottom: Get.height * 0.01);
+                            ),
+                          ],
+                        ),
 
-                    },
-                  ),
-                  Container(
-                    height: 1,
-                    width: Get.width,
-                    color: AppColors.containerBorderColor,
-                  ),
-                ],
-              ).paddingOnly(
-                bottom: Get.height * 0.01,
-                left: Get.width * 0.03,
-                right: Get.width * 0.03,
-              );
-            },
-          ),
+                        // Price + Remove Icon
+                        Row(
+                          children: [
+                            Text(
+                              "₹ ${slot.amount}",
+                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                log("data remove");
+                                await controller.removeCartItemsFromCart(
+                                  slotIds: [item.slot![0].sId!],
+                                );
+                              },
+                              child: Image.asset(
+                                Assets.imagesIcRemove,
+                                scale: 3,
+                              ).paddingOnly(left: 10),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ).paddingOnly(bottom: Get.height * 0.015);
+                  },
+                ),
+
+                Divider(
+                  thickness: 1,
+                  color: AppColors.containerBorderColor,
+                ).paddingOnly(top: Get.height * 0.015),
+              ],
+            ).paddingOnly(
+              bottom: Get.height * 0.01,
+              left: Get.width * 0.03,
+              right: Get.width * 0.03,
+            );
+          },
         ),
       ),
     ).paddingOnly(bottom: Get.height * 0.02);
