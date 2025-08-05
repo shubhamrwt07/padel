@@ -2,13 +2,18 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:get/get.dart' hide Response;
+import 'package:padel_mobile/services/network/session_expired_screen.dart';
 import '../../configs/components/snack_bars.dart';
+import '../../presentations/auth/forgot_password/widgets/forgot_password_exports.dart'
+    hide Response;
 import '../../services/network/connectivity_service.dart';
 import 'dio_client.dart';
 
 class LoggerInterceptor extends Interceptor {
   Logger logger = Logger(
-      printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true));
+    printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true),
+  );
 
   final ConnectivityService _connectivityService = ConnectivityService();
 
@@ -17,36 +22,64 @@ class LoggerInterceptor extends Interceptor {
     final options = err.requestOptions;
     final requestPath = '${options.baseUrl}${options.path}';
     logger.e('${options.method} request ==> $requestPath');
-    logger.d('Error type: ${err.error} \n'
-        'Error message: ${err.message}');
+    logger.d(
+      'Error type: ${err.error} \n'
+      'Error message: ${err.message}',
+    );
     logger.d("TOKEN: ${storage.read('token')}");
+
+    // Handle 401 Unauthorized (Token expired)
     if (err.response?.statusCode == 401) {
-      log("Not found");
+      log("Token expired - redirecting to session expired page");
+      await _handleTokenExpiration();
+      return handler.next(err);
     }
     // Check if it's a connectivity error
     else if (err.type == DioExceptionType.connectionError ||
         err.type == DioExceptionType.connectionTimeout ||
-        err.error is Exception && err.error.toString().contains('SocketException')) {
-
+        err.error is Exception &&
+            err.error.toString().contains('SocketException')) {
       await _connectivityService.checkConnectivity();
-    }
-    else if (err.response != null) {
-      SnackBarUtils.showErrorSnackBar(err.response?.data?['message'] ?? 'An error occurred');
-
-
-    }
-    else {
-      SnackBarUtils.showErrorSnackBar(err.response?.data?['message'] ?? 'An error occurred');
+    } else if (err.response != null) {
+      SnackBarUtils.showErrorSnackBar(
+        err.response?.data?['message'] ?? 'An error occurred',
+      );
+    } else {
+      SnackBarUtils.showErrorSnackBar(
+        err.response?.data?['message'] ?? 'An error occurred',
+      );
     }
 
     handler.next(err);
   }
 
+  /// Handle token expiration by clearing data and navigating to session expired page
+  Future<void> _handleTokenExpiration() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateToSessionExpired();
+    });
+  }
 
+
+  /// Navigate to session expired page
+  void _navigateToSessionExpired() {
+    try {
+      if (Get.context != null) {
+       Get.to(()=>SessionExpiredPage());
+      }
+
+    } catch (e) {
+      log("Error navigating to session expired page: $e");
+      Get.to(()=>SessionExpiredPage());
+
+    }
+  }
 
   @override
   void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final requestPath = '${options.baseUrl}${options.path}';
     logger.i('${options.method} request ==> $requestPath');
     logger.d("TOKEN: ${storage.read('token')}");
@@ -70,10 +103,12 @@ class LoggerInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    logger.d('STATUSCODE: ${response.statusCode} \n '
-        'STATUSMESSAGE: ${response.statusMessage} \n'
-        'HEADERS: ${response.headers} \n'
-        'Data: ${response.data}');
+    logger.d(
+      'STATUSCODE: ${response.statusCode} \n '
+      'STATUSMESSAGE: ${response.statusMessage} \n'
+      'HEADERS: ${response.headers} \n'
+      'Data: ${response.data}',
+    );
     logger.d("TOKEN: ${storage.read('token')}");
     handler.next(response);
   }
