@@ -46,7 +46,7 @@ class CartScreen extends StatelessWidget {
         thumbVisibility: false,
         radius: Radius.circular(8),
         child: Obx(
-          ()=> ListView.builder(
+              ()=> ListView.builder(
             controller: controller.scrollController,
             itemCount: controller.cartItems.length,
             itemBuilder: (BuildContext context, index) {
@@ -58,7 +58,7 @@ class CartScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        item.registerClubId!.clubName??"",
+                       " item.registerClubId!.clubName??""",
                         style: Theme.of(context).textTheme.labelLarge!.copyWith(),
                       ),
                     ],

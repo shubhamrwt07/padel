@@ -14,10 +14,8 @@ class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
-  RxInt totalAmount = 0.obs; // NEW
-
+  RxInt totalAmount = 0.obs;
   final HomeRepository repository = HomeRepository();
-
   Rx<AvailableCourtModel?> slots = Rx<AvailableCourtModel?>(null);
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
@@ -32,17 +30,16 @@ class BookSessionController extends GetxController {
       await getAvailableCourtsById(argument.id!);
     });
   }
-
   Future<void> getAvailableCourtsById(String registerClubId) async {
     log("Fetching courts for club: $registerClubId");
     isLoadingCourts.value = true;
     slots.value = null;
+    selectedSlots.clear(); // Clear previous selection
 
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDate =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day
-          .toString().padLeft(2, '0')}";
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
 
       final result = await repository.fetchAvailableCourtsById(
@@ -54,12 +51,54 @@ class BookSessionController extends GetxController {
 
       slots.value = result;
       log("Available courts fetched: ${result.data?[0].slot?.length ?? 0}");
+
+      // Auto-select first available slot
+      final slotTimes = result.data?[0].slot?[0].slotTimes;
+      if (slotTimes != null && slotTimes.isNotEmpty) {
+        final firstSlot = slotTimes.firstWhereOrNull((slot) => !isPastAndUnavailable(slot));
+        if (firstSlot != null) {
+          selectedSlots.add(firstSlot);
+          // Update total amount
+          totalAmount.value = firstSlot.amount ?? 0;
+
+          log("Auto-selected first slot: ${firstSlot.time}");
+        }
+      }
+
     } catch (e) {
       log("Error: $e");
     } finally {
       isLoadingCourts.value = false;
     }
   }
+
+  // Future<void> getAvailableCourtsById(String registerClubId) async {
+  //   log("Fetching courts for club: $registerClubId");
+  //   isLoadingCourts.value = true;
+  //   slots.value = null;
+  //
+  //   try {
+  //     final date = selectedDate.value ?? DateTime.now();
+  //     final formattedDate =
+  //         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day
+  //         .toString().padLeft(2, '0')}";
+  //     final formattedDay = _getWeekday(date.weekday);
+  //
+  //     final result = await repository.fetchAvailableCourtsById(
+  //       id: registerClubId,
+  //       time: '',
+  //       date: formattedDate,
+  //       day: formattedDay,
+  //     );
+  //
+  //     slots.value = result;
+  //     log("Available courts fetched: ${result.data?[0].slot?.length ?? 0}");
+  //   } catch (e) {
+  //     log("Error: $e");
+  //   } finally {
+  //     isLoadingCourts.value = false;
+  //   }
+  // }
 
   void toggleSlotSelection(SlotTimes slot) {
     if (selectedSlots.contains(slot)) {
@@ -135,8 +174,8 @@ class BookSessionController extends GetxController {
 
             "businessHours": [
               {
-                "time": slots.value!.data?[0].slot?[0].businessHours?[0].time,
-                "day": slots.value!.data?[0].slot?[0].businessHours?[0].day
+                "time":slots.value!.data?[0].registerClubId!.businessHours?[0].time,
+                "day":slots.value!.data?[0].registerClubId!.businessHours?[0].day
               }
             ],
             "slotTimes": selectedSlots.map((slot) => {
