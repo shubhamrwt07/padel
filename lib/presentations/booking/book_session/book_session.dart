@@ -179,7 +179,7 @@ class BookSession extends StatelessWidget {
       children: [
         Text('Available Slots', style: Theme.of(context).textTheme.labelLarge),
       ],
-    );
+    ).paddingOnly(top: 10,bottom: 5);
   }
 
   Widget _buildTimeSlots() {
@@ -218,40 +218,40 @@ class BookSession extends StatelessWidget {
             final isSelected = controller.selectedSlots.contains(slot);
 
             return GestureDetector(
-              onTap: isUnavailable
-                  ? null
-                  : () => controller.toggleSlotSelection(slot),
-              child: Container(
-                width: tileWidth,
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isUnavailable
-                      ? Colors.grey[300]
-                      : isSelected
-                      ? Colors.black
-                      : AppColors.timeTileBackgroundColor,
-                  borderRadius: BorderRadius.circular(40),
-                  border: Border.all(
+                onTap: isUnavailable
+                    ? null
+                    : () => controller.toggleSlotSelection(slot),
+                child: Container(
+                  width: tileWidth,
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
                     color: isUnavailable
-                        ? Colors.grey
-                        :
-                         AppColors.blackColor,
-
-                    width:  1,
-                  ),
-                ),
-                child: Text(
-                  slot.time ?? '',
-                  style: Get.textTheme.labelLarge?.copyWith(
-                    color: isUnavailable
-                        ? Colors.grey
+                        ? AppColors.greyColor
                         : isSelected
-                        ? Colors.white
-                        : Colors.black,
+                        ? Colors.black
+                        : AppColors.playerCardBackgroundColor,
+                    borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: isUnavailable
+                          ? Colors.transparent
+                          :
+                      AppColors.cartColor,
+
+                      width:  1,
+                    ),
                   ),
-                ),
-              )
+                  child: Text(
+                    slot.time ?? '',
+                    style: Get.textTheme.labelLarge?.copyWith(
+                      color: isUnavailable
+                          ? Colors.grey
+                          : isSelected
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                  ),
+                )
             );
           }).toList(),
         );
@@ -280,14 +280,13 @@ class BookSession extends StatelessWidget {
       child: Align(
         alignment: Alignment.center,
         child: CustomButton(
-
           width: Get.width * 0.9,
           onTap: () async {
-          controller.addToCart();
+            controller.addToCart();
           },
           child: Row(
             children: [
-              RichText(
+              Obx(() => RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
@@ -299,7 +298,7 @@ class BookSession extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: "0", // Static amount since no selection logic
+                      text: "${controller.totalAmount}",
                       style: Get.textTheme.titleMedium!.copyWith(
                         color: AppColors.whiteColor,
                         fontWeight: FontWeight.w600,
@@ -307,7 +306,7 @@ class BookSession extends StatelessWidget {
                     ),
                   ],
                 ),
-              ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05),
+              ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05)),
               Text(
                 "Book Now",
                 style: Get.textTheme.headlineMedium!.copyWith(

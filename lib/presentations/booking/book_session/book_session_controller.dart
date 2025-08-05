@@ -14,6 +14,7 @@ class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
+  RxInt totalAmount = 0.obs; // NEW
 
   final HomeRepository repository = HomeRepository();
 
@@ -66,8 +67,16 @@ class BookSessionController extends GetxController {
     } else {
       selectedSlots.add(slot);
     }
-    log("ID ${slot.sId!} LEN ${selectedSlots.length}");
+
+    // Recalculate total amount
+    totalAmount.value = selectedSlots.fold(
+      0,
+          (sum, slot) => sum + (slot.amount ?? 0),
+    );
+
+    log("ID ${slot.sId!} LEN ${selectedSlots.length} TOTAL ₹${totalAmount.value}");
   }
+
 
   String _getWeekday(int weekday) {
     switch (weekday) {
