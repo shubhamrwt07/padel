@@ -724,7 +724,7 @@ class HomeScreen extends GetView<HomeController> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.location_off, size: 64, color: Colors.grey[500]),
+            Icon(Icons.location_off, size: 64, color: Colors.grey[500]).paddingOnly(top: Get.height*.2),
             const SizedBox(height: 16),
             Text(
               'No courts available',

@@ -1,82 +1,79 @@
+// SignUpController.dart
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/core/network/dio_client.dart';
+import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/auth/otp/otp_controller.dart';
-import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
 import 'package:padel_mobile/repositories/authentication_repository/sign_up_repository.dart';
 
-import '../../../configs/components/snack_bars.dart';
-import '../../../core/network/dio_client.dart';
-import '../../../data/request_models/authentication_models/login_model.dart';
+import '../../../configs/routes/routes_name.dart';
 
 class SignUpController extends GetxController {
-  //Sing up repository
   SignUpRepository signUpRepository = SignUpRepository();
   LoginRepository loginRepository = LoginRepository();
 
-  //Form key
   final formKey = GlobalKey<FormState>();
 
-  //Text controllers
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  //Focus nodes
   final emailFocusNode = FocusNode();
   final phoneFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
   final confirmPasswordFocusNode = FocusNode();
 
-  //Observables values
   RxBool isLoading = false.obs;
   RxString? selectedLocation = RxString('');
   List<String> locations = ['Delhi', 'Mumbai', 'Bangalore', 'Chennai'];
   RxBool isVisiblePassword = true.obs;
   RxBool isVisibleConfirmPassword = true.obs;
 
-  //Functions
   void passwordToggle() => isVisiblePassword.value = !isVisiblePassword.value;
-
   void confirmPasswordToggle() =>
       isVisibleConfirmPassword.value = !isVisibleConfirmPassword.value;
 
-  //Validations
   String? validateEmail() {
     if (emailController.text.isEmpty) {
-      return AppStrings.emailRequired;
+      return "Email is required";
     } else if (!GetUtils.isEmail(emailController.text)) {
-      return AppStrings.invalidEmail;
+      return "Invalid email format";
     }
     return null;
   }
 
   String? validatePhone() {
     if (phoneController.text.isEmpty) {
-      return AppStrings.phoneRequired;
+      return "Phone number is required";
     } else if (!GetUtils.isPhoneNumber(phoneController.text)) {
-      return AppStrings.invalidPhone;
+      return "Invalid phone number";
     }
     return null;
   }
 
   String? validatePassword() {
     if (passwordController.text.isEmpty) {
-      return AppStrings.passwordRequired;
+      return "Password is required";
     } else if (!passwordController.text.isValidPassword) {
-      return AppStrings.invalidPassword;
+      return "Invalid password format";
     }
     return null;
   }
 
   String? validateConfirmPassword() {
     if (confirmPasswordController.text.isEmpty) {
-      return AppStrings.passwordRequired;
+      return "Confirm Password is required";
     } else if (confirmPasswordController.text != passwordController.text) {
-      return AppStrings.invalidConfirmPassword;
+      return "Passwords do not match";
     }
     return null;
   }
@@ -91,7 +88,6 @@ class SignUpController extends GetxController {
     } else if (passwordFocusNode.hasFocus) {
       passwordFocusNode.unfocus();
       confirmPasswordFocusNode.requestFocus();
-      await sendOTP();
     }
   }
 
@@ -121,9 +117,14 @@ class SignUpController extends GetxController {
     };
     var result = await signUpRepository.sendOTP(body: body);
     if (result.status == "200") {
-       Get.toNamed(
+      Get.toNamed(
         RoutesName.otp,
-        arguments: {"email": emailController.text.trim(),"type":OtpScreenType.createAccount},
+        arguments: {
+          "email": emailController.text.trim(),
+          "type": OtpScreenType.createAccount,
+          "firstName": firstNameController.text.trim(),
+          "lastName": lastNameController.text.trim(),
+        },
       );
     } else {
       SnackBarUtils.showErrorSnackBar(result.message!);
@@ -133,11 +134,13 @@ class SignUpController extends GetxController {
   Future<void> createAccount() async {
     SignUpModel result = await signUpRepository.createAccount(
       body: {
+        "firstName": firstNameController.text.trim(),
+        "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "countryCode": "+91",
         "phoneNumber": phoneController.text.trim(),
         "password": passwordController.text.trim(),
-        "city": selectedLocation?.value ?? "",
+        // "city": selectedLocation?.value ?? "",
         "agreeTermsAndCondition": true,
         "location": {
           "type": "Point",

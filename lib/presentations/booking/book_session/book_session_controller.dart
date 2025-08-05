@@ -1,10 +1,11 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
-import '../../../data/request_models/home_models/get_available_court.dart';
+import '../../../data/request_models/home_models/get_available_court.dart' hide Courts;
 import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../data/response_models/cart/add_to_cart_items_model.dart' hide SlotTimes;
 import '../../../repositories/cart/cart_repository.dart';
@@ -13,11 +14,10 @@ import '../../../repositories/home_repository/home_repository.dart';
 class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
+
   RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
-  RxInt totalAmount = 0.obs; // NEW
-
+  RxInt totalAmount = 0.obs;
   final HomeRepository repository = HomeRepository();
-
   Rx<AvailableCourtModel?> slots = Rx<AvailableCourtModel?>(null);
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
@@ -32,17 +32,16 @@ class BookSessionController extends GetxController {
       await getAvailableCourtsById(argument.id!);
     });
   }
-
   Future<void> getAvailableCourtsById(String registerClubId) async {
     log("Fetching courts for club: $registerClubId");
     isLoadingCourts.value = true;
     slots.value = null;
+    selectedSlots.clear(); // Clear previous selection
 
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDate =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day
-          .toString().padLeft(2, '0')}";
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
 
       final result = await repository.fetchAvailableCourtsById(
@@ -54,12 +53,28 @@ class BookSessionController extends GetxController {
 
       slots.value = result;
       log("Available courts fetched: ${result.data?[0].slot?.length ?? 0}");
+
+      // Auto-select first available slot
+      final slotTimes = result.data?[0].slot?[0].slotTimes;
+      if (slotTimes != null && slotTimes.isNotEmpty) {
+        final firstSlot = slotTimes.firstWhereOrNull((slot) => !isPastAndUnavailable(slot));
+        if (firstSlot != null) {
+          selectedSlots.add(firstSlot);
+          // Update total amount
+          totalAmount.value = firstSlot.amount ?? 0;
+
+          log("Auto-selected first slot: ${firstSlot.time}");
+        }
+      }
+
     } catch (e) {
       log("Error: $e");
     } finally {
       isLoadingCourts.value = false;
     }
   }
+
+
 
   void toggleSlotSelection(SlotTimes slot) {
     if (selectedSlots.contains(slot)) {
@@ -125,37 +140,58 @@ class BookSessionController extends GetxController {
     return false;
   }
 
-  void addToCart() async{
+  void addToCart() async {
     try {
       if (isLoadingCourts.value) return;
       isLoadingCourts.value = true;
+
+      // Group selected slots by selectedDate
+      final Map<String, List<SlotTimes>> groupedSlots = {};
+      final selectedDateStr = "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
+
+
+      groupedSlots[selectedDateStr] = selectedSlots.toList();
+
+      final List<Map<String, dynamic>> slotTimesList = [];
+
+      // Build slotTimes list with date grouping
+      groupedSlots.forEach((date, slots) {
+        for (var slot in slots) {
+          slotTimesList.add({
+            "time": slot.time,
+            "amount": slot.amount,
+            "slotId": slot.sId,
+          });
+        }
+        slotTimesList.add({
+          "bookingDate": date,
+        });
+      });
+
       final data = {
         "slot": [
           {
-
             "businessHours": [
               {
-                "time": slots.value!.data?[0].slot?[0].businessHours?[0].time,
-                "day": slots.value!.data?[0].slot?[0].businessHours?[0].day
+                "time": slots.value!.data?[0].registerClubId!.businessHours?[0].time,
+                "day": slots.value!.data?[0].registerClubId!.businessHours?[0].day
               }
             ],
-            "slotTimes": selectedSlots.map((slot) => {
-              "time": slot.time,
-              "amount": slot.amount,
-              "slotId": slot.sId
-            }).toList()
-
+            "slotTimes": slotTimesList
           }
         ],
-        "register_club_id": argument.id!
+        "register_club_id": argument.id!,
+        "courtId": slots.value!.data?[0].courts?[0].sId,
       };
-      await cartRepository.addCartItems(data: data).then((v){
 
-          Get.to(()=>CartScreen(buttonType: "true",));
+      log("Cart Data: $data");
 
+      await cartRepository.addCartItems(data: data).then((v) {
+        Get.to(() => CartScreen(buttonType: "true"));
       });
-    }  finally {
+    } finally {
       isLoadingCourts.value = false;
     }
   }
+
 }

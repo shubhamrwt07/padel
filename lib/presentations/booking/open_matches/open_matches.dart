@@ -103,6 +103,7 @@ class OpenMatches extends StatelessWidget {
                       child: SizedBox(
                         height: Get.height * 0.14,
                         child: Stack(
+                          ////
                           clipBehavior: Clip.none,
                           children: [
                             Transform.translate(
