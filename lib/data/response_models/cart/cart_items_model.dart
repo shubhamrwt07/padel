@@ -40,6 +40,7 @@ class CartItems {
   List<Slot>? slot;
   RegisterClubId? registerClubId;
   int? totalAmount;
+  String? courtId;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -50,6 +51,7 @@ class CartItems {
         this.slot,
         this.registerClubId,
         this.totalAmount,
+        this.courtId,
         this.createdAt,
         this.updatedAt,
         this.iV});
@@ -67,6 +69,7 @@ class CartItems {
         ? new RegisterClubId.fromJson(json['register_club_id'])
         : null;
     totalAmount = json['totalAmount'];
+    courtId = json['courtId'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -83,6 +86,7 @@ class CartItems {
       data['register_club_id'] = this.registerClubId!.toJson();
     }
     data['totalAmount'] = this.totalAmount;
+    data['courtId'] = this.courtId;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
@@ -91,14 +95,12 @@ class CartItems {
 }
 
 class Slot {
-  String? slotId;
   List<SlotTimes>? slotTimes;
   String? sId;
 
-  Slot({this.slotId, this.slotTimes, this.sId});
+  Slot({this.slotTimes, this.sId});
 
   Slot.fromJson(Map<String, dynamic> json) {
-    slotId = json['slotId'];
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
@@ -110,7 +112,6 @@ class Slot {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['slotId'] = this.slotId;
     if (this.slotTimes != null) {
       data['slotTimes'] = this.slotTimes!.map((v) => v.toJson()).toList();
     }
@@ -122,13 +123,17 @@ class Slot {
 class SlotTimes {
   String? time;
   int? amount;
+  String? slotId;
+  String? bookingDate;
   String? sId;
 
-  SlotTimes({this.time, this.amount, this.sId});
+  SlotTimes({this.time, this.amount, this.slotId, this.bookingDate, this.sId});
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
     time = json['time'];
     amount = json['amount'];
+    slotId = json['slotId'];
+    bookingDate = json['bookingDate'];
     sId = json['_id'];
   }
 
@@ -136,6 +141,8 @@ class SlotTimes {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['time'] = this.time;
     data['amount'] = this.amount;
+    data['slotId'] = this.slotId;
+    data['bookingDate'] = this.bookingDate;
     data['_id'] = this.sId;
     return data;
   }
@@ -154,13 +161,14 @@ class RegisterClubId {
   List<String>? courtImage;
   String? courtType;
   String? createdAt;
-  String? description;
   List<String>? features;
   bool? isActive;
   bool? isDeleted;
   bool? isFeatured;
   bool? isVerified;
+  String? state;
   String? updatedAt;
+  String? zipCode;
 
   RegisterClubId(
       {this.location,
@@ -175,13 +183,14 @@ class RegisterClubId {
         this.courtImage,
         this.courtType,
         this.createdAt,
-        this.description,
         this.features,
         this.isActive,
         this.isDeleted,
         this.isFeatured,
         this.isVerified,
-        this.updatedAt});
+        this.state,
+        this.updatedAt,
+        this.zipCode});
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -203,13 +212,14 @@ class RegisterClubId {
     courtImage = json['courtImage'].cast<String>();
     courtType = json['courtType'];
     createdAt = json['createdAt'];
-    description = json['description'];
     features = json['features'].cast<String>();
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
     isFeatured = json['isFeatured'];
     isVerified = json['isVerified'];
+    state = json['state'];
     updatedAt = json['updatedAt'];
+    zipCode = json['zipCode'];
   }
 
   Map<String, dynamic> toJson() {
@@ -231,13 +241,14 @@ class RegisterClubId {
     data['courtImage'] = this.courtImage;
     data['courtType'] = this.courtType;
     data['createdAt'] = this.createdAt;
-    data['description'] = this.description;
     data['features'] = this.features;
     data['isActive'] = this.isActive;
     data['isDeleted'] = this.isDeleted;
     data['isFeatured'] = this.isFeatured;
     data['isVerified'] = this.isVerified;
+    data['state'] = this.state;
     data['updatedAt'] = this.updatedAt;
+    data['zipCode'] = this.zipCode;
     return data;
   }
 }
@@ -245,6 +256,7 @@ class RegisterClubId {
 class Location {
   String? type;
   List<double>? coordinates;
+
   Location({this.type, this.coordinates});
 
   Location.fromJson(Map<String, dynamic> json) {
