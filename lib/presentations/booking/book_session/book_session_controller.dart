@@ -151,7 +151,6 @@ class BookSessionController extends GetxController {
       final Map<String, List<SlotTimes>> groupedSlots = {};
       final selectedDateStr = "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
 
-
       groupedSlots[selectedDateStr] = selectedSlots.toList();
 
       final List<Map<String, dynamic>> slotTimesList = [];
@@ -188,10 +187,14 @@ class BookSessionController extends GetxController {
 
       log("Cart Data: $data");
 
-      await cartRepository.addCartItems(data: data).then((v) {
+      await cartRepository.addCartItems(data: data).then((v) async {
+        // Fetch cart items immediately after adding to cart
+        final CartController controller = Get.find<CartController>();
+        await controller.getCartItems();
+
+        // Navigate to cart screen
         Get.to(() => CartScreen(buttonType: "true"))?.then((_) {
-          // This triggers when CartScreen is popped back
-          final CartController controller = Get.find<CartController>();
+          // Optional: Refresh cart items again when returning from cart screen
           controller.getCartItems();
         });
       });
@@ -199,5 +202,4 @@ class BookSessionController extends GetxController {
       isLoadingCourts.value = false;
     }
   }
-
 }

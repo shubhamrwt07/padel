@@ -226,6 +226,7 @@ class CartScreen extends StatelessWidget {
 
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
+
     return Obx(() {
       return CustomButton(
         width: Get.width * 0.9,
@@ -273,13 +274,22 @@ class CartScreen extends StatelessWidget {
             "register_club_id": registerClubId,
           };
 
-          // 🔍 Log the booking payload
           log("Booking payload: ${bookingPayload.toString()}");
 
           await cartController.bookCart(data: bookingPayload);
         },
 
-        child: Row(
+        // 👇 Show loader if booking is in progress
+        child: cartController.isBooking.value
+            ? const SizedBox(
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        )
+            : Row(
           children: [
             Text(
               "₹ ",
