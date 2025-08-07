@@ -97,8 +97,9 @@ class RegisterClubId {
   String? sId;
   String? clubName;
   List<BusinessHours>? businessHours;
+  List<String>? features;
 
-  RegisterClubId({this.sId, this.clubName, this.businessHours});
+  RegisterClubId({this.sId, this.clubName, this.businessHours, this.features});
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -109,6 +110,7 @@ class RegisterClubId {
         businessHours!.add(new BusinessHours.fromJson(v));
       });
     }
+    features = json['features'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -119,6 +121,7 @@ class RegisterClubId {
       data['businessHours'] =
           this.businessHours!.map((v) => v.toJson()).toList();
     }
+    data['features'] = this.features;
     return data;
   }
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../data/response_models/cart/cart_items_model.dart';
 import '../../data/response_models/cart/carte_booking_model.dart';
@@ -20,7 +21,9 @@ class CartController extends GetxController {
 
   @override
   void onInit() {
+
     getCartItems();
+    print("initialize");
     super.onInit();
   }
 
@@ -83,9 +86,8 @@ class CartController extends GetxController {
         data: data,
       );
 
-      // ✅ Do something with bookingResult if needed
       log("Booking successful: ${bookingResult.toJson()}");
-
+Get.toNamed(RoutesName.paymentMethod);
       Get.snackbar(
         "Success",
         "Booking completed successfully",

@@ -25,6 +25,8 @@ class BookSession extends StatelessWidget {
                 child: _buildSlotHeader(context),
               ),
               _buildTimeSlots(),
+              Text('Available Courts', style: Theme.of(context).textTheme.labelLarge),
+              buildCourtList(controller)
             ],
           ),
         ),
@@ -178,6 +180,7 @@ class BookSession extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('Available Slots', style: Theme.of(context).textTheme.labelLarge),
+
       ],
     ).paddingOnly(top: 10,bottom: 5);
   }
@@ -187,8 +190,23 @@ class BookSession extends StatelessWidget {
       offset: Offset(0, -Get.height * 0.025),
       child: Obx(() {
         if (controller.isLoadingCourts.value) {
-          return const Center(child: CircularProgressIndicator())
-              .paddingOnly(top: Get.height * .15);
+          return GridView.count(
+            crossAxisCount: 4,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 2.5,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8),
+            children: List.generate(16, (index) {
+              return  Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F6FF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              );
+            }),
+          );
         }
 
         final courts = controller.slots.value?.data;
@@ -258,7 +276,84 @@ class BookSession extends StatelessWidget {
       }),
     );
   }
+  Widget buildCourtList(BookSessionController controller) {
+    return Obx(() {
+      final slots = controller.slots.value?.data ?? [];
 
+      if (controller.isLoadingCourts.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (slots.isEmpty) {
+        return const Center(child: Text("No courts available"));
+      }
+
+      List<Widget> courtWidgets = [];
+
+      for (var slot in slots) {
+        final courts = slot.courts ?? [];
+        final features = slot.registerClubId?.features ?? [];
+
+        final featureText = features.isNotEmpty
+            ? features.join(' | ')
+            : 'No features available';
+
+        for (var court in courts) {
+          final courtName = court.courtName ?? '';
+
+          courtWidgets.add(
+            Container(
+              width: Get.width,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.greyColor,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Obx(() => Radio<String>(
+                    value: courtName,  // <-- Set courtName as value
+                    groupValue: controller.courtName.value,  // Current selected courtName
+                    onChanged: (value) {
+                      controller.courtName.value = value!;  // Update with courtName
+                    },
+                  )),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          court.courtName ?? 'Court',
+                          style: Get.textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          featureText,
+                          style: Get.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      }
+
+      if (courtWidgets.isEmpty) {
+        return const Center(child: Text("No courts available"));
+      }
+
+      return Column(children: courtWidgets);
+    });
+  }
   Widget _bottomButton() {
     return Container(
       height: Get.height * .09,
@@ -282,6 +377,21 @@ class BookSession extends StatelessWidget {
         child: CustomButton(
           width: Get.width * 0.9,
           onTap: () async {
+            // Validate court selection before proceeding
+            if (controller.courtName.value.isEmpty) {
+              Get.snackbar(
+                "Select Court",
+                "Please select a court before booking.",
+                backgroundColor: Colors.redAccent,
+                colorText: Colors.white,
+                snackPosition: SnackPosition.TOP,
+                margin: const EdgeInsets.all(12),
+                duration: const Duration(seconds: 2),
+              );
+              return;
+            }
+
+            // Proceed to add to cart
             controller.addToCart();
           },
           child: Row(
