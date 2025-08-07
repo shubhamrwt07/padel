@@ -11,6 +11,7 @@ import '../../repositories/cart/cart_repository.dart';
 class CartController extends GetxController {
   final CartRepository cartRepository = CartRepository();
   final ScrollController scrollController = ScrollController();
+  RxBool isBookingLoading = false.obs;
 
   // Observables
   RxInt totalPrice = 0.obs;
