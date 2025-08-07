@@ -10,6 +10,7 @@ import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../data/response_models/cart/add_to_cart_items_model.dart' hide SlotTimes;
 import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
+import '../../cart/cart_controller.dart';
 
 class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
@@ -139,6 +140,7 @@ class BookSessionController extends GetxController {
 
     return false;
   }
+  var courtName = ''.obs;  // Make it RxString
 
   void addToCart() async {
     try {
@@ -181,13 +183,17 @@ class BookSessionController extends GetxController {
           }
         ],
         "register_club_id": argument.id!,
-        "courtId": slots.value!.data?[0].courts?[0].sId,
+        "courtName": courtName.value,
       };
 
       log("Cart Data: $data");
 
       await cartRepository.addCartItems(data: data).then((v) {
-        Get.to(() => CartScreen(buttonType: "true"));
+        Get.to(() => CartScreen(buttonType: "true"))?.then((_) {
+          // This triggers when CartScreen is popped back
+          final CartController controller = Get.find<CartController>();
+          controller.getCartItems();
+        });
       });
     } finally {
       isLoadingCourts.value = false;

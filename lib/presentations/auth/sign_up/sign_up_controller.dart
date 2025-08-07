@@ -134,8 +134,8 @@ class SignUpController extends GetxController {
   Future<void> createAccount() async {
     SignUpModel result = await signUpRepository.createAccount(
       body: {
-        "firstName": firstNameController.text.trim(),
-        "lastName": lastNameController.text.trim(),
+        // "firstName": firstNameController.text.trim(),
+        // "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "countryCode": "+91",
         "phoneNumber": phoneController.text.trim(),

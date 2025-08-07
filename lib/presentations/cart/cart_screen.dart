@@ -41,19 +41,32 @@ class CartScreen extends StatelessWidget {
     return SizedBox(
       height: buttonType == "true" ? Get.height * 0.65 : Get.height * 0.56,
       child: Obx(
-            () => ListView.builder(
+            () => controller.cartItems.isEmpty
+            ? emptyState()
+            : ListView.builder(
           controller: controller.scrollController,
           itemCount: controller.cartItems.length,
           itemBuilder: (BuildContext context, index) {
             final item = controller.cartItems[index];
+
+            // Add null safety checks here
+            if (item.slot == null || item.slot!.isEmpty) {
+              return SizedBox.shrink(); // Return empty widget if no slots
+            }
+
+            final firstSlot = item.slot!.first;
+            if (firstSlot.slotTimes == null || firstSlot.slotTimes!.isEmpty) {
+              return SizedBox.shrink(); // Return empty widget if no slot times
+            }
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Club Name
                 Text(
-                  item.registerClubId!.clubName ?? "",
+                  item.registerClubId?.clubName ?? "Unknown Club",
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w600
+                    fontWeight: FontWeight.w600,
                   ),
                 ).paddingOnly(bottom: Get.height * 0.01),
 
@@ -61,10 +74,9 @@ class CartScreen extends StatelessWidget {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: item.slot![0].slotTimes!.length,
+                  itemCount: firstSlot.slotTimes!.length,
                   itemBuilder: (context, int childIndex) {
-                    final slot = item.slot![0].slotTimes![childIndex];
-                    final createdAt = item.registerClubId!.createdAt.toString();
+                    final slot = firstSlot.slotTimes![childIndex];
 
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,17 +85,19 @@ class CartScreen extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              "${formatCreatedAt(createdAt)} ",
+                              formatCreatedAt(slot.bookingDate ?? ""),
                               style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                            const SizedBox(width: 6),
                             Text(
-                              "${slot.time} ",
+                              "${slot.time ?? 'N/A'} ",
                               style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                            const SizedBox(width: 6),
                             Text(
                               "(60m)",
                               style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -97,21 +111,25 @@ class CartScreen extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              "₹ ${slot.amount}",
+                              "₹ ${slot.amount ?? '0'}",
                               style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             GestureDetector(
                               onTap: () async {
-                                log("data remove");
-                                await controller.removeCartItemsFromCart(
-                                  slotIds: [item.slot![0].sId!],
-                                );
+                                final slotTimeId = slot.slotId;
+
+                                if (slotTimeId == null) {
+                                  Get.snackbar("Error", "Invalid slot ID");
+                                  return;
+                                }
+
+                                await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
                               },
                               child: Image.asset(
                                 Assets.imagesIcRemove,
-                                scale: 3,
+                                scale: 2,
                               ).paddingOnly(left: 10),
                             ),
                           ],
@@ -156,7 +174,7 @@ class CartScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Total Slots",
+                  "Total Slots (${cartController.totalSlot.value})",
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -209,25 +227,60 @@ class CartScreen extends StatelessWidget {
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
     return Obx(() {
-      final bookingData = {
-        "slot": [
-          {
-            "slotId": "yourSlotId",
-            "businessHours": [
-              {"time": "6:00 AM To 10:00 PM", "day": "Thursday"}
-            ]
-          }
-        ],
-        "totalPrice": cartController.totalPrice.value,
-      };
-
       return CustomButton(
         width: Get.width * 0.9,
         onTap: () async {
-          await cartController.bookCart(data: bookingData);
+          final cartItems = cartController.cartItems;
+
+          if (cartItems.isEmpty) {
+            Get.snackbar("Empty Cart", "Please add items to cart.");
+            return;
+          }
+
+          final List<Map<String, dynamic>> slotData = [];
+
+          for (var cart in cartItems) {
+            for (var slot in cart.slot ?? []) {
+              for (var slotTime in slot.slotTimes ?? []) {
+                slotData.add({
+                  "slotId": slotTime.slotId,
+                  "businessHours": cart.registerClubId?.businessHours?.map((bh) => {
+                    "time": bh.time,
+                    "day": bh.day,
+                  }).toList() ?? [],
+                  "slotTimes": [
+                    {
+                      "time": slotTime.time,
+                      "amount": slotTime.amount,
+                    }
+                  ],
+                  "courtName": cart.courtName,
+                  "bookingDate": slotTime.bookingDate,
+                });
+              }
+            }
+          }
+
+          final registerClubId = cartItems.first.registerClubId?.sId;
+
+          if (registerClubId == null || slotData.isEmpty) {
+            Get.snackbar("Error", "Invalid cart data");
+            return;
+          }
+
+          final bookingPayload = {
+            "slot": slotData,
+            "register_club_id": registerClubId,
+          };
+
+          // 🔍 Log the booking payload
+          log("Booking payload: ${bookingPayload.toString()}");
+
+          await cartController.bookCart(data: bookingPayload);
         },
+
         child: Row(
-          children:  [
+          children: [
             Text(
               "₹ ",
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -254,7 +307,6 @@ class CartScreen extends StatelessWidget {
       );
     });
   }
-
   Widget emptyState() {
     return Center(
       child: Text("No items in cart"),
@@ -262,12 +314,20 @@ class CartScreen extends StatelessWidget {
   }
 
   // Date formatting with suffix (e.g., 1st, 2nd, 3rd)
+  // ✅ Updated date formatter to: 28th June' 2025
   String formatCreatedAt(String dateStr) {
-    final date = DateTime.parse(dateStr);
-    final day = date.day;
-    final suffix = getDaySuffix(day);
-    final formatted = DateFormat("MMMM yyyy").format(date);
-    return "$day$suffix $formatted";
+    if (dateStr.isEmpty) return "Invalid Date";
+
+    try {
+      final date = DateTime.parse(dateStr);
+      final day = date.day;
+      final suffix = getDaySuffix(day);
+      final month = DateFormat("MMMM").format(date);
+      final year = date.year;
+      return "$day$suffix $month' $year";
+    } catch (e) {
+      return "Invalid Date";
+    }
   }
 
   String getDaySuffix(int day) {
@@ -283,5 +343,4 @@ class CartScreen extends StatelessWidget {
         return "th";
     }
   }
-
 }

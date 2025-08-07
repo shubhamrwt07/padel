@@ -47,27 +47,24 @@ class CartRepository {
   }
   Future<RemoveToCartModel> removeCartItems({required List<String> slotIds}) async {
     try {
-      log("data remove 2");
+      log("Sending slotIds to delete: $slotIds");
+
       final response = await dioClient.delete(
         AppEndpoints.removeCartItems,
-        data: {
-          "slotIds": slotIds,
-        },
+        data: {"slotIds": slotIds},
       );
-      log("data remove 5");
-      if (response.statusCode == 200) {
-         CustomLogger.logMessage(
-          msg: "Cart items removed successfully: ${response.data}",
-          level: LogLevel.info,
-        );
 
+      log("Delete response status: ${response.statusCode}");
+      log("Delete response data: ${response.data}");
+
+      if (response.statusCode == 200) {
         return RemoveToCartModel.fromJson(response.data);
       } else {
-         throw Exception("Remove cart items failed with status code: ${response.statusCode}");
+        throw Exception("Failed to remove cart items");
       }
     } catch (e, st) {
-       CustomLogger.logMessage(
-        msg: "Remove cart items failed with error: ${e.toString()}",
+      CustomLogger.logMessage(
+        msg: "Remove cart items failed: $e",
         level: LogLevel.error,
         st: st,
       );

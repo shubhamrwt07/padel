@@ -40,7 +40,7 @@ class CartItems {
   List<Slot>? slot;
   RegisterClubId? registerClubId;
   int? totalAmount;
-  String? courtId;
+  String? courtName;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -51,7 +51,7 @@ class CartItems {
         this.slot,
         this.registerClubId,
         this.totalAmount,
-        this.courtId,
+        this.courtName,
         this.createdAt,
         this.updatedAt,
         this.iV});
@@ -69,7 +69,7 @@ class CartItems {
         ? new RegisterClubId.fromJson(json['register_club_id'])
         : null;
     totalAmount = json['totalAmount'];
-    courtId = json['courtId'];
+    courtName = json['courtName'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -86,7 +86,7 @@ class CartItems {
       data['register_club_id'] = this.registerClubId!.toJson();
     }
     data['totalAmount'] = this.totalAmount;
-    data['courtId'] = this.courtId;
+    data['courtName'] = this.courtName;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
