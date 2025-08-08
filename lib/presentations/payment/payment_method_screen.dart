@@ -6,6 +6,7 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
+import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 import 'package:padel_mobile/services/payment_services/razorpay.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 
@@ -14,6 +15,9 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
 
   @override
   Widget build(BuildContext context) {
+    // Get CartController instance
+    final CartController cartController = Get.find<CartController>();
+
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       appBar: primaryAppBar(
@@ -58,44 +62,63 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               },
             ),
           ),
-          CustomButton(
-              width: Get.width * 0.9,
-              onTap: () {
-                // if(controller.option.value.isNotEmpty){
-                //   Get.to(() => BookingSuccessfulScreen(), transition: Transition.rightToLeft);
-                // }else{
-                //   SnackBarUtils.showWarningSnackBar("Please select payment method");
-                // }
-                controller.startPayment();
-                ////
-              },
-              child: Row(
-                children: [
-                  Text(
-                    "₹",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontFamily: "Roboto",
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: 30, right: 5),
-                  Text(
-                    "7000",
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(
-                    right: Get.width * 0.3,
+
+          // Updated payment button with dynamic data from cart
+          Obx(() => CustomButton(
+            width: Get.width * 0.9,
+            onTap: () async {
+              // Check if payment method is selected
+              if (controller.option.value.isEmpty) {
+                SnackBarUtils.showWarningSnackBar("Please select payment method");
+                return;
+              }
+
+              // Check if cart has items
+              if (cartController.cartItems.isEmpty) {
+                SnackBarUtils.showWarningSnackBar("Cart is empty");
+                return;
+              }
+
+              // Start payment process
+              await controller.startPayment();
+            },
+            child: controller.isProcessing.value || cartController.isBooking.value
+                ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+                : Row(
+              children: [
+                Text(
+                  "₹",
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                    fontFamily: "Roboto",
+                    fontWeight: FontWeight.w600,
                   ),
-                  Text(
-                    "Payment",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      color: AppColors.whiteColor,
-                    ),
+                ).paddingOnly(left: 30, right: 5),
+                Text(
+                  cartController.totalPrice.value.toString(),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              )),
+                ).paddingOnly(
+                  right: Get.width * 0.3,
+                ),
+                Text(
+                  controller.isProcessing.value ? "Processing..." : "Payment",
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                  ),
+                ),
+              ],
+            ),
+          )),
         ],
       ),
     );

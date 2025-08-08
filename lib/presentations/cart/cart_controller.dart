@@ -88,7 +88,7 @@ class CartController extends GetxController {
       );
 
       log("Booking successful: ${bookingResult.toJson()}");
-Get.toNamed(RoutesName.paymentMethod);
+      Get.toNamed(RoutesName.paymentMethod);
       Get.snackbar(
         "Success",
         "Booking completed successfully",

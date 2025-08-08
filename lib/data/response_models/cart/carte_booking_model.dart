@@ -35,7 +35,7 @@ class Bookings {
   String? bookingStatus;
   String? bookingType;
   List<Slot>? slot;
-  Null? ownerId;
+  String? ownerId;
   String? sId;
   String? createdAt;
   String? updatedAt;

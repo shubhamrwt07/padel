@@ -1,43 +1,38 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/presentations/bookinghistory/booking_review/booking_completed_review.dart';
-import '../../configs/app_colors.dart';
-import '../../configs/components/app_bar.dart';
-import '../../generated/assets.dart';
+import 'package:intl/intl.dart';
+
+import '../../configs/routes/routes_name.dart';
+import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import 'booking_history_controller.dart';
+import 'booking_review/booking_completed_review.dart';
 
 class BookingHistoryUi extends StatelessWidget {
   const BookingHistoryUi({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<BookingHistoryController>(
-      init: BookingHistoryController(),
-      builder: (controller) {
-        return Scaffold(
-          appBar: primaryAppBar(
-            showLeading: true,
-            centerTitle: true,
-            title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
-            context: context,
+    final BookingHistoryController controller = Get.put(BookingHistoryController());
+
+    return Scaffold(
+      appBar: primaryAppBar(
+        showLeading: true,
+        centerTitle: true,
+        title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
+        context: context,
+      ),
+      body: Column(
+        children: [
+          tabBar(controller),
+          Expanded(
+            child: TabBarView(
+              controller: controller.tabController,
+              children: [
+                _tabContent(context, isCompleted: false),
+                _tabContent(context, isCompleted: true),
+              ],
+            ),
           ),
-          body: Column(
-            children: [
-              tabBar(controller),
-              Expanded(
-                child: TabBarView(
-                  controller: controller.tabController,
-                  children: [
-                    _tabContent(context, isCompleted: false),
-                    _tabContent(context, isCompleted: true),
-                  ],
-                ),
-              )
-            ],
-          ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -61,98 +56,125 @@ class BookingHistoryUi extends StatelessWidget {
   }
 
   Widget _tabContent(BuildContext context, {required bool isCompleted}) {
-    return ListView.builder(
-      physics: const BouncingScrollPhysics(), // Smooth scrolling effect
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            if (isCompleted) {
-              Get.to(() =>  BookingCompletedReview(),
-                  transition: Transition.rightToLeft);
-            } else {
-              Get.toNamed(RoutesName.bookingConfirmAndCancel);
-            }
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 0),
-            padding: EdgeInsets.only(
-              left: Get.width * .03,
-              right: Get.width * .03,
-              top: Get.height * .01,
-              bottom: Get.width * .01,
-            ),
-            width: Get.width,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: AppColors.containerBorderColor,
-                width: 2.0,
+    final BookingHistoryController controller = Get.find();
+
+    return Obx(() {
+      final bookings = isCompleted
+          ? controller.completedBookings.value?.bookings ?? []
+          : controller.upcomingBookings.value?.bookings ?? [];
+
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (bookings.isEmpty) {
+        return const Center(child: Text("No bookings found"));
+      }
+
+      return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: bookings.length,
+        itemBuilder: (context, index) {
+          final booking = bookings[index];
+          final club = booking.registerClubId;
+
+          return GestureDetector(
+            onTap: () {
+              if (isCompleted) {
+                Get.to(() => BookingCompletedReview(), transition: Transition.rightToLeft);
+              } else {
+                Get.toNamed(RoutesName.bookingConfirmAndCancel);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 0),
+              padding: EdgeInsets.only(
+                left: Get.width * .03,
+                right: Get.width * .03,
+                top: Get.height * .01,
+                bottom: Get.width * .01,
               ),
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Padel Haus",
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: AppColors.blackColor,
-                      ),
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-2, 0),
-                      child: Row(
-                        children: [
-                          Image.asset(Assets.imagesIcLocation, scale: 2),
-                          Text(
-                            "Chandigarh, 160101",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(color: AppColors.darkGrey),
-                          ),
-                        ],
-                      ).paddingOnly(top: 3, bottom: 3),
-                    ),
-                    Row(
+              width: Get.width,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(
+                  color: AppColors.containerBorderColor,
+                  width: 2.0,
+                ),
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.alarm, size: 15),
                         Text(
-                          "Thu, 27 June",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall!
-                              .copyWith(color: AppColors.blackColor),
-                        ).paddingOnly(left: 5),
-                        Text(
-                          "8:00am",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall!
-                              .copyWith(color: AppColors.blackColor),
-                        ).paddingOnly(left: 5),
-                        Text(
-                          "(60m)",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall!
-                              .copyWith(color: AppColors.labelBlackColor),
-                        ).paddingOnly(left: 5),
+                          club?.clubName ?? "N/A",
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: AppColors.blackColor,
+                          ),
+                        ),
+                        Transform.translate(
+                          offset: const Offset(-2, 0),
+                          child: Row(
+                            children: [
+                              Image.asset(Assets.imagesIcLocation, scale: 2),
+                              Text(
+                                "${club?.city ?? ''}, ${club?.zipCode ?? ''}",
+                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                  color: AppColors.darkGrey,
+                                ),
+                              ),
+                            ],
+                          ).paddingOnly(top: 3, bottom: 3),
+                        ),
+                        if (booking.slot != null && booking.slot!.isNotEmpty)
+                          Row(
+                            children: [
+                              const Icon(Icons.alarm, size: 15),
+          Text(
+          formatDate(booking.bookingDate),
+          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+          color: AppColors.blackColor,
+          ),
+          ).paddingOnly(left: 5),
+                              if (booking.slot!.first.slotTimes != null &&
+                                  booking.slot!.first.slotTimes!.isNotEmpty)
+                                Text(
+                                  booking.slot!.first.slotTimes!.first.time ?? "",
+                                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                                    color: AppColors.blackColor,
+                                  ),
+                                ).paddingOnly(left: 5),
+                              Text(
+                                "(60m)",
+                                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                                  color: AppColors.labelBlackColor,
+                                ),
+                              ).paddingOnly(left: 5),
+                            ],
+                          ),
                       ],
                     ),
-                  ],
-                ),
-                Icon(Icons.arrow_forward_ios,
-                    size: 18, color: AppColors.textColor),
-              ],
-            ),
-          ).paddingOnly(left: Get.width*.03,right: Get.width*.03,top: 10,bottom: 0),
-        );
-      },
-    );
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 18, color: AppColors.textColor),
+                ],
+              ),
+            ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10),
+          );
+        },
+      );
+    });
+  }
+  String formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('EEE, dd MMMM').format(date); // e.g., Thu, 27 June
+    } catch (e) {
+      return dateStr;
+    }
   }
 }

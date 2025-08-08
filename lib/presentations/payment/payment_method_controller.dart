@@ -1,13 +1,20 @@
+import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../generated/assets.dart';
 import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
+import '../booking/successful_screens/booking_successful_screen.dart';
+import '../cart/cart_controller.dart'; // Import CartController
+
 class PaymentMethodController extends GetxController {
   var option = ''.obs;
 
   late RazorpayPaymentService _paymentService;
+
+  // Get CartController instance
+  final CartController cartController = Get.find<CartController>();
 
   RxBool isProcessing = false.obs;
 
@@ -22,19 +29,18 @@ class PaymentMethodController extends GetxController {
     _paymentService.onExternalWallet = _handleExternalWallet;
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     isProcessing.value = false;
 
     ScaffoldMessenger.of(Get.context!).showSnackBar(
       SnackBar(
-        content: Text('Payment Successful! ID: ${response.paymentId}'),
+        content: Text('Payment Successful! Processing booking...'),
         backgroundColor: Colors.green,
       ),
     );
-    Get.toNamed(RoutesName.bookingConfirmAndCancel);
 
-    // Here you can verify payment on your backend
-    // _verifyPayment(response.paymentId!, response.orderId!, response.signature!);
+    // Call booking API after successful payment
+    await _processBookingAfterPayment();
   }
 
   void _handlePaymentFailure(PaymentFailureResponse response) {
@@ -57,26 +63,113 @@ class PaymentMethodController extends GetxController {
     );
   }
 
+  // Process booking after successful payment
+  Future<void> _processBookingAfterPayment() async {
+    try {
+      final cartItems = cartController.cartItems;
+
+      if (cartItems.isEmpty) {
+        Get.snackbar("Empty Cart", "Please add items to cart.");
+        return;
+      }
+
+      final List<Map<String, dynamic>> slotData = [];
+
+      for (var cart in cartItems) {
+        for (var slot in cart.slot ?? []) {
+          for (var slotTime in slot.slotTimes ?? []) {
+            // Add null safety checks for all fields
+            slotData.add({
+              "slotId": slotTime.slotId ?? "",
+              "businessHours": cart.registerClubId?.businessHours?.map((bh) => {
+                "time": bh.time ?? "",
+                "day": bh.day ?? "",
+              }).toList() ?? [],
+              "slotTimes": [
+                {
+                  "time": slotTime.time ?? "",
+                  "amount": slotTime.amount ?? 0,
+                }
+              ],
+              "courtName": cart.courtName ?? "",
+              "bookingDate": slotTime.bookingDate ?? "",
+            });
+          }
+        }
+      }
+
+      final registerClubId = cartItems.first.registerClubId?.sId;
+      final ownerId = cartItems.first.registerClubId?.ownerId;
+
+      if (registerClubId == null || registerClubId.isEmpty || slotData.isEmpty) {
+        Get.snackbar("Error", "Invalid cart data - missing required fields");
+        return;
+      }
+
+      // Create booking payload with proper null handling
+      final Map<String, dynamic> bookingPayload = {
+        "slot": slotData,
+        "register_club_id": registerClubId,
+      };
+
+      // Only add ownerId if it's not null
+      if (ownerId != null && ownerId.isNotEmpty) {
+        bookingPayload["ownerId"] = ownerId;
+      }
+
+      log("Booking payload after payment: ${bookingPayload.toString()}");
+
+      // Call booking API
+      await cartController.bookCart(data: bookingPayload);
+
+      // Navigate to booking success screen after successful booking
+      Get.to(() => BookingSuccessfulScreen());
+
+    } catch (e) {
+      log("Error processing booking after payment: $e");
+
+      // More detailed error logging
+      if (e.toString().contains("type") && e.toString().contains("subtype")) {
+        log("Null safety error - check your data model fields");
+        log("Cart items: ${cartController.cartItems.map((item) => item.toJson()).toList()}");
+      }
+
+      Get.snackbar(
+        "Booking Error",
+        "Payment successful but booking failed: ${e.toString()}",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: Duration(seconds: 5),
+      );
+    }
+  }
+
   Future<void> verifyPayment(
-    String paymentId,
-    String orderId,
-    String signature,
-  ) async {
+      String paymentId,
+      String orderId,
+      String signature,
+      ) async {
     // TODO: Implement server-side payment verification
     // Send paymentId, orderId, and signature to your backend for verification
     debugPrint('Verifying payment: $paymentId, $orderId, $signature');
   }
 
   Future<void> startPayment() async {
+    if (option.value.isEmpty) {
+      Get.snackbar("Payment Method", "Please select a payment method");
+      return;
+    }
+
     isProcessing.value = true;
 
     try {
       await _paymentService.initiatePayment(
         keyId: 'rzp_test_1DP5mmOlF5G5ag',
-        amount: 100.0,
+        amount: cartController.totalPrice.value.toDouble(), // Use dynamic amount from cart
         currency: 'INR',
         name: 'Matchacha Padel',
-        description: 'Paying for court 1 | Time - 8:00Am - 9:00Am',
+        description: 'Paying for court booking',
         orderId: '',
         userEmail: 'test@example.com',
         userContact: '9999999999',
