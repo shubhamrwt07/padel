@@ -7,6 +7,7 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
+import '../../configs/routes/routes_name.dart';
 import '../../generated/assets.dart';
 
 class CartScreen extends StatelessWidget {
@@ -238,58 +239,10 @@ class CartScreen extends StatelessWidget {
             return;
           }
 
-          final List<Map<String, dynamic>> slotData = [];
-
-          for (var cart in cartItems) {
-            for (var slot in cart.slot ?? []) {
-              for (var slotTime in slot.slotTimes ?? []) {
-                slotData.add({
-                  "slotId": slotTime.slotId,
-                  "businessHours": cart.registerClubId?.businessHours?.map((bh) => {
-                    "time": bh.time,
-                    "day": bh.day,
-                  }).toList() ?? [],
-                  "slotTimes": [
-                    {
-                      "time": slotTime.time,
-                      "amount": slotTime.amount,
-                    }
-                  ],
-                  "courtName": cart.courtName,
-                  "bookingDate": slotTime.bookingDate,
-                });
-              }
-            }
-          }
-
-          final registerClubId = cartItems.first.registerClubId?.sId;
-
-          if (registerClubId == null || slotData.isEmpty) {
-            Get.snackbar("Error", "Invalid cart data");
-            return;
-          }
-
-          final bookingPayload = {
-            "slot": slotData,
-            "register_club_id": registerClubId,
-          };
-
-          log("Booking payload: ${bookingPayload.toString()}");
-
-          await cartController.bookCart(data: bookingPayload);
+          // Simply navigate to payment screen without booking
+          Get.toNamed(RoutesName.paymentMethod);
         },
-
-        // 👇 Show loader if booking is in progress
-        child: cartController.isBooking.value
-            ? const SizedBox(
-          height: 24,
-          width: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        )
-            : Row(
+        child: Row(
           children: [
             Text(
               "₹ ",
@@ -305,9 +258,9 @@ class CartScreen extends StatelessWidget {
                 color: AppColors.whiteColor,
                 fontWeight: FontWeight.w600,
               ),
-            ).paddingOnly(right: Get.width * 0.3),
+            ).paddingOnly(right: Get.width * 0.1),
             Text(
-              "Payment",
+              "Proceed to Payment",
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                 color: AppColors.whiteColor,
               ),
@@ -316,8 +269,7 @@ class CartScreen extends StatelessWidget {
         ),
       );
     });
-  }
-  Widget emptyState() {
+  }  Widget emptyState() {
     return Center(
       child: Text("No items in cart"),
     );
