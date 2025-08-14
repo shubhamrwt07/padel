@@ -23,4 +23,9 @@ class AppEndpoints {
   static const String bookingHistory =
       "${BASE_URL}court/booking/getUserBookings";
   static const String bookingConfirmation =
-      "${BASE_URL}court/booking/getAllBookingByStatus";}
+      "${BASE_URL}court/booking/getAllBookingByStatus";
+
+  ///Review-----------------------------------------------------------------------
+  static const String getReview = "${BASE_URL}court/review/getReviews";
+  static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
+}

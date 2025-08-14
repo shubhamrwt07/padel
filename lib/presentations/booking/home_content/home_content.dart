@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -230,7 +231,7 @@ class HomeContent extends StatelessWidget {
                   ],
                 ),
               ],
-            ).paddingOnly(top: Get.height * 0.01),
+            ),
           ],
         ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
       ),
@@ -273,7 +274,7 @@ class HomeContent extends StatelessWidget {
             color: isSelected
                 ? AppColors.labelBlackColor
                 : AppColors.whiteColor,
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           child: Center(child: iconWidget),
         ).paddingOnly(bottom: 5),
@@ -305,11 +306,12 @@ class HomeContent extends StatelessWidget {
         );
       case 2:
         return Obx(
-          () => SizedBox(
+          () => Container(
+            // color: AppColors.redColor,
             key: ValueKey(2),
-            height: controller.isShowAllReviews.value
-                ? Get.height * 0.6
-                : Get.height * 0.33,
+            // height: controller.isShowAllReviews.value
+            //     ? Get.height * 0.6
+            //     : Get.height * 0.3,
             child: reviewContent(Get.context!),
           ),
         );
@@ -327,170 +329,169 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget reviewContent(BuildContext context) {
-    return SizedBox(
-      height: controller.isShowAllReviews.value
-          ? Get.height * 0.6
-          : Get.height * 0.33,
-      width: Get.width,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Customer reviews",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: AppColors.labelBlackColor,
-                ),
+    final reviewData = controller.reviewResponse.value?.data?.first;
+    final reviews = reviewData?.reviews ?? [];
+
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (reviews.isEmpty) {
+      return const Center(child: Text("No reviews available"));
+    }
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Customer reviews",
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.labelBlackColor,
               ),
-              GestureDetector(
-                onTap: () => addReview(context),
-                child: Container(
-                  color: Colors.transparent,
-                  child: Row(
-                    children: [
-                      Icon(Icons.add, color: AppColors.primaryColor, size: 14),
-                      Text(
-                        "Review",
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ).paddingOnly(bottom: Get.height * 0.01),
-          Container(
-            height: controller.isShowAllReviews.value
-                ? Get.height * 0.55
-                : Get.height * 0.29,
-            color: Colors.transparent,
-            child: ListView.builder(
-              itemCount: 10,
-              physics: controller.isShowAllReviews.value
-                  ? ScrollPhysics()
-                  : NeverScrollableScrollPhysics(),
-              padding: EdgeInsetsGeometry.zero,
-              itemBuilder: (context, index) {
-                return Container(
-                  // height: 100,
-                  width: Get.width,
-                  padding: EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightBlueColor.withAlpha(40),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.labelBlackColor.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 15,
-                                backgroundImage: AssetImage(
-                                  Assets.imagesImgCustomerPicBooking,
-                                ),
-                              ).paddingOnly(right: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Darrell Steward",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall!
-                                        .copyWith(
-                                          color: AppColors.labelBlackColor,
-                                        ),
-                                  ),
-                                  Transform.translate(
-                                    offset: Offset(-Get.width * 0.015, 0),
-                                    child: Row(
-                                      children: [
-                                        RatingBar.builder(
-                                          itemSize: 12,
-                                          initialRating: 4,
-                                          minRating: 0,
-                                          unratedColor:
-                                              AppColors.starUnselectedColor,
-                                          direction: Axis.horizontal,
-                                          allowHalfRating: true,
-                                          itemCount: 5,
-                                          itemPadding: EdgeInsets.zero,
-                                          // No padding
-                                          itemBuilder: (context, _) =>
-                                              Container(
-                                                width: 5.0,
-                                                height: 30.0,
-                                                alignment: Alignment.center,
-                                                child: Icon(
-                                                  Icons.star,
-                                                  size: 27.0,
-                                                  // Adjust the size if needed
-                                                  color:
-                                                      AppColors.secondaryColor,
-                                                ),
-                                              ),
-                                          onRatingUpdate: (rating) {},
-                                        ).paddingOnly(right: Get.width * 0.02),
-                                        Text(
-                                          "4.5",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall!
-                                              .copyWith(
-                                                fontWeight: FontWeight.w500,
-                                                color:
-                                                    AppColors.labelBlackColor,
-                                                fontSize: 7,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Text(
-                            " Post Date : 22/07/2025",
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textColor,
-                                ),
-                          ),
-                        ],
-                      ).paddingOnly(bottom: 5),
-                      Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                        style: Theme.of(context).textTheme.displayMedium!
-                            .copyWith(fontSize: 12, height: 1.1),
-                      ),
-                    ],
-                  ),
-                ).paddingOnly(bottom: 10);
-              },
             ),
+            GestureDetector(
+              onTap: () => addReview(context),
+              child: Container(
+                color: Colors.transparent,
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: AppColors.primaryColor, size: 14),
+                    Text(
+                      "Review",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ).paddingOnly(bottom: Get.height * 0.01),
+
+        Container(
+          // When showing all reviews, we don't fix height — let it expand
+          height: controller.isShowAllReviews.value
+              ? null // full height based on reviews
+              : (reviews.length >= 3
+              ? 3 * 85.0 // height for first 3 reviews
+              : reviews.length * 85.0),
+          color: Colors.transparent,
+          child: ListView.builder(
+            itemCount: controller.isShowAllReviews.value
+                ? reviews.length
+                : reviews.length > 3
+                ? 3
+                : reviews.length,
+            physics: controller.isShowAllReviews.value
+                ? const NeverScrollableScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            shrinkWrap: true, // makes list take only the needed space
+            padding: EdgeInsets.zero,
+            itemBuilder: (context, index) {
+              final review = reviews[index];
+              final rating = review.reviewRating ?? 0;
+              final comment = review.reviewComment ?? "";
+              final userName = review.userId?.email ?? "Anonymous";
+              final postDate = review.createdAt != null
+                  ? DateFormat("dd/MM/yyyy").format(DateTime.parse(review.createdAt!))
+                  : "N/A";
+
+              return Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AppColors.lightBlueColor.withAlpha(40),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.labelBlackColor.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              radius: 15,
+                              backgroundImage: AssetImage(
+                                Assets.imagesImgCustomerPicBooking,
+                              ),
+                            ).paddingOnly(right: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  userName,
+                                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                                    color: AppColors.labelBlackColor,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    RatingBarIndicator(
+                                      rating: rating.toDouble(),
+                                      itemBuilder: (context, _) => Icon(
+                                        Icons.star,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                      itemSize: 12,
+                                      unratedColor: AppColors.starUnselectedColor,
+                                    ).paddingOnly(right: 5),
+                                    Text(
+                                      rating.toString(),
+                                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.labelBlackColor,
+                                        fontSize: 7,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "Post Date: $postDate",
+                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textColor,
+                          ),
+                        ),
+                      ],
+                    ).paddingOnly(bottom: 5),
+
+                    // Comment
+                    Text(
+                      comment,
+                      style: Theme.of(context)
+                          .textTheme
+                          .displayMedium!
+                          .copyWith(fontSize: 12, height: 1.1),
+                    ),
+                  ],
+                ),
+              ).paddingOnly(bottom: 10);
+            },
           ),
-        ],
-      ),
+        )
+      ],
     );
   }
+
 
   void addReview(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddReviewBottomSheet(),
+      builder: (context) => AddReviewBottomSheet(),
     );
   }
 
