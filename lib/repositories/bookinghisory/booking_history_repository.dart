@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
+
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/booking/boking_history_model.dart';
+import '../../data/request_models/booking/booking_confermation_model.dart';
+import '../../data/request_models/booking/cancel_booking_model.dart';
 import '../../handler/logger.dart';
 
 class BookingHistoryRepository {
@@ -15,16 +19,24 @@ class BookingHistoryRepository {
 
   Future<BookingHistoryModel> getBookingHistory({required String type}) async {
     try {
-      print("Making API call for type: $type");
-      print("Endpoint: ${AppEndpoints.bookingHistory}");
+      if (kDebugMode) {
+        print("Making API call for type: $type");
+      }
+      if (kDebugMode) {
+        print("Endpoint: ${AppEndpoints.bookingHistory}");
+      }
 
       final response = await dioClient.get(
         AppEndpoints.bookingHistory,
         queryParameters: {'type': type},
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response data: ${response.data}");
+      if (kDebugMode) {
+        print("Response status: ${response.statusCode}");
+      }
+      if (kDebugMode) {
+        print("Response data: ${response.data}");
+      }
 
       if (response.statusCode == 200) {
         CustomLogger.logMessage(
@@ -33,7 +45,7 @@ class BookingHistoryRepository {
         );
 
         final model = BookingHistoryModel.fromJson(response.data);
-        print("Parsed model bookings count: ${model.bookings?.length ?? 0}");
+        print("Parsed model bookings count: ${model.data?.length ?? 0}");
         return model;
       } else {
         throw Exception("Failed to fetch booking history. Status: ${response.statusCode}");
@@ -47,4 +59,97 @@ class BookingHistoryRepository {
       rethrow;
     }
   }
+  Future<BookingConfirmationModel> getBookingConfirmation({
+    required String ownerId,
+    String? bookingId,
+  }) async {
+    try {
+      if (kDebugMode) {
+        print("Making API call for booking confirmation for owner: $ownerId");
+      }
+
+      // Base endpoint without query params
+      String endpoint = AppEndpoints.bookingConfirmation;
+
+      // Build query parameters cleanly
+      final queryParams = {
+        'bookingStatus': 'upcoming',
+        'ownerId': ownerId,
+      };
+
+      if (bookingId != null && bookingId.isNotEmpty) {
+        queryParams['booking_id'] = bookingId;
+      }
+
+      if (kDebugMode) {
+        print("Endpoint: $endpoint");
+        print("Query Params: $queryParams");
+      }
+
+      final response = await dioClient.get(
+        endpoint,
+        queryParameters: queryParams,
+      );
+
+      if (kDebugMode) {
+        print("Response status: ${response.statusCode}");
+        print("Response data: ${response.data}");
+      }
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Booking confirmation fetched: ${response.data}",
+          level: LogLevel.info,
+        );
+
+        final model = BookingConfirmationModel.fromJson(response.data);
+        print("Parsed model booking status: ${model.status}");
+        return model;
+      } else {
+        throw Exception(
+          "Failed to fetch booking confirmation. Status: ${response.statusCode}",
+        );
+      }
+    } catch (e) {
+      print("Repository error: $e");
+      CustomLogger.logMessage(
+        msg: "Error fetching booking confirmation: $e",
+        level: LogLevel.error,
+      );
+      rethrow;
+    }
+  }
+  Future<CancelUserBooking?> updateBookingStatus({
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      CustomLogger.logMessage(
+        msg: "Update Booking Status request body: $body",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.put(
+        AppEndpoints.cancelBooking,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Update Booking Status Success: ${response.data}",
+          level: LogLevel.info,
+        );
+        return CancelUserBooking.fromJson(response.data);
+      } else {
+        throw Exception("Update Booking Status Failed with status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Update Booking Status failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      return null;
+    }
+  }
+
 }

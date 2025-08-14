@@ -60,8 +60,8 @@ class BookingHistoryUi extends StatelessWidget {
 
     return Obx(() {
       final bookings = isCompleted
-          ? controller.completedBookings.value?.bookings ?? []
-          : controller.upcomingBookings.value?.bookings ?? [];
+          ? controller.completedBookings.value?.data ?? []
+          : controller.upcomingBookings.value?.data ?? [];
 
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
@@ -81,11 +81,15 @@ class BookingHistoryUi extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               if (isCompleted) {
-                Get.to(() => BookingCompletedReview(), transition: Transition.rightToLeft);
+
               } else {
-                Get.toNamed(RoutesName.bookingConfirmAndCancel);
+                Get.toNamed(
+                  RoutesName.bookingConfirmAndCancel,
+                  arguments: {"bookingId": booking.sId ?? ""},
+                );
               }
             },
+
             child: Container(
               margin: const EdgeInsets.only(bottom: 0),
               padding: EdgeInsets.only(
