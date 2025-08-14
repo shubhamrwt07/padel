@@ -1,8 +1,7 @@
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
 
-class BookingConfirmAndCancelScreen
-    extends GetView<BookingConfirmAndCancelController> {
+class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelController> {
   const BookingConfirmAndCancelScreen({super.key});
 
   @override
@@ -21,7 +20,7 @@ class BookingConfirmAndCancelScreen
         ),
         centerTitle: true,
         title: Obx(
-          () => Text(
+              () => Text(
             controller.cancelBooking.value
                 ? AppStrings.bookingCancellation
                 : AppStrings.bookingConfirmation,
@@ -59,7 +58,8 @@ class BookingConfirmAndCancelScreen
           );
         }
 
-        if (controller.bookingDetails.value == null) {
+        if (controller.bookingDetails.value == null ||
+            controller.bookingDetails.value!.booking == null) {
           return const Center(child: Text('No booking details found'));
         }
 
@@ -80,7 +80,6 @@ class BookingConfirmAndCancelScreen
     );
   }
 
-  /// ✅ Restored your static image + success message
   Widget successImageAndMessage() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -100,8 +99,13 @@ class BookingConfirmAndCancelScreen
   }
 
   Widget bookingDetailsCard(BuildContext context) {
-    final booking = controller.bookingDetails.value!;
-    final slot = booking.bookings!.first.slot!.first;
+    final booking = controller.bookingDetails.value!.booking!;
+
+    // Safely get first slot and first time
+    final slot = booking.slot?.isNotEmpty == true ? booking.slot!.first : null;
+    final slotTime = slot?.slotTimes?.isNotEmpty == true
+        ? slot!.slotTimes!.first.time ?? ''
+        : '';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -113,50 +117,44 @@ class BookingConfirmAndCancelScreen
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          bookingDetailRow(context, "Court Name", slot.courtName ?? "N/A"),
+          bookingDetailRow(context, "Court Name", slot?.courtName ?? "N/A"),
           bookingDetailRow(
             context,
-            "Court Number",
-            "${slot.courtName ?? ''} Court",
+            "Date & Time",
+            "${booking.bookingDate != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(booking.bookingDate!)) : ''} $slotTime",
           ),
           bookingDetailRow(
             context,
-            "Date & Time/Min",
-            "${DateFormat('dd/MM/yyyy').format(DateTime.parse(slot.bookingDate!))} ${slot.slotTimes?.first.time ?? ''} "
-                "(${slot.courtName ?? 0}min)",
+            "Booking Status",
+            booking.bookingStatus ?? "N/A",
           ),
-
-
-
         ],
       ),
     ).paddingOnly(bottom: Get.height * 0.02);
   }
 
-  /// ✅ Updated to display real payment method + total payment
   Widget paymentDetailsCard(BuildContext context) {
-    final booking = controller.bookingDetails.value!;
-    final paymentMethod = "Online";
-    // Calculate total from all bookings
-    final totalAmount =
-        booking.bookings?.fold<double>(
-          0,
-          (sum, b) => sum + (b.totalAmount ?? 0),
-        ) ??
-        0;
+    final booking = controller.bookingDetails.value!.booking!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Payment Details", style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        bookingDetailRow(context, "Payment Method", paymentMethod),
-        bookingDetailRow(
-          context,
-          "Total payment",
-          "₹ ${totalAmount.toStringAsFixed(2)}",
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.playerCardBackgroundColor.withAlpha(50),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Payment Details", style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          bookingDetailRow(
+            context,
+            "Total payment",
+            "₹ ${(booking.totalAmount ?? 0).toStringAsFixed(2)}",
+          ),
+        ],
+      ),
     ).paddingOnly(bottom: Get.height * 0.02);
   }
 
@@ -168,9 +166,9 @@ class BookingConfirmAndCancelScreen
         children: [
           Text(
             title,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall!.copyWith(color: AppColors.textColor),
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              color: AppColors.textColor,
+            ),
           ),
           Text(
             value,
@@ -203,10 +201,7 @@ class BookingConfirmAndCancelScreen
         ).paddingOnly(bottom: Get.height * 0.01, top: Get.height * 0.04),
         Container(
           width: double.infinity,
-          padding: EdgeInsets.only(
-            left: Get.width * 0.05,
-            right: Get.width * 0.05,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
           decoration: BoxDecoration(
             color: AppColors.lightBlueColor.withAlpha(50),
             border: Border.all(color: AppColors.blackColor.withAlpha(10)),
@@ -214,7 +209,7 @@ class BookingConfirmAndCancelScreen
           ),
           child: DropdownButtonHideUnderline(
             child: Obx(
-              () => DropdownButton<String>(
+                  () => DropdownButton<String>(
                 value: controller.selectedReason.value.isEmpty
                     ? null
                     : controller.selectedReason.value,
@@ -232,17 +227,17 @@ class BookingConfirmAndCancelScreen
                 items: controller.cancellationReasons
                     .map(
                       (reason) => DropdownMenuItem(
-                        value: reason,
-                        child: Text(
-                          reason,
-                          style: Theme.of(context).textTheme.labelLarge!
-                              .copyWith(color: AppColors.labelBlackColor),
-                        ),
-                      ),
-                    )
+                    value: reason,
+                    child: Text(
+                      reason,
+                      style: Theme.of(context).textTheme.labelLarge!
+                          .copyWith(color: AppColors.labelBlackColor),
+                    ),
+                  ),
+                )
                     .toList(),
                 onChanged: (value) {
-                  controller.selectedReason.value = value!;
+                  controller.selectedReason.value = value ?? '';
                 },
               ),
             ),
@@ -289,37 +284,29 @@ class BookingConfirmAndCancelScreen
         }),
         PrimaryButton(
           onTap: () async {
-            // Validation checks
             if (controller.selectedReason.value.isEmpty) {
               SnackBarUtils.showWarningSnackBar("Please select a reason");
               return;
             }
 
-            String cancellationReason = '';
+            String cancellationReason = controller.selectedReason.value;
 
-            if (controller.selectedReason.value == 'Other') {
+            if (cancellationReason == 'Other') {
               if (controller.otherReasonController.text.trim().isEmpty) {
                 SnackBarUtils.showWarningSnackBar("Please write a reason");
                 return;
               }
               cancellationReason = controller.otherReasonController.text.trim();
-            } else {
-              cancellationReason = controller.selectedReason.value;
             }
 
-            // Update the controller's text field with the final reason
             controller.otherReasonController.text = cancellationReason;
 
             try {
-              // Call the API
               await controller.updateBookingStatus();
-
-              // The success handling is already done in updateBookingStatus method
-              // It will show success message and navigate back
-
             } catch (e) {
-              // Error handling - show error message
-              SnackBarUtils.showErrorSnackBar("Failed to cancel booking. Please try again.");
+              SnackBarUtils.showErrorSnackBar(
+                "Failed to cancel booking. Please try again.",
+              );
             }
           },
           text: AppStrings.submit,
@@ -328,6 +315,7 @@ class BookingConfirmAndCancelScreen
               ? Get.height * 0.14
               : Get.height * 0.29,
         ),
+
       ],
     );
   }

@@ -79,18 +79,19 @@ class BookingHistoryUi extends StatelessWidget {
           final club = booking.registerClubId;
 
           return GestureDetector(
-            onTap: () {
-              if (isCompleted) {
+              onTap: () {
+                if (booking.sId != null && booking.sId!.isNotEmpty) {
+                  Get.toNamed(
+                    RoutesName.bookingConfirmAndCancel,
+                    arguments: {"id": booking.sId!},
+                  );
+                } else {
+                  Get.snackbar("Error", "Booking ID not available");
+                }
+              },
 
-              } else {
-                Get.toNamed(
-                  RoutesName.bookingConfirmAndCancel,
-                  arguments: {"bookingId": booking.sId ?? ""},
-                );
-              }
-            },
 
-            child: Container(
+              child: Container(
               margin: const EdgeInsets.only(bottom: 0),
               padding: EdgeInsets.only(
                 left: Get.width * .03,

@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../configs/components/snack_bars.dart';
@@ -8,15 +8,14 @@ import '../../../data/request_models/booking/booking_confermation_model.dart';
 import '../../../data/request_models/booking/cancel_booking_model.dart';
 import '../../../handler/logger.dart';
 import '../../../repositories/bookinghisory/booking_history_repository.dart';
-import '../../auth/forgot_password/widgets/forgot_password_exports.dart';
 
 class BookingConfirmAndCancelController extends GetxController {
   RxBool cancelBooking = false.obs;
   RxString selectedReason = ''.obs;
-  var  updateBookingStatusResponse=Rxn<CancelUserBooking>();
+  var updateBookingStatusResponse = Rxn<CancelUserBooking>();
   TextEditingController otherReasonController = TextEditingController();
 
-  // Add reactive variables for booking data
+  // Booking details state
   Rx<BookingConfirmationModel?> bookingDetails = Rx<BookingConfirmationModel?>(null);
   RxBool isLoading = false.obs;
   RxString error = ''.obs;
@@ -33,34 +32,39 @@ class BookingConfirmAndCancelController extends GetxController {
   void onInit() async {
     super.onInit();
 
-    // Get the ownerId (and optionally bookingId) from arguments
-    final String? ownerId = Get.arguments?['ownerId'];
-    final String? bookingId = Get.arguments?['bookingId'];
+    // Get bookingId from arguments
+    final String? bookingId = Get.arguments?['id'];
 
-    if (ownerId != null && ownerId.isNotEmpty) {
-      await fetchBookingDetails(ownerId, bookingId: bookingId);
+    if (bookingId != null && bookingId.isNotEmpty) {
+      await fetchBookingDetails(bookingId);
+    } else {
+      error.value = "No booking ID provided";
     }
   }
 
-  /// Fetch booking details by bookingId
-  Future<void> fetchBookingDetails(String ownerId, {String? bookingId}) async {
+  /// Fetch booking details using bookingId (_id in API)
+  /// Fetch booking details using bookingId (_id in API)
+  Future<void> fetchBookingDetails(String bookingId) async {
     try {
       isLoading.value = true;
       error.value = '';
 
       if (kDebugMode) {
-        print("Fetching booking details for Owner ID: $ownerId"
-            "${bookingId != null ? ' with Booking ID: $bookingId' : ''}");
+        print("Fetching booking details for bookingId: $bookingId");
       }
 
+      // Call the repo function using correct parameter name
       final booking = await _bookingRepo.getBookingConfirmation(
-        ownerId: ownerId,
-        bookingId: bookingId, // optional
+        id: bookingId, // matches repo function parameter
       );
 
       bookingDetails.value = booking;
 
-      log("Booking details fetched! Status: ${booking.status}");
+      if (booking.booking != null) {
+        log("Booking details fetched! Status: ${booking.booking!.bookingStatus}");
+      } else {
+        log("No booking found for this ID");
+      }
     } catch (e) {
       error.value = e.toString();
       if (kDebugMode) {
@@ -74,18 +78,18 @@ class BookingConfirmAndCancelController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  /// Update booking status
   Future<void> updateBookingStatus() async {
     if (isLoading.value || Get.isSnackbarOpen) return;
 
-    // Check if booking details are available
-    if (bookingDetails.value == null ||
-        bookingDetails.value!.bookings == null ||
-        bookingDetails.value!.bookings!.isEmpty) {
+    // Ensure booking details are available
+    if (bookingDetails.value == null || bookingDetails.value!.booking == null) {
       SnackBarUtils.showInfoSnackBar("Booking details not available");
       return;
     }
 
-    if(otherReasonController.text.trim().isEmpty){
+    if (otherReasonController.text.trim().isEmpty) {
       SnackBarUtils.showInfoSnackBar("Please enter the reason");
       return;
     }
@@ -94,7 +98,7 @@ class BookingConfirmAndCancelController extends GetxController {
 
     try {
       final body = {
-        "id": bookingDetails.value!.bookings!.first.sId, // Access sId from the first booking
+        "id": bookingDetails.value!.booking!.sId, // single booking object
         "status": "in-progress",
         "cancellationReason": otherReasonController.text.trim()
       };
@@ -105,8 +109,6 @@ class BookingConfirmAndCancelController extends GetxController {
       if (result?.status == "200") {
         // Allow getBookingHistory to run by resetting isLoading
         isLoading.value = false;
-
-        // Hit API before closing the screen
 
         // Close dialogs/pages after refresh
         Get.close(2);
@@ -126,7 +128,9 @@ class BookingConfirmAndCancelController extends GetxController {
       // Ensure isLoading is reset in case of errors
       isLoading.value = false;
     }
-  }  @override
+  }
+
+  @override
   void onClose() {
     otherReasonController.dispose();
     super.onClose();

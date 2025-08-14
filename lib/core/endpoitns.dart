@@ -20,7 +20,6 @@ class AppEndpoints {
   static const String removeCartItems = "${BASE_URL}court/cart/removeUserCart";
   static const String cancelBooking = "${BASE_URL}court/booking/updateBookingStatus";
   static const String carteBooking = "${BASE_URL}court/booking/createBooking";
-  static const String bookingHistory =
-      "${BASE_URL}court/booking/getUserBookings";
-  static const String bookingConfirmation =
-      "${BASE_URL}court/booking/getAllBookingByStatus";}
+  static const String bookingHistory = "${BASE_URL}court/booking/getUserBookings";
+  static const String bookingConfirmation = "${BASE_URL}court/booking/findById";
+      }

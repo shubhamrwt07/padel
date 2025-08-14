@@ -60,34 +60,19 @@ class BookingHistoryRepository {
     }
   }
   Future<BookingConfirmationModel> getBookingConfirmation({
-    required String ownerId,
-    String? bookingId,
+    required String id, // now only bookingId
   }) async {
     try {
       if (kDebugMode) {
-        print("Making API call for booking confirmation for owner: $ownerId");
+        print("Making API call for booking confirmation for bookingId: $id");
       }
 
-      // Base endpoint without query params
-      String endpoint = AppEndpoints.bookingConfirmation;
-
-      // Build query parameters cleanly
       final queryParams = {
-        'bookingStatus': 'upcoming',
-        'ownerId': ownerId,
+        '_id': id,
       };
 
-      if (bookingId != null && bookingId.isNotEmpty) {
-        queryParams['booking_id'] = bookingId;
-      }
-
-      if (kDebugMode) {
-        print("Endpoint: $endpoint");
-        print("Query Params: $queryParams");
-      }
-
       final response = await dioClient.get(
-        endpoint,
+        AppEndpoints.bookingConfirmation,
         queryParameters: queryParams,
       );
 
@@ -97,14 +82,7 @@ class BookingHistoryRepository {
       }
 
       if (response.statusCode == 200) {
-        CustomLogger.logMessage(
-          msg: "Booking confirmation fetched: ${response.data}",
-          level: LogLevel.info,
-        );
-
-        final model = BookingConfirmationModel.fromJson(response.data);
-        print("Parsed model booking status: ${model.status}");
-        return model;
+        return BookingConfirmationModel.fromJson(response.data);
       } else {
         throw Exception(
           "Failed to fetch booking confirmation. Status: ${response.statusCode}",
@@ -112,13 +90,10 @@ class BookingHistoryRepository {
       }
     } catch (e) {
       print("Repository error: $e");
-      CustomLogger.logMessage(
-        msg: "Error fetching booking confirmation: $e",
-        level: LogLevel.error,
-      );
       rethrow;
     }
   }
+
   Future<CancelUserBooking?> updateBookingStatus({
     required Map<String, dynamic> body,
   }) async {
