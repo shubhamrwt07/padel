@@ -1,6 +1,7 @@
 class AppEndpoints {
   AppEndpoints._();
-   static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
+
+  static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
   static const String login = "${BASE_URL}customerLogin";
   static const String signUp = "${BASE_URL}customerSignup";
   static const String fetchUserProfile = "${BASE_URL}getCustomer";
@@ -12,10 +13,14 @@ class AppEndpoints {
       "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getActiveCourt =
       "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
+
   // Cart Urls
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
   static const String removeCartItems = "${BASE_URL}court/cart/removeUserCart";
+  static const String cancelBooking = "${BASE_URL}court/booking/updateBookingStatus";
   static const String carteBooking = "${BASE_URL}court/booking/createBooking";
-  static const String bookingHistory = "${BASE_URL}court/booking/getUserBookings";
-}
+  static const String bookingHistory =
+      "${BASE_URL}court/booking/getUserBookings";
+  static const String bookingConfirmation =
+      "${BASE_URL}court/booking/getAllBookingByStatus";}
