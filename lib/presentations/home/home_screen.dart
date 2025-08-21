@@ -126,7 +126,7 @@ class HomeScreen extends GetView<HomeController> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: 2 + courts.length + (controller.isLoadingMore.value ? 1 : 0),
                 itemBuilder: (context, index) {
-                  if (index == 0) return clubTicketList(context);
+                  if (index == 0) return controller.bookings.value?.data == null ?SizedBox.shrink(): clubTicketList(context);
                   if (index == 1) {
                     return Text(
                       AppStrings.newBooking,
