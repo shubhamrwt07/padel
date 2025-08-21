@@ -143,7 +143,7 @@ class CartScreen extends StatelessWidget {
                               Get.snackbar("Error", "Invalid slot ID");
                               return;
                             }
-
+///
                             await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
                           },
                           child: Container(
