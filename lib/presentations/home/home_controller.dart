@@ -235,11 +235,11 @@ class HomeController extends GetxController {
     });
   }
 
-  @override
-  void onClose() {
-    scrollController.dispose();
-    super.onClose();
-  }
+  // @override
+  // void onClose() {
+  //   scrollController.dispose();
+  //   super.onClose();
+  // }
 
   /// Clear search and reset data
   void clearSearch() {
