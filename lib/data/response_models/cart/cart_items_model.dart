@@ -151,8 +151,8 @@ class SlotTimes {
 class RegisterClubId {
   Location? location;
   String? sId;
-  String? ownerId;
   String? clubName;
+  String? ownerId;
   int? iV;
   String? address;
   List<BusinessHours>? businessHours;
@@ -173,8 +173,8 @@ class RegisterClubId {
   RegisterClubId(
       {this.location,
         this.sId,
-        this.ownerId,
         this.clubName,
+        this.ownerId,
         this.iV,
         this.address,
         this.businessHours,
@@ -197,8 +197,8 @@ class RegisterClubId {
         ? new Location.fromJson(json['location'])
         : null;
     sId = json['_id'];
-    ownerId = json['ownerId'];
     clubName = json['clubName'];
+    ownerId = json['ownerId'];
     iV = json['__v'];
     address = json['address'];
     if (json['businessHours'] != null) {
@@ -228,8 +228,8 @@ class RegisterClubId {
       data['location'] = this.location!.toJson();
     }
     data['_id'] = this.sId;
-    data['ownerId'] = this.ownerId;
     data['clubName'] = this.clubName;
+    data['ownerId'] = this.ownerId;
     data['__v'] = this.iV;
     data['address'] = this.address;
     if (this.businessHours != null) {

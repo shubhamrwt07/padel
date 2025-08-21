@@ -30,8 +30,15 @@ class CartScreen extends StatelessWidget {
         child: Column(
           children: [
             cartList(controller),
-            totalSlot(context),
-            button(context),
+            // Only show total and button when cart is not empty
+            Obx(() => controller.cartItems.isEmpty
+                ? SizedBox.shrink()
+                : Column(
+              children: [
+                totalSlot(context),
+                button(context),
+              ],
+            )),
           ],
         ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
       ),
@@ -41,24 +48,40 @@ class CartScreen extends StatelessWidget {
   Widget cartList(CartController controller) {
     return SizedBox(
       height: buttonType == "true" ? Get.height * 0.65 : Get.height * 0.56,
-      child: Obx(
-            () => controller.cartItems.isEmpty
-            ? emptyState()
-            : ListView.builder(
+      child: Obx(() {
+        // Show loading state
+        if (controller.isLoading.value) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primaryColor,
+            ),
+          );
+        }
+
+        // Show empty state when no items
+        if (controller.cartItems.isEmpty) {
+          return emptyState();
+        }
+
+        // Filter out items with invalid data
+        final validItems = controller.cartItems.where((item) {
+          return item.slot != null &&
+              item.slot!.isNotEmpty &&
+              item.slot!.first.slotTimes != null &&
+              item.slot!.first.slotTimes!.isNotEmpty;
+        }).toList();
+
+        // Show empty state if no valid items after filtering
+        if (validItems.isEmpty) {
+          return emptyState();
+        }
+
+        return ListView.builder(
           controller: controller.scrollController,
-          itemCount: controller.cartItems.length,
+          itemCount: validItems.length,
           itemBuilder: (BuildContext context, index) {
-            final item = controller.cartItems[index];
-
-            // Add null safety checks here
-            if (item.slot == null || item.slot!.isEmpty) {
-              return SizedBox.shrink(); // Return empty widget if no slots
-            }
-
+            final item = validItems[index];
             final firstSlot = item.slot!.first;
-            if (firstSlot.slotTimes == null || firstSlot.slotTimes!.isEmpty) {
-              return SizedBox.shrink(); // Return empty widget if no slot times
-            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,57 +106,64 @@ class CartScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Date + Time + Duration
-                        Row(
-                          children: [
-                            Text(
-                              formatCreatedAt(slot.bookingDate ?? ""),
-                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Text(
+                                formatCreatedAt(slot.bookingDate ?? ""),
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "${slot.time ?? 'N/A'} ",
-                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(width: 6),
+                              Text(
+                                "${slot.time ?? 'N/A'} ",
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "(60m)",
-                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w400,
+                              const SizedBox(width: 6),
+                              Text(
+                                "(60m)",
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
 
                         // Price + Remove Icon
-                        Row(
-                          children: [
-                            Text(
-                              "₹ ${slot.amount ?? '0'}",
-                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                final slotTimeId = slot.slotId;
+                        GestureDetector(
+                          onTap: () async {
+                            final slotTimeId = slot.slotId;
 
-                                if (slotTimeId == null) {
-                                  Get.snackbar("Error", "Invalid slot ID");
-                                  return;
-                                }
+                            if (slotTimeId == null || slotTimeId.isEmpty) {
+                              Get.snackbar("Error", "Invalid slot ID");
+                              return;
+                            }
 
-                                await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
-                              },
-                              child: Image.asset(
-                                Assets.imagesIcRemove,
-                                scale: 2,
-                              ).paddingOnly(left: 10),
+                            await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
+                          },
+                          child: Container(
+                            height: 40,
+                            color: Colors.transparent,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "₹ ${slot.amount ?? '0'}",
+                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Image.asset(
+                                  Assets.imagesIcRemove,
+                                  scale: 2,
+                                ).paddingOnly(left: 10),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ).paddingOnly(bottom: Get.height * 0.015);
@@ -151,8 +181,8 @@ class CartScreen extends StatelessWidget {
               right: Get.width * 0.03,
             );
           },
-        ),
-      ),
+        );
+      }),
     ).paddingOnly(bottom: Get.height * 0.02);
   }
 
@@ -227,7 +257,6 @@ class CartScreen extends StatelessWidget {
 
   Widget button(BuildContext context) {
     final CartController cartController = Get.find<CartController>();
-
     return Obx(() {
       return CustomButton(
         width: Get.width * 0.9,
@@ -269,14 +298,40 @@ class CartScreen extends StatelessWidget {
         ),
       );
     });
-  }  Widget emptyState() {
+  }
+
+  Widget emptyState() {
     return Center(
-      child: Text("No items in cart"),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 80,
+            color: AppColors.textColor,
+          ),
+          SizedBox(height: 16),
+          Text(
+            "No items in cart",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textColor,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Add some items to get started",
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textColor,
+            ),
+          ),
+        ],
+      ).paddingOnly(top: Get.height*.2),
     );
   }
 
-  // Date formatting with suffix (e.g., 1st, 2nd, 3rd)
-  // ✅ Updated date formatter to: 28th June' 2025
   String formatCreatedAt(String dateStr) {
     if (dateStr.isEmpty) return "Invalid Date";
 

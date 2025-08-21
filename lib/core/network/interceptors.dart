@@ -41,9 +41,11 @@ class LoggerInterceptor extends Interceptor {
             err.error.toString().contains('SocketException')) {
       await _connectivityService.checkConnectivity();
     } else if (err.response != null) {
-      SnackBarUtils.showErrorSnackBar(
-        err.response?.data?['message'] ?? 'An error occurred',
-      );
+      if (err.response?.statusCode != 404) {
+   SnackBarUtils.showErrorSnackBar(
+  err.response?.data?['message'] ?? 'An error occurred',
+);
+    }
     } else {
       SnackBarUtils.showErrorSnackBar(
         err.response?.data?['message'] ?? 'An error occurred',

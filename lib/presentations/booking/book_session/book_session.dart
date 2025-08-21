@@ -199,7 +199,7 @@ class BookSession extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8),
             children: List.generate(16, (index) {
-              return  Container(
+              return Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F6FF),
                   borderRadius: BorderRadius.circular(20),
@@ -209,13 +209,10 @@ class BookSession extends StatelessWidget {
           );
         }
 
-        final courts = controller.slots.value?.data;
-        if (courts == null || courts.isEmpty) {
-          return const Center(child: Text("No courts available"));
-        }
+        /// ✅ Get slots for selected court
+        final slotTimes = controller.getSlotsForCourt(controller.courtId.value);
 
-        final slots = courts[0].slot;
-        if (slots == null || slots.isEmpty || slots[0].slotTimes == null) {
+        if (slotTimes.isEmpty) {
           return const Center(
             child: Text(
               "No time slots available",
@@ -224,7 +221,6 @@ class BookSession extends StatelessWidget {
           ).paddingOnly(top: Get.height * .15);
         }
 
-        final slotTimes = slots[0].slotTimes!;
         double spacing = Get.width * 0.02;
         final double tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
@@ -236,40 +232,38 @@ class BookSession extends StatelessWidget {
             final isSelected = controller.selectedSlots.contains(slot);
 
             return GestureDetector(
-                onTap: isUnavailable
-                    ? null
-                    : () => controller.toggleSlotSelection(slot),
-                child: Container(
-                  width: tileWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
+              onTap: isUnavailable
+                  ? null
+                  : () => controller.toggleSlotSelection(slot),
+              child: Container(
+                width: tileWidth,
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isUnavailable
+                      ? AppColors.greyColor
+                      : isSelected
+                      ? Colors.black
+                      : AppColors.playerCardBackgroundColor,
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(
                     color: isUnavailable
-                        ? AppColors.greyColor
+                        ? Colors.transparent
+                        : AppColors.cartColor,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  slot.time ?? '',
+                  style: Get.textTheme.labelLarge?.copyWith(
+                    color: isUnavailable
+                        ? Colors.grey
                         : isSelected
-                        ? Colors.black
-                        : AppColors.playerCardBackgroundColor,
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      color: isUnavailable
-                          ? Colors.transparent
-                          :
-                      AppColors.cartColor,
-
-                      width:  1,
-                    ),
+                        ? Colors.white
+                        : Colors.black,
                   ),
-                  child: Text(
-                    slot.time ?? '',
-                    style: Get.textTheme.labelLarge?.copyWith(
-                      color: isUnavailable
-                          ? Colors.grey
-                          : isSelected
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                )
+                ),
+              ),
             );
           }).toList(),
         );
@@ -300,6 +294,7 @@ class BookSession extends StatelessWidget {
 
         for (var court in courts) {
           final courtName = court.courtName ?? '';
+          final courtId = court.sId ?? ''; // <-- capture court id
 
           courtWidgets.add(
             Container(
@@ -317,11 +312,21 @@ class BookSession extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(() => Radio<String>(
-                    value: courtName,  // <-- Set courtName as value
-                    groupValue: controller.courtName.value,  // Current selected courtName
-                    onChanged: (value) {
-                      controller.courtName.value = value!;  // Update with courtName
+                    value: courtName, // <-- Set courtName as value
+                    groupValue: controller.courtName.value,
+                    onChanged: (value) async {
+                      controller.courtName.value = value!;
+                      controller.courtId.value = courtId;
+
+                      controller.selectedSlots.clear();
+
+                      // ✅ Fetch slots again for this court
+                      await controller.getAvailableCourtsById(
+                        controller.argument.id!,
+                        selectedCourtId: courtId, // <-- pass court id here
+                      );
                     },
+
                   )),
                   const SizedBox(width: 8),
                   Expanded(

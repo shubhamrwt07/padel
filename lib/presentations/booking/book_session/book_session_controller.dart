@@ -1,13 +1,11 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
+
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 import '../../../data/request_models/home_models/get_available_court.dart' hide Courts;
 import '../../../data/request_models/home_models/get_club_name_model.dart';
-import '../../../data/response_models/cart/add_to_cart_items_model.dart' hide SlotTimes;
 import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
 import '../../cart/cart_controller.dart';
@@ -33,11 +31,11 @@ class BookSessionController extends GetxController {
       await getAvailableCourtsById(argument.id!);
     });
   }
-  Future<void> getAvailableCourtsById(String registerClubId) async {
-    log("Fetching courts for club: $registerClubId");
+  Future<void> getAvailableCourtsById(String registerClubId, {String? selectedCourtId}) async {
+    log("Fetching courts for club: $registerClubId, court: $selectedCourtId");
     isLoadingCourts.value = true;
     slots.value = null;
-    selectedSlots.clear(); // Clear previous selection
+    selectedSlots.clear();
 
     try {
       final date = selectedDate.value ?? DateTime.now();
@@ -50,29 +48,51 @@ class BookSessionController extends GetxController {
         time: '',
         date: formattedDate,
         day: formattedDay,
+        courtId: selectedCourtId ?? '',   // ✅ pass courtId to API
       );
 
       slots.value = result;
-      log("Available courts fetched: ${result.data?[0].slot?.length ?? 0}");
+      log("Available courts fetched for courtId: ${selectedCourtId ?? 'first court'}");
 
-      // Auto-select first available slot
-      final slotTimes = result.data?[0].slot?[0].slotTimes;
-      if (slotTimes != null && slotTimes.isNotEmpty) {
-        final firstSlot = slotTimes.firstWhereOrNull((slot) => !isPastAndUnavailable(slot));
-        if (firstSlot != null) {
-          selectedSlots.add(firstSlot);
-          // Update total amount
-          totalAmount.value = firstSlot.amount ?? 0;
-
-          log("Auto-selected first slot: ${firstSlot.time}");
+      // ✅ If no court selected, pick first one from API
+      if (courtId.value.isEmpty) {
+        final firstCourt = result.data?.first.courts?.first;
+        if (firstCourt != null) {
+          courtId.value = firstCourt.sId ?? '';
+          courtName.value = firstCourt.courtName ?? '';
         }
       }
 
+      // ✅ Get slots for the selected court
+      final selectedCourtSlots = getSlotsForCourt(courtId.value);
+      if (selectedCourtSlots.isNotEmpty) {
+        final firstSlot = selectedCourtSlots.firstWhereOrNull(
+                (slot) => !isPastAndUnavailable(slot));
+        if (firstSlot != null) {
+          selectedSlots.add(firstSlot);
+          totalAmount.value = firstSlot.amount ?? 0;
+          log("Auto-selected first slot for court ${courtName.value}: ${firstSlot.time}");
+        }
+      }
     } catch (e) {
       log("Error: $e");
     } finally {
       isLoadingCourts.value = false;
     }
+  }
+
+  /// ✅ Helper: return slots for the selected court
+  List<SlotTimes> getSlotsForCourt(String courtId) {
+    final data = slots.value?.data ?? [];
+    for (var slot in data) {
+      final courts = slot.courts ?? [];
+      for (var court in courts) {
+        if (court.sId == courtId) {
+          return slot.slot?.first.slotTimes ?? [];
+        }
+      }
+    }
+    return [];
   }
 
 
@@ -117,31 +137,23 @@ class BookSessionController extends GetxController {
 
   bool isPastAndUnavailable(SlotTimes slot) {
     if (slot.status != "available") return true;
-
     final now = DateTime.now();
     final selected = selectedDate.value ?? now;
-
-    // Parse slot time like "8 am" or "9 pm"
     final slotTimeParts = slot.time!.toLowerCase().split(" ");
     int hour = int.parse(slotTimeParts[0]);
     if (slotTimeParts[1] == "pm" && hour != 12) hour += 12;
     if (slotTimeParts[1] == "am" && hour == 12) hour = 0;
-
     final slotDateTime = DateTime(selected.year, selected.month, selected.day, hour);
-
-    // If selected day is today, compare with current time
     final isToday = selected.year == now.year &&
         selected.month == now.month &&
         selected.day == now.day;
-
     if (isToday && slotDateTime.isBefore(DateTime(now.year, now.month, now.day, now.hour))) {
       return true;
     }
-
     return false;
   }
-  var courtName = ''.obs;  // Make it RxString
-
+  var courtName = ''.obs;
+  var courtId= ''.obs;
   void addToCart() async {
     try {
       if (isLoadingCourts.value) return;
@@ -183,6 +195,8 @@ class BookSessionController extends GetxController {
         ],
         "register_club_id": argument.id!,
         "courtName": courtName.value,
+        "courtId":courtId.value,
+
       };
 
       log("Cart Data: $data");

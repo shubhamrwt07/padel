@@ -10,17 +10,17 @@ class SignUpScreen extends GetView<SignUpController> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: PrimaryContainer(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: primaryAppBar(title: SizedBox(), context: context),
+          appBar: primaryAppBar(title: const SizedBox(), context: context),
           body: SingleChildScrollView(
             child: Column(
               children: [
                 topTexts(context),
                 formFields(),
-                // locationField(context), // COMMENTED as requested
+                locationField(context), // ✅ Added Location field
                 bottomButtonAndContent(context),
               ],
             ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
@@ -39,7 +39,8 @@ class SignUpScreen extends GetView<SignUpController> {
         ).paddingOnly(bottom: Get.height * 0.02, top: Get.height * 0.02),
         Text(
           "Create an account so you can start booking.",
-          style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
+          style: Theme.of(context).textTheme.headlineMedium!
+              .copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.06),
       ],
@@ -123,35 +124,62 @@ class SignUpScreen extends GetView<SignUpController> {
                 ),
               ),
             ).paddingOnly(bottom: Get.height * 0.03),
-
-            // Confirm Password Field commented as per request.
-            // PrimaryTextField(
-            //   action: TextInputAction.done,
-            //   onFieldSubmitted: (v) => controller.onFieldSubmit(),
-            //   validator: (v) => controller.validateConfirmPassword(),
-            //   controller: controller.confirmPasswordController,
-            //   focusNode: controller.confirmPasswordFocusNode,
-            //   hintText: "Confirm Password",
-            //   obscureText: controller.isVisibleConfirmPassword.value,
-            //   maxLine: 1,
-            //   suffixIcon: IconButton(
-            //     onPressed: () => controller.confirmPasswordToggle(),
-            //     icon: Image.asset(
-            //       controller.isVisibleConfirmPassword.value
-            //           ? Assets.imagesIcEyeOff
-            //           : Assets.imagesIcEye,
-            //       color: AppColors.textColor,
-            //       height: 20,
-            //       width: 20,
-            //     ),
-            //   ),
-            // ).paddingOnly(bottom: Get.height * 0.03),
           ],
         ),
       ),
     );
   }
 
+  /// ✅ New Location Dropdown
+  Widget locationField(BuildContext context) {
+    final controller = Get.find<SignUpController>();
+
+    return Container(
+      height: 55,
+      width: Get.width,
+      decoration: BoxDecoration(
+        color: AppColors.textFieldColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+      child: Obx(() {
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: controller.selectedLocation!.isEmpty
+                ? null
+                : controller.selectedLocation!.value,
+            hint: Text(
+              AppStrings.preferenceLocation,
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                color: AppColors.textColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            isExpanded: true,
+            icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textColor),
+            dropdownColor: AppColors.textFieldColor,
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              color: AppColors.textColor,
+              fontWeight: FontWeight.w500,
+            ),
+            onChanged: (value) {
+              if (value != null) controller.selectedLocation!.value = value;
+            },
+            items: controller.locations.map((location) {
+              return DropdownMenuItem<String>(
+                value: location,
+                child: Text(location),
+              );
+            }).toList(),
+          ),
+        );
+      }),
+    ).paddingOnly(
+      bottom: MediaQuery.of(context).viewInsets.bottom > 0
+          ? Get.height * 0.05
+          : Get.height * 0.1,
+    );
+  }
   Widget bottomButtonAndContent(BuildContext context) {
     return Column(
       children: [
