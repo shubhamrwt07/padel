@@ -36,6 +36,7 @@ dependencies:
   permission_handler:
   firebase_core:
   flutter_dash:
+  shimmer:
 
 
 dev_dependencies:

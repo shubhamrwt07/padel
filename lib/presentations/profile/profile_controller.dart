@@ -1,5 +1,6 @@
 // ✅ FILE: profile_controller.dart
  import 'dart:developer';
+import 'dart:io';
 
  import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -13,18 +14,23 @@ import 'package:padel_mobile/repositories/home_repository/profile_repository.dar
 class ProfileController extends GetxController {
   // Repositories
   ProfileRepository profileRepository = ProfileRepository();
-
+  var selectedIndex = (-1).obs;
   // Text Controllers
   TextEditingController nameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
-  Rx<TextEditingController> dobController = TextEditingController().obs;
+  // Rx<TextEditingController> dobController = TextEditingController().obs;
+  TextEditingController locationController = TextEditingController();
+  var selectedDate = "".obs;
 
   // Observables
   Rx<ProfileModel> profileModel = ProfileModel(
     response: ProfileResponse(
+      profilePic: "",
       email: "example@gmail.com",
       name: "Unknown",
+      lastname: "",
       gender: "",
       dob: "",
       countryCode: "",
@@ -45,14 +51,29 @@ class ProfileController extends GetxController {
       await fetchUserProfile();
     });
   }
-
+  RxString profileImageUrl = ''.obs;
   void setValues() {
     nameController.text = profileModel.value.response?.name ?? '';
+    lastNameController.text = profileModel.value.response?.lastname ??'';
     emailController.text = profileModel.value.response?.email ?? '';
-    phoneController.text =
-        profileModel.value.response?.phoneNumber.toString() ?? '';
-    selectedGender.value = profileModel.value.response!.gender ?? "";
-    dobController.value.text = profileModel.value.response?.dob ?? '';
+    phoneController.text = profileModel.value.response?.phoneNumber.toString() ?? '';
+    selectedGender.value = profileModel.value.response?.gender ?? "";
+    profileImageUrl.value = profileModel.value.response?.profilePic?.toString() ?? '';
+
+    // Format DOB
+    final dob = profileModel.value.response?.dob;
+    if (dob != null && dob.isNotEmpty) {
+      try {
+        DateTime parsedDate = DateTime.parse(dob);
+        selectedDate.value = DateFormat('dd-MM-yyyy').format(parsedDate);
+      } catch (e) {
+        selectedDate.value = dob;
+      }
+    } else {
+      selectedDate.value = "";
+    }
+
+    locationController.text = profileModel.value.response?.city ?? '';
   }
 
   void selectDate(BuildContext context) async {
@@ -64,7 +85,7 @@ class ProfileController extends GetxController {
     );
 
     if (pickedDate != null) {
-      dobController.value.text = DateFormat('dd/MM/yyyy').format(pickedDate);
+      selectedDate.value = DateFormat('dd-MM-yyyy').format(pickedDate); // use dash
     }
   }
 
@@ -187,36 +208,38 @@ class ProfileController extends GetxController {
   }
 
   Future<void> updateProfile() async {
+    if (isLoading.value) return;
     FocusManager.instance.primaryFocus!.unfocus();
     try {
-      if (isLoading.value) return;
       isLoading.value = true;
 
       Map<String, dynamic> locationJson = {
         "type": "Point",
         "coordinates": [77.5947, 12.9717],
       };
+
       String formattedDate;
-      if (dobController.value.text.isNotEmpty) {
-        DateTime dateTime = parseDateFromString(dobController.value.text);
-        formattedDate = dateTime.toIso8601String();
+      if (selectedDate.value.isNotEmpty) {
+        DateTime dateTime = parseDateFromString(selectedDate.value);
+        formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
       } else {
-        formattedDate = DateTime.now().toIso8601String();
+        formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
       }
 
       final updatedProfile = await profileRepository.updateUserProfile(
         name: nameController.text.trim(),
-        // countryCode: "+91",
-        // phoneNumber: phoneController.text.trim(),
+        lastName: lastNameController.text.trim(),
         gender: selectedGender.value,
         dob: formattedDate,
-        city: "city",
+        city: locationController.text.trim(),
         location: locationJson,
+        profileImage: profileImage.value != null ? File(profileImage.value!.path) : null,
       );
 
       if (updatedProfile.status == "200") {
+        await fetchUserProfile();
         Get.back();
-        fetchUserProfile();
       } else {
         log("UPDATE PROFILE ERROR");
       }
@@ -228,57 +251,14 @@ class ProfileController extends GetxController {
     }
   }
 
-  DateTime parseDateFromString(String dateString) {
+  DateTime parseDateFromString(String dateStr) {
     try {
-      if (dateString.contains('/')) {
-        List<String> parts = dateString.split('/');
-        if (parts.length == 3) {
-          int month = int.parse(parts[0]);
-          int day = int.parse(parts[1]);
-          int year = int.parse(parts[2]);
-          return DateTime(year, month, day);
-        }
-      }
-
-      // Handle DD/MM/YYYY format (alternative)
-      if (dateString.contains('/')) {
-        List<String> parts = dateString.split('/');
-        if (parts.length == 3) {
-          int day = int.parse(parts[0]);
-          int month = int.parse(parts[1]);
-          int year = int.parse(parts[2]);
-          return DateTime(year, month, day);
-        }
-      }
-
-      // Handle YYYY-MM-DD format
-      if (dateString.contains('-')) {
-        return DateTime.parse(dateString);
-      }
-
-      // Default fallback
-      return DateTime.now();
-    } catch (e) {
-      log('Error parsing date: $e');
+      return DateFormat('dd-MM-yyyy').parse(dateStr); // same format
+    } catch (_) {
       return DateTime.now();
     }
   }
 
-  // Helper method to format date properly
-  String formatDateForServer(DateTime dateTime) {
-    return dateTime.toIso8601String();
-  }
-
-  // Alternative helper method if you need more control over the format
-  String formatDateForServerCustom(DateTime dateTime) {
-    return '${dateTime.year.toString().padLeft(4, '0')}-'
-        '${dateTime.month.toString().padLeft(2, '0')}-'
-        '${dateTime.day.toString().padLeft(2, '0')}T'
-        '${dateTime.hour.toString().padLeft(2, '0')}:'
-        '${dateTime.minute.toString().padLeft(2, '0')}:'
-        '${dateTime.second.toString().padLeft(2, '0')}.'
-        '${dateTime.millisecond.toString().padLeft(3, '0')}';
-  }
 
   Future<void> pickImage(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
