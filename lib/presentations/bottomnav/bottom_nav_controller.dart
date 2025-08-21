@@ -43,4 +43,9 @@ ProfileUi()
   Widget getCurrentPage() {
     return pages[selectedIndex.value];
   }
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+  }
 }
