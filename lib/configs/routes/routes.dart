@@ -20,6 +20,8 @@ import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/notification/notification_binding.dart';
 import 'package:padel_mobile/presentations/notification/notification_ui.dart';
+import 'package:padel_mobile/presentations/packages/packages_binding.dart';
+import 'package:padel_mobile/presentations/packages/packages_screen.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_binding.dart';
@@ -203,6 +205,13 @@ class Routes {
       name: RoutesName.registration,
       page: () => RegistrationView(),
       binding: RegistrationBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.packages,
+      page: () => PackagesUi(),
+      binding: PackagesBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

@@ -9,6 +9,8 @@ import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
+import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../data/request_models/home_models/get_club_name_model.dart';
 
@@ -22,24 +24,46 @@ class HomeScreen extends GetView<HomeController> {
       child: Scaffold(
         appBar: primaryAppBar(
           showLeading: false,
-          title: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: AppStrings.hello,
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+          title: Obx(() {
+            final profile = controller.profileController.profileModel.value;
+            if (controller.profileController.isLoading.value) {
+              return Container(
+                width: 120,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                TextSpan(
-                  text: "Jane",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700),
+              );
+            }
+            final name = profile.response?.name;
+            final displayName = (name == null || name.trim().isEmpty)
+                ? 'Guest'
+                : name;
+
+            return Container(
+              color: Colors.transparent,
+              width: Get.width * 0.34,
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: AppStrings.hello,
+                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    TextSpan(
+                      text: displayName,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ).paddingOnly(left: Get.width * 0.0),
+              ),
+            );
+          }),
           action: [
             InkWell(
               onTap: () {
@@ -71,74 +95,68 @@ class HomeScreen extends GetView<HomeController> {
                     : const SizedBox.shrink(key: ValueKey('empty')),
               ),
             ),
-            Expanded(
-              child: RefreshIndicator(
-                color: Colors.white,
-                onRefresh: controller.retryFetch,
-                child: Obx(() {
-                  final courtsData = controller.courtsData.value;
+        Expanded(
+          child: RefreshIndicator(
+            color: Colors.white,
+            onRefresh: controller.retryFetch,
+            child: Obx(() {
+              final courtsData = controller.courtsData.value;
+              final isLoading = controller.isLoadingClub.value && !controller.isInitialized.value;
+              final hasError = controller.clubError.value.isNotEmpty && !controller.hasCourtsData;
+              final courts = courtsData?.data?.courts ?? [];
 
-                  if (controller.isLoadingClub.value &&
-                      !controller.isInitialized.value) {
-                    return ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [_buildLoadingState(context)],
+              // Loading state
+              if (isLoading) {
+                return _buildListWrapper(_buildLoadingState(context));
+              }
+
+              // Error state
+              if (hasError) {
+                return _buildListWrapper(_buildErrorState(context));
+              }
+
+              // Empty state
+              if (courts.isEmpty) {
+                return _buildListWrapper(_buildEmptyState(context));
+              }
+
+              // Courts list with header + title + courts + load more
+              return ListView.builder(
+                controller: controller.scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: 2 + courts.length + (controller.isLoadingMore.value ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == 0) return clubTicketList(context);
+                  if (index == 1) {
+                    return Text(
+                      AppStrings.newBooking,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ).paddingOnly(
+                      bottom: Get.width * 0.02,
+                      left: Get.width * 0.02,
                     );
                   }
 
-                  if (controller.clubError.value.isNotEmpty &&
-                      !controller.hasCourtsData) {
-                    return ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [_buildErrorState(context)],
-                    );
+                  final courtIndex = index - 2;
+                  if (courtIndex < courts.length) {
+                    return _buildCourtCard(context, courts[courtIndex], courtIndex);
                   }
 
-                  final courts = courtsData?.data?.courts;
-                  if (courts == null || courts.isEmpty) {
-                    return ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [_buildEmptyState(context)],
-                    );
-                  }
-
-                  return ListView.builder(
-                    controller: controller.scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount:
-                        2 +
-                        courts.length +
-                        (controller.isLoadingMore.value ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == 0) return clubTicketList(context);
-                      if (index == 1) {
-                        return Text(
-                          AppStrings.newBooking,
-                          style: Theme.of(context).textTheme.headlineMedium!,
-                        ).paddingOnly(
-                          bottom: Get.width * 0.02,
-                          left: Get.width * 0.02,
-                        );
-                      }
-
-                      final courtIndex = index - 2;
-                      if (courtIndex < courts.length) {
-                        return _buildCourtCard(
-                          context,
-                          courts[courtIndex],
-                          courtIndex,
-                        );
-                      }
-
-                      return _buildLoadMoreIndicator();
-                    },
-                  );
-                }),
-              ),
-            ),
+                  return _buildLoadMoreIndicator();
+                },
+              );
+            }),
+          ),
+        )
           ],
         ).paddingOnly(left: Get.width * .02, right: Get.width * .02),
       ),
+    );
+  }
+  Widget _buildListWrapper(Widget child) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [child],
     );
   }
 
@@ -470,190 +488,176 @@ class HomeScreen extends GetView<HomeController> {
           AppStrings.yourBooking,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(),
         ).paddingOnly(bottom: Get.width * 0.02),
-        SizedBox(
-          height: 80,
-          child: Scrollbar(
-            thumbVisibility: false,
-            radius: const Radius.circular(10),
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: 10,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 230,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.tabColor),
-                  ),
-                  padding: EdgeInsets.only(left: 10, right: 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            height: 34,
-                            width: 34,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.greyColor),
-                              image: DecorationImage(
-                                image: AssetImage(Assets.imagesImgHomeLogo),
-                              ),
-                            ),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "The Good Club",
-                                style: Theme.of(context).textTheme.labelLarge!
-                                    .copyWith(color: AppColors.blackColor),
-                              ).paddingOnly(right: Get.width * .08),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    Assets.imagesIcLocation,
-                                    scale: 3,
-                                    color: AppColors.blackColor,
-                                  ),
-                                  Text(
-                                    "Chandigarh 160001",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(color: AppColors.blackColor),
-                                  ).paddingOnly(left: 4),
-                                ],
-                              ).paddingOnly(top: 0, left: 6),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.star,
-                                    color: AppColors.secondaryColor,
-                                    size: 13,
-                                  ),
-                                  Text(
-                                    "4.9",
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                ],
-                              ).paddingOnly(bottom: 10),
-                              Icon(
-                                Icons.directions,
-                                color: AppColors.secondaryColor,
-                                size: 15,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    "29thJune",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.blackColor,
-                                        ),
-                                  ),
-                                  Text(
-                                    "8:00am",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall!
-                                        .copyWith(color: AppColors.blackColor),
-                                  ).paddingOnly(left: 5),
-                                ],
-                              ),
-                              Text(
-                                "(60m)",
-                                style: Theme.of(context).textTheme.labelSmall!
-                                    .copyWith(color: AppColors.blackColor),
-                              ).paddingOnly(),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ).paddingOnly(right: 10);
-              },
-            ),
-          ),
-        ),
+       Obx((){
+         if(controller.isLoadingClub.value){
+           return bookingShimmer();
+         }
+         final booking = controller.bookings.value?.data ?? [];
+         return  SizedBox(
+           height: 80,
+           child: ListView.builder(
+             controller: scrollController,
+             itemCount: booking.length,
+             scrollDirection: Axis.horizontal,
+             itemBuilder: (context, index) {
+               final b = booking[index];
+               final club = b.registerClubId;
+               return GestureDetector(
+                 onTap: () {
+                   if (b.sId != null && b.sId!.isNotEmpty) {
+                     Get.toNamed(
+                       RoutesName.bookingConfirmAndCancel,
+                       arguments: {"id": b.sId!},
+                     );
+                   } else {
+                     Get.snackbar("Error", "Booking ID not available");
+                   }
+                 },
+                 child: Container(
+                   width: 230,
+                   decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(12),
+                     border: Border.all(color: AppColors.tabColor),
+                   ),
+                   padding: EdgeInsets.only(left: 10, right: 10),
+                   child: Column(
+                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                     children: [
+                       Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                         children: [
+                           Container(
+                             height: 34,
+                             width: 34,
+                             decoration: BoxDecoration(
+                               shape: BoxShape.circle,
+                               border: Border.all(color: AppColors.greyColor),
+                             ),
+                             child: ClipOval(
+                               child: (club?.courtImage?[0].isNotEmpty ?? false)
+                                   ? CachedNetworkImage(
+                                 imageUrl: club!.courtImage![0],
+                                 fit: BoxFit.cover,
+                                 placeholder: (context, url) =>
+                                 const CircularProgressIndicator(strokeWidth: 2),
+                                 errorWidget: (context, url, error) =>
+                                     Image.asset(Assets.imagesImgHomeLogo),
+                               )
+                                   : Image.asset(Assets.imagesImgHomeLogo),
+                             ),
+                           ),
+                           Column(
+                             mainAxisAlignment: MainAxisAlignment.start,
+                             children: [
+                               Container(
+                                 color: Colors.transparent,
+                                 width: Get.width*0.3,
+                                 child: Text(
+                                   overflow: TextOverflow.ellipsis,
+                                   club?.clubName ?? "N/A",
+                                   style: Theme.of(context).textTheme.labelLarge!
+                                       .copyWith(color: AppColors.blackColor),
+                                 ).paddingOnly(right: Get.width * .08),
+                               ),
+                               Row(
+                                 children: [
+                                   Image.asset(
+                                     Assets.imagesIcLocation,
+                                     scale: 3,
+                                     color: AppColors.blackColor,
+                                   ),
+                                   Container(
+                                     color: Colors.transparent,
+                                     width: Get.width*0.3,
+                                     child: Text(
+                                       overflow: TextOverflow.ellipsis,
+                                       club?.city??"N/A",
+                                       style: Theme.of(context)
+                                           .textTheme
+                                           .bodyLarge!
+                                           .copyWith(color: AppColors.blackColor),
+                                     ).paddingOnly(left: 4),
+                                   ),
+                                 ],
+                               ).paddingOnly(left: 6),
+                             ],
+                           ),
+                           Column(
+                             crossAxisAlignment: CrossAxisAlignment.end,
+                             children: [
+                               Row(
+                                 children: [
+                                   Icon(
+                                     Icons.star,
+                                     color: AppColors.secondaryColor,
+                                     size: 13,
+                                   ),
+                                   Text(
+                                     "4.9",
+                                     style: Theme.of(
+                                       context,
+                                     ).textTheme.bodySmall,
+                                   ),
+                                 ],
+                               ).paddingOnly(bottom: 10),
+                               Icon(
+                                 Icons.directions,
+                                 color: AppColors.secondaryColor,
+                                 size: 15,
+                               ),
+                             ],
+                           ),
+                         ],
+                       ),
+                       Row(
+                         mainAxisAlignment:MainAxisAlignment.spaceBetween,
+                         children: [
+                           Row(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               Text(
+                                 formatDate(b.bookingDate),
+                                 style: Theme.of(context)
+                                     .textTheme
+                                     .bodyLarge!
+                                     .copyWith(
+                                   fontWeight: FontWeight.w500,
+                                   color: AppColors.blackColor,
+                                 ),
+                               ),
+                               if (b.slot!.first.slotTimes != null &&
+                                   b.slot!.first.slotTimes!.isNotEmpty)
+                                 Text(
+                                   b.slot!.first.slotTimes!.first.time ?? "",
+                                   style: Theme.of(context)
+                                       .textTheme
+                                       .bodyLarge!
+                                       .copyWith(color: AppColors.blackColor),
+                                 ).paddingOnly(left: 5),
+                             ],
+                           ),
+                           Text(
+                             "(60m)",
+                             style: Theme.of(context).textTheme.labelSmall!
+                                 .copyWith(color: AppColors.blackColor),
+                           )
+                         ],
+                       ),
+                     ],
+                   ),
+                 ).paddingOnly(right: 10),
+               );
+             },
+           ),
+         );
+       }),
       ],
     ).paddingOnly(left: Get.width * 0.02, bottom: Get.height * 0.01);
   }
 
-  Widget addToCart(BuildContext context) {
-    return Obx(() {
-      final courtsData = controller.courtsData.value;
-
-      // Loading state
-      if (controller.isLoadingClub.value && !controller.isInitialized.value) {
-        return _buildLoadingState(context);
-      }
-
-      // Error state
-      if (controller.clubError.value.isNotEmpty && !controller.hasCourtsData) {
-        return _buildErrorState(context);
-      }
-
-      // Empty state - check for null data properly
-      if (controller.isInitialized.value &&
-          (courtsData == null ||
-              courtsData.data == null ||
-              courtsData.data!.courts == null ||
-              courtsData.data!.courts!.isEmpty)) {
-        return _buildEmptyState(context);
-      }
-
-      // Data available - show list
-      return RefreshIndicator(
-        onRefresh: controller.retryFetch,
-        color: Colors.white,
-        child: ListView.builder(
-          controller: controller.scrollController,
-          shrinkWrap: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount:
-              courtsData!.data!.courts!.length +
-              (controller.isLoadingMore.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            // Show loading indicator at the end
-            if (index == courtsData.data!.courts!.length) {
-              return _buildLoadMoreIndicator();
-            }
-
-            final clubs = courtsData.data!.courts![index];
-            return _buildCourtCard(context, clubs, index);
-          },
-        ),
-      );
-    });
-  }
-
   Widget _buildLoadingState(BuildContext context) {
     return SizedBox(
-      height: 200,
+      height: 500,
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -661,7 +665,7 @@ class HomeScreen extends GetView<HomeController> {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              'Loading courts...',
+              'Loading Clubs...',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -969,4 +973,14 @@ class HomeScreen extends GetView<HomeController> {
 
     return '$cityStr, $addressStr';
   }
+  String formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('EEE, dd MMMM').format(date); // e.g., Thu, 27 June
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
 }

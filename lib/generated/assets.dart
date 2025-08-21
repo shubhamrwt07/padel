@@ -8,6 +8,7 @@ class Assets {
   static const String imagesEncrypted = 'assets/images/encrypted.png';
   static const String imagesGirl = 'assets/images/girl.png';
   static const String imagesGirls = 'assets/images/girls.png';
+  static const String imagesIcAmericano = 'assets/images/ic_americano.svg';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
@@ -24,6 +25,7 @@ class Assets {
   static const String imagesIcLocation = 'assets/images/ic_location.png';
   static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
+  static const String imagesIcPackages = 'assets/images/ic_packages.svg';
   static const String imagesIcPaypal = 'assets/images/ic_paypal.svg';
   static const String imagesIcPerson = 'assets/images/ic_person.png';
   static const String imagesIcPrivacy = 'assets/images/ic_privacy.png';

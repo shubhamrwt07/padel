@@ -1,12 +1,17 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/data/request_models/booking/boking_history_model.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:padel_mobile/repositories/bookinghisory/booking_history_repository.dart';
 import 'package:padel_mobile/services/notification_service/firebase_notification.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import '../../repositories/home_repository/home_repository.dart';
 
 class HomeController extends GetxController {
+  ProfileController profileController = Get.put(ProfileController());
   // LOCATION ------------------------------------------------------------------
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
@@ -184,6 +189,7 @@ class HomeController extends GetxController {
     currentPage.value = 1;
     hasMoreData.value = true;
     await fetchClubs(isRefresh: true);
+    await fetchBookings();
   }
 
   /// Check if courts data is available
@@ -225,6 +231,7 @@ class HomeController extends GetxController {
     // Fetch initial data
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await fetchClubs(isRefresh: true);
+      await fetchBookings();
     });
   }
 
@@ -246,5 +253,25 @@ class HomeController extends GetxController {
   void updateLocation(String location) {
     selectedLocation.value = location;
     // Optionally refresh data based on location
+  }
+
+  ///Your Bookings--------------------------------------------------------------
+  var bookings = Rxn<BookingHistoryModel>();
+  BookingHistoryRepository bookingHistoryRepository = Get.put(BookingHistoryRepository());
+  Future<void> fetchBookings()async{
+    isLoadingClub.value = true;
+    try{
+      final response = await bookingHistoryRepository.getBookingHistory(type: "upcoming");
+      bookings.value = response;
+      if(response.success== true){
+        isLoadingClub.value = false;
+        CustomLogger.logMessage(msg: "Booking fetched", level: LogLevel.debug);
+      }
+
+    }catch(e){
+      CustomLogger.logMessage(msg: e, level: LogLevel.error);
+    }finally{
+      isLoadingClub.value = false;
+    }
   }
 }
