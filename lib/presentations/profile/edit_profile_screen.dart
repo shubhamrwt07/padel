@@ -1,7 +1,9 @@
 // ✅ FILE: edit_profile_ui.dart
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import '../../configs/app_colors.dart';
@@ -41,8 +43,13 @@ class EditProfileUi extends GetView<ProfileController> {
             children: [
               _profileImage(context),
               _textFieldWithLabel(
-                "Full Name",
+                "First Name",
                 controller.nameController,
+                context,
+              ),
+              _textFieldWithLabel(
+                "Last Name",
+                controller.lastNameController,
                 context,
               ),
               _textFieldWithLabel(
@@ -58,7 +65,7 @@ class EditProfileUi extends GetView<ProfileController> {
               ),
               _genderSelection(context),
               _dobField(context),
-              _textFieldWithLabel("Location / City", null, context),
+              _textFieldWithLabel("Location / City", controller.locationController, context),
             ],
           ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
         ),
@@ -117,43 +124,67 @@ class EditProfileUi extends GetView<ProfileController> {
     return Center(
       child: Obx(() {
         final imagePath = controller.profileImage.value?.path;
+        final imageUrl = controller.profileImageUrl.value;
+
         return Stack(
           alignment: Alignment.bottomRight,
           children: [
-            Container(
-              height: Get.height * .11,
-              width: Get.width * .24,
-              decoration: BoxDecoration(
-                color: AppColors.tabSelectedColor,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: imagePath == null
-                  ? Icon(
+            GestureDetector(
+              onTap: () => controller.showImageSourceActionSheet(context),
+              child: Container(
+                height: Get.height * .11,
+                width: Get.width * .24,
+                decoration: BoxDecoration(
+                  color: AppColors.tabSelectedColor,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: ClipOval(
+                  child: imagePath != null
+                      ? Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    width: Get.width * .24,
+                    height: Get.height * .11,
+                  )
+                      : imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    width: Get.width * .24,
+                    height: Get.height * .11,
+                    placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Icon(
                       Icons.person,
                       size: 90,
                       color: AppColors.labelBlackColor,
-                    )
-                  : ClipOval(
-                      child: Image.file(
-                        File(imagePath),
-                        fit: BoxFit.cover,
-                        width: Get.width * .24,
-                        height: Get.height * .11,
-                      ),
                     ),
+                  )
+                      : Icon(
+                    Icons.person,
+                    size: 90,
+                    color: AppColors.labelBlackColor,
+                  ),
+                ),
+              ),
             ),
             Positioned(
               bottom: 0,
-              right: 8,
+              right: 5,
               child: GestureDetector(
                 onTap: () => controller.showImageSourceActionSheet(context),
                 child: Container(
-                  padding: EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: AppColors.secondaryColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Image.asset(Assets.imagesIcCamara, scale: 5),
+                  child: Image.asset(Assets.imagesIcCamara, scale: 4.2),
                 ),
               ),
             ),
@@ -250,24 +281,40 @@ class EditProfileUi extends GetView<ProfileController> {
         ).paddingOnly(top: Get.height * .02),
         Obx(
               () => GestureDetector(
-            onTap: () => controller.selectDate(context),
-            child: AbsorbPointer(
-              child: PrimaryTextField(
-                readOnly: true,
-                controller: controller.dobController.value,
-                hintText: "Select Date of Birth",
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: Get.width * 0.04,
-                  vertical: 57 * 0.22,
-                ),
-                suffixIcon: Icon(
-                  Icons.calendar_month_outlined,
-                  color: AppColors.iconColor,
-                ),
+               onTap: ()=>controller.selectDate(context),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: Get.width * 0.04,
+                vertical: 57 * 0.22,
               ),
-            ),
-          ).paddingOnly(top: 10),
-        ),
+              decoration: BoxDecoration(
+                color: AppColors.textFieldColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.containerBorderColor),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    controller.selectedDate.value.isEmpty
+                        ? "Select Date of Birth"
+                        : controller.selectedDate.value,
+                    style: TextStyle(
+                      color: controller.selectedDate.value.isEmpty
+                          ? AppColors.textHintColor
+                          : AppColors.textColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Icon(
+                    Icons.calendar_month_outlined,
+                    color: AppColors.iconColor,
+                  ),
+                ],
+              ),
+            ).paddingOnly(top: 10),
+          ),
+        )
       ],
     );
   }

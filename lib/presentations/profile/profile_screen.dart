@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/profile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
@@ -12,7 +13,7 @@ class ProfileUi extends GetView<ProfileController> {
         showLeading: false,
         title: Text(
           AppStrings.profile,
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+          style: Get.textTheme.titleMedium!.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ).paddingOnly(left: Get.width * 0.02),
@@ -21,31 +22,42 @@ class ProfileUi extends GetView<ProfileController> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// Profile Header
           Row(
             children: [
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Get.toNamed(RoutesName.editProfile);
-                    },
-                    child: Container(
-                      height: Get.height * .11,
-                      width: Get.width * .24,
-                      decoration: BoxDecoration(
-                        color: AppColors.tabSelectedColor,
-                        borderRadius: BorderRadius.circular(50),
+              Obx(
+                    () => Container(
+                  height: Get.height * 0.1,
+                  width: Get.height * 0.1,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.tabSelectedColor,
+                  ),
+                  child: ClipOval(
+                    child: (controller.profileModel.value.response?.profilePic?.isNotEmpty ?? false)
+                        ? CachedNetworkImage(
+                      imageUrl: controller.profileModel.value.response?.profilePic ?? "",
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryColor,
+                          ),
+                        ),
                       ),
-                      child: Icon(
+                      errorWidget: (context, url, error) => Icon(
                         Icons.person,
-                        size: 90,
+                        size: 40,
                         color: AppColors.labelBlackColor,
                       ),
+                    )
+                        : Icon(
+                      Icons.person,
+                      size: 40,
+                      color: AppColors.labelBlackColor,
                     ),
                   ),
-                  // Future profile picture with camera icon can go here
-                ],
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,8 +65,8 @@ class ProfileUi extends GetView<ProfileController> {
                   Obx(() {
                     final profile = controller.profileModel.value.response;
                     return Text(
-                      profile?.name ?? 'Unknown',
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      "${profile?.name ?? 'Unknown'} ${profile?.lastname ?? ""}",
+                      style: Get.textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                         color: AppColors.labelBlackColor,
@@ -65,7 +77,7 @@ class ProfileUi extends GetView<ProfileController> {
                     final profile = controller.profileModel.value.response;
                     return Text(
                       profile?.email ?? 'unknown@gmail.com',
-                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      style: Get.textTheme.headlineSmall!.copyWith(
                         fontWeight: FontWeight.w500,
                         color: AppColors.labelBlackColor,
                       ),
@@ -73,7 +85,7 @@ class ProfileUi extends GetView<ProfileController> {
                   }),
                   GestureDetector(
                     onTap: () {
-                      Get.to(() => EditProfileUi());
+                      Get.to(() => EditProfileUi(), transition: Transition.rightToLeft);
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -93,7 +105,7 @@ class ProfileUi extends GetView<ProfileController> {
                       ),
                       child: Text(
                         AppStrings.editProfile,
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        style: Get.textTheme.bodyLarge!.copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 8,
                           fontWeight: FontWeight.w600,
@@ -104,147 +116,156 @@ class ProfileUi extends GetView<ProfileController> {
                 ],
               ).paddingOnly(left: 10),
             ],
-          ).paddingOnly(left: Get.width * .0, right: Get.width * .0),
-          GestureDetector(
-            onTap: () {
-              Get.toNamed(RoutesName.bookingHistory);
-            },
-            child: Container(
-              color: Colors.transparent,
-              height: 60,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    size: 20,
-                    color: AppColors.labelBlackColor,
-                  ),
-                  Text(
-                    AppStrings.booking,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: AppColors.labelBlackColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: Get.width * .1),
-                ],
-              ),
+          ),
+
+          /// Profile Options
+          Obx(
+            ()=> ProfileRow(
+              icon: Icon(Icons.calendar_month_outlined, size: 20,color: controller.selectedIndex.value == 0 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: AppStrings.booking,
+              isSelected:  controller.selectedIndex.value == 0,
+              onTap: (){
+                controller.selectedIndex.value = 0;
+                Get.toNamed(RoutesName.bookingHistory);
+              },
             ).paddingOnly(top: Get.height * .05),
           ),
-          GestureDetector(
-            onTap: () {
-              Get.toNamed(RoutesName.paymentWallet);
-            },
-            child: Container(
-              height: 60,
-              color: Colors.transparent,
-              child: Row(
-                children: [
-                  Image.asset(Assets.imagesIcBalanceWallet, scale: 5),
-                  Text(
-                    AppStrings.payments,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: AppColors.labelBlackColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: Get.width * .1),
-                ],
-              ),
+
+          // Obx(
+          //   ()=> ProfileRow(
+          //     icon: SvgPicture.asset(Assets.imagesPadelIcon, height: 17, width: 17,color: controller.selectedIndex.value == 1 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+          //     title: "Open Match",
+          //     isSelected:  controller.selectedIndex.value == 1,
+          //     onTap: () {
+          //       controller.selectedIndex.value = 1;
+          //     },
+          //   ),
+          // ),
+          //
+          // Obx(
+          //   ()=> ProfileRow(
+          //     icon: SvgPicture.asset(Assets.imagesIcAmericano, height: 19, width: 19,color: controller.selectedIndex.value == 2 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+          //     title: "Americano",
+          //     isSelected:  controller.selectedIndex.value == 2,
+          //     onTap: () {
+          //       controller.selectedIndex.value = 2;
+          //     },
+          //   ),
+          // ),
+
+          Obx(
+            ()=> ProfileRow(
+              icon: Image.asset(Assets.imagesIcBalanceWallet, scale: 5,color: controller.selectedIndex.value == 3 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: AppStrings.payments,
+              isSelected:  controller.selectedIndex.value == 3,
+              onTap: (){
+                controller.selectedIndex.value = 3;
+                Get.toNamed(RoutesName.paymentWallet);
+              },
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Get.to(
-                    () => CartScreen(buttonType: "true"),
-                transition: Transition.rightToLeft,
-              );
-            },
-            child: Container(
-              color: Colors.transparent,
-              height: 60,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 20,
-                    color: AppColors.labelBlackColor,
-                  ),
-                  Text(
-                    AppStrings.cart,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: AppColors.labelBlackColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: Get.width * .1),
-                ],
-              ),
+
+          Obx(
+            ()=> ProfileRow(
+              icon: Icon(Icons.shopping_cart_outlined, size: 20, color: controller.selectedIndex.value == 4 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: AppStrings.cart,
+              isSelected:  controller.selectedIndex.value == 4,
+              onTap: () {
+                controller.selectedIndex.value = 4;
+                Get.to(() => CartScreen(buttonType: "true"), transition: Transition.rightToLeft);
+              },
             ),
           ),
-          GestureDetector(
-            onTap: () => Get.toNamed(RoutesName.support),
-            child: Container(
-              color: Colors.transparent,
-              height: 60,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.headset_mic_outlined,
-                    size: 20,
-                    color: AppColors.labelBlackColor,
-                  ),
-                  Text(
-                    AppStrings.helpSupport,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: AppColors.labelBlackColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: Get.width * .1),
-                ],
-              ),
+
+          Obx(
+            ()=> ProfileRow(
+              icon: SvgPicture.asset(Assets.imagesIcPackages, height: 17, width: 17,color: controller.selectedIndex.value == 5 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: "Packages",
+              isSelected:  controller.selectedIndex.value == 5,
+              onTap: () {
+                controller.selectedIndex.value = 5;
+                Get.toNamed(RoutesName.packages);
+              },
             ),
           ),
-          Container(
-            color: Colors.transparent,
-            height: 60,
-            child: Row(
-              children: [
-                Image.asset(Assets.imagesIcPrivacy, scale: 5),
-                Text(
-                  AppStrings.privacy,
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    color: AppColors.labelBlackColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ).paddingOnly(left: Get.width * .1),
-              ],
+
+          Obx(
+            ()=> ProfileRow(
+              icon: Icon(Icons.headset_mic_outlined, size: 20,color: controller.selectedIndex.value == 6 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: AppStrings.helpSupport,
+              isSelected:  controller.selectedIndex.value == 6,
+              onTap: (){
+                controller.selectedIndex.value = 6;
+                Get.toNamed(RoutesName.support);
+              },
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              controller.showLogoutDialog(context);
-            },
-            child: Container(
-              color: Colors.transparent,
-              height: 60,
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    Assets.imagesIcLogOut,
-                    height: 15,
-                    width: 17,
-                  ).paddingOnly(left: 3),
-                  Text(
-                    AppStrings.logout,
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ).paddingOnly(left: Get.width * .11),
-                ],
-              ),
+
+          Obx(
+            ()=> ProfileRow(
+              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5,color: controller.selectedIndex.value == 7 ? AppColors.primaryColor:AppColors.labelBlackColor,),
+              title: AppStrings.privacy,
+              isSelected:  controller.selectedIndex.value == 7,
+              onTap: () {
+                controller.selectedIndex.value = 7;
+              },
             ),
+          ),
+
+          ProfileRow(
+            icon: SvgPicture.asset(Assets.imagesIcLogOut, height: 15, width: 17).paddingOnly(left: 3),
+            title: AppStrings.logout,
+            textColor: Colors.red,
+            onTap: () => controller.showLogoutDialog(context),
           ),
         ],
       ).paddingOnly(left: Get.width * .05, right: Get.width * .05),
     );
   }
 }
+
+/// Reusable row widget
+class ProfileRow extends StatelessWidget {
+  final Widget icon;
+  final String title;
+  final VoidCallback? onTap;
+  final Color? textColor;
+  final bool isSelected;
+
+  const ProfileRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.onTap,
+    this.textColor,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultColor = AppColors.labelBlackColor;
+    final highlightColor = AppColors.primaryColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        color: Colors.transparent,
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 40),
+            Text(
+              title,
+              style: Get.textTheme.headlineSmall!.copyWith(
+                color: isSelected ? highlightColor : (textColor ?? defaultColor),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

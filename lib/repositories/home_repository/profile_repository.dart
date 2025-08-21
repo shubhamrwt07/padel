@@ -44,6 +44,7 @@ class ProfileRepository {
 
   Future<UpdateProfileModel> updateUserProfile({
     required String name,
+    required String lastName,
     required String gender,
     required String dob,
     required String city,
@@ -53,28 +54,31 @@ class ProfileRepository {
     try {
       FormData formData = FormData.fromMap({
         'name': name,
-
+        // 'lastname':lastName,
         'gender': gender,
         'dob': dob,
-        'city': "Chandigarh",
-        // 'location': "Chandigarh",
+        'city': city,
+        'location': location,
       });
+
       CustomLogger.logMessage(
-        msg: "Starting profile update for user1: ${formData.fields}",
+        msg: "Form Data: ${formData.fields}",
         level: LogLevel.info,
       );
 
       if (profileImage != null) {
         String fileName = profileImage.path.split('/').last;
-        // formData.files.add(
-        //   MapEntry(
-        //     'files',
-        //     await MultipartFile.fromFile(
-        //       profileImage.path,
-        //       filename: fileName,
-        //     ),
-        //   ),
-        // );
+
+        formData.files.add(
+          MapEntry(
+            'profilePic',
+            await MultipartFile.fromFile(
+              profileImage.path,
+              filename: fileName,
+            ),
+          ),
+        );
+
         CustomLogger.logMessage(
           msg: "Profile image added to form data: $fileName",
           level: LogLevel.info,

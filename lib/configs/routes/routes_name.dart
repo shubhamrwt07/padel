@@ -48,4 +48,5 @@ class RoutesName {
   static const String score = '/score';
   static const String americano = '/americano';
   static const String registration = '/registration';
+  static const String packages = '/packages';
 }
