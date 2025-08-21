@@ -174,16 +174,46 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildSlotHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Available Slots', style: Theme.of(context).textTheme.labelLarge),
-
+        Obx(() => Text(
+          controller.showUnavailableSlots.value
+              ? 'Unavailable Slots'
+              : 'Available Slots',
+          style: Theme.of(context).textTheme.labelLarge,
+        )),
+        Obx(() => Row(
+          children: [
+            Text(
+              controller.showUnavailableSlots.value
+                  ? "Show Available Slots"
+                  : "Show Unavailable Slots",
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Transform.scale(
+              scale: 0.7, // 🔹 smaller size
+              child: Switch(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                value: controller.showUnavailableSlots.value,
+                onChanged: (value) {
+                  controller.showUnavailableSlots.value = value;
+                },
+                activeColor: Colors.white,
+                activeTrackColor: Colors.green,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: AppColors.blackColor
+              ),
+            ),
+          ],
+        )),
       ],
-    ).paddingOnly(top: 10,bottom: 5);
+    ).paddingOnly(top: 10, bottom: 5);
   }
+
 
   Widget _buildTimeSlots() {
     return Transform.translate(
@@ -212,7 +242,12 @@ class BookSession extends StatelessWidget {
         /// ✅ Get slots for selected court
         final slotTimes = controller.getSlotsForCourt(controller.courtId.value);
 
-        if (slotTimes.isEmpty) {
+        // ✅ Show only available OR only unavailable depending on toggle
+        final visibleSlots = controller.showUnavailableSlots.value
+            ? slotTimes.where((slot) => controller.isPastAndUnavailable(slot)).toList()
+            : slotTimes.where((slot) => !controller.isPastAndUnavailable(slot)).toList();
+
+        if (visibleSlots.isEmpty) {
           return const Center(
             child: Text(
               "No time slots available",
@@ -227,7 +262,7 @@ class BookSession extends StatelessWidget {
         return Wrap(
           spacing: spacing,
           runSpacing: Get.height * 0.015,
-          children: slotTimes.map((slot) {
+          children: visibleSlots.map((slot) {
             final isUnavailable = controller.isPastAndUnavailable(slot);
             final isSelected = controller.selectedSlots.contains(slot);
 

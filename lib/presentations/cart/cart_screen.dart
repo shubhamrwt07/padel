@@ -111,21 +111,22 @@ class CartScreen extends StatelessWidget {
                             children: [
                               Text(
                                 formatCreatedAt(slot.bookingDate ?? ""),
-                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 "${slot.time ?? 'N/A'} ",
-                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                  color: AppColors.labelBlackColor,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 "(60m)",
-                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -156,24 +157,39 @@ class CartScreen extends StatelessWidget {
                                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),
-                                ),
-                                Image.asset(
-                                  Assets.imagesIcRemove,
-                                  scale: 2,
-                                ).paddingOnly(left: 10),
+                                ).paddingOnly(right: 10),
+                                Container(
+                                  alignment: Alignment.center,
+                                  height: 15,
+                                  width: 15,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.red, // border color
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.remove,   // 🔹 minus sign, centered
+                                    size: 12,       // make it fit
+                                    color: Colors.red,
+                                  ),
+                                )
+
+
+
                               ],
                             ),
                           ),
                         ),
                       ],
-                    ).paddingOnly(bottom: Get.height * 0.015);
+                    ).paddingOnly(bottom: Get.height * 0.0);
                   },
                 ),
 
                 Divider(
                   thickness: 1,
                   color: AppColors.containerBorderColor,
-                ).paddingOnly(top: Get.height * 0.015),
+                ).paddingOnly(top: Get.height * 0.01),
               ],
             ).paddingOnly(
               bottom: Get.height * 0.01,

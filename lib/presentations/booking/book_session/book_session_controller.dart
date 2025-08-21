@@ -13,6 +13,7 @@ import '../../cart/cart_controller.dart';
 class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
+  RxBool showUnavailableSlots = false.obs;
 
   RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
   RxInt totalAmount = 0.obs;
@@ -36,13 +37,11 @@ class BookSessionController extends GetxController {
     isLoadingCourts.value = true;
     slots.value = null;
     selectedSlots.clear();
-
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDate =
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
-
       final result = await repository.fetchAvailableCourtsById(
         id: registerClubId,
         time: '',
@@ -137,19 +136,50 @@ class BookSessionController extends GetxController {
 
   bool isPastAndUnavailable(SlotTimes slot) {
     if (slot.status != "available") return true;
+
     final now = DateTime.now();
     final selected = selectedDate.value ?? now;
-    final slotTimeParts = slot.time!.toLowerCase().split(" ");
-    int hour = int.parse(slotTimeParts[0]);
-    if (slotTimeParts[1] == "pm" && hour != 12) hour += 12;
-    if (slotTimeParts[1] == "am" && hour == 12) hour = 0;
-    final slotDateTime = DateTime(selected.year, selected.month, selected.day, hour);
+
+    // Parse slot time like "10 am", "10:30 am"
+    final timeString = slot.time!.toLowerCase().trim();
+
+    // Split into [time, am/pm]
+    final parts = timeString.split(" ");
+    final timePart = parts[0];
+    final amPm = parts.length > 1 ? parts[1] : "";
+
+    int hour = 0;
+    int minute = 0;
+
+    if (timePart.contains(":")) {
+      final timePieces = timePart.split(":");
+      hour = int.parse(timePieces[0]);
+      minute = int.parse(timePieces[1]);
+    } else {
+      hour = int.parse(timePart);
+    }
+
+    // Convert to 24h format
+    if (amPm == "pm" && hour != 12) hour += 12;
+    if (amPm == "am" && hour == 12) hour = 0;
+
+    final slotDateTime = DateTime(
+      selected.year,
+      selected.month,
+      selected.day,
+      hour,
+      minute,
+    );
+
+    // Only disable if it's today and already passed
     final isToday = selected.year == now.year &&
         selected.month == now.month &&
         selected.day == now.day;
-    if (isToday && slotDateTime.isBefore(DateTime(now.year, now.month, now.day, now.hour))) {
-      return true;
+
+    if (isToday && now.isAfter(slotDateTime)) {
+      return true; // slot has passed
     }
+
     return false;
   }
   var courtName = ''.obs;
