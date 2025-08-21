@@ -145,7 +145,7 @@ class SignUpController extends GetxController {
       },
     };
 
-    log("Signup Body: $body"); // 👈 debug log to confirm exact payload
+    log("Signup Body: $body");
 
     SignUpModel result = await signUpRepository.createAccount(body: body);
 
