@@ -12,9 +12,9 @@ class ProfileUi extends GetView<ProfileController> {
         showLeading: false,
         title: Text(
           AppStrings.profile,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ).paddingOnly(left: Get.width * 0.02),
         context: context,
       ),
@@ -44,41 +44,33 @@ class ProfileUi extends GetView<ProfileController> {
                       ),
                     ),
                   ),
-                  // Positioned(
-                  //   bottom: 0,
-                  //   right: 8,
-                  //   child: Container(
-                  //     padding: EdgeInsets.all(6),
-                  //     decoration: BoxDecoration(
-                  //       color: AppColors.primaryColor,
-                  //       shape: BoxShape.circle,
-                  //     ),
-                  //     child: Image.asset(Assets.imagesIcCamara, scale: 5),
-                  //   ),
-                  // ),
+                  // Future profile picture with camera icon can go here
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx(
-                  ()=> Text(
-                      controller.profileModel.value.response!.name ?? 'Unknown',
+                  Obx(() {
+                    final profile = controller.profileModel.value.response;
+                    return Text(
+                      profile?.name ?? 'Unknown',
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                         color: AppColors.labelBlackColor,
                       ),
-                    ).paddingOnly(left: 5),
-                  ),
-                  Text(
-                    controller.profileModel.value.response!.email ??
-                        'unknown@gmail.com',
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.labelBlackColor,
-                    ),
-                  ).paddingOnly(left: 5),
+                    ).paddingOnly(left: 5);
+                  }),
+                  Obx(() {
+                    final profile = controller.profileModel.value.response;
+                    return Text(
+                      profile?.email ?? 'unknown@gmail.com',
+                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.labelBlackColor,
+                      ),
+                    ).paddingOnly(left: 5);
+                  }),
                   GestureDetector(
                     onTap: () {
                       Get.to(() => EditProfileUi());
@@ -89,12 +81,12 @@ class ProfileUi extends GetView<ProfileController> {
                       width: Get.width * .22,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            const Color(0xFF3DBE64),
-                            const Color(0xFF1F41BB),
+                            Color(0xFF3DBE64),
+                            Color(0xFF1F41BB),
                           ],
                           stops: [0.1, 0.4],
                         ),
@@ -161,9 +153,8 @@ class ProfileUi extends GetView<ProfileController> {
           ),
           GestureDetector(
             onTap: () {
-              // Get.toNamed(RoutesName.cart);
               Get.to(
-                () => CartScreen(buttonType: "true"),
+                    () => CartScreen(buttonType: "true"),
                 transition: Transition.rightToLeft,
               );
             },

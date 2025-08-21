@@ -112,8 +112,6 @@ class SignUpController extends GetxController {
     Map<String, dynamic> body = {
       "email": emailController.text.trim(),
       "type": "Signup",
-      "countryCode": "+91",
-      "phoneNumber": phoneController.text.trim(),
     };
     var result = await signUpRepository.sendOTP(body: body);
     if (result.status == "200") {
@@ -122,8 +120,8 @@ class SignUpController extends GetxController {
         arguments: {
           "email": emailController.text.trim(),
           "type": OtpScreenType.createAccount,
-          "firstName": firstNameController.text.trim(),
-          "lastName": lastNameController.text.trim(),
+          // "name": firstNameController.text.trim(),
+          // "lastName": lastNameController.text.trim(),
         },
       );
     } else {
@@ -132,22 +130,25 @@ class SignUpController extends GetxController {
   }
 
   Future<void> createAccount() async {
-    SignUpModel result = await signUpRepository.createAccount(
-      body: {
-        // "firstName": firstNameController.text.trim(),
-        // "lastName": lastNameController.text.trim(),
-        "email": emailController.text.trim(),
-        "countryCode": "+91",
-        "phoneNumber": phoneController.text.trim(),
-        "password": passwordController.text.trim(),
-        // "city": selectedLocation?.value ?? "",
-        "agreeTermsAndCondition": true,
-        "location": {
-          "type": "Point",
-          "coordinates": [77.5946, 12.9716],
-        },
+    final body = {
+      "email": emailController.text.trim(),
+      "name": firstNameController.text.trim(),
+      "lastname": lastNameController.text.trim(),
+      "countryCode": "+91",
+      "phoneNumber": phoneController.text.trim(),
+      "password": passwordController.text.trim(),
+      "city": selectedLocation?.value ?? "Chandigarh",
+      "agreeTermsAndCondition": true,
+      "location": {
+        "type": "Point",
+        "coordinates": [77.5946, 12.9716],
       },
-    );
+    };
+
+    log("Signup Body: $body"); // 👈 debug log to confirm exact payload
+
+    SignUpModel result = await signUpRepository.createAccount(body: body);
+
     if (result.status == "200") {
       LoginModel result = await loginRepository.loginUser(
         body: {

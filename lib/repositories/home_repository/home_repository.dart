@@ -34,21 +34,24 @@ class HomeRepository {
     }
   }
   Future<AvailableCourtModel> fetchAvailableCourtsById({
-    required String id,
+    required String id,       // club id
     required String time,
     required String date,
     required String day,
+    String? courtId,          // ✅ optional court id
   }) async {
-    final url = "${AppEndpoints.getActiveCourt}$id&day=$day";
+    // ✅ Build query params
+    String url = "${AppEndpoints.getActiveCourt}$id&day=$day&date=$date&time=$time";
+
+    if (courtId != null && courtId.isNotEmpty) {
+      url += "&courtId=$courtId";  // ✅ send courtId
+    }
 
     log("Fetching available courts by ID: $url");
-    log("Time: $time, Date: $date, Day: $day");
+    log("Time: $time, Date: $date, Day: $day, CourtId: ${courtId ?? 'not sent'}");
 
     try {
-      final response = await dioClient.get(
-        url,
-
-      );
+      final response = await dioClient.get(url);
 
       if (response.statusCode == 200) {
         debugPrint("Available Courts Response: ${response.data}");
@@ -66,5 +69,6 @@ class HomeRepository {
       }
     }
   }
+
 
 }

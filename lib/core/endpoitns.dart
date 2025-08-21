@@ -13,19 +13,15 @@ class AppEndpoints {
       "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getActiveCourt =
       "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
-
-  // Cart Urls
+  // Cart Urls -----------------------------------------------------------------
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
   static const String removeCartItems = "${BASE_URL}court/cart/removeUserCart";
   static const String cancelBooking = "${BASE_URL}court/booking/updateBookingStatus";
   static const String carteBooking = "${BASE_URL}court/booking/createBooking";
-  static const String bookingHistory =
-      "${BASE_URL}court/booking/getUserBookings";
-  static const String bookingConfirmation =
-      "${BASE_URL}court/booking/getAllBookingByStatus";
-
-  ///Review-----------------------------------------------------------------------
+  static const String bookingHistory = "${BASE_URL}court/booking/getUserBookings";
+  static const String bookingConfirmation = "${BASE_URL}court/booking/findById";
+  ///Review---------------------------------------------------------------------
   static const String getReview = "${BASE_URL}court/review/getReviews";
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
 }

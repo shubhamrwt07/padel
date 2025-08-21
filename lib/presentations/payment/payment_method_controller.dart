@@ -64,6 +64,7 @@ class PaymentMethodController extends GetxController {
   }
 
   // Process booking after successful payment
+// Process booking after successful payment
   Future<void> _processBookingAfterPayment() async {
     try {
       final cartItems = cartController.cartItems;
@@ -78,21 +79,61 @@ class PaymentMethodController extends GetxController {
       for (var cart in cartItems) {
         for (var slot in cart.slot ?? []) {
           for (var slotTime in slot.slotTimes ?? []) {
-            // Add null safety checks for all fields
+            // ✅ Parse bookingDate to weekday
+            DateTime? bookingDate;
+            if (slotTime.bookingDate != null && slotTime.bookingDate!.isNotEmpty) {
+              bookingDate = DateTime.tryParse(slotTime.bookingDate!);
+            }
+
+            String bookingDay = "";
+            if (bookingDate != null) {
+              switch (bookingDate.weekday) {
+                case 1:
+                  bookingDay = "Monday";
+                  break;
+                case 2:
+                  bookingDay = "Tuesday";
+                  break;
+                case 3:
+                  bookingDay = "Wednesday";
+                  break;
+                case 4:
+                  bookingDay = "Thursday";
+                  break;
+                case 5:
+                  bookingDay = "Friday";
+                  break;
+                case 6:
+                  bookingDay = "Saturday";
+                  break;
+                case 7:
+                  bookingDay = "Sunday";
+                  break;
+              }
+            }
+
+            // ✅ Filter only that day's business hour
+            final selectedBusinessHour = cart.registerClubId?.businessHours
+                ?.where((bh) => bh.day == bookingDay)
+                .map((bh) => {
+              "time": bh.time ?? "",
+              "day": bh.day ?? "",
+            })
+                .toList() ??
+                [];
+
             slotData.add({
               "slotId": slotTime.slotId ?? "",
-              "businessHours": cart.registerClubId?.businessHours?.map((bh) => {
-                "time": bh.time ?? "",
-                "day": bh.day ?? "",
-              }).toList() ?? [],
+              "businessHours": selectedBusinessHour, // ✅ only selected day
               "slotTimes": [
                 {
                   "time": slotTime.time ?? "",
                   "amount": slotTime.amount ?? 0,
                 }
               ],
-              "courtName": cart.courtName ?? "",
+              "courtId": cart.sId ?? "",
               "bookingDate": slotTime.bookingDate ?? "",
+              "courtName": cart.courtName ?? "",
             });
           }
         }
@@ -106,41 +147,34 @@ class PaymentMethodController extends GetxController {
         return;
       }
 
-      // Create booking payload with proper null handling
+      // ✅ Add current timestamp
+      final String confirmedAt = DateTime.now().toIso8601String();
+
+      // ✅ Booking payload with current time
       final Map<String, dynamic> bookingPayload = {
         "slot": slotData,
         "register_club_id": registerClubId,
+        "confirmedAt": confirmedAt, // ⏰ Add current booking confirmation time
       };
 
-      // Only add ownerId if it's not null
       if (ownerId != null && ownerId.isNotEmpty) {
         bookingPayload["ownerId"] = ownerId;
       }
 
       log("Booking payload after payment: ${bookingPayload.toString()}");
 
-      // Call booking API
       await cartController.bookCart(data: bookingPayload);
 
-      // Navigate to booking success screen after successful booking
       Get.to(() => BookingSuccessfulScreen());
-
     } catch (e) {
       log("Error processing booking after payment: $e");
-
-      // More detailed error logging
-      if (e.toString().contains("type") && e.toString().contains("subtype")) {
-        log("Null safety error - check your data model fields");
-        log("Cart items: ${cartController.cartItems.map((item) => item.toJson()).toList()}");
-      }
-
       Get.snackbar(
         "Booking Error",
         "Payment successful but booking failed: ${e.toString()}",
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: Duration(seconds: 5),
+        duration: const Duration(seconds: 5),
       );
     }
   }

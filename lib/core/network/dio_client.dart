@@ -124,7 +124,7 @@ class DioClient {
         options: options,
         cancelToken: cancelToken,
       );
-      return response.data;
+      return response; // ✅ Return the full response object
     } catch (e) {
       rethrow;
     }
