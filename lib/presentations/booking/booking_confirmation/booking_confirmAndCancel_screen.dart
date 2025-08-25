@@ -13,6 +13,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           onPressed: () {
             if (controller.cancelBooking.value) {
               controller.cancelBooking.value = false;
+              controller.slotToCancel.value = null; // reset slot selection
             } else {
               Get.back();
             }
@@ -22,7 +23,9 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         title: Obx(
               () => Text(
             controller.cancelBooking.value
-                ? AppStrings.bookingCancellation
+                ? (controller.slotToCancel.value != null
+                ? "Cancel Slot"
+                : AppStrings.bookingCancellation)
                 : AppStrings.bookingConfirmation,
           ),
         ),
@@ -46,7 +49,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    final String? bookingId = Get.arguments?['bookingId'];
+                    final String? bookingId = Get.arguments?['id'];
                     if (bookingId != null) {
                       controller.fetchBookingDetails(bookingId);
                     }
@@ -86,7 +89,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         Center(child: SvgPicture.asset(Assets.imagesImgBookingConfirm)),
         const SizedBox(height: 12),
         Text(
-          "Your Slots are Successfully booked.",
+          "",
           style: Get.textTheme.headlineSmall!.copyWith(
             color: AppColors.labelBlackColor,
             fontWeight: FontWeight.w600,
@@ -94,40 +97,107 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           textAlign: TextAlign.center,
         ),
       ],
-    ).paddingOnly(top: Get.height * 0.04, bottom: Get.height * 0.03);
+    ).paddingOnly(top: Get.height * 0.04, bottom: Get.height * 0.01);
   }
 
   Widget bookingDetailsCard(BuildContext context) {
     final booking = controller.bookingDetails.value!.booking!;
-    final slot = booking.slot?.isNotEmpty == true ? booking.slot!.first : null;
-    final slotTime = slot?.slotTimes?.isNotEmpty == true
-        ? slot!.slotTimes!.first.time ?? ''
-        : '';
+    final slots = booking.slot ?? [];
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.playerCardBackgroundColor.withAlpha(50),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.blackColor.withAlpha(10)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          bookingDetailRow(context, "Court Name", slot?.courtName ?? "N/A"),
-          bookingDetailRow(
-            context,
-            "Date & Time",
-            "${booking.bookingDate != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(booking.bookingDate!)) : ''} $slotTime",
+    if (slots.isEmpty) {
+      return const Center(child: Text("No slot details available"));
+    }
+
+    return Column(
+      children: slots.map((slot) {
+        final slotTimes = slot.slotTimes ?? [];
+        final String date = booking.bookingDate != null
+            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(booking.bookingDate!))
+            : "N/A";
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: AppColors.playerCardBackgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.lightGrace),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              )
+            ],
           ),
-          bookingDetailRow(
-            context,
-            "Booking Status",
-            booking.bookingStatus ?? "N/A",
-          ),
-        ],
-      ),
-    ).paddingOnly(bottom: Get.height * 0.02);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ✅ Top logo + success message
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.black,
+                    child: SvgPicture.asset(
+                      Assets.imagesImgBookingConfirm,
+                      height: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Your Slots are Successfully booked.",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.labelBlackColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              bookingDetailRow(context, "Court Name", slot.courtName ?? "N/A"),
+              bookingDetailRow(context, "Date", date),
+
+              if (slotTimes.isNotEmpty)
+                ...slotTimes.map((st) {
+                  final amount = st.amount != null ? "₹${st.amount}" : "₹0";
+
+                  return Column(
+                    children: [
+                      bookingDetailRow(context, "Time", st.time ?? "N/A"),
+                      bookingDetailRow(context, "Amount", amount),
+                      const SizedBox(height: 8),
+                    ],
+                  );
+                }).toList(),
+
+              // ✅ Show cancel button per slot if more than 1 slot exists
+              if ((booking.slot?.length ?? 0) > 1)
+                PrimaryButton(
+                  height: 25,
+                  width: 120,
+                  text: "Cancel Booking",
+                  textStyle: Get.textTheme.labelMedium!.copyWith(
+                    fontSize: 12, // smaller text
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white, // or your preferred color
+                  ),
+                  onTap: () {
+                    controller.cancelBooking.value = true;
+                    controller.slotToCancel.value = booking.sId;
+                  },
+                ).paddingOnly(top: 10, bottom: 10),
+
+
+              const SizedBox(height: 8),
+            ],
+          ).paddingOnly(left: 10, right: 10, top: 15),
+        );
+      }).toList(),
+    );
   }
 
   Widget paymentDetailsCard(BuildContext context) {
@@ -137,7 +207,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       decoration: BoxDecoration(
         color: AppColors.playerCardBackgroundColor.withAlpha(50),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+        border: Border.all(color: AppColors.lightGrace),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,19 +252,27 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
     final booking = controller.bookingDetails.value?.booking;
     if (booking == null) return const SizedBox.shrink();
 
-    // Hide if refunded
+    // Hide if refunded or already cancelled
     if (booking.bookingStatus?.toLowerCase() == "refunded") {
       return const SizedBox.shrink();
     }
 
-    return cancelButton();
+    // ✅ Show "Cancel Booking" only if single slot exists
+    if ((booking.slot?.length ?? 0) == 1) {
+      return cancelButton();
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget cancelButton() {
     return PrimaryButton(
-      onTap: () => controller.cancelBooking.value = true,
+      onTap: () {
+        controller.cancelBooking.value = true;
+        controller.slotToCancel.value = null; // whole booking
+      },
       text: AppStrings.cancelBooking,
-    ).paddingOnly(top: Get.height * 0.2);
+    ).paddingOnly(top: Get.height * 0.1, bottom: 10);
   }
 
   Widget cancelForm(BuildContext context) {
@@ -204,11 +282,14 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.whatsYourReason,
+          controller.slotToCancel.value != null
+              ? "Why are you cancelling this slot?"
+              : AppStrings.whatsYourReason,
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(
             color: AppColors.labelBlackColor,
           ),
         ).paddingOnly(bottom: Get.height * 0.01, top: Get.height * 0.04),
+
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
@@ -284,7 +365,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                     ),
                     decoration: InputDecoration.collapsed(
                       hintText: AppStrings.writeHere,
-                      hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      hintStyle:
+                      Theme.of(context).textTheme.labelLarge!.copyWith(
                         color: AppColors.labelBlackColor,
                       ),
                     ),
@@ -296,54 +378,40 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           return const SizedBox.shrink();
         }),
 
-        // ✅ Show refund message instead of submit button when inprogress
-        if (booking?.bookingStatus?.toLowerCase() == "in-progress") ...[
-          Center(
-            child: Text(
-              "You will receive your refund within 7 days",
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                fontSize: 16,
-                color: AppColors.labelBlackColor,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ).paddingOnly(top: Get.height * 0.2),
-        ] else ...[
-          PrimaryButton(
-            onTap: () async {
-              if (controller.selectedReason.value.isEmpty) {
-                SnackBarUtils.showWarningSnackBar("Please select a reason");
+        // ✅ Submit button
+        PrimaryButton(
+          onTap: () async {
+            if (controller.selectedReason.value.isEmpty) {
+              SnackBarUtils.showWarningSnackBar("Please select a reason");
+              return;
+            }
+
+            String cancellationReason = controller.selectedReason.value;
+
+            if (cancellationReason == 'Other') {
+              if (controller.otherReasonController.text.trim().isEmpty) {
+                SnackBarUtils.showWarningSnackBar("Please write a reason");
                 return;
               }
+              cancellationReason = controller.otherReasonController.text.trim();
+            }
 
-              String cancellationReason = controller.selectedReason.value;
+            controller.otherReasonController.text = cancellationReason;
 
-              if (cancellationReason == 'Other') {
-                if (controller.otherReasonController.text.trim().isEmpty) {
-                  SnackBarUtils.showWarningSnackBar("Please write a reason");
-                  return;
-                }
-                cancellationReason = controller.otherReasonController.text.trim();
-              }
-
-              controller.otherReasonController.text = cancellationReason;
-
-              try {
-                await controller.updateBookingStatus();
-              } catch (e) {
-                SnackBarUtils.showErrorSnackBar(
-                  "Failed to cancel booking. Please try again.",
-                );
-              }
-            },
-            text: AppStrings.submit,
-          ).paddingOnly(
-            top: controller.selectedReason.value == 'Other'
-                ? Get.height * 0.14
-                : Get.height * 0.29,
-          ),
-        ],
+            try {
+              await controller.updateBookingStatus();
+            } catch (e) {
+              SnackBarUtils.showErrorSnackBar(
+                "Failed to cancel booking. Please try again.",
+              );
+            }
+          },
+          text: AppStrings.submit,
+        ).paddingOnly(
+          top: controller.selectedReason.value == 'Other'
+              ? Get.height * 0.14
+              : Get.height * 0.29,
+        ),
       ],
     );
   }
