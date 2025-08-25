@@ -5,6 +5,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../generated/assets.dart';
 import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
+import '../booking/book_session/book_session_controller.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 import '../cart/cart_controller.dart'; // Import CartController
 
@@ -15,6 +16,8 @@ class PaymentMethodController extends GetxController {
 
   // Get CartController instance
   final CartController cartController = Get.find<CartController>();
+  final bookSessionController = Get.find<BookSessionController>();
+
 
   RxBool isProcessing = false.obs;
 
@@ -74,6 +77,8 @@ class PaymentMethodController extends GetxController {
         return;
       }
 
+      final bookSessionController = Get.find<BookSessionController>();
+
       final List<Map<String, dynamic>> slotData = [];
 
       for (var cart in cartItems) {
@@ -124,16 +129,17 @@ class PaymentMethodController extends GetxController {
 
             slotData.add({
               "slotId": slotTime.slotId ?? "",
-              "businessHours": selectedBusinessHour, // ✅ only selected day
+              "businessHours": selectedBusinessHour,
               "slotTimes": [
                 {
                   "time": slotTime.time ?? "",
                   "amount": slotTime.amount ?? 0,
                 }
               ],
-              "courtId": cart.sId ?? "",
+              // ✅ Use BookSessionController values
+              "courtId": bookSessionController.courtId.value,
+              "courtName": bookSessionController.courtName.value,
               "bookingDate": slotTime.bookingDate ?? "",
-              "courtName": cart.courtName ?? "",
             });
           }
         }
@@ -147,14 +153,12 @@ class PaymentMethodController extends GetxController {
         return;
       }
 
-      // ✅ Add current timestamp
       final String confirmedAt = DateTime.now().toIso8601String();
 
-      // ✅ Booking payload with current time
       final Map<String, dynamic> bookingPayload = {
         "slot": slotData,
         "register_club_id": registerClubId,
-        "confirmedAt": confirmedAt, // ⏰ Add current booking confirmation time
+        "confirmedAt": confirmedAt,
       };
 
       if (ownerId != null && ownerId.isNotEmpty) {

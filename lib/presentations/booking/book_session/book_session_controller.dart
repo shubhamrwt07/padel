@@ -22,6 +22,9 @@ class BookSessionController extends GetxController {
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
 
+  var courtName = ''.obs;
+  var courtId = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -32,28 +35,38 @@ class BookSessionController extends GetxController {
       await getAvailableCourtsById(argument.id!);
     });
   }
-  Future<void> getAvailableCourtsById(String registerClubId, {String? selectedCourtId}) async {
-    log("Fetching courts for club: $registerClubId, court: $selectedCourtId");
+
+  @override
+  void onClose() {
+    selectedSlots.clear(); // ✅ clear slots when leaving page
+    totalAmount.value = 0;
+    super.onClose();
+  }
+
+  Future<void> getAvailableCourtsById(String clubId, {String? selectedCourtId}) async {
+    log("Fetching courts for club: $clubId, court: $selectedCourtId");
     isLoadingCourts.value = true;
     slots.value = null;
     selectedSlots.clear();
+
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDate =
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
+
       final result = await repository.fetchAvailableCourtsById(
-        id: registerClubId,
+        id: clubId,
         time: '',
         date: formattedDate,
         day: formattedDay,
-        courtId: selectedCourtId ?? '',   // ✅ pass courtId to API
+        courtId: selectedCourtId ?? '',
       );
 
       slots.value = result;
-      log("Available courts fetched for courtId: ${selectedCourtId ?? 'first court'}");
+      log("Available courts fetched for clubId: $clubId, courtId: ${selectedCourtId ?? 'first court'}");
 
-      // ✅ If no court selected, pick first one from API
+      // ✅ If no court selected, pick first one
       if (courtId.value.isEmpty) {
         final firstCourt = result.data?.first.courts?.first;
         if (firstCourt != null) {
@@ -62,16 +75,13 @@ class BookSessionController extends GetxController {
         }
       }
 
-      // ✅ Get slots for the selected court
-      final selectedCourtSlots = getSlotsForCourt(courtId.value);
-      if (selectedCourtSlots.isNotEmpty) {
-        final firstSlot = selectedCourtSlots.firstWhereOrNull(
-                (slot) => !isPastAndUnavailable(slot));
-        if (firstSlot != null) {
-          selectedSlots.add(firstSlot);
-          totalAmount.value = firstSlot.amount ?? 0;
-          log("Auto-selected first slot for court ${courtName.value}: ${firstSlot.time}");
-        }
+      // ✅ Auto-select first available slot
+      final availableSlots = getSlotsForCourt(courtId.value)
+          .where((s) => !isPastAndUnavailable(s))
+          .toList();
+
+      if (availableSlots.isNotEmpty && selectedSlots.isEmpty) {
+        toggleSlotSelection(availableSlots.first);
       }
     } catch (e) {
       log("Error: $e");
@@ -94,8 +104,6 @@ class BookSessionController extends GetxController {
     return [];
   }
 
-
-
   void toggleSlotSelection(SlotTimes slot) {
     if (selectedSlots.contains(slot)) {
       selectedSlots.remove(slot);
@@ -111,7 +119,6 @@ class BookSessionController extends GetxController {
 
     log("ID ${slot.sId!} LEN ${selectedSlots.length} TOTAL ₹${totalAmount.value}");
   }
-
 
   String _getWeekday(int weekday) {
     switch (weekday) {
@@ -134,7 +141,9 @@ class BookSessionController extends GetxController {
     }
   }
 
+  /// Mark past OR booked slots as unavailable
   bool isPastAndUnavailable(SlotTimes slot) {
+    if (slot.status == "booked") return true;
     if (slot.status != "available") return true;
 
     final now = DateTime.now();
@@ -142,8 +151,6 @@ class BookSessionController extends GetxController {
 
     // Parse slot time like "10 am", "10:30 am"
     final timeString = slot.time!.toLowerCase().trim();
-
-    // Split into [time, am/pm]
     final parts = timeString.split(" ");
     final timePart = parts[0];
     final amPm = parts.length > 1 ? parts[1] : "";
@@ -159,7 +166,6 @@ class BookSessionController extends GetxController {
       hour = int.parse(timePart);
     }
 
-    // Convert to 24h format
     if (amPm == "pm" && hour != 12) hour += 12;
     if (amPm == "am" && hour == 12) hour = 0;
 
@@ -171,19 +177,16 @@ class BookSessionController extends GetxController {
       minute,
     );
 
-    // Only disable if it's today and already passed
     final isToday = selected.year == now.year &&
         selected.month == now.month &&
         selected.day == now.day;
 
     if (isToday && now.isAfter(slotDateTime)) {
-      return true; // slot has passed
+      return true; // past slot
     }
 
     return false;
   }
-  var courtName = ''.obs;
-  var courtId= ''.obs;
   void addToCart() async {
     try {
       if (isLoadingCourts.value) return;
@@ -191,13 +194,13 @@ class BookSessionController extends GetxController {
 
       // Group selected slots by selectedDate
       final Map<String, List<SlotTimes>> groupedSlots = {};
-      final selectedDateStr = "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
+      final selectedDateStr =
+          "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
 
       groupedSlots[selectedDateStr] = selectedSlots.toList();
 
       final List<Map<String, dynamic>> slotTimesList = [];
 
-      // Build slotTimes list with date grouping
       groupedSlots.forEach((date, slots) {
         for (var slot in slots) {
           slotTimesList.add({
@@ -225,21 +228,22 @@ class BookSessionController extends GetxController {
         ],
         "register_club_id": argument.id!,
         "courtName": courtName.value,
-        "courtId":courtId.value,
-
+        "courtId": courtId.value,
       };
 
       log("Cart Data: $data");
 
       await cartRepository.addCartItems(data: data).then((v) async {
-        // Fetch cart items immediately after adding to cart
         final CartController controller = Get.find<CartController>();
         await controller.getCartItems();
 
-        // Navigate to cart screen
-        Get.to(() => CartScreen(buttonType: "true"))?.then((_) {
-          // Optional: Refresh cart items again when returning from cart screen
-          controller.getCartItems();
+        Get.to(() => CartScreen(buttonType: "true"))?.then((_) async {
+          // ✅ Clear slots when returning back
+          selectedSlots.clear();
+          totalAmount.value = 0;
+
+          // ✅ Refresh slots from API (so booked slot turns red)
+          await getAvailableCourtsById(argument.id!, selectedCourtId: courtId.value);
         });
       });
     } finally {
