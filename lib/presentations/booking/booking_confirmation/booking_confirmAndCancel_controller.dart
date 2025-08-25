@@ -15,6 +15,9 @@ class BookingConfirmAndCancelController extends GetxController {
   var updateBookingStatusResponse = Rxn<CancelUserBooking>();
   TextEditingController otherReasonController = TextEditingController();
 
+  // Track which slot is being cancelled
+  RxnString slotToCancel = RxnString();
+
   // Booking details state
   Rx<BookingConfirmationModel?> bookingDetails = Rx<BookingConfirmationModel?>(null);
   RxBool isLoading = false.obs;
@@ -32,9 +35,7 @@ class BookingConfirmAndCancelController extends GetxController {
   void onInit() async {
     super.onInit();
 
-    // Get bookingId from arguments
     final String? bookingId = Get.arguments?['id'];
-
     if (bookingId != null && bookingId.isNotEmpty) {
       await fetchBookingDetails(bookingId);
     } else {
@@ -42,22 +43,13 @@ class BookingConfirmAndCancelController extends GetxController {
     }
   }
 
-  /// Fetch booking details using bookingId (_id in API)
-  /// Fetch booking details using bookingId (_id in API)
+  /// Fetch booking details
   Future<void> fetchBookingDetails(String bookingId) async {
     try {
       isLoading.value = true;
       error.value = '';
 
-      if (kDebugMode) {
-        print("Fetching booking details for bookingId: $bookingId");
-      }
-
-      // Call the repo function using correct parameter name
-      final booking = await _bookingRepo.getBookingConfirmation(
-        id: bookingId, // matches repo function parameter
-      );
-
+      final booking = await _bookingRepo.getBookingConfirmation(id: bookingId);
       bookingDetails.value = booking;
 
       if (booking.booking != null) {
@@ -67,13 +59,8 @@ class BookingConfirmAndCancelController extends GetxController {
       }
     } catch (e) {
       error.value = e.toString();
-      if (kDebugMode) {
-        print("Error fetching booking details: $e");
-      }
-      Get.snackbar(
-        "Error",
-        "Failed to fetch booking details. Please try again.",
-      );
+      if (kDebugMode) print("Error fetching booking details: $e");
+      Get.snackbar("Error", "Failed to fetch booking details. Please try again.");
     } finally {
       isLoading.value = false;
     }
@@ -83,7 +70,6 @@ class BookingConfirmAndCancelController extends GetxController {
   Future<void> updateBookingStatus() async {
     if (isLoading.value || Get.isSnackbarOpen) return;
 
-    // Ensure booking details are available
     if (bookingDetails.value == null || bookingDetails.value!.booking == null) {
       SnackBarUtils.showInfoSnackBar("Booking details not available");
       return;
@@ -97,21 +83,28 @@ class BookingConfirmAndCancelController extends GetxController {
     isLoading.value = true;
 
     try {
+      final bookingId = bookingDetails.value!.booking!.sId;
+      final slotId = slotToCancel.value;
+
       final body = {
-        "id": bookingDetails.value!.booking!.sId, // single booking object
+        "id": bookingId,
         "status": "in-progress",
-        "cancellationReason": otherReasonController.text.trim()
+        "cancellationReason": otherReasonController.text.trim(),
+        if (slotId != null) "slotId": slotId, // ✅ only send slotId when needed
       };
 
       final result = await _bookingRepo.updateBookingStatus(body: body);
       updateBookingStatusResponse.value = result;
 
       if (result?.status == "200") {
-        // Allow getBookingHistory to run by resetting isLoading
         isLoading.value = false;
 
-        // Close dialogs/pages after refresh
-        Get.close(2);
+        // Refresh booking details
+        await fetchBookingDetails(bookingId!);
+
+        // Reset state
+        cancelBooking.value = false;
+        slotToCancel.value = null;
 
         CustomLogger.logMessage(
           msg: result?.message ?? "Updated",
@@ -120,12 +113,11 @@ class BookingConfirmAndCancelController extends GetxController {
         SnackBarUtils.showSuccessSnackBar(result?.message ?? "Updated");
         otherReasonController.clear();
       } else {
-        print("Booking Update Failed");
+        SnackBarUtils.showErrorSnackBar("Booking update failed");
       }
     } catch (e) {
       CustomLogger.logMessage(msg: e, level: LogLevel.error);
     } finally {
-      // Ensure isLoading is reset in case of errors
       isLoading.value = false;
     }
   }
