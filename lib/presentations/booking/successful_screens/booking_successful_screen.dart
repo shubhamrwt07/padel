@@ -27,7 +27,7 @@ class BookingSuccessfulScreen extends StatelessWidget {
           ).paddingOnly(bottom: Get.height * 0.05),
           PrimaryButton(
             onTap: () {
-              Get.toNamed(RoutesName.bottomNav);
+              Get.offAllNamed(RoutesName.bottomNav);
             },
             text: AppStrings.continueText,
           ).paddingOnly(bottom: Get.height * 0.17),

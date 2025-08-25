@@ -16,7 +16,7 @@ class HomeController extends GetxController {
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
   ScrollController scrollController = ScrollController();
-  BookingController bookingController = Get.put(BookingController());
+  // BookingController bookingController = Get.put(BookingController());
 
   // NotificationService notificationService = NotificationService();
   final List<String> dummyLocations = [    'Delhi',

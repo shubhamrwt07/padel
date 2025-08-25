@@ -35,12 +35,12 @@ class PaymentMethodController extends GetxController {
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     isProcessing.value = false;
 
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Text('Payment Successful! Processing booking...'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    // ScaffoldMessenger.of(Get.context!).showSnackBar(
+    //   SnackBar(
+    //     content: Text('Payment Successful! Processing booking...'),
+    //     backgroundColor: Colors.green,
+    //   ),
+    // );
 
     // Call booking API after successful payment
     await _processBookingAfterPayment();
