@@ -241,8 +241,7 @@ class BookSession extends StatelessWidget {
         if (visibleSlots.isEmpty) {
           return const Center(
               child: Text("No time slots available",
-                  style: TextStyle(fontWeight: FontWeight.w700)))
-              .paddingOnly(top: Get.height * .15);
+                  style: TextStyle(fontWeight: FontWeight.w700)));
         }
 
         final spacing = Get.width * 0.02;

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -792,8 +794,8 @@ class HomeScreen extends GetView<HomeController> {
   Widget _buildCourtCard(BuildContext context, Courts clubs, int index) {
     return GestureDetector(
       onTap: () {
+        log("CLUB ID -> ${clubs.id}");
         if (clubs.id != null) {
-          controller.bookingController.courtsData.value = clubs;
           Get.toNamed(RoutesName.booking, arguments: {"data": clubs});
           FocusManager.instance.primaryFocus?.unfocus();
         }

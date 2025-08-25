@@ -7,24 +7,20 @@ class BookingController extends GetxController
     with GetSingleTickerProviderStateMixin {
 
   late TabController tabController;
-  final List<Tab> tabs = const [
-    Tab(text: 'Tab 1'),
-    Tab(text: 'Tab 2'),
-    Tab(text: 'Tab 3'),
-    Tab(text: 'Tab 4'),
-  ];
 Rx<Courts> courtsData=Courts().obs;
+
   @override
   void onInit() {
     super.onInit();
+    courtsData.value = Get.arguments["data"];
     tabController = TabController(
-      length: tabs.length,
+      length: 4,
       vsync: this,
       initialIndex: 1,
 
     );
     WidgetsBinding.instance.addPostFrameCallback((callback){
-      log("Data Fetch Sucssfully${courtsData.value.courtImage}");
+      log("Data Fetch Successfully-> ${courtsData.value}");
     });
   }
 
