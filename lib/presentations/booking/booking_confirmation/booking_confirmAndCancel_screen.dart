@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
 
@@ -108,6 +109,14 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       return const Center(child: Text("No slot details available"));
     }
 
+    // ✅ Decide the message based on status
+    String bookingMessage = "Your Slots are Successfully booked.";
+    if (booking.bookingStatus?.toLowerCase() == "in-progress") {
+      bookingMessage = "You will receive your refund within 7 days.";
+    } else if (booking.bookingStatus?.toLowerCase() == "refunded") {
+      bookingMessage = "Your refund successfully credited.";
+    }
+
     return Column(
       children: slots.map((slot) {
         final slotTimes = slot.slotTimes ?? [];
@@ -132,22 +141,35 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Top logo + success message
+              // ✅ Top logo + dynamic success/refund message
               Row(
                 children: [
                   CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.black,
-                    child: SvgPicture.asset(
-                      Assets.imagesImgBookingConfirm,
-                      height: 20,
-                      color: Colors.white,
+                    radius: 22,
+                    backgroundColor: Colors.grey.shade200,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: booking.userId?.profilePic ?? "",
+                        fit: BoxFit.cover,
+                        width: 44,
+                        height: 44,
+                        placeholder: (context, url) => SvgPicture.asset(
+                          Assets.imagesImgBookingConfirm, // 👈 placeholder
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        errorWidget: (context, url, error) => SvgPicture.asset(
+                          Assets.imagesImgBookingConfirm, // 👈 fallback
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "Your Slots are Successfully booked.",
+                      bookingMessage,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.labelBlackColor,
@@ -181,16 +203,15 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                   width: 120,
                   text: "Cancel Booking",
                   textStyle: Get.textTheme.labelMedium!.copyWith(
-                    fontSize: 12, // smaller text
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white, // or your preferred color
+                    color: Colors.white,
                   ),
                   onTap: () {
                     controller.cancelBooking.value = true;
                     controller.slotToCancel.value = booking.sId;
                   },
                 ).paddingOnly(top: 10, bottom: 10),
-
 
               const SizedBox(height: 8),
             ],
@@ -199,7 +220,6 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       }).toList(),
     );
   }
-
   Widget paymentDetailsCard(BuildContext context) {
     final booking = controller.bookingDetails.value!.booking!;
     return Container(

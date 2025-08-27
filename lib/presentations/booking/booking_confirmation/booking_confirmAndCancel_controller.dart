@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
 import '../../../configs/components/snack_bars.dart';
 import '../../../data/request_models/booking/booking_confermation_model.dart';
@@ -97,6 +98,7 @@ class BookingConfirmAndCancelController extends GetxController {
       updateBookingStatusResponse.value = result;
 
       if (result?.status == "200") {
+        Get.offAllNamed(RoutesName.bottomNav);
         isLoading.value = false;
 
         // Refresh booking details

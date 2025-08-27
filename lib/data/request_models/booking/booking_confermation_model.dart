@@ -32,12 +32,12 @@ class Booking {
   String? bookingStatus;
   String? bookingType;
   List<Slot>? slot;
-  String? ownerId;
   String? createdAt;
+  String? ownerId;
   String? updatedAt;
   int? iV;
+  String? cancellationDate;
   String? cancellationReason;
-  String? cancellationReasonForOwner;
 
   Booking(
       {this.sId,
@@ -48,12 +48,12 @@ class Booking {
         this.bookingStatus,
         this.bookingType,
         this.slot,
-        this.ownerId,
         this.createdAt,
+        this.ownerId,
         this.updatedAt,
         this.iV,
-        this.cancellationReason,
-        this.cancellationReasonForOwner});
+        this.cancellationDate,
+        this.cancellationReason});
 
   Booking.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -70,12 +70,12 @@ class Booking {
         slot!.add(new Slot.fromJson(v));
       });
     }
-    ownerId = json['ownerId'];
     createdAt = json['createdAt'];
+    ownerId = json['ownerId'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    cancellationDate = json['cancellationDate'];
     cancellationReason = json['cancellationReason'];
-    cancellationReasonForOwner = json['cancellationReasonForOwner'];
   }
 
   Map<String, dynamic> toJson() {
@@ -92,12 +92,12 @@ class Booking {
     if (this.slot != null) {
       data['slot'] = this.slot!.map((v) => v.toJson()).toList();
     }
-    data['ownerId'] = this.ownerId;
     data['createdAt'] = this.createdAt;
+    data['ownerId'] = this.ownerId;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['cancellationDate'] = this.cancellationDate;
     data['cancellationReason'] = this.cancellationReason;
-    data['cancellationReasonForOwner'] = this.cancellationReasonForOwner;
     return data;
   }
 }
@@ -108,14 +108,21 @@ class UserId {
   String? email;
   String? countryCode;
   int? phoneNumber;
+  String? name;
+  String? lastname;
   String? password;
+  String? city;
   bool? agreeTermsAndCondition;
   String? category;
   bool? isActive;
   bool? isDeleted;
+  String? role;
   String? createdAt;
   String? updatedAt;
   int? iV;
+  String? dob;
+  String? gender;
+  String? profilePic;
 
   UserId(
       {this.location,
@@ -123,14 +130,21 @@ class UserId {
         this.email,
         this.countryCode,
         this.phoneNumber,
+        this.name,
+        this.lastname,
         this.password,
+        this.city,
         this.agreeTermsAndCondition,
         this.category,
         this.isActive,
         this.isDeleted,
+        this.role,
         this.createdAt,
         this.updatedAt,
-        this.iV});
+        this.iV,
+        this.dob,
+        this.gender,
+        this.profilePic});
 
   UserId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -140,14 +154,21 @@ class UserId {
     email = json['email'];
     countryCode = json['countryCode'];
     phoneNumber = json['phoneNumber'];
+    name = json['name'];
+    lastname = json['lastname'];
     password = json['password'];
+    city = json['city'];
     agreeTermsAndCondition = json['agreeTermsAndCondition'];
     category = json['category'];
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
+    role = json['role'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    dob = json['dob'];
+    gender = json['gender'];
+    profilePic = json['profilePic'];
   }
 
   Map<String, dynamic> toJson() {
@@ -159,14 +180,21 @@ class UserId {
     data['email'] = this.email;
     data['countryCode'] = this.countryCode;
     data['phoneNumber'] = this.phoneNumber;
+    data['name'] = this.name;
+    data['lastname'] = this.lastname;
     data['password'] = this.password;
+    data['city'] = this.city;
     data['agreeTermsAndCondition'] = this.agreeTermsAndCondition;
     data['category'] = this.category;
     data['isActive'] = this.isActive;
     data['isDeleted'] = this.isDeleted;
+    data['role'] = this.role;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['dob'] = this.dob;
+    data['gender'] = this.gender;
+    data['profilePic'] = this.profilePic;
     return data;
   }
 }
@@ -193,6 +221,7 @@ class Location {
 class Slot {
   String? slotId;
   String? courtName;
+  String? courtId;
   String? bookingDate;
   List<SlotTimes>? slotTimes;
   List<BusinessHours>? businessHours;
@@ -200,6 +229,7 @@ class Slot {
   Slot(
       {this.slotId,
         this.courtName,
+        this.courtId,
         this.bookingDate,
         this.slotTimes,
         this.businessHours});
@@ -207,6 +237,7 @@ class Slot {
   Slot.fromJson(Map<String, dynamic> json) {
     slotId = json['slotId'];
     courtName = json['courtName'];
+    courtId = json['courtId'];
     bookingDate = json['bookingDate'];
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
@@ -226,6 +257,7 @@ class Slot {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['slotId'] = this.slotId;
     data['courtName'] = this.courtName;
+    data['courtId'] = this.courtId;
     data['bookingDate'] = this.bookingDate;
     if (this.slotTimes != null) {
       data['slotTimes'] = this.slotTimes!.map((v) => v.toJson()).toList();
