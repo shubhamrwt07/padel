@@ -23,25 +23,87 @@ class CartScreen extends StatelessWidget {
       appBar: primaryAppBar(
         showLeading: buttonType == "true" ? true : false,
         centerTitle: true,
-        title: Text("Cart"),
+        title: const Text("Cart"),
         context: context,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            cartList(controller),
-            // Only show total and button when cart is not empty
-            Obx(() => controller.cartItems.isEmpty
-                ? SizedBox.shrink()
-                : Column(
+      body: Column(
+        children: [
+          Obx(() {
+            if (controller.cartItems.isEmpty) return const SizedBox.shrink();
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                totalSlot(context),
-                button(context),
+                GestureDetector(
+                  onTap: () {
+                    if (controller.selectedClubIds.length == controller.cartItems.length) {
+                      controller.unselectAll();
+                    } else {
+                      controller.selectAll();
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Transform.scale(
+                        scale: 0.8,
+                        child: Checkbox(
+                          activeColor: AppColors.secondaryColor,
+                          value: controller.selectedClubIds.length == controller.cartItems.length,
+                          onChanged: (val) {
+                            if (val == true) {
+                              controller.selectAll();
+                            } else {
+                              controller.unselectAll();
+                            }
+                          },
+                        ),
+                      ),
+                      Text(
+                        "Select All",
+                        style: Get.textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () async {
+                    await controller.deleteSelectedClubs();
+                  },
+                )
               ],
-            )),
-          ],
-        ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
-      ),
+            ).paddingSymmetric(vertical: 10);
+          }),
+          Expanded(child: cartList(controller)),
+        ],
+      ).paddingSymmetric(horizontal: Get.width * 0.05),
+
+      /// 🔹 TotalSlot + Button fixed at bottom
+      bottomNavigationBar: Obx(() {
+        if (controller.cartItems.isEmpty) return const SizedBox.shrink();
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                totalSlot(context), // 🔹 moved here
+                const SizedBox(height: 8),
+                button(context),    // 🔹 stays below
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -79,122 +141,141 @@ class CartScreen extends StatelessWidget {
         return ListView.builder(
           controller: controller.scrollController,
           itemCount: validItems.length,
+          physics: AlwaysScrollableScrollPhysics(),
           itemBuilder: (BuildContext context, index) {
             final item = validItems[index];
             final firstSlot = item.slot!.first;
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Club Name
-                Text(
-                  item.registerClubId?.clubName ?? "Unknown Club",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ).paddingOnly(bottom: Get.height * 0.01),
-
-                // Slot List
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: firstSlot.slotTimes!.length,
-                  itemBuilder: (context, int childIndex) {
-                    final slot = firstSlot.slotTimes![childIndex];
-
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Date + Time + Duration
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Text(
-                                formatCreatedAt(slot.bookingDate ?? ""),
-                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "${slot.time ?? 'N/A'} ",
-                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                  color: AppColors.labelBlackColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "(60m)",
-                                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
+            return Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Club Name
+                  Row(
+                    children: [
+                      Obx(() => Transform.scale(
+                        scale: 0.8,
+                        child: Checkbox(
+                          activeColor: AppColors.secondaryColor,
+                          value: controller.selectedClubIds.contains(item.registerClubId?.sId ?? ""),
+                          onChanged: (val) {
+                            controller.toggleSelectClub(item.registerClubId?.sId ?? "");
+                          },
+                        ),
+                      )),
+                      Expanded(
+                        child: Text(
+                          item.registerClubId?.clubName ?? "Unknown Club",
+                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),
+                    ],
+                  ),
 
-                        // Price + Remove Icon
-                        GestureDetector(
-                          onTap: () async {
-                            final slotTimeId = slot.slotId;
+                  // Slot List
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: firstSlot.slotTimes!.length,
+                    itemBuilder: (context, int childIndex) {
+                      final slot = firstSlot.slotTimes![childIndex];
 
-                            if (slotTimeId == null || slotTimeId.isEmpty) {
-                              Get.snackbar("Error", "Invalid slot ID");
-                              return;
-                            }
-///
-                            await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
-                          },
-                          child: Container(
-                            height: 40,
-                            color: Colors.transparent,
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Date + Time + Duration
+                          Expanded(
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "₹ ${slot.amount ?? '0'}",
-                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  formatCreatedAt(slot.bookingDate ?? ""),
+                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),
-                                ).paddingOnly(right: 10),
-                                Container(
-                                  alignment: Alignment.center,
-                                  height: 15,
-                                  width: 15,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.red, // border color
-                                    ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "${slot.time ?? 'N/A'} ",
+                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                    color: AppColors.labelBlackColor,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  child: Icon(
-                                    Icons.remove,   // 🔹 minus sign, centered
-                                    size: 12,       // make it fit
-                                    color: Colors.red,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "(60m)",
+                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                    fontWeight: FontWeight.w400,
                                   ),
-                                )
-
-
-
+                                ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ).paddingOnly(bottom: Get.height * 0.0);
-                  },
-                ),
 
-                Divider(
-                  thickness: 1,
-                  color: AppColors.containerBorderColor,
-                ).paddingOnly(top: Get.height * 0.01),
-              ],
-            ).paddingOnly(
-              bottom: Get.height * 0.01,
-              left: Get.width * 0.03,
-              right: Get.width * 0.03,
+                          // Price + Remove Icon
+                          GestureDetector(
+                            onTap: () async {
+                              final slotTimeId = slot.slotId;
+
+                              if (slotTimeId == null || slotTimeId.isEmpty) {
+                                Get.snackbar("Error", "Invalid slot ID");
+                                return;
+                              }
+                      ///
+                              await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
+                            },
+                            child: Container(
+                              height: 40,
+                              color: Colors.transparent,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "₹ ${slot.amount ?? '0'}",
+                                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ).paddingOnly(right: 10),
+                                  Container(
+                                    alignment: Alignment.center,
+                                    height: 15,
+                                    width: 15,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.red, // border color
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.remove,   // 🔹 minus sign, centered
+                                      size: 12,       // make it fit
+                                      color: Colors.red,
+                                    ),
+                                  )
+
+
+
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ).paddingOnly(bottom: Get.height * 0.0);
+                    },
+                  ),
+
+                  // Divider(
+                  //   thickness: 1,
+                  //   color: AppColors.containerBorderColor,
+                  // ).paddingOnly(top: Get.height * 0.01),
+                ],
+              ).paddingOnly(
+                bottom: Get.height * 0.01,
+                left: Get.width * 0.03,
+                right: Get.width * 0.03,
+              ),
             );
           },
         );

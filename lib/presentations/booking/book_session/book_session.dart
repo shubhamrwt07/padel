@@ -1,11 +1,7 @@
 import 'dart:developer';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:shimmer/shimmer.dart';
 
 class BookSession extends StatelessWidget {
   BookSession({super.key});
@@ -172,19 +168,15 @@ class BookSession extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Obx(() => Text(
-          controller.showUnavailableSlots.value
-              ? 'Unavailable Slots'
-              : 'Available Slots',
+        Text('Available Slots',
           style: Theme.of(context).textTheme.labelLarge,
-        )),
+        ),
         Obx(() => Row(
           children: [
             Text(
               controller.showUnavailableSlots.value
-                  ? "Show Available Slots"
-                  : "Show Unavailable Slots",
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  ?"Show Available Slots":"Show Unavailable Slots",
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -195,7 +187,7 @@ class BookSession extends StatelessWidget {
                 onChanged: (value) =>
                 controller.showUnavailableSlots.value = value,
                 activeColor: Colors.white,
-                activeTrackColor: Colors.green,
+                activeTrackColor: AppColors.secondaryColor,
                 inactiveThumbColor: Colors.white,
                 inactiveTrackColor: AppColors.blackColor,
               ),
@@ -220,85 +212,185 @@ class BookSession extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8),
-            children: List.generate(
-              16,
-                  (index) => Container(
+            children: List.generate(16, (index) {
+              return Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F6FF),
                   borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-            ),
+              );
+            }),
           );
         }
 
         final slotTimes = controller.getSlotsForCourt(controller.courtId.value);
 
-        final visibleSlots = controller.showUnavailableSlots.value
-            ? slotTimes.where((s) => controller.isPastAndUnavailable(s)).toList()
-            : slotTimes.where((s) => !controller.isPastAndUnavailable(s)).toList();
-
-        if (visibleSlots.isEmpty) {
+        if (slotTimes.isEmpty) {
           return const Center(
-              child: Text("No time slots available",
-                  style: TextStyle(fontWeight: FontWeight.w700)));
+            child: Text(
+              "No time slots available",
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          );
+        }
+
+        // 🔑 Filtering like _buildSlotsForCourt
+        final filteredSlots = slotTimes.where((slot) {
+          final availability = slot.availabilityStatus?.toLowerCase();
+          final isBlocked = availability == "maintenance" ||
+              availability == "weather conditions" ||
+              availability == "staff unavailability";
+          final isUnavailable = controller.isPastAndUnavailable(slot);
+          final isBooked = slot.status?.toLowerCase() == "booked";
+
+          final isAvailableSlot = !(isUnavailable || isBlocked || isBooked);
+
+          return controller.showUnavailableSlots.value
+              ?!isAvailableSlot: isAvailableSlot;
+        }).toList();
+
+        if (filteredSlots.isEmpty) {
+          return const Center(child: Text("No matching slots"));
         }
 
         final spacing = Get.width * 0.02;
         final tileWidth = (Get.width - spacing * 3 - 32) / 4;
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: Get.height * 0.015,
-          children: visibleSlots.map((slot) {
-            final isUnavailable = controller.isPastAndUnavailable(slot);
-            final isSelected = controller.selectedSlots.contains(slot);
+        return SingleChildScrollView(
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: Get.height * 0.015,
+            children: filteredSlots.map((slot) {
+              final availability = slot.availabilityStatus?.toLowerCase();
+              final isBlocked = availability == "maintenance" ||
+                  availability == "weather conditions" ||
+                  availability == "staff unavailability";
+              final isUnavailable = controller.isPastAndUnavailable(slot);
+              final isBooked = slot.status?.toLowerCase() == "booked";
+              final isSelected = controller.selectedSlots.contains(slot);
 
-            return GestureDetector(
-              onTap: isUnavailable ? null : () => controller.toggleSlotSelection(slot),
-              child: Container(
-                width: tileWidth,
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isUnavailable
-                      ? AppColors.tabColor
-                      : isSelected
-                      ? Colors.black
-                      : AppColors.playerCardBackgroundColor,
-                  borderRadius: BorderRadius.circular(40),
-                  border: Border.all(
-                    color: isUnavailable
-                        ? Colors.transparent
-                        : AppColors.cartColor,
+              return GestureDetector(
+                onTap: () {
+                  if (isBooked) {
+                    SnackBarUtils.showInfoSnackBar(
+                      "Slot Unavailable\nThis slot is already booked.",
+                    );
+                  } else if (isUnavailable) {
+                    SnackBarUtils.showInfoSnackBar(
+                      "Slot Unavailable\nThis slot is not available.",
+                    );
+                  } else if (isBlocked) {
+                    SnackBarUtils.showInfoSnackBar(
+                      "Slot Blocked\nReason: ${slot.availabilityStatus?.capitalizeFirst ?? 'Blocked'}",
+                    );
+                  } else {
+                    controller.toggleSlotSelection(slot);
+                  }
+                },
+                child: SizedBox(
+                  width: tileWidth,
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isBooked
+                          ? Colors.red.shade50
+                          : isUnavailable
+                          ? Colors.grey.shade100
+                          : isBlocked
+                          ? Colors.orange.shade50
+                          : isSelected
+                          ? Colors.black
+                          : const Color(0xFFF5F6FF),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Text(
+                      slot.time ?? '',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isBooked
+                            ? Colors.red.shade900
+                            : isUnavailable
+                            ? Colors.grey
+                            : isBlocked
+                            ? Colors.orange.shade900
+                            : isSelected
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  slot.time ?? '',
-                  style: Get.textTheme.labelLarge?.copyWith(
-                    color: isUnavailable
-                        ? Colors.white
-                        : isSelected
-                        ? Colors.white
-                        : Colors.black,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         );
       }),
     );
   }
 
-  /// Courts list
+
   Widget buildCourtList(BookSessionController controller) {
     return Obx(() {
       final slots = controller.slots.value?.data ?? [];
 
       if (controller.isLoadingCourts.value) {
-        return const Center(child: CircularProgressIndicator());
+        return ListView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 4, // number of shimmer rows
+          itemBuilder: (context, index) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                width: Get.width,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade400, width: 1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // Radio button placeholder
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Text placeholders
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 14,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 200,
+                            height: 12,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       }
+
       if (slots.isEmpty) {
         return const Center(child: Text("No courts available"));
       }
@@ -317,44 +409,55 @@ class BookSession extends StatelessWidget {
           final courtId = court.sId ?? '';
 
           courtWidgets.add(
-            Container(
-              width: Get.width,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.greyColor, width: 1),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Obx(() => Radio<String>(
-                    value: courtName,
-                    groupValue: controller.courtName.value,
-                    onChanged: (value) async {
-                      controller.courtName.value = value!;
-                      controller.courtId.value = courtId;
-                      controller.selectedSlots.clear();
-                      await controller.getAvailableCourtsById(
-                        controller.argument.id!,
-                        selectedCourtId: courtId,
-                      );
-                    },
-                  )),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(courtName,
-                            style: Get.textTheme.headlineSmall),
-                        const SizedBox(height: 4),
-                        Text(featureText, style: Get.textTheme.bodySmall),
-                      ],
+              InkWell(
+                onTap: () async {
+                  controller.courtName.value = courtName;
+                  controller.courtId.value = courtId;
+                  controller.selectedSlots.clear();
+                  await controller.getAvailableCourtsById(
+                    controller.argument.id!,
+                    selectedCourtId: courtId,
+                  );
+                },
+                child: Container(
+                  width: Get.width,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.greyColor, width: 1),
                     ),
                   ),
-                ],
-              ),
-            ),
+                  child: Row(
+                    children: [
+                      Obx(() => Radio<String>(
+                        value: courtName,
+                        groupValue: controller.courtName.value,
+                        onChanged: (value) async {
+                          controller.courtName.value = value!;
+                          controller.courtId.value = courtId;
+                          controller.selectedSlots.clear();
+                          await controller.getAvailableCourtsById(
+                            controller.argument.id!,
+                            selectedCourtId: courtId,
+                          );
+                        },
+                      )),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(courtName, style: Get.textTheme.headlineSmall),
+                            const SizedBox(height: 4),
+                            Text(featureText, style: Get.textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+
           );
         }
       }

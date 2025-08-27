@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -78,7 +80,6 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                 SnackBarUtils.showWarningSnackBar("Cart is empty");
                 return;
               }
-
               // Start payment process
               await controller.startPayment();
             },

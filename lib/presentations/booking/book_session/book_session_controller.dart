@@ -1,9 +1,5 @@
 import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-
 import '../../../data/request_models/home_models/get_available_court.dart' hide Courts;
 import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../repositories/cart/cart_repository.dart';
@@ -38,7 +34,7 @@ class BookSessionController extends GetxController {
 
   @override
   void onClose() {
-    selectedSlots.clear(); // ✅ clear slots when leaving page
+    selectedSlots.clear();
     totalAmount.value = 0;
     super.onClose();
   }
@@ -209,9 +205,20 @@ class BookSessionController extends GetxController {
             "slotId": slot.sId,
           });
         }
+
+        // ✅ Add date for this group
         slotTimesList.add({
           "bookingDate": date,
         });
+      });
+
+// then add court info
+      slotTimesList.add({
+        "courtId": courtId.value,
+      });
+
+      slotTimesList.add({
+        "courtName": courtName.value,
       });
 
       final data = {
@@ -219,16 +226,14 @@ class BookSessionController extends GetxController {
           {
             "businessHours": [
               {
-                "time": slots.value!.data?[0].registerClubId!.businessHours?[0].time,
-                "day": slots.value!.data?[0].registerClubId!.businessHours?[0].day
+                "time": slots.value!.data?[0].registerClubId!.businessHours?[0].time ?? "",
+                "day": slots.value!.data?[0].registerClubId!.businessHours?[0].day ?? "",
               }
             ],
             "slotTimes": slotTimesList
           }
         ],
         "register_club_id": argument.id!,
-        "courtName": courtName.value,
-        "courtId": courtId.value,
       };
 
       log("Cart Data: $data");
