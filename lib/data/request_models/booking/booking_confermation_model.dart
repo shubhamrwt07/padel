@@ -298,14 +298,11 @@ class SlotTimes {
 class BusinessHours {
   String? day;
   String? time;
-
   BusinessHours({this.day, this.time});
-
   BusinessHours.fromJson(Map<String, dynamic> json) {
     day = json['day'];
     time = json['time'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['day'] = this.day;
