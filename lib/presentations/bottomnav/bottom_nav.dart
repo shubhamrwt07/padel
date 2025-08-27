@@ -18,23 +18,26 @@ class BottomNavUi extends StatelessWidget {
       body: Obx(() => controller.getCurrentPage()),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          color: Colors.transparent,
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(30),
+              color: Colors.black.withAlpha(20),
               spreadRadius: 2,
               blurRadius: 8,
-              offset: const Offset(0, 0),
+              offset: const Offset(0, -5),
             ),
           ],
         ),
         child: Container(
           height: 60,
-          decoration:  BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-            color: Colors.white,
-            image: DecorationImage(image: AssetImage(Assets.imagesImgBackgroundBottomBar),fit: BoxFit.cover)
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(Assets.imagesImgBackgroundBottomBar),
+              fit: BoxFit.contain,
+            ),
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+            color: Colors.transparent,
           ),
           child: Obx(
                 () => GNav(
@@ -110,10 +113,10 @@ class BottomNavUi extends StatelessWidget {
                   ),
                 );
               }),
-            ).paddingOnly(left: 5, right: 5),
+            ).paddingOnly(left: 15, right: 15),
           ),
         ),
-      ).paddingOnly(left: 16,right: 16,bottom: 24),
+      ).paddingOnly(bottom: 24),
     );
   }
   Shader getGradientShader(Rect bounds) {
