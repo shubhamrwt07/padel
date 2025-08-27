@@ -16,7 +16,6 @@ class PaymentMethodController extends GetxController {
 
   // Get CartController instance
   final CartController cartController = Get.find<CartController>();
-  final bookSessionController = Get.find<BookSessionController>();
 
 
   RxBool isProcessing = false.obs;
@@ -68,104 +67,131 @@ class PaymentMethodController extends GetxController {
 
   // Process booking after successful payment
 // Process booking after successful payment
+//   Future<void> _processBookingAfterPayment() async {
+//     try {
+//       final cartItems = cartController.cartItems;
+//
+//       if (cartItems.isEmpty) {
+//         Get.snackbar("Empty Cart", "Please add items to cart.");
+//         return;
+//       }
+//
+//       final bookSessionController = Get.find<BookSessionController>();
+//
+//       final List<Map<String, dynamic>> slotData = [];
+//
+//       for (var cart in cartItems) {
+//         for (var slot in cart.slot ?? []) {
+//           for (var slotTime in slot.slotTimes ?? []) {
+//             // ✅ Parse bookingDate to weekday
+//             DateTime? bookingDate;
+//             if (slotTime.bookingDate != null && slotTime.bookingDate!.isNotEmpty) {
+//               bookingDate = DateTime.tryParse(slotTime.bookingDate!);
+//             }
+//
+//             String bookingDay = "";
+//             if (bookingDate != null) {
+//               switch (bookingDate.weekday) {
+//                 case 1:
+//                   bookingDay = "Monday";
+//                   break;
+//                 case 2:
+//                   bookingDay = "Tuesday";
+//                   break;
+//                 case 3:
+//                   bookingDay = "Wednesday";
+//                   break;
+//                 case 4:
+//                   bookingDay = "Thursday";
+//                   break;
+//                 case 5:
+//                   bookingDay = "Friday";
+//                   break;
+//                 case 6:
+//                   bookingDay = "Saturday";
+//                   break;
+//                 case 7:
+//                   bookingDay = "Sunday";
+//                   break;
+//               }
+//             }
+//
+//             // ✅ Filter only that day's business hour
+//             final selectedBusinessHour = cart.registerClubId?.businessHours
+//                 ?.where((bh) => bh.day == bookingDay)
+//                 .map((bh) => {
+//               "time": bh.time ?? "",
+//               "day": bh.day ?? "",
+//             })
+//                 .toList() ??
+//                 [];
+//
+//             slotData.add({
+//               "slotId": slotTime.slotId ?? "",
+//               "businessHours": selectedBusinessHour,
+//               "slotTimes": [
+//                 {
+//                   "time": slotTime.time ?? "",
+//                   "amount": slotTime.amount ?? 0,
+//                 }
+//               ],
+//               // ✅ Use BookSessionController values
+//               "courtId": bookSessionController.courtId.value,
+//               "courtName": bookSessionController.courtName.value,
+//               "bookingDate": slotTime.bookingDate ?? "",
+//             });
+//           }
+//         }
+//       }
+//
+//       final registerClubId = cartItems.first.registerClubId?.sId;
+//       final ownerId = cartItems.first.registerClubId?.ownerId;
+//
+//       if (registerClubId == null || registerClubId.isEmpty || slotData.isEmpty) {
+//         Get.snackbar("Error", "Invalid cart data - missing required fields");
+//         return;
+//       }
+//
+//       final String confirmedAt = DateTime.now().toIso8601String();
+//
+//       final Map<String, dynamic> bookingPayload = {
+//         "slot": slotData,
+//         "register_club_id": registerClubId,
+//         "confirmedAt": confirmedAt,
+//       };
+//
+//       if (ownerId != null && ownerId.isNotEmpty) {
+//         bookingPayload["ownerId"] = ownerId;
+//       }
+//
+//       log("Booking payload after payment: ${bookingPayload.toString()}");
+//
+//       await cartController.bookCart(data: bookingPayload);
+//
+//       Get.to(() => BookingSuccessfulScreen());
+//     } catch (e) {
+//       log("Error processing booking after payment: $e");
+//       Get.snackbar(
+//         "Booking Error",
+//         "Payment successful but booking failed: ${e.toString()}",
+//         snackPosition: SnackPosition.TOP,
+//         backgroundColor: Colors.red,
+//         colorText: Colors.white,
+//         duration: const Duration(seconds: 5),
+//       );
+//     }
+//   }
   Future<void> _processBookingAfterPayment() async {
     try {
-      final cartItems = cartController.cartItems;
+      // ✅ Get payload directly from CartController
+      final bookingPayload = cartController.buildBookingPayload();
 
-      if (cartItems.isEmpty) {
-        Get.snackbar("Empty Cart", "Please add items to cart.");
+      if (bookingPayload == null) {
+        Get.snackbar("Error", "No selected items available for booking");
         return;
       }
 
-      final bookSessionController = Get.find<BookSessionController>();
-
-      final List<Map<String, dynamic>> slotData = [];
-
-      for (var cart in cartItems) {
-        for (var slot in cart.slot ?? []) {
-          for (var slotTime in slot.slotTimes ?? []) {
-            // ✅ Parse bookingDate to weekday
-            DateTime? bookingDate;
-            if (slotTime.bookingDate != null && slotTime.bookingDate!.isNotEmpty) {
-              bookingDate = DateTime.tryParse(slotTime.bookingDate!);
-            }
-
-            String bookingDay = "";
-            if (bookingDate != null) {
-              switch (bookingDate.weekday) {
-                case 1:
-                  bookingDay = "Monday";
-                  break;
-                case 2:
-                  bookingDay = "Tuesday";
-                  break;
-                case 3:
-                  bookingDay = "Wednesday";
-                  break;
-                case 4:
-                  bookingDay = "Thursday";
-                  break;
-                case 5:
-                  bookingDay = "Friday";
-                  break;
-                case 6:
-                  bookingDay = "Saturday";
-                  break;
-                case 7:
-                  bookingDay = "Sunday";
-                  break;
-              }
-            }
-
-            // ✅ Filter only that day's business hour
-            final selectedBusinessHour = cart.registerClubId?.businessHours
-                ?.where((bh) => bh.day == bookingDay)
-                .map((bh) => {
-              "time": bh.time ?? "",
-              "day": bh.day ?? "",
-            })
-                .toList() ??
-                [];
-
-            slotData.add({
-              "slotId": slotTime.slotId ?? "",
-              "businessHours": selectedBusinessHour,
-              "slotTimes": [
-                {
-                  "time": slotTime.time ?? "",
-                  "amount": slotTime.amount ?? 0,
-                }
-              ],
-              // ✅ Use BookSessionController values
-              "courtId": bookSessionController.courtId.value,
-              "courtName": bookSessionController.courtName.value,
-              "bookingDate": slotTime.bookingDate ?? "",
-            });
-          }
-        }
-      }
-
-      final registerClubId = cartItems.first.registerClubId?.sId;
-      final ownerId = cartItems.first.registerClubId?.ownerId;
-
-      if (registerClubId == null || registerClubId.isEmpty || slotData.isEmpty) {
-        Get.snackbar("Error", "Invalid cart data - missing required fields");
-        return;
-      }
-
-      final String confirmedAt = DateTime.now().toIso8601String();
-
-      final Map<String, dynamic> bookingPayload = {
-        "slot": slotData,
-        "register_club_id": registerClubId,
-        "confirmedAt": confirmedAt,
-      };
-
-      if (ownerId != null && ownerId.isNotEmpty) {
-        bookingPayload["ownerId"] = ownerId;
-      }
-
-      log("Booking payload after payment: ${bookingPayload.toString()}");
+      log("Booking payload after payment: $bookingPayload");
 
       await cartController.bookCart(data: bookingPayload);
 
