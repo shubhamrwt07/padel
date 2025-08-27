@@ -332,7 +332,6 @@ class BookSession extends StatelessWidget {
 
   Widget buildCourtList(BookSessionController controller) {
     return Obx(() {
-      final slots = controller.slots.value?.data ?? [];
 
       if (controller.isLoadingCourts.value) {
         return ListView.builder(
@@ -390,6 +389,7 @@ class BookSession extends StatelessWidget {
           },
         );
       }
+      final slots = controller.slots.value?.data ?? [];
 
       if (slots.isEmpty) {
         return const Center(child: Text("No courts available"));

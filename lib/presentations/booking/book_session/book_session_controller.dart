@@ -28,7 +28,10 @@ class BookSessionController extends GetxController {
     selectedDate.value = DateTime.now();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await getAvailableCourtsById(argument.id!);
+      await loadCourtsAndSetFirst();
+      if (courtId.value.isNotEmpty) {
+        await getAvailableCourtsById(argument.id!, selectedCourtId: courtId.value);
+      }
     });
   }
 
@@ -38,11 +41,45 @@ class BookSessionController extends GetxController {
     totalAmount.value = 0;
     super.onClose();
   }
+  Future<void> loadCourtsAndSetFirst() async {
+    isLoadingCourts.value = true;
+    try {
+      final date = selectedDate.value ?? DateTime.now();
+      final formattedDate =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      final formattedDay = _getWeekday(date.weekday);
+
+      // Call the same repository method but without courtId filter
+      final result = await repository.fetchAvailableCourtsById(
+        id: argument.id!,
+        time: '',
+        date: formattedDate,
+        day: formattedDay,
+        courtId: '',
+      );
+
+      // Set slots (so UI can show courts list too if needed)
+      slots.value = result;
+
+      // Pick the first court
+      final firstCourt = result.data?.first.courts?.first;
+      if (firstCourt != null) {
+        courtId.value = firstCourt.sId ?? '';
+        courtName.value = firstCourt.courtName ?? '';
+        log("First court selected: ${courtName.value} (${courtId.value})");
+      }
+    } catch (e) {
+      log("Error loading courts: $e");
+    }finally{
+      isLoadingCourts.value  =false;
+    }
+  }
+
 
   Future<void> getAvailableCourtsById(String clubId, {String? selectedCourtId}) async {
     log("Fetching courts for club: $clubId, court: $selectedCourtId");
     isLoadingCourts.value = true;
-    slots.value = null;
+    // slots.value = null;
     selectedSlots.clear();
 
     try {
