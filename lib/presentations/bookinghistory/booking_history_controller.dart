@@ -9,19 +9,18 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
 
   Rx<BookingHistoryModel?> upcomingBookings = Rx<BookingHistoryModel?>(null);
   Rx<BookingHistoryModel?> completedBookings = Rx<BookingHistoryModel?>(null);
+  Rx<BookingHistoryModel?> cancelledBookings = Rx<BookingHistoryModel?>(null); // ✅ new
 
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 3, vsync: this); // ✅ updated to 3 tabs
 
-    // Add listener to tab changes for debugging
     tabController.addListener(() {
       if (!tabController.indexIsChanging) {
         print("Current tab: ${tabController.index}");
-;
       }
     });
 
@@ -38,18 +37,19 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
       // Fetch upcoming bookings
       print("Fetching upcoming bookings...");
       final upcoming = await bookingRepo.getBookingHistory(type: "upcoming");
-      print("Upcoming response received");
       upcomingBookings.value = upcoming;
 
       // Fetch completed bookings
       print("Fetching completed bookings...");
       final completed = await bookingRepo.getBookingHistory(type: "completed");
-      print("Completed response received");
       completedBookings.value = completed;
 
-      // Trigger UI update
-      update();
+      // Fetch cancelled bookings ✅
+      print("Fetching cancelled bookings...");
+      final cancelled = await bookingRepo.getBookingHistory(type: "cancelled");
+      cancelledBookings.value = cancelled;
 
+      update();
     } catch (e) {
       print("Error fetching bookings: $e");
       errorMessage.value = "Failed to fetch bookings: $e";
@@ -59,7 +59,6 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
     }
   }
 
-  // Method to refresh bookings
   void refreshBookings() {
     fetchBookings();
   }
