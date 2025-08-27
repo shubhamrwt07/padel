@@ -15,20 +15,25 @@ class CartController extends GetxController {
   RxBool isBookingLoading = false.obs;
 
   // Observables
-  RxInt totalPrice = 0.obs;
-  RxInt totalSlot = 0.obs;
   RxBool isLoading = false.obs;
   RxBool isBooking = false.obs;
   RxList<CartItems> cartItems = <CartItems>[].obs;
 
+  // Selection tracking (club-level)
+  RxSet<String> selectedClubIds = <String>{}.obs;
+
+  // Computed totals (only selected clubs)
+  RxInt totalPrice = 0.obs;
+  RxInt totalSlot = 0.obs;
+
   @override
   void onInit() {
     getCartItems();
-    print("initialize");
     super.onInit();
   }
 
   // Fetch Cart Items
+
   Future<void> getCartItems() async {
     try {
       isLoading.value = true;
@@ -36,12 +41,16 @@ class CartController extends GetxController {
 
       if (result.cartItems != null && result.cartItems!.isNotEmpty) {
         cartItems.assignAll(result.cartItems!);
-        totalPrice.value = result.grandTotal ?? 0;
-        // Calculate total slots
-        calculateTotalSlots();
+        // By default select all clubs
+        selectedClubIds.value = cartItems
+            .map((e) => e.registerClubId?.sId ?? "")
+            .where((id) => id.isNotEmpty)
+            .toSet();
+
+        calculateTotals();
       } else {
-        // Explicitly clear cart when no items
         cartItems.clear();
+        selectedClubIds.clear();
         totalPrice.value = 0;
         totalSlot.value = 0;
       }
@@ -49,8 +58,8 @@ class CartController extends GetxController {
       log("Cart Items length: ${cartItems.length}");
     } catch (e) {
       if (kDebugMode) print("Error fetching cart items: $e");
-      // Clear cart on error to avoid showing stale data
       cartItems.clear();
+      selectedClubIds.clear();
       totalPrice.value = 0;
       totalSlot.value = 0;
     } finally {
@@ -58,39 +67,100 @@ class CartController extends GetxController {
     }
   }
 
-  // Calculate total slots from cart items
-  void calculateTotalSlots() {
+  // Recalculate totals based on selected clubs
+  void calculateTotals() {
+    int price = 0;
     int slots = 0;
+
     for (var item in cartItems) {
+      final clubId = item.registerClubId?.sId ?? "";
+      if (!selectedClubIds.contains(clubId)) continue;
+
       if (item.slot != null && item.slot!.isNotEmpty) {
         for (var slot in item.slot!) {
           if (slot.slotTimes != null) {
             slots += slot.slotTimes!.length;
+            for (var slotTime in slot.slotTimes!) {
+              price += int.tryParse(slotTime.amount?.toString() ?? "0") ?? 0;
+            }
           }
         }
       }
     }
+
+    totalPrice.value = price;
     totalSlot.value = slots;
   }
-  // Remove cart items with immediate UI update
+
+
+  // Toggle single club selection
+  void toggleSelectClub(String clubId) {
+    if (selectedClubIds.contains(clubId)) {
+      selectedClubIds.remove(clubId);
+    } else {
+      selectedClubIds.add(clubId);
+    }
+    calculateTotals();
+  }
+
+  // Select all clubs
+  void selectAll() {
+    selectedClubIds.value = cartItems
+        .map((e) => e.registerClubId?.sId ?? "")
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    calculateTotals();
+  }
+
+  // Unselect all clubs
+  void unselectAll() {
+    selectedClubIds.clear();
+    calculateTotals();
+  }
+
+  // Delete only selected clubs
+  Future<void> deleteSelectedClubs() async {
+    final toDeleteIds = selectedClubIds.toSet();
+
+    // Collect all slotIds belonging to selected clubs
+    final slotIds = <String>[];
+    for (var item in cartItems) {
+      if (toDeleteIds.contains(item.registerClubId?.sId ?? "")) {
+        for (var slot in item.slot ?? []) {
+          for (var slotTime in slot.slotTimes ?? []) {
+            if (slotTime.slotId != null) slotIds.add(slotTime.slotId!);
+          }
+        }
+      }
+    }
+
+    if (slotIds.isNotEmpty) {
+      await removeCartItemsFromCart(slotIds: slotIds);
+    }
+  }
+
+  // Remove cart items (batch slotIds supported)
   Future<void> removeCartItemsFromCart({required List<String> slotIds}) async {
     try {
-      log("slots ids for remove ${slotIds[0]}");
+      log("slots ids for remove $slotIds");
       if (isLoading.value) return;
 
-      // First, optimistically update UI by removing the item locally
-      _removeSlotFromLocalCart(slotIds[0]);
+      // Optimistically remove slots locally
+      for (var slotId in slotIds) {
+        _removeSlotFromLocalCart(slotId);
+      }
 
       isLoading.value = true;
 
-      RemoveToCartModel result = await cartRepository.removeCartItems(slotIds: slotIds);
+      RemoveToCartModel result =
+      await cartRepository.removeCartItems(slotIds: slotIds);
 
-      // Update the total amount from the API response
+      // Update the total amount from API
       if (result.newTotalAmount != null) {
         totalPrice.value = result.newTotalAmount!;
       }
 
-      // Refresh cart items to ensure data consistency with server
+      // Refresh cart to ensure consistency
       await getCartItems();
 
       Get.snackbar(
@@ -101,10 +171,9 @@ class CartController extends GetxController {
         colorText: Colors.white,
       );
 
-      log("Item removed successfully");
+      log("Items removed successfully");
     } catch (e) {
       log("Remove cart error: $e");
-      // On error, refresh cart to restore correct state
       await getCartItems();
 
       Get.snackbar(
@@ -116,10 +185,11 @@ class CartController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      calculateTotals();
     }
   }
 
-  // Helper method to remove slot from local cart immediately
+  // Helper to remove slot from local cart
   void _removeSlotFromLocalCart(String slotId) {
     for (int i = 0; i < cartItems.length; i++) {
       var item = cartItems[i];
@@ -127,41 +197,37 @@ class CartController extends GetxController {
         for (int j = 0; j < item.slot!.length; j++) {
           var slot = item.slot![j];
           if (slot.slotTimes != null) {
-            // Remove the specific slot time
             slot.slotTimes!.removeWhere((slotTime) => slotTime.slotId == slotId);
-
-            // If no slot times left in this slot, remove the slot
             if (slot.slotTimes!.isEmpty) {
               item.slot!.removeAt(j);
-              j--; // Adjust index after removal
+              j--;
             }
           }
         }
-
-        // If no slots left in this item, remove the entire item
         if (item.slot!.isEmpty) {
           cartItems.removeAt(i);
-          i--; // Adjust index after removal
+          i--;
         }
       }
     }
 
-    // Recalculate totals
-    calculateTotalSlots();
+    calculateTotals();
+
     if (cartItems.isEmpty) {
+      selectedClubIds.clear();
       totalPrice.value = 0;
       totalSlot.value = 0;
     }
   }
 
-  // Book Cart (calls repository.booking)
+  // Book Cart
   Future<void> bookCart({required Map<String, dynamic> data}) async {
     try {
       isBooking.value = true;
 
-      CarteBookingModel bookingResult = await cartRepository.booking(
-        data: data,
-      );
+      CarteBookingModel bookingResult =
+      await cartRepository.booking(data: data);
+
       log("Booking successful: ${bookingResult.toJson()}");
       Get.toNamed(RoutesName.paymentMethod);
       Get.snackbar(
@@ -172,7 +238,6 @@ class CartController extends GetxController {
         colorText: Colors.white,
       );
 
-      // Optionally refresh cart items
       await getCartItems();
     } catch (e) {
       log("Booking error: $e");
@@ -186,5 +251,85 @@ class CartController extends GetxController {
     } finally {
       isBooking.value = false;
     }
+  }
+
+}
+extension CartControllerBooking on CartController {
+  Map<String, dynamic>? buildBookingPayload() {
+    final selectedItems = cartItems
+        .where((c) => selectedClubIds.contains(c.registerClubId?.sId ?? ""))
+        .toList();
+
+    if (selectedItems.isEmpty) return null;
+
+    final List<Map<String, dynamic>> slotData = [];
+
+    for (var cart in selectedItems) {
+      for (var slot in cart.slot ?? []) {
+        for (var slotTime in slot.slotTimes ?? []) {
+          // Parse bookingDate
+          DateTime? bookingDate = slotTime.bookingDate != null && slotTime.bookingDate!.isNotEmpty
+              ? DateTime.tryParse(slotTime.bookingDate!)
+              : null;
+
+          String bookingDay = "";
+          if (bookingDate != null) {
+            switch (bookingDate.weekday) {
+              case 1: bookingDay = "Monday"; break;
+              case 2: bookingDay = "Tuesday"; break;
+              case 3: bookingDay = "Wednesday"; break;
+              case 4: bookingDay = "Thursday"; break;
+              case 5: bookingDay = "Friday"; break;
+              case 6: bookingDay = "Saturday"; break;
+              case 7: bookingDay = "Sunday"; break;
+            }
+          }
+
+          // Only business hours of that day
+          final selectedBusinessHour = cart.registerClubId?.businessHours
+              ?.where((bh) => bh.day == bookingDay)
+              .map((bh) => {
+            "time": bh.time ?? "",
+            "day": bh.day ?? "",
+          })
+              .toList() ??
+              [];
+
+          slotData.add({
+            "slotId": slotTime.slotId ?? "",
+            "businessHours": selectedBusinessHour,
+            "slotTimes": [
+              {
+                "time": slotTime.time ?? "",
+                "amount": slotTime.amount ?? 0,
+              }
+            ],
+            // ✅ From Cart API directly
+            "courtId": slotTime.courtId,
+            "courtName": slotTime.courtName,
+            "bookingDate": slotTime.bookingDate ?? "",
+          });
+        }
+      }
+    }
+
+    final registerClubId = selectedItems.first.registerClubId?.sId;
+    final ownerId = selectedItems.first.registerClubId?.ownerId;
+
+    if (registerClubId == null || registerClubId.isEmpty || slotData.isEmpty) {
+      return null;
+    }
+
+    final Map<String, dynamic> bookingPayload = {
+      "slot": slotData,
+      "register_club_id": registerClubId,
+      "confirmedAt": DateTime.now().toIso8601String(),
+    };
+
+    if (ownerId != null && ownerId.isNotEmpty) {
+      bookingPayload["ownerId"] = ownerId;
+    }
+
+    return bookingPayload;
   }
 }
