@@ -122,7 +122,6 @@ class CartController extends GetxController {
   Future<void> deleteSelectedClubs() async {
     final toDeleteIds = selectedClubIds.toSet();
 
-    // Collect all slotIds belonging to selected clubs
     final slotIds = <String>[];
     for (var item in cartItems) {
       if (toDeleteIds.contains(item.registerClubId?.sId ?? "")) {
@@ -139,29 +138,25 @@ class CartController extends GetxController {
     }
   }
 
+
   // Remove cart items (batch slotIds supported)
   Future<void> removeCartItemsFromCart({required List<String> slotIds}) async {
     try {
       log("slots ids for remove $slotIds");
       if (isLoading.value) return;
 
-      // Optimistically remove slots locally
-      for (var slotId in slotIds) {
-        _removeSlotFromLocalCart(slotId);
-      }
-
       isLoading.value = true;
 
-      RemoveToCartModel result =
-      await cartRepository.removeCartItems(slotIds: slotIds);
+      // Call API
+      RemoveToCartModel result = await cartRepository.removeCartItems(slotIds: slotIds);
 
-      // Update the total amount from API
+      // Refresh cart only from API
+      await getCartItems();
+
+      // Update total price from API
       if (result.newTotalAmount != null) {
         totalPrice.value = result.newTotalAmount!;
       }
-
-      // Refresh cart to ensure consistency
-      await getCartItems();
 
       Get.snackbar(
         "Success",
@@ -190,43 +185,14 @@ class CartController extends GetxController {
   }
 
   // Helper to remove slot from local cart
-  void _removeSlotFromLocalCart(String slotId) {
-    for (int i = 0; i < cartItems.length; i++) {
-      var item = cartItems[i];
-      if (item.slot != null) {
-        for (int j = 0; j < item.slot!.length; j++) {
-          var slot = item.slot![j];
-          if (slot.slotTimes != null) {
-            slot.slotTimes!.removeWhere((slotTime) => slotTime.slotId == slotId);
-            if (slot.slotTimes!.isEmpty) {
-              item.slot!.removeAt(j);
-              j--;
-            }
-          }
-        }
-        if (item.slot!.isEmpty) {
-          cartItems.removeAt(i);
-          i--;
-        }
-      }
-    }
-
-    calculateTotals();
-
-    if (cartItems.isEmpty) {
-      selectedClubIds.clear();
-      totalPrice.value = 0;
-      totalSlot.value = 0;
-    }
-  }
 
   // Book Cart
-  Future<void> bookCart({required Map<String, dynamic> data}) async {
+  Future<void> bookCart({required List<Map<String, dynamic>> data}) async {
     try {
       isBooking.value = true;
 
       CarteBookingModel bookingResult =
-      await cartRepository.booking(data: data);
+      await cartRepository.booking(data: data); // send list directly ✅
 
       log("Booking successful: ${bookingResult.toJson()}");
       Get.toNamed(RoutesName.paymentMethod);
@@ -255,33 +221,50 @@ class CartController extends GetxController {
 
 }
 extension CartControllerBooking on CartController {
-  Map<String, dynamic>? buildBookingPayload() {
+  List<Map<String, dynamic>>? buildBookingPayload() {
     final selectedItems = cartItems
         .where((c) => selectedClubIds.contains(c.registerClubId?.sId ?? ""))
         .toList();
 
     if (selectedItems.isEmpty) return null;
 
-    final List<Map<String, dynamic>> slotData = [];
+    final List<Map<String, dynamic>> payloadList = [];
 
     for (var cart in selectedItems) {
+      final List<Map<String, dynamic>> slotData = [];
+
       for (var slot in cart.slot ?? []) {
         for (var slotTime in slot.slotTimes ?? []) {
           // Parse bookingDate
-          DateTime? bookingDate = slotTime.bookingDate != null && slotTime.bookingDate!.isNotEmpty
+          DateTime? bookingDate = slotTime.bookingDate != null &&
+              slotTime.bookingDate!.isNotEmpty
               ? DateTime.tryParse(slotTime.bookingDate!)
               : null;
 
           String bookingDay = "";
           if (bookingDate != null) {
             switch (bookingDate.weekday) {
-              case 1: bookingDay = "Monday"; break;
-              case 2: bookingDay = "Tuesday"; break;
-              case 3: bookingDay = "Wednesday"; break;
-              case 4: bookingDay = "Thursday"; break;
-              case 5: bookingDay = "Friday"; break;
-              case 6: bookingDay = "Saturday"; break;
-              case 7: bookingDay = "Sunday"; break;
+              case 1:
+                bookingDay = "Monday";
+                break;
+              case 2:
+                bookingDay = "Tuesday";
+                break;
+              case 3:
+                bookingDay = "Wednesday";
+                break;
+              case 4:
+                bookingDay = "Thursday";
+                break;
+              case 5:
+                bookingDay = "Friday";
+                break;
+              case 6:
+                bookingDay = "Saturday";
+                break;
+              case 7:
+                bookingDay = "Sunday";
+                break;
             }
           }
 
@@ -304,32 +287,24 @@ extension CartControllerBooking on CartController {
                 "amount": slotTime.amount ?? 0,
               }
             ],
-            // ✅ From Cart API directly
             "courtId": slotTime.courtId,
             "courtName": slotTime.courtName,
             "bookingDate": slotTime.bookingDate ?? "",
           });
         }
       }
+
+      if (slotData.isNotEmpty) {
+        final bookingPayload = {
+          "slot": slotData,
+          "register_club_id": cart.registerClubId?.sId ?? "",
+          "ownerId": cart.registerClubId?.ownerId ?? "",
+        };
+
+        payloadList.add(bookingPayload);
+      }
     }
 
-    final registerClubId = selectedItems.first.registerClubId?.sId;
-    final ownerId = selectedItems.first.registerClubId?.ownerId;
-
-    if (registerClubId == null || registerClubId.isEmpty || slotData.isEmpty) {
-      return null;
-    }
-
-    final Map<String, dynamic> bookingPayload = {
-      "slot": slotData,
-      "register_club_id": registerClubId,
-      "confirmedAt": DateTime.now().toIso8601String(),
-    };
-
-    if (ownerId != null && ownerId.isNotEmpty) {
-      bookingPayload["ownerId"] = ownerId;
-    }
-
-    return bookingPayload;
+    return payloadList.isEmpty ? null : payloadList;
   }
 }

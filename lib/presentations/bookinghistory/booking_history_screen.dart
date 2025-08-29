@@ -86,12 +86,16 @@ class BookingHistoryUi extends StatelessWidget {
               if (booking.sId != null && booking.sId!.isNotEmpty) {
                 Get.toNamed(
                   RoutesName.bookingConfirmAndCancel,
-                  arguments: {"id": booking.sId!},
+                  arguments: {
+                    "id": booking.sId!,
+                    "fromCompleted": type == "completed", // ✅ pass flag
+                  },
                 );
               } else {
                 Get.snackbar("Error", "Booking ID not available");
               }
             },
+
             child: bookingCard(context, booking, club),
           );
         },

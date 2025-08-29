@@ -38,6 +38,8 @@ class Booking {
   int? iV;
   String? cancellationDate;
   String? cancellationReason;
+  int? refundAmount;
+  String? refundDate;
 
   Booking(
       {this.sId,
@@ -53,7 +55,9 @@ class Booking {
         this.updatedAt,
         this.iV,
         this.cancellationDate,
-        this.cancellationReason});
+        this.cancellationReason,
+        this.refundAmount,
+        this.refundDate});
 
   Booking.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -76,6 +80,8 @@ class Booking {
     iV = json['__v'];
     cancellationDate = json['cancellationDate'];
     cancellationReason = json['cancellationReason'];
+    refundAmount = json['refundAmount'];
+    refundDate = json['refundDate'];
   }
 
   Map<String, dynamic> toJson() {
@@ -98,6 +104,8 @@ class Booking {
     data['__v'] = this.iV;
     data['cancellationDate'] = this.cancellationDate;
     data['cancellationReason'] = this.cancellationReason;
+    data['refundAmount'] = this.refundAmount;
+    data['refundDate'] = this.refundDate;
     return data;
   }
 }

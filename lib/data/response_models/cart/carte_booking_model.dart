@@ -35,10 +35,10 @@ class Bookings {
   String? bookingStatus;
   String? bookingType;
   List<Slot>? slot;
-  String? ownerId;
-  String? sId;
   String? createdAt;
+  String? ownerId;
   String? updatedAt;
+  String? sId;
   int? iV;
 
   Bookings(
@@ -49,10 +49,10 @@ class Bookings {
         this.bookingStatus,
         this.bookingType,
         this.slot,
-        this.ownerId,
-        this.sId,
         this.createdAt,
+        this.ownerId,
         this.updatedAt,
+        this.sId,
         this.iV});
 
   Bookings.fromJson(Map<String, dynamic> json) {
@@ -68,10 +68,10 @@ class Bookings {
         slot!.add(new Slot.fromJson(v));
       });
     }
-    ownerId = json['ownerId'];
-    sId = json['_id'];
     createdAt = json['createdAt'];
+    ownerId = json['ownerId'];
     updatedAt = json['updatedAt'];
+    sId = json['_id'];
     iV = json['__v'];
   }
 
@@ -86,10 +86,10 @@ class Bookings {
     if (this.slot != null) {
       data['slot'] = this.slot!.map((v) => v.toJson()).toList();
     }
-    data['ownerId'] = this.ownerId;
-    data['_id'] = this.sId;
     data['createdAt'] = this.createdAt;
+    data['ownerId'] = this.ownerId;
     data['updatedAt'] = this.updatedAt;
+    data['_id'] = this.sId;
     data['__v'] = this.iV;
     return data;
   }
@@ -98,6 +98,7 @@ class Bookings {
 class Slot {
   String? slotId;
   String? courtName;
+  String? courtId;
   String? bookingDate;
   List<SlotTimes>? slotTimes;
   List<BusinessHours>? businessHours;
@@ -105,6 +106,7 @@ class Slot {
   Slot(
       {this.slotId,
         this.courtName,
+        this.courtId,
         this.bookingDate,
         this.slotTimes,
         this.businessHours});
@@ -112,6 +114,7 @@ class Slot {
   Slot.fromJson(Map<String, dynamic> json) {
     slotId = json['slotId'];
     courtName = json['courtName'];
+    courtId = json['courtId'];
     bookingDate = json['bookingDate'];
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
@@ -131,6 +134,7 @@ class Slot {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['slotId'] = this.slotId;
     data['courtName'] = this.courtName;
+    data['courtId'] = this.courtId;
     data['bookingDate'] = this.bookingDate;
     if (this.slotTimes != null) {
       data['slotTimes'] = this.slotTimes!.map((v) => v.toJson()).toList();

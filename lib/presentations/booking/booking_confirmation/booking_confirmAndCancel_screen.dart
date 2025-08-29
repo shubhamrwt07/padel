@@ -115,6 +115,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       bookingMessage = "You will receive your refund within 7 days.";
     } else if (booking.bookingStatus?.toLowerCase() == "refunded") {
       bookingMessage = "Your refund successfully credited.";
+    } else if (booking.bookingStatus?.toLowerCase() == "completed") {
+      bookingMessage = "Your booking has been successfully completed.";
     }
 
     return Column(
@@ -154,12 +156,12 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                         width: 44,
                         height: 44,
                         placeholder: (context, url) => SvgPicture.asset(
-                          Assets.imagesImgBookingConfirm, // 👈 placeholder
+                          Assets.imagesImgBookingConfirm,
                           height: 20,
                           color: Colors.white,
                         ),
                         errorWidget: (context, url, error) => SvgPicture.asset(
-                          Assets.imagesImgBookingConfirm, // 👈 fallback
+                          Assets.imagesImgBookingConfirm,
                           height: 20,
                           color: Colors.white,
                         ),
@@ -196,22 +198,12 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                   );
                 }).toList(),
 
-              // ✅ Show cancel button per slot if more than 1 slot exists
-              if ((booking.slot?.length ?? 0) > 1)
-                PrimaryButton(
-                  height: 25,
-                  width: 120,
-                  text: "Cancel Booking",
-                  textStyle: Get.textTheme.labelMedium!.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                  onTap: () {
-                    controller.cancelBooking.value = true;
-                    controller.slotToCancel.value = booking.sId;
-                  },
-                ).paddingOnly(top: 10, bottom: 10),
+              // ✅ Show booking status
+              bookingDetailRow(
+                context,
+                "Booking Status" ,
+                booking.bookingStatus?.capitalizeFirst ?? "N/A",
+              ),
 
               const SizedBox(height: 8),
             ],
@@ -222,6 +214,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
   }
   Widget paymentDetailsCard(BuildContext context) {
     final booking = controller.bookingDetails.value!.booking!;
+    final status = booking.bookingStatus?.toLowerCase();
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -236,9 +230,17 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           const SizedBox(height: 8),
           bookingDetailRow(
             context,
-            "Total payment",
+            "Total Payment",
             "₹ ${(booking.totalAmount ?? 0).toStringAsFixed(2)}",
           ),
+
+          // ✅ Show refunded amount if status is refunded
+          if (status == "refunded" || status == "in-progress")
+            bookingDetailRow(
+              context,
+              "Refunded Amount",
+              "₹ ${(booking.refundAmount ?? 0).toStringAsFixed(2)}",
+            ),
         ],
       ),
     ).paddingOnly(bottom: Get.height * 0.02);
@@ -272,8 +274,16 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
     final booking = controller.bookingDetails.value?.booking;
     if (booking == null) return const SizedBox.shrink();
 
-    // Hide if refunded or already cancelled
-    if (booking.bookingStatus?.toLowerCase() == "refunded") {
+    // ✅ check if came from completed tab
+    final bool fromCompleted = Get.arguments?['fromCompleted'] ?? false;
+    if (fromCompleted) {
+      return const SizedBox.shrink();
+    }
+
+    final status = booking.bookingStatus?.toLowerCase();
+
+    // ❌ Hide if refunded, already cancelled, or completed
+    if (status == "refunded" || status == "completed" || status == "cancelled") {
       return const SizedBox.shrink();
     }
 
@@ -430,7 +440,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         ).paddingOnly(
           top: controller.selectedReason.value == 'Other'
               ? Get.height * 0.14
-              : Get.height * 0.29,
+              : Get.height * 0.2,
         ),
       ],
     );
