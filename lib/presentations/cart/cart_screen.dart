@@ -59,7 +59,7 @@ class CartScreen extends StatelessWidget {
                       ),
                       Text(
                         "Select All",
-                        style: Get.textTheme.labelMedium,
+                        style: Get.textTheme.labelMedium!.copyWith(fontSize: 12)
                       ),
                     ],
                   ),
@@ -425,7 +425,7 @@ class CartScreen extends StatelessWidget {
             ),
           ),
         ],
-      ).paddingOnly(top: Get.height*.2),
+      ).paddingOnly(top: Get.height*.00),
     );
   }
 

@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
-
 import '../../../configs/components/snack_bars.dart';
 import '../../../data/request_models/booking/booking_confermation_model.dart';
 import '../../../data/request_models/booking/cancel_booking_model.dart';

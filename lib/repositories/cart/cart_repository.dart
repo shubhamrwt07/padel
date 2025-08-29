@@ -101,7 +101,7 @@ class CartRepository {
     }
   }
   Future<CarteBookingModel> booking({
-    required Map<String, dynamic> data,
+    required dynamic data,
   }) async {
     try {
       final response = await dioClient.post(
@@ -128,5 +128,6 @@ class CartRepository {
       rethrow;
     }
   }
+
 
 }
