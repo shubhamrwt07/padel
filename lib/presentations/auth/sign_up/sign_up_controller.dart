@@ -73,7 +73,7 @@ class SignUpController extends GetxController {
     if (confirmPasswordController.text.isEmpty) {
       return "Confirm Password is required";
     } else if (confirmPasswordController.text != passwordController.text) {
-      return "Passwords do not match";
+      return "Passwords do not creatematch";
     }
     return null;
   }

@@ -194,8 +194,8 @@ class NotificationController extends GetxController {
 
     try {
       if (payload.isNotEmpty) {
-        if (payload.contains('match')) {
-          Get.toNamed('/match-details');
+        if (payload.contains('creatematch')) {
+          Get.toNamed('/creatematch-details');
         } else if (payload.contains('booking')) {
           Get.toNamed('/booking-details');
         } else {

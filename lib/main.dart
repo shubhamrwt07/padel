@@ -145,8 +145,8 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
     try {
       if (data['route'] != null) {
         Get.toNamed(data['route']);
-      } else if (data['type'] == 'match') {
-        Get.toNamed('/match-details', arguments: data);
+      } else if (data['type'] == 'creatematch') {
+        Get.toNamed('/creatematch-details', arguments: data);
       } else if (data['type'] == 'booking') {
         Get.toNamed('/booking-details', arguments: data);
       } else {

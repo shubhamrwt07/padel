@@ -239,7 +239,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             bookingDetailRow(
               context,
               "Refunded Amount",
-              "₹ ${(booking.refundAmount ?? 0).toStringAsFixed(2)}",
+              "₹ ${(booking.refundAmount  ?? 0).toStringAsFixed(2)}",
             ),
         ],
       ),
