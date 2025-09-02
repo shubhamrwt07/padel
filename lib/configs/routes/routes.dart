@@ -42,7 +42,12 @@ import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
+
+import '../../presentations/creatematch/create_match_binding.dart';
+import '../../presentations/creatematch/create_mstch_view.dart';
 import '../../presentations/profile/profile_screen.dart';
+import '../../presentations/questions/create_question_binding.dart';
+import '../../presentations/questions/create_question_screen.dart';
 import '../../presentations/registration/registration_americano_screen.dart';
 import '../../presentations/scoreview/score_view_screen .dart';
 import '../../presentations/splash/splash_binding.dart';
@@ -212,6 +217,19 @@ class Routes {
       name: RoutesName.packages,
       page: () => PackagesUi(),
       binding: PackagesBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.createMatch,
+      page: () => CreateOpenMatchesScreen(),
+      binding: CreateOpenMatchBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),   GetPage(
+      name: RoutesName.createQuestions,
+      page: () => CreateQuestionsScreen(),
+      binding: CreateQuestionsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

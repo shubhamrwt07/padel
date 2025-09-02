@@ -17,7 +17,7 @@ class AppStrings{
   static const String invalidPassword = "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character";
   static const String phoneRequired="Phone number is required";
   static const String invalidPhone="Invalid Phone number";
-  static const String invalidConfirmPassword="Passwords do not match";
+  static const String invalidConfirmPassword="Passwords do not creatematch";
   // Sign Up Screen-------------------------------------------------------------
   static const String createAccount = "Create Account";
   static const String createAnAccountSo = "Create an account so you can explore all the existing jobs";
