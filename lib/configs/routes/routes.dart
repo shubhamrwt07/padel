@@ -40,11 +40,11 @@ import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
+import '../../presentations/booking/open_matches/create_mstch_view.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
 
-import '../../presentations/creatematch/create_match_binding.dart';
-import '../../presentations/creatematch/create_mstch_view.dart';
+import '../../presentations/booking/open_matches/create_match_binding.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/questions/create_question_binding.dart';
 import '../../presentations/questions/create_question_screen.dart';

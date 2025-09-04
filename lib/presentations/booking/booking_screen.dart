@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 import 'americano/americano_screen.dart';
+import 'open_matches/create_mstch_view.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
@@ -145,7 +146,8 @@ class BookingScreen extends GetView<BookingController> {
                         children: [
                            HomeContent(),
                            BookSession(),
-                           OpenMatches(),
+                           // OpenMatches(),
+                          CreateOpenMatchesScreen(),
                           AmericanoScreen()
                         ],
                       ),
