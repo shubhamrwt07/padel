@@ -1,6 +1,7 @@
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_model.dart' hide SlotTimes;
 import 'dart:developer';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import '../../../data/request_models/home_models/get_available_court.dart' hide Courts;
@@ -9,6 +10,7 @@ import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
 import '../../cart/cart_controller.dart';
 class CreateOpenMatchesController extends GetxController {
+
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
@@ -22,7 +24,24 @@ class CreateOpenMatchesController extends GetxController {
 
   var courtName = ''.obs;
   var courtId = ''.obs;
+  void onNext(){
+    OpenMatchDetails matchDetails=OpenMatchDetails(data:
+    MatchData(sId: "343434434", clubId: "pawan", clubName: "fuijhh", slot: [],
+        matchType: "matchType", skillLevel: "low", skillDetails: [],
+        matchDate: "matchDate", matchTime: "matchTime", matchStatus: "matchStatus"));
 
+    if (selectedSlots.isEmpty) {
+      SnackBarUtils.showInfoSnackBar("Please select at least one slot.");
+      return;
+    }
+
+    Get.toNamed(
+      RoutesName.createQuestions,
+      arguments: matchDetails
+    );
+
+    log(matchDetails.data!.clubName.toString());
+  }
   @override
   void onInit() {
     super.onInit();

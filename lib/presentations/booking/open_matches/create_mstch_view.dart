@@ -10,6 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/custom_button.dart';
 import '../../../configs/components/snack_bars.dart';
+import '../../../configs/routes/routes_name.dart';
+import '../details_page/details_model.dart';
 import 'create_match_controller.dart';
 
 class CreateOpenMatchesScreen extends StatelessWidget {
@@ -490,10 +492,12 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         alignment: Alignment.center,
         child: CustomButton(
           width: Get.width * 0.9,
-          onTap: () {},
+          onTap: () {
+controller.onNext();
+          },
           child: Text("Next Step",
               style: Get.textTheme.headlineMedium!
-                  .copyWith(color: AppColors.whiteColor)),
+                  .copyWith(color: AppColors.whiteColor)).paddingOnly(right: Get.width*0.1),
         ),
       ),
     );

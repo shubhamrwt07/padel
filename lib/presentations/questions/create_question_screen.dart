@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 
 
 import '../../configs/app_colors.dart';
@@ -15,7 +16,7 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
     final controller = Get.put(CreateQuestionsController());
 
     return Scaffold(
-      backgroundColor: Colors.black.withValues(alpha: 0.2),
+      backgroundColor: Colors.grey.withValues(alpha: 0.4),
       body: SafeArea(
         child: Container(
           width: double.infinity,
@@ -259,91 +260,31 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
           TextButton.icon(
             onPressed: controller.goBack,
             icon: Icon(Icons.arrow_back, color: AppColors.primaryColor),
-            label: Text("Back", style: Get.textTheme.labelLarge!.copyWith(
-                color: AppColors.primaryColor)),
+            label: Text(
+              "Back",
+              style: Get.textTheme.labelLarge!
+                  .copyWith(color: AppColors.primaryColor),
+            ),
           ),
         const Spacer(),
 
-        Obx(() =>
-        controller.currentStep.value == 6 ?
-        PrimaryButton(
-            width: Get.width*0.35,
+        Obx(() => controller.currentStep.value == 6
+            ? PrimaryButton(
+            width: Get.width * 0.35,
             height: 40,
-            onTap: ()=>_showAddQuestionDialog(context), text: "Submit") :
-        ElevatedButton(
+            onTap: (){controller.onSubmit();}, // ✅ direct API call
+            text: "Submit")
+            : ElevatedButton(
           onPressed: controller.goNext,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(10),
           ),
-          child: const Icon(
-            Icons.arrow_forward, color: Colors.white, size: 22,),
-        )
-        )
+          child: const Icon(Icons.arrow_forward,
+              color: Colors.white, size: 22),
+        ))
       ],
-    );
-  }
-  void _showAddQuestionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
-          child: Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            backgroundColor: AppColors.textFieldColor,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child:  GestureDetector(
-                      onTap: ()=>Get.back(),
-                      child: Container(
-                          height: 30,
-                          width: 30,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.transparent
-                          ),
-                          child: Icon(Icons.close, color: AppColors.textColor)),
-                    ),
-                  ),
-                  Text('Question', style: Get.textTheme.headlineMedium),
-                  const SizedBox(height: 8),
-                  PrimaryTextField(
-                      color: AppColors.whiteColor,
-                      hintText: "Enter Question"),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Options', style: Get.textTheme.headlineMedium),
-                      Text('+ Add', style: Get.textTheme.headlineLarge!.copyWith(color: AppColors.primaryColor)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  PrimaryTextField(
-                      color: AppColors.whiteColor,
-                      hintText: "Enter Option"),
-                  const SizedBox(height: 24),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: PrimaryButton(
-                        width: Get.width*0.3,
-                        height: 40,
-                        onTap: ()=>Get.toNamed(RoutesName.bottomNav), text: "Submit"),
-                  )
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

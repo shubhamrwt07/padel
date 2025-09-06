@@ -71,7 +71,8 @@ class CartRepository {
       );
       rethrow;
     }
-  }  Future<AddToCartModel> addCartItems({
+  }
+  Future<AddToCartModel> addCartItems({
     required Map<String, dynamic> data,
   }) async {
     log("POST API -${AppEndpoints.addCartItems} body ${data.toString()}");

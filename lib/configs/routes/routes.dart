@@ -45,6 +45,8 @@ import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
 
 import '../../presentations/booking/open_matches/create_match_binding.dart';
+import '../../presentations/openmatches/open_match_binding.dart';
+import '../../presentations/openmatches/open_match_view.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/questions/create_question_binding.dart';
 import '../../presentations/questions/create_question_screen.dart';
@@ -226,10 +228,18 @@ class Routes {
       binding: CreateOpenMatchBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
-    ),   GetPage(
+    ),
+    GetPage(
       name: RoutesName.createQuestions,
       page: () => CreateQuestionsScreen(),
       binding: CreateQuestionsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.openMatch,
+      page: () => OpenMatchView(),
+      binding: OpenMatchBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
