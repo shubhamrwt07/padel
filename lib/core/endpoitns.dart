@@ -23,4 +23,6 @@ class AppEndpoints {
   ///Review---------------------------------------------------------------------
   static const String getReview = "${BASE_URL}court/review/getReviews";
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
+  static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
+  static const String getAllMatches = "${BASE_URL}court/openmatch/getAllOpenMatches";
 }

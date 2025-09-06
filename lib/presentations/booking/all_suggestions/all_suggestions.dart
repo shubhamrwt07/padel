@@ -262,7 +262,7 @@ class AllSuggestions extends StatelessWidget {
 
   Widget _buildMatchCard(BuildContext context) {
     return InkWell(
-      onTap: () => Get.to(DetailsPage()),
+      onTap: () => Get.to(DetailsScreen()),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(8),
@@ -422,7 +422,7 @@ class AllSuggestions extends StatelessWidget {
             style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
           ).paddingOnly(right: Get.width * 0.14),
           onTap: () {
-            Get.to(() => DetailsPage(), transition: Transition.rightToLeft);
+            Get.to(() => DetailsScreen(), transition: Transition.rightToLeft);
           },
         ),
       ),

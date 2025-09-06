@@ -1,8 +1,19 @@
+import 'dart:developer';
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
+import '../booking/details_page/details_page.dart';
 
 class CreateQuestionsController extends GetxController{
-  var currentStep = 1.obs;
 
+  OpenMatchDetails? data;
+    @override
+  void onInit() {
+      data =Get.arguments;
+      log(data!.data!.clubName.toString());
+    super.onInit();
+  }
+
+  var currentStep = 1.obs;
   var selectedLevel = ''.obs;
   var selectedSport = ''.obs;
 
@@ -24,4 +35,7 @@ class CreateQuestionsController extends GetxController{
   //
   var selectedVolley = ''.obs;
   var selectedWallRebound = ''.obs;
+  onSubmit(){
+    Get.to(DetailsScreen (),arguments: data);
+  }
 }
