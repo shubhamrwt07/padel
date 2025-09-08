@@ -10,25 +10,19 @@ import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
 import '../../cart/cart_controller.dart';
 class CreateOpenMatchesController extends GetxController {
-
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
-
   RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
   RxInt totalAmount = 0.obs;
   final HomeRepository repository = HomeRepository();
   Rx<AvailableCourtModel?> slots = Rx<AvailableCourtModel?>(null);
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
-
   var courtName = ''.obs;
   var courtId = ''.obs;
   void onNext(){
-    OpenMatchDetails matchDetails=OpenMatchDetails(data:
-    MatchData(sId: "343434434", clubId: "pawan", clubName: "fuijhh", slot: [],
-        matchType: "matchType", skillLevel: "low", skillDetails: [],
-        matchDate: "matchDate", matchTime: "matchTime", matchStatus: "matchStatus"));
+    // DetailsController detailsController=Get.put(DetailsController());
 
     if (selectedSlots.isEmpty) {
       SnackBarUtils.showInfoSnackBar("Please select at least one slot.");
@@ -37,10 +31,10 @@ class CreateOpenMatchesController extends GetxController {
 
     Get.toNamed(
       RoutesName.createQuestions,
-      arguments: matchDetails
+
     );
 
-    log(matchDetails.data!.clubName.toString());
+
   }
   @override
   void onInit() {

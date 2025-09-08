@@ -220,10 +220,11 @@ class BookSessionController extends GetxController {
 
     return false;
   }
+  var cartLoader=false.obs;
   void addToCart() async {
     try {
-      if (isLoadingCourts.value) return;
-      isLoadingCourts.value = true;
+      if (cartLoader.value) return;
+      cartLoader.value = true;
 
       // Group selected slots by selectedDate
       final Map<String, List<SlotTimes>> groupedSlots = {};
@@ -289,7 +290,7 @@ class BookSessionController extends GetxController {
         });
       });
     } finally {
-      isLoadingCourts.value = false;
+      cartLoader.value = false;
     }
   }
 }

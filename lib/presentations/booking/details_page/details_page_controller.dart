@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
+import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/primary_button.dart';
 class DetailsController extends GetxController{
-
+  OpenMatchRepository repository=OpenMatchRepository();
+  Rx<OpenMatchDetailsModel> model=OpenMatchDetailsModel().obs;
   ///show Cancel Match Dialog Box---------------------------------------
   void showCancelMatchDialog(BuildContext context) {
     showDialog(
@@ -35,11 +37,14 @@ class DetailsController extends GetxController{
       ),
     );
   }
-  OpenMatchDetails? data;
+    getMatch()async{
+    log("message");
+    model.value = await repository.getParticularMatch();
+  }
   @override
   void onInit() {
-    data=Get.arguments;
-    log(data!.data!.clubName.toString());
+
+    getMatch();
     super.onInit();
   }
 }

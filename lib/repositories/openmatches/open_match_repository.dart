@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
+
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/response_models/cart/cart_items_model.dart';
@@ -65,6 +69,28 @@ class OpenMatchRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Cart items failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  Future<OpenMatchDetailsModel> getParticularMatch() async {
+     log("mes 2");
+    try {
+      log(AppEndpoints.getParticularMatch);
+      final response = await dioClient.get(AppEndpoints.getParticularMatch);
+      log("mes 3 ${response.data} ");
+
+         return  OpenMatchDetailsModel.fromJson(response.data);
+
+
+
+    } catch (e, st) {
+      log("mes 4 ");
+      CustomLogger.logMessage(
+        msg: "details error 2: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );
