@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../configs/routes/routes_name.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
@@ -67,38 +68,47 @@ class BookingHistoryUi extends StatelessWidget {
           : controller.upcomingBookings.value?.data ?? [];
 
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return ListView.builder(
+          itemCount: 10,
+          itemBuilder: (context,index){
+            return bookingCardShimmer(context);
+          },
+        );
       }
 
       if (bookings.isEmpty) {
         return const Center(child: Text("No bookings found"));
       }
 
-      return ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        itemCount: bookings.length,
-        itemBuilder: (context, index) {
-          final booking = bookings[index];
-          final club = booking.registerClubId;
+      return RefreshIndicator(
+        color: Colors.white,
+        onRefresh: () async => controller.refreshBookings(),
+        child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: bookings.length,
+          itemBuilder: (context, index) {
+            final booking = bookings[index];
+            final club = booking.registerClubId;
 
-          return GestureDetector(
-            onTap: () {
-              if (booking.sId != null && booking.sId!.isNotEmpty) {
-                Get.toNamed(
-                  RoutesName.bookingConfirmAndCancel,
-                  arguments: {
-                    "id": booking.sId!,
-                    "fromCompleted": type == "completed", // ✅ pass flag
-                  },
-                );
-              } else {
-                Get.snackbar("Error", "Booking ID not available");
-              }
-            },
+            return GestureDetector(
+              onTap: () {
+                if (booking.sId != null && booking.sId!.isNotEmpty) {
+                  Get.toNamed(
+                    RoutesName.bookingConfirmAndCancel,
+                    arguments: {
+                      "id": booking.sId!,
+                      "fromCompleted": type == "completed", // ✅ pass flag
+                    },
+                  );
+                } else {
+                  Get.snackbar("Error", "Booking ID not available");
+                }
+              },
 
-            child: bookingCard(context, booking, club),
-          );
-        },
+              child: bookingCard(context, booking, club),
+            );
+          },
+        ),
       );
     });
   }
@@ -192,4 +202,116 @@ class BookingHistoryUi extends StatelessWidget {
       return dateStr;
     }
   }
+  Widget bookingCardShimmer(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 0),
+        padding: EdgeInsets.only(
+          left: Get.width * .03,
+          right: Get.width * .03,
+          top: Get.height * .01,
+          bottom: Get.width * .01,
+        ),
+        width: Get.width,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey.shade50,
+          ),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Club name skeleton
+                  Container(
+                    height: 14,
+                    width: Get.width * 0.4,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Location skeleton
+                  Row(
+                    children: [
+                      Container(
+                        height: 14,
+                        width: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        height: 12,
+                        width: Get.width * 0.3,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Booking info skeleton (3 inline segments)
+                  Row(
+                    children: [
+                      Container(
+                        height: 12,
+                        width: Get.width * 0.25,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 12,
+                        width: Get.width * 0.2,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 12,
+                        width: Get.width * 0.15,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Arrow icon skeleton
+            Container(
+              height: 18,
+              width: 18,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ],
+        ),
+      ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10),
+    );
+  }
+
+
 }

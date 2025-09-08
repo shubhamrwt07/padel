@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:padel_mobile/configs/components/success_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
 
@@ -71,7 +72,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!controller.cancelBooking.value) successImageAndMessage(),
+              if (!controller.cancelBooking.value)  SuccessImage().paddingOnly(top: Get.height*0.03,bottom: Get.height*0.03),
               bookingDetailsCard(context),
               paymentDetailsCard(context),
               if (!controller.cancelBooking.value) _showCancelButtonIfAllowed(),
@@ -81,24 +82,6 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         );
       }),
     );
-  }
-
-  Widget successImageAndMessage() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Center(child: SvgPicture.asset(Assets.imagesImgBookingConfirm)),
-        const SizedBox(height: 12),
-        Text(
-          "",
-          style: Get.textTheme.headlineSmall!.copyWith(
-            color: AppColors.labelBlackColor,
-            fontWeight: FontWeight.w600,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    ).paddingOnly(top: Get.height * 0.04, bottom: Get.height * 0.01);
   }
 
   Widget bookingDetailsCard(BuildContext context) {
@@ -155,16 +138,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                         fit: BoxFit.cover,
                         width: 44,
                         height: 44,
-                        placeholder: (context, url) => SvgPicture.asset(
-                          Assets.imagesImgBookingConfirm,
-                          height: 20,
-                          color: Colors.white,
-                        ),
-                        errorWidget: (context, url, error) => SvgPicture.asset(
-                          Assets.imagesImgBookingConfirm,
-                          height: 20,
-                          color: Colors.white,
-                        ),
+                        placeholder: (context, url) => CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error)
                       ),
                     ),
                   ),
