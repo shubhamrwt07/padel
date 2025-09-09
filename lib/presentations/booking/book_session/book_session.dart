@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -479,40 +480,44 @@ class BookSession extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.center,
-        child: CustomButton(
-          width: Get.width * 0.9,
-          onTap: () {
-            if (controller.courtName.value.isEmpty) {
-              Get.snackbar("Select Court", "Please select a court before booking.",
-                  backgroundColor: Colors.redAccent,
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.TOP,
-                  margin: const EdgeInsets.all(12),
-                  duration: const Duration(seconds: 2));
-              return;
-            }
-            controller.addToCart();
-          },
-          child: Row(
-            children: [
-              Obx(() => RichText(
-                text: TextSpan(children: [
-                  TextSpan(
-                      text: "₹ ",
-                      style: Get.textTheme.titleMedium!.copyWith(
-                          color: AppColors.whiteColor,
-                          fontWeight: FontWeight.w600)),
-                  TextSpan(
-                      text: "${controller.totalAmount}",
-                      style: Get.textTheme.titleMedium!.copyWith(
-                          color: AppColors.whiteColor,
-                          fontWeight: FontWeight.w600)),
-                ]),
-              ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05)),
-              Text("Book Now",
-                  style: Get.textTheme.headlineMedium!
-                      .copyWith(color: AppColors.whiteColor)),
-            ],
+        child: Obx(
+          ()=> CustomButton(
+            width: Get.width * 0.9,
+            onTap: () {
+              if (controller.courtName.value.isEmpty) {
+                Get.snackbar("Select Court", "Please select a court before booking.",
+                    backgroundColor: Colors.redAccent,
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.TOP,
+                    margin: const EdgeInsets.all(12),
+                    duration: const Duration(seconds: 2));
+                return;
+              }
+              controller.addToCart();
+            },
+            child:controller.cartLoader.value?
+                CircularProgressIndicator(color: AppColors.whiteColor,):
+            Row(
+              children: [
+                Obx(() => RichText(
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "₹ ",
+                        style: Get.textTheme.titleMedium!.copyWith(
+                            color: AppColors.whiteColor,
+                            fontWeight: FontWeight.w600)),
+                    TextSpan(
+                        text: "${controller.totalAmount}",
+                        style: Get.textTheme.titleMedium!.copyWith(
+                            color: AppColors.whiteColor,
+                            fontWeight: FontWeight.w600)),
+                  ]),
+                ).paddingOnly(right: Get.width * 0.3, left: Get.width * 0.05)),
+                Text("Book Now",
+                    style: Get.textTheme.headlineMedium!
+                        .copyWith(color: AppColors.whiteColor)),
+              ],
+            ),
           ),
         ),
       ),

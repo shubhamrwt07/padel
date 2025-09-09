@@ -5,11 +5,9 @@ import '../booking/details_page/details_page.dart';
 
 class CreateQuestionsController extends GetxController{
 
-  OpenMatchDetails? data;
     @override
   void onInit() {
-      data =Get.arguments;
-      log(data!.data!.clubName.toString());
+
     super.onInit();
   }
 
@@ -36,6 +34,6 @@ class CreateQuestionsController extends GetxController{
   var selectedVolley = ''.obs;
   var selectedWallRebound = ''.obs;
   onSubmit(){
-    Get.to(DetailsScreen (),arguments: data);
+    Get.to(()=>DetailsScreen (),);
   }
 }

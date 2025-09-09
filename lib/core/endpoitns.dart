@@ -25,4 +25,5 @@ class AppEndpoints {
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
   static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
   static const String getAllMatches = "${BASE_URL}court/openmatch/getAllOpenMatches";
+  static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68be7b412a1d4c80ee2cc02f";
 }
