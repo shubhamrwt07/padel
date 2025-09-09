@@ -204,7 +204,7 @@ class BookingHistoryUi extends StatelessWidget {
   }
   Widget bookingCardShimmer(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
+      baseColor: Colors.grey.shade200,
       highlightColor: Colors.grey.shade100,
       child: Container(
         margin: const EdgeInsets.only(bottom: 0),

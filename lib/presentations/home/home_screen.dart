@@ -30,12 +30,12 @@ class HomeScreen extends GetView<HomeController> {
             InkWell(
               onTap: () => Get.toNamed(RoutesName.notification),
               child: const Icon(Icons.notifications),
-            ),
+            ).paddingOnly(right: 5),
           ],
           context: context,
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.02),
+          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -87,7 +87,7 @@ class HomeScreen extends GetView<HomeController> {
                           // --- Courts Section ---
                           Text(AppStrings.newBooking,
                               style: Get.textTheme.headlineMedium)
-                              .paddingOnly(bottom: Get.width * 0.02, left: Get.width * 0.02),
+                              .paddingOnly(bottom: Get.width * 0.02,),
                           if (controller.isLoadingClub.value)
                             Column(
                               children: List.generate(4, (_) => loadingCard()),
@@ -149,7 +149,7 @@ class HomeScreen extends GetView<HomeController> {
             ],
           ),
         ),
-      );
+      ).paddingOnly(left: 5);
     });
   }
 
@@ -484,7 +484,7 @@ class HomeScreen extends GetView<HomeController> {
               ),
             ],
           ],
-        ).paddingSymmetric(vertical: 50),
+        ).paddingSymmetric(vertical: 200),
       );
     }
 
@@ -599,7 +599,7 @@ class HomeScreen extends GetView<HomeController> {
             ),
           ],
         ),
-      ).paddingOnly(left: Get.width * 0.02, right: Get.width * 0.02, bottom: 5),
+      ).paddingOnly(bottom: 5),
     );
   }
 
