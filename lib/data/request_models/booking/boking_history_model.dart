@@ -1,7 +1,7 @@
 class BookingHistoryModel {
   bool? success;
   String? message;
-  List<Data>? data;
+  List<BookingHistoryData>? data;
   int? total;
   int? page;
   int? limit;
@@ -20,9 +20,9 @@ class BookingHistoryModel {
     success = json['success'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <BookingHistoryData>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new BookingHistoryData.fromJson(v));
       });
     }
     total = json['total'];
@@ -46,7 +46,7 @@ class BookingHistoryModel {
   }
 }
 
-class Data {
+class BookingHistoryData {
   String? sId;
   String? userId;
   RegisterClubId? registerClubId;
@@ -61,7 +61,7 @@ class Data {
   int? iV;
   String? cancellationReason;
 
-  Data(
+  BookingHistoryData(
       {this.sId,
         this.userId,
         this.registerClubId,
@@ -76,7 +76,7 @@ class Data {
         this.iV,
         this.cancellationReason});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  BookingHistoryData.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     userId = json['userId'];
     registerClubId = json['register_club_id'] != null

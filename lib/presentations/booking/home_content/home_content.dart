@@ -426,10 +426,15 @@ class HomeContent extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  userName,
-                                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                                    color: AppColors.labelBlackColor,
+                                Container(
+                                  color: Colors.transparent,
+                                  width: Get.width*0.3,
+                                  child: Text(
+                                    userName,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                                      color: AppColors.labelBlackColor,
+                                    ),
                                   ),
                                 ),
                                 Row(

@@ -123,6 +123,6 @@ Widget loadingCard({double height = 95, double width = 118}) {
           ),
         ],
       ),
-    ).paddingOnly(left: Get.width * 0.02, right: Get.width * 0.02),
+    ),
   );
 }
