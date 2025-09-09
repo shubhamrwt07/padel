@@ -38,12 +38,13 @@ import 'package:padel_mobile/presentations/scoreview/score_view_binding.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
+import '../../presentations/addmatch/add_player_binding.dart';
+import '../../presentations/addmatch/add_player_view.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/booking/open_matches/create_mstch_view.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
-
 import '../../presentations/booking/open_matches/create_match_binding.dart';
 import '../../presentations/openmatches/open_match_binding.dart';
 import '../../presentations/openmatches/open_match_view.dart';
@@ -56,9 +57,7 @@ import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {
   static const String initialRoute = RoutesName.splash;
-
   static const Duration defaultDuration = Duration(milliseconds: 300);
-
   static final route = [
     GetPage(
       name: RoutesName.splash,
@@ -240,6 +239,12 @@ class Routes {
       name: RoutesName.openMatch,
       page: () => OpenMatchView(),
       binding: OpenMatchBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),    GetPage(
+      name: RoutesName.addPlayer,
+      page: () => ManualBookingOpenMatchesScreen(),
+      binding: ManualBookingOpenMatchesBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
