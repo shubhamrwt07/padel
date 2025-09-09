@@ -103,6 +103,7 @@ class AmericanoBottomSheetContent extends StatelessWidget {
                 child: PrimaryButton(
                   onTap: () {
                     // Get.toNamed(RoutesName.registrationAmericano);
+                    Get.back();
                   },
                   text: "Register Now",
                 ),
