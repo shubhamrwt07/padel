@@ -35,7 +35,8 @@ class CartScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    if (controller.selectedClubIds.length == controller.cartItems.length) {
+                    if (controller.selectedClubIds.length ==
+                        controller.cartItems.length) {
                       controller.unselectAll();
                     } else {
                       controller.selectAll();
@@ -47,7 +48,8 @@ class CartScreen extends StatelessWidget {
                         scale: 0.8,
                         child: Checkbox(
                           activeColor: AppColors.secondaryColor,
-                          value: controller.selectedClubIds.length == controller.cartItems.length,
+                          value: controller.selectedClubIds.length ==
+                              controller.cartItems.length,
                           onChanged: (val) {
                             if (val == true) {
                               controller.selectAll();
@@ -57,10 +59,9 @@ class CartScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      Text(
-                        "Select All",
-                        style: Get.textTheme.labelMedium!.copyWith(fontSize: 12)
-                      ),
+                      Text("Select All",
+                          style: Get.textTheme.labelMedium!.copyWith(
+                              fontSize: 12)),
                     ],
                   ),
                 ),
@@ -77,7 +78,7 @@ class CartScreen extends StatelessWidget {
         ],
       ).paddingSymmetric(horizontal: Get.width * 0.05),
 
-      /// 🔹 TotalSlot + Button fixed at bottom
+      /// Bottom section
       bottomNavigationBar: Obx(() {
         if (controller.cartItems.isEmpty) return const SizedBox.shrink();
         return SafeArea(
@@ -96,9 +97,9 @@ class CartScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                totalSlot(context), // 🔹 moved here
+                totalSlot(context),
                 const SizedBox(height: 8),
-                button(context),    // 🔹 stays below
+                button(context),
               ],
             ),
           ),
@@ -111,7 +112,6 @@ class CartScreen extends StatelessWidget {
     return SizedBox(
       height: buttonType == "true" ? Get.height * 0.65 : Get.height * 0.56,
       child: Obx(() {
-        // Show loading state
         if (controller.isLoading.value) {
           return Center(
             child: CircularProgressIndicator(
@@ -120,20 +120,17 @@ class CartScreen extends StatelessWidget {
           );
         }
 
-        // Show empty state when no items
         if (controller.cartItems.isEmpty) {
           return emptyState();
         }
 
-        // Filter out items with invalid data
         final validItems = controller.cartItems.where((item) {
           return item.slot != null &&
               item.slot!.isNotEmpty &&
-              item.slot!.first.slotTimes != null &&
-              item.slot!.first.slotTimes!.isNotEmpty;
+              item.slot!.any((s) =>
+              s.slotTimes != null && s.slotTimes!.isNotEmpty);
         }).toList();
 
-        // Show empty state if no valid items after filtering
         if (validItems.isEmpty) {
           return emptyState();
         }
@@ -141,135 +138,146 @@ class CartScreen extends StatelessWidget {
         return ListView.builder(
           controller: controller.scrollController,
           itemCount: validItems.length,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (BuildContext context, index) {
             final item = validItems[index];
-            final firstSlot = item.slot!.first;
 
             return Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Club Name
+                  // Club Name + Select Checkbox
                   Row(
                     children: [
                       Obx(() => Transform.scale(
                         scale: 0.8,
                         child: Checkbox(
                           activeColor: AppColors.secondaryColor,
-                          value: controller.selectedClubIds.contains(item.registerClubId?.sId ?? ""),
+                          value: controller.selectedClubIds
+                              .contains(item.registerClubId?.sId ?? ""),
                           onChanged: (val) {
-                            controller.toggleSelectClub(item.registerClubId?.sId ?? "");
+                            controller.toggleSelectClub(
+                                item.registerClubId?.sId ?? "");
                           },
                         ),
                       )),
                       Expanded(
                         child: Text(
                           item.registerClubId?.clubName ?? "Unknown Club",
-                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
                   ),
 
-                  // Slot List
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: firstSlot.slotTimes!.length,
-                    itemBuilder: (context, int childIndex) {
-                      final slot = firstSlot.slotTimes![childIndex];
+                  // 🔹 Loop through ALL slots + slotTimes
+                  Column(
+                    children: item.slot!.map((slotGroup) {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: slotGroup.slotTimes!.length,
+                        itemBuilder: (context, int childIndex) {
+                          final slot = slotGroup.slotTimes![childIndex];
 
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Date + Time + Duration
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Text(
-                                  formatCreatedAt(slot.bookingDate ?? ""),
-                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "${slot.time ?? 'N/A'} ",
-                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                    color: AppColors.labelBlackColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "(60m)",
-                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Price + Remove Icon
-                          GestureDetector(
-                            onTap: () async {
-                              final slotTimeId = slot.slotId;
-
-                              if (slotTimeId == null || slotTimeId.isEmpty) {
-                                Get.snackbar("Error", "Invalid slot ID");
-                                return;
-                              }
-                      ///
-                              await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
-                            },
-                            child: Container(
-                              height: 40,
-                              color: Colors.transparent,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "₹ ${slot.amount ?? '0'}",
-                                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      fontWeight: FontWeight.w500,
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Date + Time + Duration
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      formatCreatedAt(slot.bookingDate ?? ""),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                  ).paddingOnly(right: 10),
-                                  Container(
-                                    alignment: Alignment.center,
-                                    height: 15,
-                                    width: 15,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.red, // border color
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "${slot.time ?? 'N/A'} ",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                        color: AppColors.labelBlackColor,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    child: Icon(
-                                      Icons.remove,   // 🔹 minus sign, centered
-                                      size: 12,       // make it fit
-                                      color: Colors.red,
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "(60m)",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                          fontWeight: FontWeight.w400),
                                     ),
-                                  )
-
-
-
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ).paddingOnly(bottom: Get.height * 0.0);
-                    },
-                  ),
 
-                  // Divider(
-                  //   thickness: 1,
-                  //   color: AppColors.containerBorderColor,
-                  // ).paddingOnly(top: Get.height * 0.01),
+                              // Price + Remove
+                              GestureDetector(
+                                onTap: () async {
+                                  final slotTimeId = slot.slotId;
+
+                                  if (slotTimeId == null ||
+                                      slotTimeId.isEmpty) {
+                                    Get.snackbar(
+                                        "Error", "Invalid slot ID");
+                                    return;
+                                  }
+
+                                  await controller.removeCartItemsFromCart(
+                                      slotIds: [slotTimeId]);
+                                },
+                                child: Container(
+                                  height: 40,
+                                  color: Colors.transparent,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "₹ ${slot.amount ?? '0'}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall!
+                                            .copyWith(
+                                            fontWeight: FontWeight.w500),
+                                      ).paddingOnly(right: 10),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        height: 15,
+                                        width: 15,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.remove,
+                                          size: 12,
+                                          color: Colors.red,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ).paddingOnly(bottom: Get.height * 0.01);
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ],
               ).paddingOnly(
                 bottom: Get.height * 0.01,
@@ -328,7 +336,7 @@ class CartScreen extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       "₹ ",
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
@@ -338,9 +346,10 @@ class CartScreen extends StatelessWidget {
                     ),
                     Text(
                       "${cartController.totalPrice.value}",
-                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium!
+                          .copyWith(fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -359,13 +368,10 @@ class CartScreen extends StatelessWidget {
         width: Get.width * 0.9,
         onTap: () async {
           final cartItems = cartController.cartItems;
-
           if (cartItems.isEmpty) {
             Get.snackbar("Empty Cart", "Please add items to cart.");
             return;
           }
-
-          // Simply navigate to payment screen without booking
           Get.toNamed(RoutesName.paymentMethod);
         },
         child: Row(
@@ -407,25 +413,23 @@ class CartScreen extends StatelessWidget {
             size: 80,
             color: AppColors.textColor,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "No items in cart",
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: AppColors.textColor,
-            ),
+            ).copyWith(color: AppColors.textColor),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             "Add some items to get started",
-            style: TextStyle(
-              fontSize: 14,
+            style: const TextStyle(fontSize: 14).copyWith(
               color: AppColors.textColor,
             ),
           ),
         ],
-      ).paddingOnly(top: Get.height*.00),
+      ),
     );
   }
 
@@ -438,7 +442,7 @@ class CartScreen extends StatelessWidget {
       final suffix = getDaySuffix(day);
       final month = DateFormat("MMMM").format(date);
       final year = date.year;
-      return "$day$suffix $month' $year";
+      return "$day$suffix $month $year";
     } catch (e) {
       return "Invalid Date";
     }

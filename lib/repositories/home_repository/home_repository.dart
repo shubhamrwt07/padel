@@ -16,7 +16,7 @@ class HomeRepository {
       final response = await dioClient.get(url);
 
       if (response.statusCode == 200) {
-        debugPrint("Response Data: ${response.data}");
+        log("Response Data: ${response.data}");
         return CourtsModel.fromJson(response.data);
       } else {
         ////
@@ -33,29 +33,18 @@ class HomeRepository {
       }
     }
   }
-  Future<AvailableCourtModel> fetchAvailableCourtsById({
-    required String id,       // club id
-    required String time,
-    required String date,
+  Future<GetAllActiveCourtsForSlotWiseModel> fetchAvailableCourtsSlotWise({
+    required String registerClubId,       // club id
     required String day,
-    String? courtId,          // ✅ optional court id
   }) async {
-    // ✅ Build query params
-    String url = "${AppEndpoints.getActiveCourt}$id&day=$day&date=$date&time=$time";
-
-    if (courtId != null && courtId.isNotEmpty) {
-      url += "&courtId=$courtId";  // ✅ send courtId
-    }
-
-    log("Fetching available courts by ID: $url");
-    log("Time: $time, Date: $date, Day: $day, CourtId: ${courtId ?? 'not sent'}");
+    String url = "${AppEndpoints.getAllActiveCourtsForSlotWise}register_club_id=$registerClubId&day=$day";
 
     try {
       final response = await dioClient.get(url);
 
       if (response.statusCode == 200) {
-        debugPrint("Available Courts Response: ${response.data}");
-        return AvailableCourtModel.fromJson(response.data);
+        debugPrint("Available Courts Responsedfr: ${response.data}");
+        return GetAllActiveCourtsForSlotWiseModel.fromJson(response.data);
       } else {
         throw Exception("Failed to load available courts - status code: ${response.statusCode}");
       }
@@ -69,6 +58,5 @@ class HomeRepository {
       }
     }
   }
-
 
 }

@@ -1,5 +1,6 @@
 class AppEndpoints {
   AppEndpoints._();
+
   static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
   static const String login = "${BASE_URL}customerLogin";
   static const String signUp = "${BASE_URL}customerSignup";
@@ -10,8 +11,9 @@ class AppEndpoints {
   static const String resetPassword = "${BASE_URL}forgotPassword";
   static const String getClub =
       "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
-  static const String getActiveCourt =
-      "${BASE_URL}court/saveCourt/getAllActiveCourts?register_club_id=";
+  static const String getAllActiveCourtsForSlotWise = "${BASE_URL}court/saveCourt/getAllActiveCourtsForSlotWise?";
+
+
   // Cart Urls -----------------------------------------------------------------
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";

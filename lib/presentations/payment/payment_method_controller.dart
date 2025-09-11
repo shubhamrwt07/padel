@@ -13,24 +13,19 @@ class PaymentMethodController extends GetxController {
   var option = ''.obs;
 
   late RazorpayPaymentService _paymentService;
-
   // Get CartController instance
   final CartController cartController = Get.find<CartController>();
-
-
   RxBool isProcessing = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     _paymentService = RazorpayPaymentService();
-
     // Set up payment event handlers
     _paymentService.onPaymentSuccess = _handlePaymentSuccess;
     _paymentService.onPaymentFailure = _handlePaymentFailure;
     _paymentService.onExternalWallet = _handleExternalWallet;
   }
-
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     isProcessing.value = false;
 
