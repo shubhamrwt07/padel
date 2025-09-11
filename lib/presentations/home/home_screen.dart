@@ -312,7 +312,7 @@ class HomeScreen extends GetView<HomeController> {
         }
       },
       child: Container(
-        width: 230,
+        width: 235,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.tabColor),

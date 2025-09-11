@@ -15,7 +15,7 @@ import '../../../generated/assets.dart';
 import 'details_page_controller.dart';
 
 class DetailsScreen extends GetView<DetailsController> {
-  DetailsController controller = Get.put(DetailsController());
+  final DetailsController controller = Get.put(DetailsController());
 
   DetailsScreen({super.key});
 
@@ -34,7 +34,7 @@ class DetailsScreen extends GetView<DetailsController> {
           action: [
             appBarAction(
               Colors.white,
-              Icon(Icons.share_outlined, color: Colors.black, size: 18),
+              const Icon(Icons.share_outlined, color: Colors.black, size: 18),
             ),
             SizedBox(width: Get.width * .04),
             PopupMenuButton<String>(
@@ -43,21 +43,17 @@ class DetailsScreen extends GetView<DetailsController> {
               onSelected: (value) {
                 switch (value) {
                   case 'share':
-                    // handle share
                     break;
                   case 'refresh':
-                    // handle refresh
                     break;
                   case 'settings':
-                    // open settings
                     break;
                   case 'logout':
-                    // handle logout
                     break;
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'refresh',
                   child: Row(
                     children: [
@@ -67,7 +63,7 @@ class DetailsScreen extends GetView<DetailsController> {
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'settings',
                   child: Row(
                     children: [
@@ -86,14 +82,22 @@ class DetailsScreen extends GetView<DetailsController> {
           ],
         ),
         body: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: Obx(() {
-            var data = controller.model.value.data;
+            final data = controller.model.value.data;
+
+            if (data == null) {
+              return SizedBox(
+                height: Get.height * 0.6,
+                child: const Center(child: CircularProgressIndicator()),
+              );
+            }
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // club + date card
                 Container(
-                  // height: Get.height * .16,
                   width: Get.width,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
@@ -106,20 +110,24 @@ class DetailsScreen extends GetView<DetailsController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
-                        // leading: SvgPicture.asset(Assets.imagesIcPadelIcon),
                         title: Text(
-                          data?.clubId?.clubName ?? "Unknown club",
-                          style: Get.textTheme.headlineLarge!.copyWith(
+                          data.clubId?.clubName ?? "Unknown club",
+                          style: Get.textTheme.headlineLarge?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                          ),
+                          ) ??
+                              const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                         subtitle: Text(
-                          "${data?.matchDate ?? ""} | ${data?.matchTime ?? ""}",
-                          style: Get.textTheme.displaySmall!.copyWith(
+                          "${data.matchDate ?? ""} | ${data.matchTime ?? ""}",
+                          style: Get.textTheme.displaySmall?.copyWith(
                             fontSize: 11,
                             color: AppColors.darkGreyColor,
-                          ),
+                          ) ??
+                              const TextStyle(fontSize: 11),
                         ),
                       ),
                       Center(
@@ -140,13 +148,16 @@ class DetailsScreen extends GetView<DetailsController> {
                           ),
                           gameDetails(
                             "Game Level",
-                            "${data?.skillLevel ?? ""}",
+                            data.skillLevel ?? "-",
                             AppColors.blackColor,
                             13,
                           ),
                           gameDetails(
                             "Price",
-                            "${data?.slot?[0].slotTimes?[0].amount ?? "0"}",
+                            (data.slot?.isNotEmpty == true &&
+                                data.slot![0].slotTimes?.isNotEmpty == true)
+                                ? "${data.slot![0].slotTimes![0].amount}"
+                                : "0",
                             AppColors.primaryColor,
                             16,
                           ),
@@ -158,12 +169,14 @@ class DetailsScreen extends GetView<DetailsController> {
                     ],
                   ),
                 ).paddingOnly(top: Get.height * 0.03),
+
+                // match type
                 Container(
                   height: Get.height * .045,
                   width: Get.width,
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
-                    color: Color(0xFFf4f6fc),
+                    color: const Color(0xFFf4f6fc),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: AppColors.blackColor.withAlpha(10),
@@ -177,10 +190,18 @@ class DetailsScreen extends GetView<DetailsController> {
                   top: Get.height * .015,
                   bottom: Get.height * .015,
                 ),
-                gameCard(teamA: data!.teamA!, teamB: data.teamB!),
+
+                // game card
+                if (data.teamA != null && data.teamB != null)
+                  gameCard(
+                    teamA: data.teamA ?? [],
+                    teamB: data.teamB ?? [],
+                  ),
+
                 SizedBox(height: Get.height * .015),
+
+                // club info card
                 Container(
-                  // height: Get.height * .16,
                   width: Get.width,
                   decoration: BoxDecoration(
                     color: AppColors.primaryColor.withAlpha(10),
@@ -195,7 +216,6 @@ class DetailsScreen extends GetView<DetailsController> {
                       Container(
                         height: Get.height * .1,
                         width: Get.width * .3,
-
                         decoration: BoxDecoration(
                           color: AppColors.primaryColor.withAlpha(10),
                           border: Border.all(
@@ -212,7 +232,7 @@ class DetailsScreen extends GetView<DetailsController> {
                         ),
                       ),
                       Container(
-                        color: Color(0xFFf4f6fc),
+                        color: const Color(0xFFf4f6fc),
                         width: Get.width * .51,
                         height: Get.height * .1,
                         child: Column(
@@ -222,10 +242,13 @@ class DetailsScreen extends GetView<DetailsController> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "The Good Club",
-                                  style: Get.textTheme.headlineSmall!.copyWith(
+                                  data.clubId?.clubName ?? "The Good Club",
+                                  style:
+                                  Get.textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.w500,
-                                  ),
+                                  ) ??
+                                      const TextStyle(
+                                          fontWeight: FontWeight.w500),
                                 ),
                                 Icon(
                                   Icons.directions,
@@ -234,22 +257,25 @@ class DetailsScreen extends GetView<DetailsController> {
                               ],
                             ).paddingOnly(bottom: 5),
                             Text(
+                              data.clubId?.address ??
+                                  "Unknown address, please update",
                               overflow: TextOverflow.ellipsis,
-                              "Sukhna Enclave, behind Rock Garden, Kaimbwala, Kansal, Chandigarh 160001",
-                              style: Get.textTheme.displaySmall!.copyWith(
+                              style: Get.textTheme.displaySmall?.copyWith(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 11,
-                              ),
+                              ) ??
+                                  const TextStyle(fontSize: 11),
                             ).paddingOnly(bottom: 10),
                             Text(
                               "More Info",
-                              style: Get.textTheme.headlineLarge!.copyWith(
+                              style: Get.textTheme.headlineLarge?.copyWith(
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.primaryColor,
                                 decoration: TextDecoration.underline,
-                                decorationColor:
-                                    AppColors.primaryColor, // Blue underline
-                              ),
+                                decorationColor: AppColors.primaryColor,
+                              ) ??
+                                  const TextStyle(
+                                      fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
@@ -257,6 +283,7 @@ class DetailsScreen extends GetView<DetailsController> {
                     ],
                   ).paddingAll(15),
                 ),
+
                 information(),
               ],
             ).paddingAll(16);
@@ -275,7 +302,7 @@ class DetailsScreen extends GetView<DetailsController> {
             color: Colors.black.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 6,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -288,14 +315,9 @@ class DetailsScreen extends GetView<DetailsController> {
   }
 
   Widget gameDetails(
-    String title,
-    String subtitle,
-    Color color,
-    double fontSize,
-  ) {
+      String title, String subtitle, Color color, double fontSize) {
     return Container(
       alignment: Alignment.center,
-      // height: Get.height * .1,
       color: Colors.transparent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -304,11 +326,16 @@ class DetailsScreen extends GetView<DetailsController> {
           SizedBox(height: Get.height * .01),
           Text(
             subtitle,
-            style: Get.textTheme.headlineMedium!.copyWith(
+            style: Get.textTheme.headlineMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
               fontSize: fontSize,
-            ),
+            ) ??
+                TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: fontSize,
+                ),
           ),
         ],
       ),
@@ -327,50 +354,51 @@ class DetailsScreen extends GetView<DetailsController> {
               color: Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color: image.isNotEmpty
-                    ? AppColors.whiteColor
-                    : AppColors.primaryColor,
+                color:
+                image.isNotEmpty ? AppColors.whiteColor : AppColors.primaryColor,
               ),
             ),
             child: image.isEmpty
                 ? const Icon(
-                    CupertinoIcons.add,
-                    size: 20,
-                    color: AppColors.primaryColor,
-                  )
+              CupertinoIcons.add,
+              size: 20,
+              color: AppColors.primaryColor,
+            )
                 : ClipOval(
-                    child: SvgPicture.asset(
-                      image,
-                      fit: BoxFit.cover,
-                      width: 50,
-                      height: 50,
-                    ),
-                  ),
+              child: SvgPicture.asset(
+                image,
+                fit: BoxFit.cover,
+                width: 50,
+                height: 50,
+              ),
+            ),
           ),
           const SizedBox(height: 5),
           Text(
             name,
-            style: Get.textTheme.bodyLarge!.copyWith(
+            style: Get.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w500,
-            ),
+            ) ??
+                const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 0),
           showSubtitle
               ? Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  height: 16,
-                  width: 30,
-                  child: Text(
-                    "B/C",
-                    style: Get.textTheme.bodyLarge!.copyWith(
-                      color: Colors.green,
-                    ),
-                  ),
-                )
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.green.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            height: 16,
+            width: 30,
+            child: Text(
+              "B/C",
+              style: Get.textTheme.bodyLarge?.copyWith(
+                color: Colors.green,
+              ) ??
+                  const TextStyle(color: Colors.green),
+            ),
+          )
               : const SizedBox(height: 20),
         ],
       ),
@@ -383,7 +411,7 @@ class DetailsScreen extends GetView<DetailsController> {
       width: Get.width,
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.blackColor.withAlpha(10)),
-        color: Color(0xFFf4f6fc),
+        color: const Color(0xFFf4f6fc),
         borderRadius: BorderRadius.circular(8),
       ),
       child: IntrinsicHeight(
@@ -392,11 +420,12 @@ class DetailsScreen extends GetView<DetailsController> {
           children: [
             Text(
               "Players",
-              style: Get.textTheme.headlineLarge!.copyWith(
+              style: Get.textTheme.headlineLarge?.copyWith(
                 color: AppColors.blackColor,
-              ),
+              ) ??
+                  const TextStyle(color: AppColors.blackColor),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -410,7 +439,7 @@ class DetailsScreen extends GetView<DetailsController> {
                       return Row(
                         children: [
                           playerCard(
-                            "${teamA[index].userId!.name}",
+                            teamA[index].userId?.name ?? "Unknown",
                             false,
                             "assets/images/ic_google.svg",
                           ),
@@ -433,15 +462,17 @@ class DetailsScreen extends GetView<DetailsController> {
               children: [
                 Text(
                   "A",
-                  style: Get.textTheme.headlineLarge!.copyWith(
+                  style: Get.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                  ),
+                  ) ??
+                      const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
                   "B",
-                  style: Get.textTheme.headlineLarge!.copyWith(
+                  style: Get.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                  ),
+                  ) ??
+                      const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
             ).paddingOnly(top: 10),
@@ -457,42 +488,33 @@ class DetailsScreen extends GetView<DetailsController> {
       children: [
         Text(
           "Information",
-          style: Get.textTheme.headlineLarge!.copyWith(
+          style: Get.textTheme.headlineLarge?.copyWith(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-          ),
+          ) ??
+              const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         ListTile(
-          // leading: SvgPicture.asset(Assets.imagesIcMyClub,color: AppColors.textColor,),
-          title: Text(
-            "Type of Court ( 2 court)",
-            style: Get.textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            "Outdoor, crystal, Double",
-            style: Get.textTheme.headlineLarge,
-          ),
+          title: Text("Type of Court ( 2 court )",
+              style: Get.textTheme.bodyLarge),
+          subtitle:
+          Text("Outdoor, crystal, Double", style: Get.textTheme.headlineLarge),
         ),
         ListTile(
-          leading: Icon(
-            Icons.calendar_month_outlined,
-            color: AppColors.textColor,
-          ),
+          leading: Icon(Icons.calendar_month_outlined,
+              color: AppColors.textColor),
           title: Text("End registration", style: Get.textTheme.bodyLarge),
-          subtitle: Text(
-            "Today at 10:00 PM",
-            style: Get.textTheme.headlineLarge,
-          ),
+          subtitle: Text("Today at 10:00 PM",
+              style: Get.textTheme.headlineLarge),
         ),
       ],
     ).paddingOnly(top: Get.height * 0.01);
   }
-
   Widget bottomBar(BuildContext context) {
     return Container(
       height: Get.height * .12,
       padding: const EdgeInsets.only(top: 10),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         boxShadow: [
@@ -510,7 +532,7 @@ class DetailsScreen extends GetView<DetailsController> {
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
             borderRadius: BorderRadius.circular(30),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 6,
@@ -520,13 +542,8 @@ class DetailsScreen extends GetView<DetailsController> {
           ),
           child: PrimaryButton(
             height: 50,
-            onTap: () {
-              // controller.showCancelMatchDialog(context);
-            },
+            onTap: () {},
             text: "Book Now",
-            // child: controller.isLoading.value
-            //     ? AppLoader(size: 30, strokeWidth: 5)
-            //     : null,
           ),
         ).paddingOnly(bottom: Get.height * 0.03),
       ),
@@ -546,13 +563,11 @@ class BackgroundContainer extends StatelessWidget {
       width: Get.width,
       color: AppColors.whiteColor,
       child: Stack(
-        // fit: StackFit.expand,
         children: [
           Container(
             height: 200,
             width: Get.width,
-            decoration: BoxDecoration(color: AppColors.primaryColor),
-            // child: Image.asset(Assets.imagesImgDummyClub,fit: BoxFit.cover,),
+            decoration: const BoxDecoration(color: AppColors.primaryColor),
           ),
           Container(
             height: 200,

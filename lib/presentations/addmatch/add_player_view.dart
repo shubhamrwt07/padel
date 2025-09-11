@@ -7,7 +7,6 @@ import '../../configs/components/loader_widgets.dart';
 import '../../configs/components/primary_button.dart';
 import '../../configs/components/primary_text_feild.dart';
 import 'add_player_controller.dart';
-
 class ManualBookingOpenMatchesScreen extends StatelessWidget {
   final ManualBookingOpenMatchesController controller = Get.put(ManualBookingOpenMatchesController());
   ManualBookingOpenMatchesScreen({super.key});
@@ -172,7 +171,7 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
           readOnly: readOnly,
           keyboardType: keyboardType,
           action: action,
-          maxLength:maxLength ,
+          maxLength:maxLength,
           // scrollPadding: EdgeInsets.only(bottom: Get.height*0.3),
           // contentPadding: EdgeInsets.symmetric(
           //   horizontal: Get.width * 0.04,

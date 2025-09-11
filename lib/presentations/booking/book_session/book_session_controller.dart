@@ -1,6 +1,7 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-import '../../../data/request_models/home_models/get_available_court.dart' hide Courts;
+import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../repositories/cart/cart_repository.dart';
 import '../../../repositories/home_repository/home_repository.dart';
@@ -11,15 +12,15 @@ class BookSessionController extends GetxController {
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
 
-  RxList<SlotTimes> selectedSlots = <SlotTimes>[].obs;
+  RxList<Slots> selectedSlots = <Slots>[].obs;
   RxInt totalAmount = 0.obs;
   final HomeRepository repository = HomeRepository();
-  Rx<AvailableCourtModel?> slots = Rx<AvailableCourtModel?>(null);
+  Rx<GetAllActiveCourtsForSlotWiseModel?> slots = Rx<GetAllActiveCourtsForSlotWiseModel?>(null);
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
 
-  var courtName = ''.obs;
-  var courtId = ''.obs;
+  // Track selected slots with their court info
+  RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
 
   @override
   void onInit() {
@@ -28,129 +29,143 @@ class BookSessionController extends GetxController {
     selectedDate.value = DateTime.now();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await loadCourtsAndSetFirst();
-      if (courtId.value.isNotEmpty) {
-        await getAvailableCourtsById(argument.id!, selectedCourtId: courtId.value);
-      }
+      await getAvailableCourtsById(argument.id!);
     });
   }
 
   @override
   void onClose() {
     selectedSlots.clear();
+    selectedSlotsWithCourtInfo.clear();
     totalAmount.value = 0;
     super.onClose();
   }
-  Future<void> loadCourtsAndSetFirst() async {
+
+  Future<void> getAvailableCourtsById(String clubId) async {
+    log("=== DEBUG API CALL ===");
+    log("Fetching courts for club: $clubId");
+    log("Selected date: ${selectedDate.value}");
+
     isLoadingCourts.value = true;
-    try {
-      final date = selectedDate.value ?? DateTime.now();
-      final formattedDate =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-      final formattedDay = _getWeekday(date.weekday);
-
-      // Call the same repository method but without courtId filter
-      final result = await repository.fetchAvailableCourtsById(
-        id: argument.id!,
-        time: '',
-        date: formattedDate,
-        day: formattedDay,
-        courtId: '',
-      );
-
-      // Set slots (so UI can show courts list too if needed)
-      slots.value = result;
-
-      // Pick the first court
-      final firstCourt = result.data?.first.courts?.first;
-      if (firstCourt != null) {
-        courtId.value = firstCourt.sId ?? '';
-        courtName.value = firstCourt.courtName ?? '';
-        log("First court selected: ${courtName.value} (${courtId.value})");
-      }
-    } catch (e) {
-      log("Error loading courts: $e");
-    }finally{
-      isLoadingCourts.value  =false;
-    }
-  }
-
-
-  Future<void> getAvailableCourtsById(String clubId, {String? selectedCourtId}) async {
-    log("Fetching courts for club: $clubId, court: $selectedCourtId");
-    isLoadingCourts.value = true;
-    // slots.value = null;
     selectedSlots.clear();
+    selectedSlotsWithCourtInfo.clear();
+    totalAmount.value = 0;
 
     try {
       final date = selectedDate.value ?? DateTime.now();
-      final formattedDate =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final formattedDay = _getWeekday(date.weekday);
 
-      final result = await repository.fetchAvailableCourtsById(
-        id: clubId,
-        time: '',
-        date: formattedDate,
+      log("Formatted day: $formattedDay");
+      log("Club ID: $clubId");
+      log("About to call repository.fetchAvailableCourtsSlotWise...");
+
+      final result = await repository.fetchAvailableCourtsSlotWise(
         day: formattedDay,
-        courtId: selectedCourtId ?? '',
+        registerClubId: clubId,
       );
 
+      log("API Result received: $result");
+      log("Result type: ${result.runtimeType}");
+
+      log("Result data: ${result.data}");
+      log("Result data length: ${result.data?.length}");
+
       slots.value = result;
-      log("Available courts fetched for clubId: $clubId, courtId: ${selectedCourtId ?? 'first court'}");
+      log("slots.value set to: ${slots.value}");
 
-      // ✅ If no court selected, pick first one
-      if (courtId.value.isEmpty) {
-        final firstCourt = result.data?.first.courts?.first;
-        if (firstCourt != null) {
-          courtId.value = firstCourt.sId ?? '';
-          courtName.value = firstCourt.courtName ?? '';
-        }
-      }
+      // Force UI refresh
+      slots.refresh();
+      log("slots refreshed");
 
-      // ✅ Auto-select first available slot
-      final availableSlots = getSlotsForCourt(courtId.value)
-          .where((s) => !isPastAndUnavailable(s))
-          .toList();
+    } catch (e, stackTrace) {
+      log("Error occurred: $e");
+      log("Stack trace: $stackTrace");
 
-      if (availableSlots.isNotEmpty && selectedSlots.isEmpty) {
-        toggleSlotSelection(availableSlots.first);
-      }
-    } catch (e) {
-      log("Error: $e");
+      // Set slots to null on error
+      slots.value = null;
     } finally {
       isLoadingCourts.value = false;
+      log("isLoadingCourts set to false");
+      log("Final slots.value: ${slots.value}");
     }
   }
-
-  /// ✅ Helper: return slots for the selected court
-  List<SlotTimes> getSlotsForCourt(String courtId) {
-    final data = slots.value?.data ?? [];
-    for (var slot in data) {
-      final courts = slot.courts ?? [];
-      for (var court in courts) {
-        if (court.sId == courtId) {
-          return slot.slot?.first.slotTimes ?? [];
-        }
-      }
-    }
-    return [];
-  }
-
-  void toggleSlotSelection(SlotTimes slot) {
-    if (selectedSlots.contains(slot)) {
-      selectedSlots.remove(slot);
+  void toggleSlotSelection(Slots slot, {String? courtId, String? courtName}) {
+    // Resolve court info for this specific slot to build a unique key per court+slot
+    Map<String, String>? resolvedCourtInfo;
+    if (courtId != null && courtId.isNotEmpty) {
+      // If courtName is empty, resolve it from loaded courts by courtId
+      final resolvedName = (courtName != null && courtName.isNotEmpty)
+          ? courtName
+          : _getCourtNameById(courtId);
+      resolvedCourtInfo = {
+        'courtId': courtId,
+        'courtName': resolvedName ?? '',
+      };
     } else {
+      resolvedCourtInfo = _findCourtInfoForSlot(slot);
+    }
+    if (resolvedCourtInfo == null) {
+      return;
+    }
+
+    final slotId = slot.sId ?? '';
+    final resolvedCourtId = resolvedCourtInfo['courtId'] ?? '';
+    final resolvedCourtName = resolvedCourtInfo['courtName'] ?? '';
+    final compositeKey = '${resolvedCourtId}_$slotId';
+
+    if (selectedSlotsWithCourtInfo.containsKey(compositeKey)) {
+      // Remove only this exact slot instance
+      selectedSlots.remove(slot);
+      selectedSlotsWithCourtInfo.remove(compositeKey);
+    } else {
+      // Add slot with its court context
       selectedSlots.add(slot);
+      selectedSlotsWithCourtInfo[compositeKey] = {
+        'slot': slot,
+        'courtId': resolvedCourtId,
+        'courtName': resolvedCourtName,
+      };
     }
 
     // Recalculate total amount
     totalAmount.value = selectedSlots.fold(
       0,
-          (sum, slot) => sum + (slot.amount ?? 0),
+          (sum, s) => sum + (s.amount ?? 0),
     );
 
-    log("ID ${slot.sId!} LEN ${selectedSlots.length} TOTAL ₹${totalAmount.value}");
+    log("Selected ${selectedSlots.length} slots, Total: ₹${totalAmount.value}");
+  }
+
+  /// Find court information for a given slot
+  Map<String, String>? _findCourtInfoForSlot(Slots targetSlot) {
+    final data = slots.value?.data ?? [];
+
+    for (var courtData in data) {
+      final slotsList = courtData.slots ?? [];
+
+      // Check if this slot belongs to this court
+      final hasSlot = slotsList.any((s) => s.sId == targetSlot.sId);
+
+      if (hasSlot) {
+        return {
+          'courtId': courtData.sId ?? '',
+          'courtName': courtData.courtName ?? '',
+        };
+      }
+    }
+
+    return null;
+  }
+
+  /// Resolve court name by its id from the currently loaded slots data
+  String? _getCourtNameById(String courtId) {
+    final data = slots.value?.data ?? [];
+    for (var courtData in data) {
+      if (courtData.sId == courtId) {
+        return courtData.courtName ?? '';
+      }
+    }
+    return null;
   }
 
   String _getWeekday(int weekday) {
@@ -175,7 +190,7 @@ class BookSessionController extends GetxController {
   }
 
   /// Mark past OR booked slots as unavailable
-  bool isPastAndUnavailable(SlotTimes slot) {
+  bool isPastAndUnavailable(Slots slot) {
     if (slot.status == "booked") return true;
     if (slot.status != "available") return true;
 
@@ -220,77 +235,148 @@ class BookSessionController extends GetxController {
 
     return false;
   }
-  var cartLoader=false.obs;
+
+  var cartLoader = false.obs;
+
   void addToCart() async {
     try {
       if (cartLoader.value) return;
       cartLoader.value = true;
 
-      // Group selected slots by selectedDate
-      final Map<String, List<SlotTimes>> groupedSlots = {};
+      if (selectedSlots.isEmpty) {
+        Get.snackbar(
+          "No Slots Selected",
+          "Please select at least one slot before adding to cart.",
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
+        return;
+      }
+
       final selectedDateStr =
           "${selectedDate.value!.year}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}";
 
-      groupedSlots[selectedDateStr] = selectedSlots.toList();
+      final Map<String, dynamic> groupedPayload = {};
 
-      final List<Map<String, dynamic>> slotTimesList = [];
+      selectedSlotsWithCourtInfo.forEach((compositeKey, slotInfo) {
+        final courtId = slotInfo['courtId'] as String;
+        final courtName = slotInfo['courtName'] as String;
+        final slot = slotInfo['slot'] as Slots;
 
-      groupedSlots.forEach((date, slots) {
-        for (var slot in slots) {
-          slotTimesList.add({
-            "time": slot.time,
-            "amount": slot.amount,
-            "slotId": slot.sId,
-          });
+        final slotEntry = {
+          "businessHours": slot.businessHours
+              ?.map((bh) => {
+            "time": bh.time,
+            "day": bh.day,
+          })
+              .toList(),
+          "slotTimes": [
+            {
+              "time": slot.time,
+              "amount": slot.amount,
+              "slotId": slot.sId,
+            },
+            {
+              "bookingDate": selectedDateStr,
+            },
+            {
+              "courtId": courtId,
+            },
+            {
+              "courtName": courtName,
+            }
+          ]
+        };
+
+        // Group by register_club_id
+        final key = argument.id!;
+        if (!groupedPayload.containsKey(key)) {
+          groupedPayload[key] = {
+            "slot": [],
+            "register_club_id": key,
+          };
         }
 
-        // ✅ Add date for this group
-        slotTimesList.add({
-          "bookingDate": date,
-        });
+        (groupedPayload[key]["slot"] as List).add(slotEntry);
       });
 
-// then add court info
-      slotTimesList.add({
-        "courtId": courtId.value,
-      });
+      final List<Map<String, dynamic>> cartPayload =
+      groupedPayload.values.cast<Map<String, dynamic>>().toList();
 
-      slotTimesList.add({
-        "courtName": courtName.value,
-      });
 
-      final data = {
-        "slot": [
-          {
-            "businessHours": [
-              {
-                "time": slots.value!.data?[0].registerClubId!.businessHours?[0].time ?? "",
-                "day": slots.value!.data?[0].registerClubId!.businessHours?[0].day ?? "",
-              }
-            ],
-            "slotTimes": slotTimesList
-          }
-        ],
-        "register_club_id": argument.id!,
-      };
 
-      log("Cart Data: $data");
+      log("Cart Data Payload: $cartPayload");
 
-      await cartRepository.addCartItems(data: data).then((v) async {
+      await cartRepository.addCartItems(data: cartPayload).then((v) async {
         final CartController controller = Get.find<CartController>();
         await controller.getCartItems();
 
         Get.to(() => CartScreen(buttonType: "true"))?.then((_) async {
-          // ✅ Clear slots when returning back
           selectedSlots.clear();
+          selectedSlotsWithCourtInfo.clear();
           totalAmount.value = 0;
-
-          // ✅ Refresh slots from API (so booked slot turns red)
-          await getAvailableCourtsById(argument.id!, selectedCourtId: courtId.value);
+          await getAvailableCourtsById(argument.id!);
         });
       });
+    } on DioException catch (e) {
+      final dynamic data = e.response?.data;
+      final serverMessage =
+      (data is Map && data['message'] is String) ? data['message'] as String : null;
+      final detailed = serverMessage ?? e.message ?? 'Something went wrong.';
+      log("Add to cart failed (Dio): status=${e.response?.statusCode}, data=${e.response?.data}");
+      Get.snackbar(
+        "Error",
+        detailed,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } catch (e) {
+      log("Error adding to cart: $e");
+      Get.snackbar(
+        "Error",
+        "Failed to add slots to cart. Please try again.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
     } finally {
       cartLoader.value = false;
     }
+  }
+
+  /// Get all courts data
+  List<dynamic> getAllCourts() {
+    return slots.value?.data ?? [];
+  }
+
+
+  /// Check if a slot is selected
+  bool isSlotSelected(Slots slot) {
+    return selectedSlots.any((s) => s.sId == slot.sId);
+  }
+
+  /// Get selected slots count for a specific court
+  int getSelectedSlotsCountForCourt(String courtId) {
+    int count = 0;
+    selectedSlotsWithCourtInfo.forEach((slotId, slotInfo) {
+      if (slotInfo['courtId'] == courtId) {
+        count++;
+      }
+    });
+    return count;
+  }
+
+  /// Get total amount for a specific court
+  int getTotalAmountForCourt(String courtId) {
+    int total = 0;
+    selectedSlotsWithCourtInfo.forEach((slotId, slotInfo) {
+      if (slotInfo['courtId'] == courtId) {
+        final slot = slotInfo['slot'] as Slots;
+        total += slot.amount ?? 0;
+      }
+    });
+    return total;
   }
 }
