@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart';
@@ -11,7 +12,81 @@ class BookSessionController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
+  RxInt currentPage = 0.obs;
+  var selectedTimeOfDay = 0.obs; // 0 = Morning, 1 = Noon, 2 = Night
 
+  var morningCount = 0.obs;
+  var noonCount = 0.obs;
+  var nightCount = 0.obs;
+
+  // Cache base slot lists (after unavailable/available toggle applied)
+  final Map<String, List<Slots>> _originalSlotsCache = {};
+
+  void filterSlotsByTimeOfDay() {
+    final tab = selectedTimeOfDay.value;
+    final courts = slots.value?.data ?? [];
+    for (final court in courts) {
+      final courtId = court.sId ?? '';
+      final baseList = _originalSlotsCache[courtId] ?? List<Slots>.from(court.slots ?? []);
+      court.slots = baseList.where((s) {
+        final hour = _parseHour24(s.time);
+        if (hour == null) return false;
+        if (tab == 0) return hour >= 6 && hour <= 11; // Morning 6-11 am
+        if (tab == 1) return hour >= 12 && hour <= 17; // Noon 12-5 pm
+        return hour >= 18 && hour <= 23; // Night 6-11 pm
+      }).toList();
+    }
+    _recalculateTimeOfDayCounts();
+    slots.refresh();
+  }
+
+  void _recalculateTimeOfDayCounts() {
+    morningCount.value = 0;
+    noonCount.value = 0;
+    nightCount.value = 0;
+    _originalSlotsCache.forEach((_, list) {
+      for (final s in list) {
+        final hour = _parseHour24(s.time);
+        if (hour == null) continue;
+        if (hour >= 6 && hour <= 11) {
+          morningCount.value++;
+        } else if (hour >= 12 && hour <= 17) {
+          noonCount.value++;
+        } else if (hour >= 18 && hour <= 23) {
+          nightCount.value++;
+        }
+      }
+    });
+  }
+
+  int? _parseHour24(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return null;
+    final t = timeStr.trim().toLowerCase();
+    try {
+      // Try h:mm a first
+      final dt = DateFormat('h:mm a').parseStrict(t);
+      return dt.hour;
+    } catch (_) {
+      try {
+        final dt = DateFormat('h a').parseStrict(t);
+        return dt.hour;
+      } catch (_) {
+        // Fallback manual parse: "10:30 am" or "10 am"
+        final parts = t.split(' ');
+        if (parts.length == 2) {
+          final isPm = parts[1] == 'pm';
+          final hm = parts[0].split(':');
+          final h = int.tryParse(hm[0]);
+          if (h == null) return null;
+          var hour = h % 12;
+          if (isPm) hour += 12;
+          return hour;
+        }
+        return null;
+      }
+    }
+  }
+  PageController pageController = PageController();
   // OLD: Single date selections
   RxList<Slots> selectedSlots = <Slots>[].obs;
 
@@ -44,13 +119,16 @@ class BookSessionController extends GetxController {
     selectedSlotsWithCourtInfo.clear();
     multiDateSelections.clear();
     totalAmount.value = 0;
+    pageController.dispose();
+
     super.onClose();
   }
 
-  Future<void> getAvailableCourtsById(String clubId) async {
+  Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
     log("=== DEBUG API CALL ===");
     log("Fetching courts for club: $clubId");
     log("Selected date: ${selectedDate.value}");
+    log("Show unavailable: $showUnavailable");
 
     isLoadingCourts.value = true;
 
@@ -69,8 +147,28 @@ class BookSessionController extends GetxController {
         registerClubId: clubId,
       );
 
+      if (result != null) {
+        // Apply filtering based on toggle first
+        for (var court in result.data ?? []) {
+          final base = court.slots ?? [];
+          if (showUnavailable) {
+            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+          } else {
+            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
+          }
+        }
+      }
+
       slots.value = result;
-      slots.refresh();
+      // Build base cache and counts, then apply current time-of-day filter
+      _originalSlotsCache
+        ..clear();
+      final courts = slots.value?.data ?? [];
+      for (final court in courts) {
+        _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
+      }
+      _recalculateTimeOfDayCounts();
+      filterSlotsByTimeOfDay();
 
     } catch (e, stackTrace) {
       log("Error occurred: $e");
@@ -247,6 +345,23 @@ class BookSessionController extends GetxController {
     }
 
     return false;
+  }
+
+  // Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
+  bool _isUnavailableSlot(Slots slot) {
+    final availability = slot.availabilityStatus?.toLowerCase();
+    final isBlocked = availability == "maintenance" ||
+        availability == "weather conditions" ||
+        availability == "staff unavailability";
+    final isBooked = (slot.status?.toLowerCase() == 'booked');
+    final isPast = isPastAndUnavailable(slot);
+    return isPast || isBlocked || isBooked;
+  }
+
+  // Helper: available when not unavailable and status is available/empty
+  bool _isAvailableSlot(Slots slot) {
+    final status = slot.status?.toLowerCase() ?? '';
+    return !_isUnavailableSlot(slot) && (status == 'available' || status.isEmpty);
   }
 
   var cartLoader = false.obs;
