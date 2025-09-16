@@ -3,7 +3,7 @@ import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart'
 
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import 'americano/americano_screen.dart';
-import 'open_matches/create_mstch_view.dart';
+import 'open_matches/open_match_view.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
@@ -150,7 +150,7 @@ class BookingScreen extends GetView<BookingController> {
                              HomeContent(),
                              BookSession(),
                              // OpenMatches(),
-                            CreateOpenMatchesScreen(),
+                            OpenMatchesScreen(),
                             AmericanoScreen()
                           ],
                         ),
