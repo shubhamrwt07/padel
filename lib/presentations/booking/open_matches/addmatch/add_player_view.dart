@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../configs/app_colors.dart';
-import '../../configs/components/app_bar.dart';
-import '../../configs/components/loader_widgets.dart';
-import '../../configs/components/primary_button.dart';
-import '../../configs/components/primary_text_feild.dart';
+import '../../../../configs/app_colors.dart';
+import '../../../../configs/components/app_bar.dart';
+import '../../../../configs/components/primary_button.dart';
+import '../../../../configs/components/primary_text_feild.dart';
 import 'add_player_controller.dart';
 class ManualBookingOpenMatchesScreen extends StatelessWidget {
   final ManualBookingOpenMatchesController controller = Get.put(ManualBookingOpenMatchesController());
@@ -74,11 +72,11 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
                 ),).paddingOnly(top: Get.height*0.02,bottom: Get.height*0.01),
                 Obx(() => DropdownButtonFormField<String>(
                   value: controller.playerLevel.value,
-                  isDense: true, // reduces overall height
+                  isDense: true,dropdownColor: AppColors.whiteColor, // reduces overall height
                   items: controller.playerLevels.map((level) {
                     return DropdownMenuItem(
                       value: level,
-                      child: Text(level,style:Get.textTheme.labelLarge),
+                      child: Text(level,style:Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),),
                     );
                   }).toList(),
                   onChanged: (value) => controller.playerLevel.value = value!,
@@ -88,7 +86,7 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -131,18 +129,17 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
               ),
             ],
           ),
-          child:Obx(
-                ()=> PrimaryButton(
-              height: 50,
-              onTap: () {
-                // controller.createUser();
-              },
-              text:"Confirm",
-              // child: controller.isLoading.value
-              //     ? AppLoader(size: 30, strokeWidth: 5)
-              //     : null,
-            ),
-          ),
+          child:PrimaryButton(
+            height: 50,
+            onTap: () {
+              Get.back();
+              // controller.createUser();
+            },
+            text:"Confirm",
+            // child: controller.isLoading.value
+            //     ? AppLoader(size: 30, strokeWidth: 5)
+            //     : null,
+          )
         ).paddingOnly(bottom: Get.height * 0.03),
       ),
     );

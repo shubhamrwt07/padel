@@ -30,17 +30,11 @@ class SignUpController extends GetxController {
   final emailFocusNode = FocusNode();
   final phoneFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
-  final confirmPasswordFocusNode = FocusNode();
 
   RxBool isLoading = false.obs;
   RxString? selectedLocation = RxString('');
   List<String> locations = ['Delhi', 'Mumbai', 'Bangalore', 'Chennai'];
-  RxBool isVisiblePassword = true.obs;
-  RxBool isVisibleConfirmPassword = true.obs;
 
-  void passwordToggle() => isVisiblePassword.value = !isVisiblePassword.value;
-  void confirmPasswordToggle() =>
-      isVisibleConfirmPassword.value = !isVisibleConfirmPassword.value;
 
   String? validateEmail() {
     if (emailController.text.isEmpty) {
@@ -68,16 +62,6 @@ class SignUpController extends GetxController {
     }
     return null;
   }
-
-  String? validateConfirmPassword() {
-    if (confirmPasswordController.text.isEmpty) {
-      return "Confirm Password is required";
-    } else if (confirmPasswordController.text != passwordController.text) {
-      return "Passwords do not creatematch";
-    }
-    return null;
-  }
-
   void onFieldSubmit() async {
     if (phoneFocusNode.hasFocus) {
       phoneFocusNode.unfocus();
@@ -87,9 +71,38 @@ class SignUpController extends GetxController {
       passwordFocusNode.requestFocus();
     } else if (passwordFocusNode.hasFocus) {
       passwordFocusNode.unfocus();
-      confirmPasswordFocusNode.requestFocus();
     }
   }
+
+  //Password--------------------------------------------------------------------
+  var hasSpecialChar = false.obs;
+  var hasNumber = false.obs;
+  var hasCapitalLetter = false.obs;
+  RxBool isVisiblePassword = true.obs;
+  var isPasswordFocused = false.obs;
+  void passwordToggle() => isVisiblePassword.value = !isVisiblePassword.value;
+  void checkPasswordConditions(String password) {
+    hasSpecialChar.value = RegExp(r'[!@#\$&*~]').hasMatch(password);
+    hasNumber.value = RegExp(r'[0-9]').hasMatch(password);
+    hasCapitalLetter.value = RegExp(r'[A-Z]').hasMatch(password);
+  }
+  @override
+  void onInit() {
+    passwordFocusNode.addListener(() {
+      isPasswordFocused.value = passwordFocusNode.hasFocus;
+    });
+    super.onInit();
+  }
+  @override
+  void onClose() {
+    phoneFocusNode.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    passwordController.dispose();
+    super.onClose();
+  }
+
+
 
   Future<void> onCreate() async {
     FocusManager.instance.primaryFocus!.unfocus();
@@ -165,4 +178,5 @@ class SignUpController extends GetxController {
       SnackBarUtils.showErrorSnackBar(result.message!);
     }
   }
+
 }
