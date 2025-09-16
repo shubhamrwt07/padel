@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
-
-
-import '../../configs/app_colors.dart';
-import '../../configs/components/primary_button.dart';
-import '../../configs/components/primary_text_feild.dart';
-import '../../configs/routes/routes_name.dart';
 import 'create_questions_controller.dart';
 class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
   const CreateQuestionsScreen({super.key});

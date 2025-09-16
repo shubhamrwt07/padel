@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/custom_button.dart';
 import '../../../data/response_models/openmatch_model/all_open_matches.dart';
@@ -45,10 +47,8 @@ class OpenMatchesScreen extends StatelessWidget {
               ).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
             ).paddingOnly(right: Get.width * 0.14),
             onTap: () {
-              Get.to(
-                    () => AllSuggestions(),
-                transition: Transition.rightToLeft,
-              );
+             final booking = Get.put(BookSessionController());
+              Get.toNamed(RoutesName.createOpenMatch, arguments: {"id":booking.argument});
             },
           ),
         ),
@@ -65,19 +65,41 @@ class OpenMatchesScreen extends StatelessWidget {
                 child: _buildSlotHeader(context),
               ),
               _buildTimeSlots(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Open matches",style: Get.textTheme.headlineMedium,),
+                  GestureDetector(
+                    onTap: ()=> Get.to(
+                          () => AllSuggestions(),
+                      transition: Transition.rightToLeft,
+                    ),
+                    child: Container(
+                        color: Colors.transparent,
+                        padding: EdgeInsets.symmetric(vertical: 5,horizontal: 8),
+                        alignment: Alignment.center,
+                        child: Text("View all",style: Get.textTheme.labelMedium!.copyWith(color: AppColors.primaryColor),)),
+                  ),
+                ],
+              ).paddingOnly(bottom: 10),
               Obx(() {
                 if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator()).paddingSymmetric(vertical: 16);
+                  return Center(child: buildMatchCardShimmer());
                 }
                 final matches = controller.matchesBySelection.value;
                 if (matches == null || (matches.data?.isEmpty ?? true)) {
                   return Center(
-                    child: Text(
-                      'No matches available for this time',
-                      style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
-                      textAlign: TextAlign.center,
-                    ),
-                  ).paddingSymmetric(vertical: 16);
+                    child: Column(
+                      children: [
+                        Icon(Icons.event_busy_outlined,size: 50,color: AppColors.darkGrey,),
+                        Text(
+                          'No matches available for this time',
+                          style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ).paddingOnly(top: 50),
+                  );
                 }
                 return Column(
                   children: matches.data!
@@ -526,7 +548,8 @@ class OpenMatchesScreen extends StatelessWidget {
 
   // Rich card from API data
   Widget _buildMatchCardFromData(BuildContext context, MatchData data) {
-    final dateStr = _formatDateDisplay(data.matchDate);
+    final dayStr = getDay(data.matchDate);
+    final dateOnlyStr = getDate(data.matchDate);
     final timeStr = (data.matchTime ?? '').toLowerCase();
     final clubName = data.clubId?.clubName ?? '-';
     final address = data.clubId?.city != null && data.clubId?.zipCode != null
@@ -536,100 +559,132 @@ class OpenMatchesScreen extends StatelessWidget {
         ? '₹${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '₹-';
 
-    // Players (up to 2) then two available placeholders
+    // Build players list (up to 4)
     final playerAvatars = <Widget>[];
-    final teamAFirst = data.teamA != null && data.teamA!.isNotEmpty ? data.teamA!.first.userId?.profilePic : null;
-    final teamBFirst = data.teamB != null && data.teamB!.isNotEmpty ? null : null; // no user object defined in TeamB
+
+    // Team A first player
+    final teamAFirst = data.teamA != null && data.teamA!.isNotEmpty
+        ? data.teamA!.first.userId?.profilePic
+        : null;
 
     if (teamAFirst != null && teamAFirst.isNotEmpty) {
-      playerAvatars.add(_buildFilledPlayer(teamAFirst, data.teamA!.first.userId?.name ?? ''));
-    }
-    // If there is a second player with picture, add; otherwise skip
-    if (playerAvatars.length < 2) {
-      // try using createdBy profile if available
-      final createdPic = data.createdBy?.profilePic;
-      final createdName = data.createdBy?.name ?? '';
-      if (createdPic != null && createdPic.isNotEmpty) {
-        playerAvatars.add(_buildFilledPlayer(createdPic, createdName));
-      }
+      playerAvatars.add(
+        _buildFilledPlayer(teamAFirst, data.teamA!.first.userId?.name ?? ''),
+      );
     }
 
-    while (playerAvatars.length < 2) {
+    // Team B first player (currently placeholder since no userId defined in your model)
+    final teamBFirst = data.teamB != null && data.teamB!.isNotEmpty
+        ? data.teamB!.first.userId?.profilePic
+        : null;
+
+    if (teamBFirst != null && teamBFirst.isNotEmpty) {
+      playerAvatars.add(
+        _buildFilledPlayer(teamBFirst, data.teamB!.first.userId?.name ?? ''),
+      );
+    }
+
+    // Fill remaining slots until 4 total
+    while (playerAvatars.length < 4) {
       playerAvatars.add(_buildAvailableCircle());
     }
-
-    // Two additional available placeholders
-    playerAvatars.add(_buildAvailableCircle());
-    playerAvatars.add(_buildAvailableCircle());
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
+        color: AppColors.playerCardBackgroundColor,
         border: Border.all(color: AppColors.greyColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header: date | time and level badge
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        children: [
-                          TextSpan(
-                            text: '${dateStr} | ${timeStr}',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
+              Row(
+                children: [
+                  RichText(
+                    text: TextSpan(
                       children: [
-                        Text(
-                          data.skillLevel ?? 'Professional',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        TextSpan(
+                          text: '$dayStr ',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(fontWeight: FontWeight.w900),
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          data.matchType ?? 'Mixed',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                        const SizedBox(width: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor.withOpacity(.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            data.skillLevel?.substring(0, 1).toUpperCase() ?? 'A',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.primaryColor),
-                          ),
+                        TextSpan(
+                          text: '$dateOnlyStr | $timeStr',
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
-                    )
-                  ],
-                ),
+                    ),
+                  ).paddingOnly(right: Get.width * 0.05),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 0),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      data.skillLevel?.substring(0, 1).toUpperCase() ??
+                          'A/B',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                          color: AppColors.whiteColor, fontSize: 10),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Text(
+                    "${data.skillLevel?.capitalizeFirst ?? 'Professional'} |",
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  Icon(
+                    data.gender == "female"
+                        ? Icons.female
+                        : data.gender == "male"
+                        ? Icons.male
+                        : Icons.wc,
+                    size: 14,
+                  ).paddingOnly(right: 5, left: 5),
+                  Text(
+                    data.matchType?.capitalizeFirst ?? 'Mixed',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              )
             ],
-          ).paddingOnly(top: 15, bottom: 10, right: 15, left: 15),
+          ).paddingOnly(top: 15, bottom: 10,left: 15),
 
-          // Players row with two existing/available and two available
+          // Players row with up to 4 slots
           Padding(
-            padding: const EdgeInsets.only(bottom: 0),
+            padding: const EdgeInsets.only(bottom: 10),
             child: IntrinsicHeight(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: playerAvatars,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // Team A slots (first 2)
+                  ...playerAvatars.take(2),
+
+                  // Divider between teams
+                  VerticalDivider(
+                    color: AppColors.greyColor,
+                    thickness: 1.5,
+                    width: 0,
+                  ),
+
+                  // Team B slots (last 2)
+                  ...playerAvatars.skip(2),
+                ],
               ),
             ),
           ),
@@ -650,7 +705,8 @@ class OpenMatchesScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.location_on, size: 14, color: AppColors.darkGrey),
+                        Icon(Icons.location_on,
+                            size: 14, color: AppColors.darkGrey),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -677,26 +733,36 @@ class OpenMatchesScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ).paddingOnly(top: 10, bottom: 12, left: 15, right: 0),
+          ).paddingOnly(top: 10, bottom: 12, left: 15),
         ],
       ),
     ).paddingOnly(bottom: 12);
   }
+
 
   Widget _buildFilledPlayer(String imageUrl, String name) {
     return Column(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: Colors.transparent,
-          backgroundImage: NetworkImage(imageUrl),
+          backgroundColor: Colors.grey.shade400,
+          child: ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              width: 48,
+              height: 48,
+              placeholder: (context, url) => CircularProgressIndicator(color: AppColors.primaryColor,),
+              errorWidget: (context, url, error) => const Icon(Icons.person, size: 24),
+            ),
+          ),
         ),
         const SizedBox(height: 6),
         SizedBox(
-          width: 70,
+          width: 60,
           child: Text(
             name,
-            style: Get.textTheme.bodySmall,
+            style: Get.textTheme.labelSmall,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
@@ -708,33 +774,188 @@ class OpenMatchesScreen extends StatelessWidget {
   Widget _buildAvailableCircle() {
     return Column(
       children: [
-        Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primaryColor, width: 2),
-          ),
-          child: const Center(
-            child: Icon(Icons.add, color: Colors.blueAccent),
+        GestureDetector(
+          onTap: ()=>Get.toNamed(RoutesName.addPlayer),
+          child: Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primaryColor, width: 1),
+            ),
+            child: const Center(
+              child: Icon(Icons.add, color: AppColors.primaryColor),
+            ),
           ),
         ),
         const SizedBox(height: 6),
         Text(
           "Available",
-          style: Get.textTheme.bodySmall!.copyWith(color: AppColors.primaryColor),
+          style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
         )
       ],
     );
   }
 
-  String _formatDateDisplay(String? ymd) {
+  String getDay(String? ymd) {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('EEEE dd MMMM').format(parsed);
+      return DateFormat('EEEE').format(parsed); // e.g. Monday
     } catch (_) {
       return ymd;
     }
   }
+
+  String getDate(String? ymd) {
+    if (ymd == null || ymd.isEmpty) return '';
+    try {
+      final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
+      return DateFormat('dd MMMM').format(parsed); // e.g. 16 September
+    } catch (_) {
+      return ymd;
+    }
+  }
+
+  Widget buildMatchCardShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          // color: Colors.white,
+          border: Border.all(color: AppColors.greyColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header shimmer
+            Padding(
+              padding: const EdgeInsets.only(top: 15, bottom: 10, right: 15, left: 15),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              height: 12,
+                              width: 60,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              height: 16,
+                              width: 30,
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              height: 10,
+                              width: 80,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              height: 10,
+                              width: 40,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Players shimmer row
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Team A placeholders
+                    _circleShimmer(),
+                    _circleShimmer(),
+
+                    // Divider
+                    VerticalDivider(
+                      color: AppColors.greyColor,
+                      thickness: 1.5,
+                      width: 0,
+                    ),
+
+                    // Team B placeholders
+                    _circleShimmer(),
+                    _circleShimmer(),
+                  ],
+                ),
+              ),
+            ),
+
+            Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
+
+            // Footer shimmer
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 12, left: 15, right: 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 14,
+                          width: 100,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          height: 10,
+                          width: 120,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    width: Get.width * .22,
+                    height: 30,
+                    color: Colors.grey,
+                  ).paddingOnly(right: 10),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).paddingOnly(bottom: 12);
+  }
+
+  Widget _circleShimmer() {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey,
+      ),
+    );
+  }
+
 }

@@ -102,35 +102,106 @@ class SignUpScreen extends GetView<SignUpController> {
               hintText: "Email",
             ).paddingOnly(bottom: Get.height * 0.03),
 
-            PrimaryTextField(
-              keyboardType: TextInputType.visiblePassword,
-              action: TextInputAction.next,
-              onFieldSubmitted: (v) => controller.onFieldSubmit(),
-              validator: (v) => controller.validatePassword(),
-              controller: controller.passwordController,
-              focusNode: controller.passwordFocusNode,
-              hintText: "Password",
-              obscureText: controller.isVisiblePassword.value,
-              maxLine: 1,
-              suffixIcon: IconButton(
-                onPressed: () => controller.passwordToggle(),
-                icon: Image.asset(
-                  controller.isVisiblePassword.value
-                      ? Assets.imagesIcEyeOff
-                      : Assets.imagesIcEye,
-                  color: AppColors.textColor,
-                  height: 20,
-                  width: 20,
+            Focus(
+              onFocusChange: (hasFocus) {
+                controller.isPasswordFocused.value = hasFocus;
+              },
+              child: PrimaryTextField(
+                keyboardType: TextInputType.visiblePassword,
+                action: TextInputAction.next,
+                onChanged: (v) => controller.checkPasswordConditions(v),
+                onFieldSubmitted: (v) => controller.onFieldSubmit(),
+                validator: (v) => controller.validatePassword(),
+                controller: controller.passwordController,
+                hintText: "Password",
+                obscureText: controller.isVisiblePassword.value,
+                maxLine: 1,
+                suffixIcon: IconButton(
+                  onPressed: () => controller.passwordToggle(),
+                  icon: Image.asset(
+                    controller.isVisiblePassword.value
+                        ? Assets.imagesIcEyeOff
+                        : Assets.imagesIcEye,
+                    color: AppColors.textColor,
+                    height: 20,
+                    width: 20,
+                  ),
                 ),
               ),
-            ).paddingOnly(bottom: Get.height * 0.03),
+            ).paddingOnly(bottom: controller.isPasswordFocused.value? 0: Get.height * 0.03),
+
+            Obx(() {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  // Fade + slight slide from top
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, -0.1),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: controller.isPasswordFocused.value
+                    ? Column(
+                  key: const ValueKey("conditions"),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPasswordCondition(
+                      "At least 1 Capital Letter",
+                      controller.hasCapitalLetter.value,
+                    ),
+                    _buildPasswordCondition(
+                      "At least 1 Special Character",
+                      controller.hasSpecialChar.value,
+                    ),
+                    _buildPasswordCondition(
+                      "At least 1 Number",
+                      controller.hasNumber.value,
+                    ),
+                  ],
+                )
+                    : const SizedBox.shrink(
+                  key: ValueKey("empty"),
+                ),
+              );
+            }),
+
           ],
         ),
       ),
     );
   }
+  Widget _buildPasswordCondition(String text, bool value) {
+    return Row(
+      children: [
+        Transform.scale(
+          scale: 0.8,
+          child: Checkbox(
+            value: value,
+            onChanged: null,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            fillColor: WidgetStateProperty.resolveWith<Color>(
+                  (states) {
+                if (value) return Colors.green;
+                return Colors.grey.shade50;
+              },
+            ),
+            checkColor: Colors.white,
+          ),
+        ),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
 
-  /// ✅ New Location Dropdown
   Widget locationField(BuildContext context) {
     final controller = Get.find<SignUpController>();
 
@@ -174,11 +245,7 @@ class SignUpScreen extends GetView<SignUpController> {
           ),
         );
       }),
-    ).paddingOnly(
-      bottom: MediaQuery.of(context).viewInsets.bottom > 0
-          ? Get.height * 0.05
-          : Get.height * 0.1,
-    );
+    ).paddingOnly(bottom: Get.height * 0.05);
   }
   Widget bottomButtonAndContent(BuildContext context) {
     return Column(
