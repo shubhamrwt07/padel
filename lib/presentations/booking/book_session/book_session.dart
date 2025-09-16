@@ -20,17 +20,143 @@ class BookSession extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDatePicker(),
+
+              // NEW: Multi-date selections summary
+              _buildMultiDateSummary(),
+
               Transform.translate(
                 offset: Offset(0, -Get.height * 0.03),
                 child: _buildSlotHeader(context),
               ),
-              // Show all courts with their slots
-              _buildAllCourtsWithSlots(),
+              Transform.translate(
+                offset: Offset(0, -Get.height * 0.03),
+                child: _buildAllCourtsWithSlots(),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// NEW: Multi-date selections summary widget
+  Widget _buildMultiDateSummary() {
+    return Obx(() {
+      final selectionsByDate = controller.getSelectionsByDate();
+      final totalSelections = controller.getTotalSelectionsCount();
+
+      if (totalSelections == 0) return const SizedBox.shrink();
+
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Selected Bookings',
+                  style: Get.textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$totalSelections slots',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => controller.clearAllSelections(),
+                      child: Icon(
+                        Icons.clear_all,
+                        size: 20,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Show summary by date
+            ...selectionsByDate.entries.map((entry) {
+              final date = entry.key;
+              final selections = entry.value;
+              final formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.parse(date));
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: selections.map((selection) {
+                        final slot = selection['slot'];
+                        final courtName = selection['courtName'];
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${slot.time} - $courtName',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+        ),
+      );
+    });
   }
 
   /// 📅 Date Picker
@@ -62,6 +188,10 @@ class BookSession extends StatelessWidget {
               final dayName = DateFormat('E').format(date);
               final monthName = DateFormat('MMM').format(date);
 
+              // Check if this date has any selections
+              final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+              final dateSelections = controller.getSelectionsByDate()[dateString] ?? [];
+
               return GestureDetector(
                 onTap: onTap,
                 child: AnimatedSwitcher(
@@ -81,10 +211,14 @@ class BookSession extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                               color: isSelected
                                   ? Colors.black
+                                  : dateSelections.isNotEmpty
+                                  ? AppColors.primaryColor.withOpacity(0.1)
                                   : AppColors.playerCardBackgroundColor,
                               border: Border.all(
                                 color: isSelected
                                     ? Colors.transparent
+                                    : dateSelections.isNotEmpty
+                                    ? AppColors.primaryColor
                                     : AppColors.blackColor.withAlpha(20),
                               ),
                             ),
@@ -95,6 +229,8 @@ class BookSession extends StatelessWidget {
                                     style: Get.textTheme.bodySmall!.copyWith(
                                       color: isSelected
                                           ? Colors.white
+                                          : dateSelections.isNotEmpty
+                                          ? AppColors.primaryColor
                                           : Colors.black,
                                     )),
                                 Text("${date.day}",
@@ -103,44 +239,45 @@ class BookSession extends StatelessWidget {
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
                                           ? Colors.white
+                                          : dateSelections.isNotEmpty
+                                          ? AppColors.primaryColor
                                           : AppColors.textColor,
                                     )),
                                 Text(monthName,
                                     style: Get.textTheme.bodySmall!.copyWith(
                                       color: isSelected
                                           ? Colors.white
+                                          : dateSelections.isNotEmpty
+                                          ? AppColors.primaryColor
                                           : Colors.black,
                                     )),
                               ],
                             ),
                           ),
                         ),
-                        if (isSelected)
+                        // Show selection count for this date
+                        if (dateSelections.isNotEmpty)
                           Positioned(
                             top: 0,
                             right: -4,
-                            child: Obx(() {
-                              final selectedCount =
-                                  controller.selectedSlotsWithCourtInfo.length;
-                              return selectedCount == 0
-                                  ? const SizedBox.shrink()
-                                  : Container(
-                                height: 20,
-                                width: 20,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                child: Text(
-                                  "$selectedCount",
-                                  style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
-                                ),
-                              );
-                            }),
+                            child: Container(
+                              height: 20,
+                              width: 20,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected
+                                    ? AppColors.secondaryColor
+                                    : AppColors.primaryColor,
+                              ),
+                              child: Text(
+                                "${dateSelections.length}",
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -149,7 +286,6 @@ class BookSession extends StatelessWidget {
               );
             },
             onDateChange: (date) async {
-              controller.selectedSlots.clear();
               controller.selectedDate.value = date;
               log("Selected date: $date");
 
@@ -199,7 +335,7 @@ class BookSession extends StatelessWidget {
           ],
         )),
       ],
-    ).paddingOnly(top: 10, bottom: 5);
+    ).paddingOnly(top: 10, bottom: 0);
   }
 
   /// Build all courts with their slots
@@ -209,7 +345,6 @@ class BookSession extends StatelessWidget {
         return _buildLoadingShimmer();
       }
 
-      // More detailed debugging
       log("Building courts widget...");
       log("slots.value: ${controller.slots.value}");
 
@@ -280,7 +415,6 @@ class BookSession extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              // Add a retry button for debugging
               ElevatedButton.icon(
                 onPressed: () async {
                   await controller.getAvailableCourtsById(controller.argument.id!);
@@ -306,6 +440,7 @@ class BookSession extends StatelessWidget {
       );
     });
   }
+
   /// Build individual court section with its slots
   Widget _buildCourtSection(dynamic courtData) {
     final courtName = courtData.courtName ?? 'Unknown Court';
@@ -493,29 +628,28 @@ class BookSession extends StatelessWidget {
       );
     }
 
-    return GridView.builder(padding: EdgeInsets.zero,
+    return GridView.builder(
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 2.2,
+        childAspectRatio: 2.5,
       ),
       itemCount: filteredSlots.length,
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
-        // 👇 Wrap in Obx so it rebuilds when selectedSlots changes
+        // Wrap in Obx so it rebuilds when selectedSlots changes
         return Obx(() => _buildSlotTile(slot, courtId));
       },
     );
-
   }
-  /// Build individual slot tile
+
   /// Build individual slot tile
   Widget _buildSlotTile(dynamic slot, String courtId) {
-    final compositeKey = '${courtId}_${slot.sId ?? ''}';
-    final isSelected = controller.selectedSlotsWithCourtInfo.containsKey(compositeKey);
+    final isSelected = controller.isSlotSelected(slot, courtId);
 
     // Check if this slot is unavailable
     final isUnavailable = controller.isPastAndUnavailable(slot) ||
@@ -524,7 +658,7 @@ class BookSession extends StatelessWidget {
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    // 🎨 Colors
+    // Colors
     Color backgroundColor;
     Color textColor;
 
@@ -543,33 +677,38 @@ class BookSession extends StatelessWidget {
       onTap: isUnavailable
           ? null
           : () {
-        controller.toggleSlotSelection(slot, courtId: courtId, courtName: '');
+        controller.toggleSlotSelection(
+          slot,
+          courtId: courtId,
+          courtName: '',
+        );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(20), // pill shape
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? Colors.black : Colors.grey.shade300,
             width: 1,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Text(
-          slot.time ?? '',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Center(
+          child: Text(
+            slot.time ?? '',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: textColor,
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// Loading shimmer effect
   /// Loading shimmer effect
   Widget _buildLoadingShimmer() {
     return Column(
@@ -635,7 +774,7 @@ class BookSession extends StatelessWidget {
                     itemBuilder: (_, __) => Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20), // same as slot tile
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
@@ -663,7 +802,7 @@ class BookSession extends StatelessWidget {
               () => CustomButton(
             width: Get.width * 0.9,
             onTap: () {
-              if (controller.selectedSlots.isEmpty) {
+              if (controller.multiDateSelections.isEmpty) {
                 Get.snackbar(
                   "Select Slots",
                   "Please select at least one slot before booking.",

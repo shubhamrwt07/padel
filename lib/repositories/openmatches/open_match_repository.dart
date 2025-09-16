@@ -1,14 +1,10 @@
 import 'dart:developer';
-
 import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
-
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
-import '../../data/response_models/cart/cart_items_model.dart';
 import '../../data/response_models/openmatch_model/all_open_matches.dart';
 import '../../data/response_models/openmatch_model/open_match_model.dart';
 import '../../handler/logger.dart';
-
 class OpenMatchRepository {
   static final OpenMatchRepository _instance = OpenMatchRepository._internal();
   final DioClient dioClient = DioClient();
@@ -49,41 +45,37 @@ class OpenMatchRepository {
     }
   }
 
-  /// Get all open matches
-  Future<AllOpenMatchesModel> getAllOpenMatches() async {
+  Future<AllOpenMatches> getMatchesByDateTime({
+    required String matchDate,
+    required String matchTime,
+  }) async {
     try {
-      final response = await dioClient.get(AppEndpoints.getAllMatches);
+      // Encode matchTime properly (space → %20)
+      final encodedTime = Uri.encodeComponent(matchTime);
+
+      final url =
+          "${AppEndpoints.getAllMatches}?matchDate=$matchDate&matchTime=$encodedTime";
+
+      final response = await dioClient.get(url);
 
       if (response.statusCode == 200) {
-        CustomLogger.logMessage(
-          msg: "Cart items fetched successful: ${response.data}",
-          level: LogLevel.info,
-        );
-        return AllOpenMatchesModel.fromJson(response.data);
-      } else if(response.statusCode == 404) {
-        return AllOpenMatchesModel.fromJson(response.data);
-
-      }else{
-        throw Exception("Error");
+        return AllOpenMatches.fromJson(response.data);
+      } else {
+        throw Exception("Failed to fetch matches. Status: ${response.statusCode}");
       }
-    } catch (e, st) {
-      CustomLogger.logMessage(
-        msg: "Cart items failed with error: ${e.toString()}",
-        level: LogLevel.error,
-        st: st,
-      );
+    } catch (e) {
       rethrow;
     }
   }
 
   Future<OpenMatchDetailsModel> getParticularMatch() async {
-     log("mes 2");
+    log("mes 2");
     try {
       log(AppEndpoints.getParticularMatch);
       final response = await dioClient.get(AppEndpoints.getParticularMatch);
       log("mes 3 ${response.data} ");
 
-         return  OpenMatchDetailsModel.fromJson(response.data);
+      return  OpenMatchDetailsModel.fromJson(response.data);
 
 
 

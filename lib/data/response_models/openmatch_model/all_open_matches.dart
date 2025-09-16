@@ -1,4 +1,4 @@
-class AllOpenMatchesModel {
+class AllOpenMatches {
   bool? success;
   List<MatchData>? data;
   int? currentPage;
@@ -8,7 +8,7 @@ class AllOpenMatchesModel {
   bool? hasNextPage;
   bool? hasPrevPage;
 
-  AllOpenMatchesModel(
+  AllOpenMatches(
       {this.success,
         this.data,
         this.currentPage,
@@ -18,7 +18,7 @@ class AllOpenMatchesModel {
         this.hasNextPage,
         this.hasPrevPage});
 
-  AllOpenMatchesModel.fromJson(Map<String, dynamic> json) {
+  AllOpenMatches.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     if (json['data'] != null) {
       data = <MatchData>[];
@@ -174,8 +174,8 @@ class MatchData {
 class ClubId {
   Location? location;
   String? sId;
-  String? ownerId;
   String? clubName;
+  String? ownerId;
   int? iV;
   String? address;
   List<BusinessHours>? businessHours;
@@ -192,13 +192,12 @@ class ClubId {
   String? state;
   String? updatedAt;
   String? zipCode;
-  String? description;
 
   ClubId(
       {this.location,
         this.sId,
-        this.ownerId,
         this.clubName,
+        this.ownerId,
         this.iV,
         this.address,
         this.businessHours,
@@ -214,16 +213,15 @@ class ClubId {
         this.isVerified,
         this.state,
         this.updatedAt,
-        this.zipCode,
-        this.description});
+        this.zipCode});
 
   ClubId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
         ? new Location.fromJson(json['location'])
         : null;
     sId = json['_id'];
-    ownerId = json['ownerId'];
     clubName = json['clubName'];
+    ownerId = json['ownerId'];
     iV = json['__v'];
     address = json['address'];
     if (json['businessHours'] != null) {
@@ -245,7 +243,6 @@ class ClubId {
     state = json['state'];
     updatedAt = json['updatedAt'];
     zipCode = json['zipCode'];
-    description = json['description'];
   }
 
   Map<String, dynamic> toJson() {
@@ -254,8 +251,8 @@ class ClubId {
       data['location'] = this.location!.toJson();
     }
     data['_id'] = this.sId;
-    data['ownerId'] = this.ownerId;
     data['clubName'] = this.clubName;
+    data['ownerId'] = this.ownerId;
     data['__v'] = this.iV;
     data['address'] = this.address;
     if (this.businessHours != null) {
@@ -275,7 +272,6 @@ class ClubId {
     data['state'] = this.state;
     data['updatedAt'] = this.updatedAt;
     data['zipCode'] = this.zipCode;
-    data['description'] = this.description;
     return data;
   }
 }

@@ -474,7 +474,7 @@ class HomeScreen extends GetView<HomeController> {
                   ? 'No courts found for "${controller.searchQuery.value}"'
                   : 'No courts available',
               textAlign: TextAlign.center,
-              style: Get.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+              style: Get.textTheme.headlineMedium?.copyWith(color: Colors.grey[600]),
             ),
             if (controller.searchQuery.value.isNotEmpty) ...[
               const SizedBox(height: 16),

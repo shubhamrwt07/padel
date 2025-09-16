@@ -8,7 +8,7 @@ import '../../repositories/openmatches/open_match_repository.dart';
 class OpenMatchController extends GetxController {
   final OpenMatchRepository repository = OpenMatchRepository();
 
-  Rx<AllOpenMatchesModel?> matches = Rx<AllOpenMatchesModel?>(null);
+  Rx<AllOpenMatches?> matches = Rx<AllOpenMatches?>(null);
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -42,23 +42,23 @@ class OpenMatchController extends GetxController {
   }
 
   // FETCH OPEN MATCHES
-  Future<void> fetchOpenMatches() async {
-    try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      final response = await repository.getAllOpenMatches();
-      matches.value = response;
-    } catch (e) {
-      errorMessage.value = e.toString();
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  // Future<void> fetchOpenMatches() async {
+  //   try {
+  //     isLoading.value = true;
+  //     errorMessage.value = '';
+  //     final response = await repository.getAllOpenMatches();
+  //     matches.value = response;
+  //   } catch (e) {
+  //     errorMessage.value = e.toString();
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   @override
   void onInit() {
 
     super.onInit();
-    fetchOpenMatches();
+    // fetchOpenMatches();
   }
 }

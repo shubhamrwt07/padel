@@ -42,11 +42,10 @@ import '../../presentations/addmatch/add_player_binding.dart';
 import '../../presentations/addmatch/add_player_view.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
-import '../../presentations/booking/open_matches/create_mstch_view.dart';
+import '../../presentations/booking/open_matches/open_match_view.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
-import '../../presentations/booking/open_matches/create_match_binding.dart';
-import '../../presentations/openmatches/open_match_binding.dart';
+import '../../presentations/booking/open_matches/open_match_binding.dart';
 import '../../presentations/openmatches/open_match_view.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/questions/create_question_binding.dart';
@@ -223,8 +222,8 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.createMatch,
-      page: () => CreateOpenMatchesScreen(),
-      binding: CreateOpenMatchBinding(),
+      page: () => OpenMatchesScreen(),
+      binding: OpenMatchBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
