@@ -15,13 +15,12 @@ class BookSession extends StatelessWidget {
       bottomNavigationBar: _bottomButton(),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
+          padding: const EdgeInsets.only(left: 16,right: 16,bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10), // Add top spacing
               _buildDatePicker(),
-              const SizedBox(height: 12),
               _buildTimeOfDayTabs(),  // <-- Added here
               // Conditional spacing based on whether multi-date summary is showing
               Obx(() {
@@ -242,7 +241,6 @@ class BookSession extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: 16),
 
         /// Date picker wrapped separately with Obx
         Obx(() => Row(
@@ -415,7 +413,7 @@ class BookSession extends StatelessWidget {
       ];
 
       return Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
             color: AppColors.lightBlueColor
@@ -449,7 +447,8 @@ class BookSession extends StatelessWidget {
                       Text(
                         "${tab['label']} (${tab['count']})",
                         style: TextStyle(
-                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: isSelected ? AppColors.primaryColor : Colors.black87,
                         ),
                       ),
@@ -853,12 +852,11 @@ class BookSession extends StatelessWidget {
       );
     });
   }
-
   /// Bottom bar with total & book button
   /// Bottom bar with total & book button
   Widget _bottomButton() {
     return Container(
-      height: Get.height * .12, // Increased height to fit progress bar
+      height: Get.height * .15, // a little bigger to fit button + progress bar
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
@@ -873,13 +871,20 @@ class BookSession extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          /// Progress bar (moved inside bottom button)
-          Obx(() => _buildProgressBar(
-            (controller.slots.value?.data?.length ?? 0) > 0
-                ? (controller.slots.value!.data!.length / 2).ceil()
-                : 0,
-          )),
-          const SizedBox(height: 8),
+          /// Progress bar (only show when slots are fetched)
+          Obx(() {
+            final totalSlots = controller.slots.value?.data?.length ?? 0;
+            if (totalSlots == 0) {
+              return const SizedBox.shrink(); // don’t render anything
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: SizedBox(
+                height: 12, // fixed height avoids overflow
+                child: _buildProgressBar((totalSlots / 2).ceil()),
+              ),
+            );
+          }),
 
           /// Book Now button
           Obx(
