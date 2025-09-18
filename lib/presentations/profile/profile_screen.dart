@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:padel_mobile/presentations/profile/edit_profile_screen.dart';
+import 'package:padel_mobile/presentations/profile/edit_profile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
 class ProfileUi extends GetView<ProfileController> {
@@ -34,9 +34,9 @@ class ProfileUi extends GetView<ProfileController> {
                     color: AppColors.tabSelectedColor,
                   ),
                   child: ClipOval(
-                    child: (controller.profileModel.value.response?.profilePic?.isNotEmpty ?? false)
+                    child: (controller.profileModel.value?.response?.profilePic?.isNotEmpty ?? false)
                         ? CachedNetworkImage(
-                      imageUrl: controller.profileModel.value.response?.profilePic ?? "",
+                      imageUrl: controller.profileModel.value?.response?.profilePic ?? "",
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Center(
                         child: CircularProgressIndicator(
@@ -63,7 +63,7 @@ class ProfileUi extends GetView<ProfileController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(() {
-                    final profile = controller.profileModel.value.response;
+                    final profile = controller.profileModel.value?.response;
                     return Text(
                       "${profile?.name ?? 'Unknown'} ${profile?.lastname ?? ""}",
                       style: Get.textTheme.titleSmall!.copyWith(
@@ -74,7 +74,7 @@ class ProfileUi extends GetView<ProfileController> {
                     ).paddingOnly(left: 5);
                   }),
                   Obx(() {
-                    final profile = controller.profileModel.value.response;
+                    final profile = controller.profileModel.value?.response;
                     return Text(
                       profile?.email ?? 'unknown@gmail.com',
                       style: Get.textTheme.headlineSmall!.copyWith(
@@ -85,7 +85,7 @@ class ProfileUi extends GetView<ProfileController> {
                   }),
                   GestureDetector(
                     onTap: () {
-                      Get.to(() => EditProfileUi(), transition: Transition.rightToLeft);
+                      Get.toNamed(RoutesName.editProfile);
                     },
                     child: Container(
                       alignment: Alignment.center,

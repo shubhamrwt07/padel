@@ -2,6 +2,7 @@ import 'package:padel_mobile/data/request_models/authentication_models/otp_model
 import 'package:padel_mobile/data/request_models/authentication_models/reset_password.model.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/data/request_models/common_model.dart';
+import 'package:padel_mobile/data/response_models/get_locations_model.dart';
 
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
@@ -118,6 +119,31 @@ class SignUpRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Reset Password failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+   ///Get Locations Api------------------------------------------------------------
+  Future<GetLocationsModel> getlocations() async {
+    try {
+      final response = await dioClient.get(
+        AppEndpoints.getLocations,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Get-Locations Data: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetLocationsModel.fromJson(response.data);
+      } else {
+        throw Exception("Get-Locations failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Get-Locations failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );

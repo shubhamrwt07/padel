@@ -134,7 +134,7 @@ class PaymentWalletScreen extends StatelessWidget {
                ),
              ).paddingOnly(top: 2),
              Text(
-               "7000",
+               "0",
                style: Get.textTheme.titleMedium!.copyWith(
                  color: AppColors.primaryColor,
                ),

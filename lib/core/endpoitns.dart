@@ -12,6 +12,7 @@ class AppEndpoints {
   static const String getClub =
       "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getAllActiveCourtsForSlotWise = "${BASE_URL}court/saveCourt/getAllActiveCourtsForSlotWise?";
+  static const String getLocations = "${BASE_URL}court/state/getStates";
 
 
   // Cart Urls -----------------------------------------------------------------
