@@ -1,19 +1,10 @@
-// ✅ FILE: edit_profile_ui.dart
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
-import 'package:padel_mobile/presentations/profile/profile_controller.dart';
-import '../../configs/app_colors.dart';
-import '../../configs/components/app_bar.dart';
-import '../../configs/components/primary_button.dart';
-import '../../configs/components/primary_text_feild.dart';
-import '../../generated/assets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
-class EditProfileUi extends GetView<ProfileController> {
-  const EditProfileUi({super.key});
+class EditProfileUi extends StatelessWidget {
+  final EditProfileController controller = Get.put(EditProfileController());
+  EditProfileUi({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +17,6 @@ class EditProfileUi extends GetView<ProfileController> {
           showLeading: true,
           centerTitle: true,
           title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
-          action: [
-            // GestureDetector(
-            //   onTap: () => Get.back(),
-            //   child: Icon(
-            //     Icons.check,
-            //     color: AppColors.blueColor,
-            //   ).paddingOnly(right: Get.width * 0.02),
-            // ),
-          ],
           context: context,
         ),
         body: SingleChildScrollView(
@@ -65,7 +47,14 @@ class EditProfileUi extends GetView<ProfileController> {
               ),
               _genderSelection(context),
               _dobField(context),
-              _textFieldWithLabel("Location / City", controller.locationController, context),
+                 Text(
+          "Location / City",
+          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppColors.labelBlackColor,
+          ),
+        ).paddingOnly(top: Get.height * .02,bottom: Get.height*0.01),
+              locationField()
             ],
           ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
         ),
@@ -319,4 +308,75 @@ class EditProfileUi extends GetView<ProfileController> {
     );
   }
 
+ Widget locationField() {
+    final style = Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500);
+    return  Obx(() {
+            if (controller.isLocationLoading.value) {
+              return Container(
+                height: 52,
+                width: Get.width,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    CupertinoActivityIndicator(color: AppColors.primaryColor,radius: 14,).paddingOnly(right: 5,left: 10),
+                    Text("Loading Locations...",style: style,),
+                  ], 
+                ),
+              );
+            }
+
+            if (controller.locations.isEmpty) {
+              return Container(
+                height: 52,
+                width: Get.width,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text("No Location found",style: style,),
+              );
+            }
+
+            return Container(
+              height: 52,
+              width: Get.width,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: AppColors.textFieldColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: Obx(
+                      () => DropdownButton<String>(
+                    value: controller.selectedLocation.value.isEmpty
+                        ? null
+                        : controller.selectedLocation.value,
+                    hint: Text("Pefered Location", style: style),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    items: controller.locations
+                        .map((state) => DropdownMenuItem<String>(
+                      value: state.name ?? '',
+                      child: Text(
+                        state.name ?? '',
+                        style: style,
+                      ),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      controller.selectedLocation.value = value ?? "";
+                      CustomLogger.logMessage(msg: "Selected Location -> ${controller.selectedLocation.value}",level: LogLevel.info);
+                    },
+                  ),
+                ),
+              ),
+            );
+
+          }).paddingOnly(bottom: Get.height * 0.05);
+  }
 }

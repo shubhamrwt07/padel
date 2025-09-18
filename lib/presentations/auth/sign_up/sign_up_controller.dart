@@ -1,18 +1,8 @@
 // SignUpController.dart
 import 'dart:developer';
-
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/components/snack_bars.dart';
-import 'package:padel_mobile/core/network/dio_client.dart';
-import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
-import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
-import 'package:padel_mobile/presentations/auth/otp/otp_controller.dart';
-import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
-import 'package:padel_mobile/repositories/authentication_repository/sign_up_repository.dart';
-
-import '../../../configs/routes/routes_name.dart';
+import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
+import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 
 class SignUpController extends GetxController {
   SignUpRepository signUpRepository = SignUpRepository();
@@ -32,8 +22,7 @@ class SignUpController extends GetxController {
   final passwordFocusNode = FocusNode();
 
   RxBool isLoading = false.obs;
-  RxString? selectedLocation = RxString('');
-  List<String> locations = ['Delhi', 'Mumbai', 'Bangalore', 'Chennai'];
+
 
 
   String? validateEmail() {
@@ -87,7 +76,8 @@ class SignUpController extends GetxController {
     hasCapitalLetter.value = RegExp(r'[A-Z]').hasMatch(password);
   }
   @override
-  void onInit() {
+  void onInit() async{
+    await fetchLocations();
     passwordFocusNode.addListener(() {
       isPasswordFocused.value = passwordFocusNode.hasFocus;
     });
@@ -150,7 +140,7 @@ class SignUpController extends GetxController {
       "countryCode": "+91",
       "phoneNumber": phoneController.text.trim(),
       "password": passwordController.text.trim(),
-      "city": selectedLocation?.value ?? "Chandigarh",
+      "city": selectedLocation.value,
       "agreeTermsAndCondition": true,
       "location": {
         "type": "Point",
@@ -176,6 +166,24 @@ class SignUpController extends GetxController {
       }
     } else {
       SnackBarUtils.showErrorSnackBar(result.message!);
+    }
+  }
+  
+  ///Get Location Api----------------------------------------------------
+  var isLocationLoading = false.obs;
+  var locations = <GetLocationData>[].obs;
+  var selectedLocation = ''.obs;
+  Future<void>fetchLocations()async{
+    isLocationLoading.value = true;
+    try{
+      final response = await signUpRepository.getlocations();
+      if(response.status == true){
+        locations.assignAll(response.data?.toList()??[]);
+      }
+    }catch(e){
+      CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
+    }finally{
+      isLocationLoading.value = false;
     }
   }
 

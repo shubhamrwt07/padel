@@ -28,6 +28,8 @@ import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_binding.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_screen.dart';
+import 'package:padel_mobile/presentations/profile/edit_profile/edit_profile_binding.dart';
+import 'package:padel_mobile/presentations/profile/edit_profile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_binding.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
@@ -115,6 +117,13 @@ class Routes {
       page: () => ProfileUi(),
       binding: ProfileBinding(),
       transition: Transition.fadeIn,
+      transitionDuration: defaultDuration,
+    ),
+     GetPage(
+      name: RoutesName.editProfile,
+      page: () => EditProfileUi(),
+      binding: EditProfileBinding(),
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
     GetPage(

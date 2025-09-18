@@ -1,7 +1,5 @@
 // SignUpScreen.dart
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 
 class SignUpScreen extends GetView<SignUpController> {
@@ -20,7 +18,7 @@ class SignUpScreen extends GetView<SignUpController> {
               children: [
                 topTexts(context),
                 formFields(),
-                locationField(context), // ✅ Added Location field
+                locationField(),
                 bottomButtonAndContent(context),
               ],
             ).paddingOnly(left: Get.width * 0.05, right: Get.width * 0.05),
@@ -35,11 +33,11 @@ class SignUpScreen extends GetView<SignUpController> {
       children: [
         Text(
           "Create Account",
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Get.textTheme.titleLarge,
         ).paddingOnly(bottom: Get.height * 0.02, top: Get.height * 0.02),
         Text(
           "Create an account so you can start booking.",
-          style: Theme.of(context).textTheme.headlineMedium!
+          style: Get.textTheme.headlineMedium!
               .copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ).paddingOnly(bottom: Get.height * 0.06),
@@ -202,50 +200,76 @@ class SignUpScreen extends GetView<SignUpController> {
     );
   }
 
-  Widget locationField(BuildContext context) {
-    final controller = Get.find<SignUpController>();
-
-    return Container(
-      height: 55,
-      width: Get.width,
-      decoration: BoxDecoration(
-        color: AppColors.textFieldColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
-      child: Obx(() {
-        return DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: controller.selectedLocation!.isEmpty
-                ? null
-                : controller.selectedLocation!.value,
-            hint: Text(
-              AppStrings.preferenceLocation,
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                color: AppColors.textColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            isExpanded: true,
-            icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textColor),
-            dropdownColor: AppColors.textFieldColor,
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              color: AppColors.textColor,
-              fontWeight: FontWeight.w500,
-            ),
-            onChanged: (value) {
-              if (value != null) controller.selectedLocation!.value = value;
-            },
-            items: controller.locations.map((location) {
-              return DropdownMenuItem<String>(
-                value: location,
-                child: Text(location),
+  Widget locationField() {
+    final style = Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500);
+    return  Obx(() {
+            if (controller.isLocationLoading.value) {
+              return Container(
+                height: 52,
+                width: Get.width,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    CupertinoActivityIndicator(color: AppColors.primaryColor,radius: 14,).paddingOnly(right: 5,left: 10),
+                    Text("Loading Locations...",style: style,),
+                  ], 
+                ),
               );
-            }).toList(),
-          ),
-        );
-      }),
-    ).paddingOnly(bottom: Get.height * 0.05);
+            }
+
+            if (controller.locations.isEmpty) {
+              return Container(
+                height: 52,
+                width: Get.width,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.textFieldColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text("No Location found",style: style,),
+              );
+            }
+
+            return Container(
+              height: 52,
+              width: Get.width,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: AppColors.textFieldColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: Obx(
+                      () => DropdownButton<String>(
+                    value: controller.selectedLocation.value.isEmpty
+                        ? null
+                        : controller.selectedLocation.value,
+                    hint: Text("Pefered Location", style: style),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    items: controller.locations
+                        .map((state) => DropdownMenuItem<String>(
+                      value: state.name ?? '',
+                      child: Text(
+                        state.name ?? '',
+                        style: style,
+                      ),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      controller.selectedLocation.value = value ?? "";
+                      CustomLogger.logMessage(msg: "Selected Location -> ${controller.selectedLocation.value}",level: LogLevel.info);
+                    },
+                  ),
+                ),
+              ),
+            );
+
+          }).paddingOnly(bottom: Get.height * 0.05);
   }
   Widget bottomButtonAndContent(BuildContext context) {
     return Column(
@@ -261,13 +285,13 @@ class SignUpScreen extends GetView<SignUpController> {
                 children: [
                   TextSpan(
                     text: "Already have an account? ",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    style: Get.textTheme.headlineMedium!.copyWith(
                       color: AppColors.darkGreyColor,
                     ),
                   ),
                   TextSpan(
                     text: "Sign In",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    style: Get.textTheme.headlineMedium!.copyWith(
                       color: AppColors.primaryColor,
                     ),
                   ),

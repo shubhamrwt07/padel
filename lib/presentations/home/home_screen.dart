@@ -123,7 +123,7 @@ class HomeScreen extends GetView<HomeController> {
         );
       }
 
-      final name = profile.response?.name;
+      final name = profile?.response?.name;
       final displayName =
       (name == null || name.trim().isEmpty) ? 'Guest' : name;
 
