@@ -90,7 +90,7 @@ class HomeScreen extends GetView<HomeController> {
                               .paddingOnly(bottom: Get.width * 0.02,),
                           if (controller.isLoadingClub.value)
                             Column(
-                              children: List.generate(4, (_) => loadingCard()),
+                              children: List.generate(5, (_) => loadingCard()),
                             )
                           else
                             _buildCourtList(),

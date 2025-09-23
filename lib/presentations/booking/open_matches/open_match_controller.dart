@@ -1,9 +1,7 @@
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../data/response_models/openmatch_model/open_match_model.dart';
-import '../../../data/response_models/openmatch_model/all_open_matches.dart';
-import '../../../repositories/openmatches/open_match_repository.dart';
-
+import '../../../presentations/booking/widgets/booking_exports.dart';
 class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedSlots = <String>[].obs;
@@ -34,9 +32,32 @@ class OpenMatchesController extends GetxController {
     "11 pm",
   ];
 
+  String getDay(String? ymd) {
+    if (ymd == null || ymd.isEmpty) return '';
+    try {
+      final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
+      return DateFormat('EEEE').format(parsed); // e.g. Monday
+    } catch (_) {
+      return ymd;
+    }
+  }
+
+  String getDate(String? ymd) {
+    if (ymd == null || ymd.isEmpty) return '';
+    try {
+      final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
+      return DateFormat('dd MMMM').format(parsed); // e.g. 16 September
+    } catch (_) {
+      return ymd;
+    }
+  }
+
+  Courts argument = Courts();
+
   @override
   void onInit() {
     super.onInit();
+    argument =Get.arguments["data"];
     if (timeSlots.isNotEmpty) {
       final firstAvail = firstAvailableSlot();
       if (firstAvail != null) {
@@ -104,12 +125,13 @@ class OpenMatchesController extends GetxController {
       final repo = OpenMatchRepository();
       final response = await repo.getMatchesByDateTime(
         matchDate: formattedDate,
-        matchTime: formattedTime, // repo will encode
+        matchTime: formattedTime,
+        cubId: argument.id??"",
       );
       matchesBySelection.value = response;
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar("Error", errorMessage.value);
+      CustomLogger.logMessage(msg: "Error -> ${errorMessage.value}", level: LogLevel.error);
     } finally {
       isLoading.value = false;
     }

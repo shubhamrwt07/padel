@@ -1,7 +1,4 @@
-import 'package:get/get.dart';
-
-import 'open_match_controller.dart';
-
+import '../../../presentations/booking/widgets/booking_exports.dart';
 class OpenMatchBinding implements Bindings{
   @override
   void dependencies() {
