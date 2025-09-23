@@ -15,7 +15,7 @@ class AppEndpoints {
   static const String getLocations = "${BASE_URL}court/state/getStates";
 
 
-  // Cart Urls -----------------------------------------------------------------
+  ///Cart Urls------------------------------------------------------------------
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
   static const String removeCartItems = "${BASE_URL}court/cart/removeUserCart";
@@ -26,7 +26,11 @@ class AppEndpoints {
   ///Review---------------------------------------------------------------------
   static const String getReview = "${BASE_URL}court/review/getReviews";
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
+
+  ///Open Matches---------------------------------------------------------------
   static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
-  static const String getAllMatches = "${BASE_URL}court/openmatch/getAllOpenMatches";
+  static const String getOpenMatches = "${BASE_URL}court/openmatch/getOpenMatches";
   static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68be7b412a1d4c80ee2cc02f";
+  static const String createUserForOpenMatch = "${BASE_URL}customerSignupWithOutPassword";
+  static const String addUserForOpenMatch = "${BASE_URL}court/openmatch/addPlayerToMatch";
 }
