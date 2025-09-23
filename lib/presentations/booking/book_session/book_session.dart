@@ -279,18 +279,15 @@ class BookSession extends StatelessWidget {
                   final now = DateTime.now();
                   final today = DateTime(now.year, now.month, now.day);
                   final currentDate = DateTime(date.year, date.month, date.day);
-
                   if (currentDate.isBefore(today)) {
                     return const SizedBox.shrink();
                   }
-
                   final dayName = DateFormat('E').format(date);
                   final monthName = DateFormat('MMM').format(date);
                   final dateString =
                       "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
                   final dateSelections =
                       controller.getSelectionsByDate()[dateString] ?? [];
-
                   return GestureDetector(
                     onTap: onTap,
                     child: AnimatedSwitcher(

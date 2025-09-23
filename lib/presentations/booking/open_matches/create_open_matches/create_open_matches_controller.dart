@@ -36,7 +36,6 @@ class CreateOpenMatchesController extends GetxController {
     super.onInit();
     argument = Get.arguments['id'];
     selectedDate.value = DateTime.now();
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await getAvailableCourtsById(argument.id!);
     });
@@ -55,7 +54,6 @@ class CreateOpenMatchesController extends GetxController {
     log("=== DEBUG API CALL ===");
     log("Fetching courts for club: $clubId");
     log("Selected date: ${selectedDate.value}");
-
     isLoadingCourts.value = true;
 
     // Clear current date selections only, keep other dates

@@ -54,7 +54,7 @@ class PackagesUi extends GetView<PackagesController> {
                                 p.title,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -63,7 +63,7 @@ class PackagesUi extends GetView<PackagesController> {
                                 p.description,
                                 style: const TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 13,
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -76,14 +76,15 @@ class PackagesUi extends GetView<PackagesController> {
                               "Slots: ${p.slots}",
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+
                               ),
                             ),
                             Text(
                               "Validity: ${p.validity}",
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
                             ),
                           ],
