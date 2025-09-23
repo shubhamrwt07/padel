@@ -21,6 +21,31 @@ class BookSessionController extends GetxController {
 
   // Cache base slot lists (after unavailable/available toggle applied)
   final Map<String, List<Slots>> _originalSlotsCache = {};
+  void _autoSelectTab() {
+    final now = DateTime.now();
+    final hour = now.hour;
+
+    if (hour >= 6 && hour <= 11 && morningCount.value > 0) {
+      selectedTimeOfDay.value = 0; // Morning
+    } else if (hour >= 12 && hour <= 17 && noonCount.value > 0) {
+      selectedTimeOfDay.value = 1; // Noon
+    } else if (hour >= 18 && hour <= 23 && nightCount.value > 0) {
+      selectedTimeOfDay.value = 2; // Night
+    } else {
+      // Fallback: pick first tab that has slots
+      if (morningCount.value > 0) {
+        selectedTimeOfDay.value = 0;
+      } else if (noonCount.value > 0) {
+        selectedTimeOfDay.value = 1;
+      } else if (nightCount.value > 0) {
+        selectedTimeOfDay.value = 2;
+      } else {
+        selectedTimeOfDay.value = 0; // default
+      }
+    }
+
+    filterSlotsByTimeOfDay();
+  }
 
   void filterSlotsByTimeOfDay() {
     final tab = selectedTimeOfDay.value;
@@ -168,7 +193,11 @@ class BookSessionController extends GetxController {
         _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
       }
       _recalculateTimeOfDayCounts();
+
       filterSlotsByTimeOfDay();
+      _autoSelectTab();
+
+
 
     } catch (e, stackTrace) {
       log("Error occurred: $e");
@@ -303,45 +332,71 @@ class BookSessionController extends GetxController {
   }
 
   bool isPastAndUnavailable(Slots slot) {
-    if (slot.status == "booked") return true;
-    if (slot.status != "available") return true;
+    // Treat booked or explicitly unavailable statuses as unavailable
+    final status = slot.status?.toLowerCase() ?? '';
+    if (status == 'booked') return true;
+    if (status.isNotEmpty && status != 'available') return true;
+
+    // If time is missing or malformed, don't mark as past (avoid crashes)
+    final rawTime = slot.time;
+    if (rawTime == null || rawTime.trim().isEmpty) {
+      return false;
+    }
 
     final now = DateTime.now();
     final selected = selectedDate.value ?? now;
 
-    final timeString = slot.time!.toLowerCase().trim();
-    final parts = timeString.split(" ");
-    final timePart = parts[0];
-    final amPm = parts.length > 1 ? parts[1] : "";
+    try {
+      final timeString = rawTime.toLowerCase().trim();
 
-    int hour = 0;
-    int minute = 0;
+      // Try common formats first
+      DateTime? parsed;
+      for (final pattern in const ['h:mm a', 'h a', 'HH:mm', 'H:mm', 'HH']) {
+        try {
+          parsed = DateFormat(pattern).parseStrict(timeString);
+          break;
+        } catch (_) {}
+      }
 
-    if (timePart.contains(":")) {
-      final timePieces = timePart.split(":");
-      hour = int.parse(timePieces[0]);
-      minute = int.parse(timePieces[1]);
-    } else {
-      hour = int.parse(timePart);
-    }
+      int hour;
+      int minute;
+      if (parsed != null) {
+        hour = parsed.hour;
+        minute = parsed.minute;
+      } else {
+        // Fallback manual parse: supports "10", "10:30", with optional am/pm
+        String t = timeString;
+        String meridiem = '';
+        final parts = t.split(' ');
+        if (parts.length == 2) {
+          t = parts[0];
+          meridiem = parts[1];
+        }
+        final timePieces = t.split(':');
+        hour = int.tryParse(timePieces[0]) ?? 0;
+        minute = timePieces.length > 1 ? int.tryParse(timePieces[1]) ?? 0 : 0;
+        if (meridiem == 'pm' && hour != 12) hour += 12;
+        if (meridiem == 'am' && hour == 12) hour = 0;
+      }
 
-    if (amPm == "pm" && hour != 12) hour += 12;
-    if (amPm == "am" && hour == 12) hour = 0;
+      final slotDateTime = DateTime(
+        selected.year,
+        selected.month,
+        selected.day,
+        hour,
+        minute,
+      );
 
-    final slotDateTime = DateTime(
-      selected.year,
-      selected.month,
-      selected.day,
-      hour,
-      minute,
-    );
+      final isToday = selected.year == now.year &&
+          selected.month == now.month &&
+          selected.day == now.day;
 
-    final isToday = selected.year == now.year &&
-        selected.month == now.month &&
-        selected.day == now.day;
-
-    if (isToday && now.isAfter(slotDateTime)) {
-      return true;
+      if (isToday && now.isAfter(slotDateTime)) {
+        return true;
+      }
+    } catch (_) {
+      // On any parsing error, consider it not past to be safe
+      return false;
     }
 
     return false;
@@ -534,7 +589,6 @@ class BookSessionController extends GetxController {
       }
       result[dateString]!.add(selection);
     });
-
     return result;
   }
 

@@ -5,9 +5,7 @@ import 'package:shimmer/shimmer.dart';
 
 class BookSession extends StatelessWidget {
   BookSession({super.key});
-
   final BookSessionController controller = Get.put(BookSessionController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +38,6 @@ class BookSession extends StatelessWidget {
       ),
     );
   }
-
   /// NEW: Multi-date selections summary widget
   Widget _buildMultiDateSummary() {
     return Obx(() {
@@ -160,7 +157,6 @@ class BookSession extends StatelessWidget {
       );
     });
   }
-
   /// 📅 Date Picker - Fixed spacing and toggle functionality
   Widget _buildDatePicker() {
     return Column(
@@ -401,7 +397,7 @@ class BookSession extends StatelessWidget {
       ],
     );
   }
-  /// Time of Day Filter Tabs (Morning / Noon / Night)
+  /// Time of Day Filter Tabs (Morning /Noon/ Night)
   Widget _buildTimeOfDayTabs() {
     return Obx(() {
       final selectedTab = controller.selectedTimeOfDay.value;
@@ -416,7 +412,7 @@ class BookSession extends StatelessWidget {
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-            color: AppColors.lightBlueColor
+          color: AppColors.lightBlueColor,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -425,34 +421,46 @@ class BookSession extends StatelessWidget {
             final isSelected = selectedTab == index;
 
             return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  controller.selectedTimeOfDay.value = index;
-                  controller.filterSlotsByTimeOfDay();
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryColor.withOpacity(0.1) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(tab["icon"] as IconData,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(30),
+                  onTap: () {
+                    controller.selectedTimeOfDay.value = index;
+                    controller.filterSlotsByTimeOfDay();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryColor.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          tab["icon"] as IconData,
                           size: 18,
-                          color: isSelected ? AppColors.primaryColor : Colors.black87),
-                      const SizedBox(width: 6),
-                      Text(
-                        "${tab['label']} (${tab['count']})",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected ? AppColors.primaryColor : Colors.black87,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : Colors.black87,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Text(
+                          "${tab['label']} (${tab['count']})",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -462,8 +470,6 @@ class BookSession extends StatelessWidget {
       );
     });
   }
-
-
   /// Build all courts with their slots
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
@@ -484,7 +490,7 @@ class BookSession extends StatelessWidget {
         children: [
           // PageView for courts
           SizedBox(
-            height: Get.height * 0.55,
+            height: Get.height * 0.47,
             child: PageView.builder(
               controller: controller.pageController,
               onPageChanged: (index) {
@@ -503,14 +509,34 @@ class BookSession extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12), // Consistent spacing
+          const SizedBox(height: 6),
 
-          // Custom progress bar
+          /// 👇 Swipe hint with arrow animation
+          Obx(() {
+            final currentPage = controller.currentPage.value;
+
+            if (totalPages <= 1) return const SizedBox.shrink();
+
+            if (currentPage == 0) {
+              // First page → swipe left
+              return _buildSwipeHint("Swipe Left for more slots ", Icons.arrow_right_alt);
+            } else if (currentPage == totalPages - 1) {
+              // Last page → swipe right
+              return _buildSwipeHint("Swipe Right", Icons.arrow_left);
+            }
+            return const SizedBox.shrink();
+          }),
+
+          const SizedBox(height: 6),
+
+          /// Dot indicator placed right below courts
+          _buildDotIndicator(totalPages),
+          const SizedBox(height: 26),
+
         ],
       );
     });
   }
-
   /// Build individual court section with its slots
   Widget _buildCourtSection(dynamic courtData) {
     final courtName = courtData.courtName ?? 'Unknown Court';
@@ -609,7 +635,6 @@ class BookSession extends StatelessWidget {
       ),
     );
   }
-
   /// Build slots grid for a specific court
   Widget _buildSlotsGrid(List<dynamic> slotTimes, String courtId) {
     if (slotTimes.isEmpty) {
@@ -699,7 +724,6 @@ class BookSession extends StatelessWidget {
       },
     );
   }
-
   /// Build individual slot tile
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
@@ -758,81 +782,127 @@ class BookSession extends StatelessWidget {
       ),
     );
   }
-
   /// Loading shimmer effect
   Widget _buildLoadingShimmer() {
-    return Column(
-      children: List.generate(2, (courtIndex) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 50,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
+    final totalPages = 2;
+    return SizedBox(
+      height: Get.height * 0.47 + 80,
+      child: PageView.builder(
+        itemCount: totalPages,
+        itemBuilder: (context, pageIndex) {
+          return Column(
+            children: List.generate(2, (courtIndex) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  height: 12,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 2.2,
-                    ),
-                    itemCount: 8,
-                    itemBuilder: (_, __) => Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Court title bar
+                      Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+
+                      // Court subtitle
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                        height: 14,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Slots grid
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 2.2,
+                          ),
+                          itemCount: 8,
+                          itemBuilder: (_, __) => Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        );
-      }),
+              );
+            }),
+          );
+        },
+      ),
     );
   }
-
-  Widget _buildProgressBar(int totalPages) {
+  Widget _buildSwipeHint(String text, IconData icon) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(seconds: 1),
+      tween: Tween(begin: 0, end: 10),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: value),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon == Icons.arrow_left) Icon(icon, color: AppColors.primaryColor),
+              const SizedBox(width: 6),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 6),
+              if (icon == Icons.arrow_right_alt) Icon(icon, color: AppColors.primaryColor),
+            ],
+          ),
+        );
+      },
+      onEnd: () {
+        // 🔄 Restart the animation by rebuilding
+      },
+    );
+  }
+  /// Dot indicator for page view
+  Widget _buildDotIndicator(int totalPages) {
     return Obx(() {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -840,12 +910,12 @@ class BookSession extends StatelessWidget {
           final isActive = index == controller.currentPage.value;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            height: 8,
-            width: isActive ? 140 : 100,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            height: isActive ? 10 : 8,
+            width: isActive ? 10 : 8,
             decoration: BoxDecoration(
-              color: isActive ? AppColors.primaryColor : Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(4),
+              shape: BoxShape.circle,
+              color: isActive ? AppColors.primaryColor : Colors.grey.shade400,
             ),
           );
         }),
@@ -853,13 +923,13 @@ class BookSession extends StatelessWidget {
     });
   }
   /// Bottom bar with total & book button
-  /// Bottom bar with total & book button
   Widget _bottomButton() {
     return Container(
-      height: Get.height * .15, // a little bigger to fit button + progress bar
+      alignment: Alignment.center,
+      height: Get.height * .09,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -871,20 +941,7 @@ class BookSession extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          /// Progress bar (only show when slots are fetched)
-          Obx(() {
-            final totalSlots = controller.slots.value?.data?.length ?? 0;
-            if (totalSlots == 0) {
-              return const SizedBox.shrink(); // don’t render anything
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: SizedBox(
-                height: 12, // fixed height avoids overflow
-                child: _buildProgressBar((totalSlots / 2).ceil()),
-              ),
-            );
-          }),
+          /// Dot indicator OUTSIDE button
 
           /// Book Now button
           Obx(

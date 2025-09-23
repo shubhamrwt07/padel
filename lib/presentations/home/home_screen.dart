@@ -345,15 +345,23 @@ class HomeScreen extends GetView<HomeController> {
         border: Border.all(color: AppColors.greyColor),
       ),
       child: ClipOval(
-        child: (club?.courtImage?[0].isNotEmpty ?? false)
+        child: (club?.courtImage != null &&
+            club!.courtImage!.isNotEmpty &&
+            club.courtImage![0].isNotEmpty)
             ? CachedNetworkImage(
-          imageUrl: club!.courtImage![0],
+          imageUrl: club.courtImage![0],
           fit: BoxFit.cover,
-          placeholder: (_, __) => const CircularProgressIndicator(strokeWidth: 2),
-          errorWidget: (_, __, ___) => Image.asset(Assets.imagesImgHomeLogo),
+          placeholder: (_, __) =>
+          const CircularProgressIndicator(strokeWidth: 2),
+          errorWidget: (_, __, ___) =>
+              Image.asset(Assets.imagesImgHomeLogo),
         )
-            : Image.asset(Assets.imagesImgHomeLogo),
-      ),
+            : Image.asset(
+          Assets.imagesImgHomeLogo,
+          fit: BoxFit.cover,
+        ),
+      )
+
     );
   }
 
