@@ -602,7 +602,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     if (filteredSlots.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               Icon(
@@ -645,9 +645,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 2.5,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 2.2,
       ),
       itemCount: filteredSlots.length,
       itemBuilder: (context, index) {

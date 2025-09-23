@@ -268,7 +268,7 @@ class OpenMatchesScreen extends StatelessWidget {
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
                 width: tileWidth,
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isSelected
@@ -276,7 +276,7 @@ class OpenMatchesScreen extends StatelessWidget {
                       : disabled
                           ? AppColors.greyColor.withOpacity(.3)
                           : AppColors.timeTileBackgroundColor,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: disabled ? AppColors.greyColor : AppColors.blackColor.withAlpha(10),
                   ),
@@ -320,90 +320,6 @@ class OpenMatchesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDynamicMatchCard(BuildContext context, {required String date, required String time, required String clubName, required String address, required String price}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.playerCardBackgroundColor,
-        border: Border.all(color: AppColors.greyColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$date | $time",
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              Text(
-                "The first player sets the match type",
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ],
-          ).paddingOnly(top: 15, bottom: 10, right: 15, left: 15),
-          const SizedBox(height: 12),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 0),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking),
-                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking),
-                      Container(width: 1, color: AppColors.greyColor),
-                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking),
-                      _buildPlayerSlot(image: Assets.imagesImgCustomerPicBooking),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
-          const SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                clubName,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: Get.width * .64,
-                    child: Text(
-                      address,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    width: Get.width * .16,
-                    child: Text(
-                      price,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: AppColors.primaryColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ).paddingOnly(right: Get.width * .04),
-                ],
-              ),
-            ],
-          ).paddingOnly(top: 5, bottom: 15, left: 15),
-        ],
-      ),
-    );
-  }
 
   /// ---------------- MATCH HEADER ----------------
   Widget _buildMatchHeader(BuildContext context) {
