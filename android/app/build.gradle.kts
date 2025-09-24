@@ -26,8 +26,6 @@ android {
 
     defaultConfig {
         applicationId = "com.matchacha.app"
-
-        // Fixed syntax for Kotlin DSL - use assignment instead of space
         minSdk = 21
         targetSdk = 34
 
@@ -41,10 +39,13 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            minifyEnabled = true
-            shrinkResources = true
+
+            // ✅ FIXED for Kotlin DSL
+            isMinifyEnabled = true
+            isShrinkResources = true
+
             proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
