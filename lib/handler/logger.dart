@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 
 enum LogLevel { error, info, debug, warning, trace }
 class CustomLogger {
-  static final Logger _logger = Logger(printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true,lineLength: 500,noBoxingByDefault: true,));
+  static final Logger _logger = Logger(printer: PrettyPrinter(methodCount: 0, colors: false, printEmojis: true,lineLength: 500,noBoxingByDefault: true,));
 
   static void logMessage({required dynamic msg, required LogLevel level, dynamic error, StackTrace? st}) {
     switch (level) {

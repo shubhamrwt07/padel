@@ -1,13 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../../../configs/app_colors.dart';
-import '../../../../configs/components/app_bar.dart';
-import '../../../../configs/components/primary_button.dart';
-import '../../../../configs/components/primary_text_feild.dart';
-import 'add_player_controller.dart';
-class ManualBookingOpenMatchesScreen extends StatelessWidget {
-  final ManualBookingOpenMatchesController controller = Get.put(ManualBookingOpenMatchesController());
-  ManualBookingOpenMatchesScreen({super.key});
+import '../../widgets/booking_exports.dart';
+class AddPlayerScreen extends StatelessWidget {
+  final AddPlayerController controller = Get.put(AddPlayerController());
+  AddPlayerScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -26,18 +20,21 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
                 textFieldWithLabel(
                   "First Name",
                   action: TextInputAction.next,
+                  keyboardType: TextInputType.text,
                   controller.fullNameController,
                   context,
                 ),
                 textFieldWithLabel(
                   "Email",
                   action: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
                   controller.emailController,
                   context,
                 ),
                 textFieldWithLabel(
                   "Phone Number",
                   action: TextInputAction.next,
+                  keyboardType: TextInputType.number,
                   controller.phoneController,
                   maxLength: 10,
                   context,
@@ -72,7 +69,7 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
                 ),).paddingOnly(top: Get.height*0.02,bottom: Get.height*0.01),
                 Obx(() => DropdownButtonFormField<String>(
                   value: controller.playerLevel.value,
-                  isDense: true,dropdownColor: AppColors.whiteColor, // reduces overall height
+                  isDense: true,dropdownColor: AppColors.whiteColor,
                   items: controller.playerLevels.map((level) {
                     return DropdownMenuItem(
                       value: level,
@@ -129,16 +126,17 @@ class ManualBookingOpenMatchesScreen extends StatelessWidget {
               ),
             ],
           ),
-          child:PrimaryButton(
-            height: 50,
-            onTap: () {
-              Get.back();
-              // controller.createUser();
-            },
-            text:"Confirm",
-            // child: controller.isLoading.value
-            //     ? AppLoader(size: 30, strokeWidth: 5)
-            //     : null,
+          child:Obx(
+            ()=> PrimaryButton(
+              height: 50,
+              onTap: () {
+                controller.createUser();
+              },
+              text:"Confirm",
+              child: controller.isLoading.value
+                  ? AppLoader(size: 30, strokeWidth: 5)
+                  : null,
+            ),
           )
         ).paddingOnly(bottom: Get.height * 0.03),
       ),

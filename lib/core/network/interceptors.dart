@@ -12,7 +12,7 @@ import 'dio_client.dart';
 
 class LoggerInterceptor extends Interceptor {
   Logger logger = Logger(
-    printer: PrettyPrinter(methodCount: 0, colors: false, printEmojis: true),
+    printer: PrettyPrinter(methodCount: 0, colors: false, printEmojis: true,),
   );
 
   final ConnectivityService _connectivityService = ConnectivityService();

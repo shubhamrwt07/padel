@@ -8,6 +8,10 @@ import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
 import 'package:padel_mobile/presentations/booking/americano/americano_binding.dart';
 import 'package:padel_mobile/presentations/booking/americano/americano_screen.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_binding.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_binding.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_screen.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/create_open_matches/create_open_matches_binding.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/create_open_matches/create_open_matches_screen.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
@@ -44,15 +48,12 @@ import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
-import '../../presentations/booking/open_matches/addmatch/add_player_binding.dart';
-import '../../presentations/booking/open_matches/addmatch/add_player_view.dart';
-import '../../presentations/booking/open_matches/open_match_view.dart';
+import '../../presentations/booking/open_matches/open_match_screen.dart';
 import '../../presentations/booking/open_matches/questions/create_question_binding.dart';
 import '../../presentations/booking/open_matches/questions/create_question_screen.dart';
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
 import '../../presentations/booking/open_matches/open_match_binding.dart';
-import '../../presentations/openmatches/open_match_view.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/registration/registration_americano_screen.dart';
 import '../../presentations/scoreview/score_view_screen .dart';
@@ -224,6 +225,8 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
+
+    ///Package------------------------------------------------------------------
     GetPage(
       name: RoutesName.packages,
       page: () => PackagesUi(),
@@ -231,10 +234,19 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
+
+    ///Open Matches-------------------------------------------------------------
     GetPage(
-      name: RoutesName.createMatch,
+      name: RoutesName.openMatch,
       page: () => OpenMatchesScreen(),
       binding: OpenMatchBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.allOpenMatch,
+      page: () => AllOpenMatchScreen(),
+      binding: AllOpenMatchBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
@@ -246,15 +258,9 @@ class Routes {
       transitionDuration: defaultDuration,
     ),
     GetPage(
-      name: RoutesName.openMatch,
-      page: () => OpenMatchView(),
-      binding: OpenMatchBinding(),
-      transition: Transition.rightToLeft,
-      transitionDuration: defaultDuration,
-    ),    GetPage(
       name: RoutesName.addPlayer,
-      page: () => ManualBookingOpenMatchesScreen(),
-      binding: ManualBookingOpenMatchesBinding(),
+      page: () => AddPlayerScreen(),
+      binding: AddPlayerBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ), GetPage(

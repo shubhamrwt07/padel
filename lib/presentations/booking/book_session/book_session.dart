@@ -274,7 +274,7 @@ class BookSession extends StatelessWidget {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
-                itemExtent: 56,
+                itemExtent: 55,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   final now = DateTime.now();
                   final today = DateTime(now.year, now.month, now.day);
@@ -293,14 +293,14 @@ class BookSession extends StatelessWidget {
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       child: SizedBox(
-                        height: 64,
+                        height: 60,
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
                             // Removed negative transform for better spacing
                             Container(
-                              height: 56,
-                              width: 50,
+                              height: Get.height * 0.07,
+                              width: Get.width * 0.13,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),

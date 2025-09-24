@@ -51,9 +51,9 @@ class RoutesName {
   static const String packages = '/packages';
 
 
-  static const String createMatch = '/createMatch';
-  static const String createQuestions = '/createQuestions';
   static const String openMatch = '/openMatch';
+  static const String createQuestions = '/createQuestions';
+  static const String allOpenMatch = '/allOpenMatch';
   static const String addPlayer = '/addPlayer';
   static const String createOpenMatch = '/createOpenMatch';
 
