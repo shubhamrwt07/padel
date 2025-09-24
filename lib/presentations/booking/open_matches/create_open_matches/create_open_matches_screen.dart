@@ -21,7 +21,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       bottomNavigationBar: PrimaryButton(
-          onTap: () => Get.toNamed(RoutesName.createQuestions),
+          onTap: () {
+            controller.onNext();
+          },
           text: "Next"
       ).paddingOnly(left: Get.width*0.05, right: Get.width*0.05, bottom: Get.height*0.05, top: 10),
       appBar: primaryAppBar(title: Text("Create match"), centerTitle: true, context: context),

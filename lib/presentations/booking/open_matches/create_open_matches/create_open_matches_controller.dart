@@ -5,7 +5,9 @@ import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 
+import '../../../../configs/routes/routes_name.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../../repositories/cart/cart_repository.dart';
@@ -43,7 +45,7 @@ class CreateOpenMatchesController extends GetxController {
 
   // Keep existing for backward compatibility
   RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
-
+  DetailsController detailsController=Get.put(DetailsController());
   @override
   void onInit() {
     super.onInit();
@@ -64,6 +66,20 @@ class CreateOpenMatchesController extends GetxController {
     super.onClose();
   }
 
+
+
+ void onNext(){
+   detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName??"");
+   detailsController.localMatchData.update("clubId", (v)=>slots.value!.data![0].registerClubId!.sId??"");
+   detailsController.localMatchData.update("matchDate", (v)=>selectedDate.value??"");
+   detailsController.localMatchData.update("matchTime", (v)=>"${selectedSlots.value.first.time}-${selectedSlots.value.last.time} "??"");
+   detailsController.localMatchData.update("price", (v)=>totalAmount.toString()??"");
+
+   detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
+   Get.toNamed(RoutesName.createQuestions);
+
+
+ }
   void _autoSelectTab() {
     final now = DateTime.now();
     final hour = now.hour;

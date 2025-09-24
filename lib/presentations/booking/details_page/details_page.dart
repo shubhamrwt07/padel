@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
 
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
@@ -21,6 +22,8 @@ class DetailsScreen extends GetView<DetailsController> {
 
   @override
   Widget build(BuildContext context) {
+    final data = controller.localMatchData;
+
     return BackgroundContainer(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -83,17 +86,12 @@ class DetailsScreen extends GetView<DetailsController> {
         ),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          child: Obx(() {
-            final data = controller.model.value.data;
+          child:
 
-            if (data == null) {
-              return SizedBox(
-                height: Get.height * 0.6,
-                child: const Center(child: CircularProgressIndicator()),
-              );
-            }
 
-            return Column(
+
+
+              Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // club + date card
@@ -111,7 +109,7 @@ class DetailsScreen extends GetView<DetailsController> {
                     children: [
                       ListTile(
                         title: Text(
-                          data.clubId?.clubName ?? "Unknown club",
+                          data['clubName'] ?? "Unknown club",
                           style: Get.textTheme.headlineLarge?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -122,7 +120,7 @@ class DetailsScreen extends GetView<DetailsController> {
                               ),
                         ),
                         subtitle: Text(
-                          "${data.matchDate ?? ""} | ${data.matchTime ?? ""}",
+                          "${data['matchDate'] ?? ""} | ${data['matchTime']?? ""}",
                           style: Get.textTheme.displaySmall?.copyWith(
                             fontSize: 11,
                             color: AppColors.darkGreyColor,
@@ -142,22 +140,19 @@ class DetailsScreen extends GetView<DetailsController> {
                         children: [
                           gameDetails(
                             "Gender",
-                            "All Players",
+                            "${data['gender']}",
                             AppColors.blackColor,
                             13,
                           ),
                           gameDetails(
                             "Game Level",
-                            data.skillLevel ?? "-",
+                            data['skillLevel'] ?? "-",
                             AppColors.blackColor,
                             13,
                           ),
                           gameDetails(
                             "Price",
-                            (data.slot?.isNotEmpty == true &&
-                                data.slot![0].slotTimes?.isNotEmpty == true)
-                                ? "${data.slot![0].slotTimes![0].amount}"
-                                : "0",
+                            data['price'],
                             AppColors.primaryColor,
                             16,
                           ),
@@ -192,11 +187,11 @@ class DetailsScreen extends GetView<DetailsController> {
                 ),
 
                 // game card
-                if (data.teamA != null && data.teamB != null)
-                  gameCard(
-                    teamA: data.teamA ?? [],
-                    teamB: data.teamB ?? [],
-                  ),
+                 gameCard(
+                      teamA: controller.teamA ?? [],
+                      teamB: controller.teamB??[],
+                    ),
+
 
                 SizedBox(height: Get.height * .015),
 
@@ -242,7 +237,7 @@ class DetailsScreen extends GetView<DetailsController> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  data.clubId?.clubName ?? "The Good Club",
+                                  data['clubName'] ?? "",
                                   style:
                                   Get.textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.w500,
@@ -257,7 +252,7 @@ class DetailsScreen extends GetView<DetailsController> {
                               ],
                             ).paddingOnly(bottom: 5),
                             Text(
-                              data.clubId?.address ??
+                              data['address'] ??
                                   "Unknown address, please update",
                               overflow: TextOverflow.ellipsis,
                               style: Get.textTheme.displaySmall?.copyWith(
@@ -286,8 +281,8 @@ class DetailsScreen extends GetView<DetailsController> {
 
                 information(),
               ],
-            ).paddingAll(16);
-          }),
+            ).paddingAll(16)
+
         ),
       ),
     );
@@ -343,6 +338,7 @@ class DetailsScreen extends GetView<DetailsController> {
   }
 
   Widget playerCard(String name, bool showSubtitle, String image) {
+    log("IMage ${image}");
     return GestureDetector(
       onTap: () {},
       child: Column(
@@ -360,17 +356,12 @@ class DetailsScreen extends GetView<DetailsController> {
             ),
             child: image.isEmpty
                 ? const Icon(
-              CupertinoIcons.add,
+              CupertinoIcons.profile_circled,
               size: 20,
               color: AppColors.primaryColor,
             )
                 : ClipOval(
-              child: SvgPicture.asset(
-                image,
-                fit: BoxFit.cover,
-                width: 50,
-                height: 50,
-              ),
+              child: Image.network(image,fit: BoxFit.cover,)
             ),
           ),
           const SizedBox(height: 5),
@@ -405,9 +396,9 @@ class DetailsScreen extends GetView<DetailsController> {
     );
   }
 
-  Widget gameCard({required List<TeamA> teamA, required List<TeamB> teamB}) {
+  Widget gameCard({required List  teamA, required List  teamB}) {
     return Container(
-      height: Get.height * .19,
+      height: Get.height * .20,
       width: Get.width,
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.blackColor.withAlpha(10)),
@@ -429,53 +420,130 @@ class DetailsScreen extends GetView<DetailsController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  height: 100,
-                  width: 160,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: teamA.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Row(
-                        children: [
-                          playerCard(
-                            teamA[index].userId?.name ?? "Unknown",
-                            false,
-                            "assets/images/ic_google.svg",
-                          ),
-                        ],
-                      );
-                    },
+                // Team A Players
+                Expanded(
+                  child: SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 2, // Maximum 2 players per team
+                      itemBuilder: (BuildContext context, int index) {
+                        // Check if player exists at this index
+                        bool hasPlayer = index < teamA.length &&
+                            teamA[index].isNotEmpty &&
+                            teamA[index]['name'] != null &&
+                            teamA[index]['name'].toString().isNotEmpty;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: hasPlayer
+                              ? playerCard(
+                            teamA[index]['name'] ?? "Unknown",
+                            true, // isPlayer = true
+                            teamA[index]['image']??"" ,
+
+                          )
+                              :GestureDetector(
+                            onTap: (){
+                              controller.showDailogue(context,index: index,team: "teamA");
+                            },
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white
+                                      ),
+                                               height: 50,
+                                                         width: 50,
+                                                         child: Icon(CupertinoIcons.add),
+                                                              ),
+                                    Text("Available")
+                                  ],
+                                ),
+                              )
+                        );
+                      },
+                    ),
                   ),
                 ),
+
+                // Divider
                 Container(
                   height: Get.height * .1,
                   width: 1,
                   color: AppColors.blackColor.withAlpha(30),
                 ),
-                playerCard("Add Me", false, "assets/images/ic_google.svg"),
-                playerCard("Add Me", false, "assets/images/ic_google.svg"),
+
+                // Team B Players
+                Expanded(
+                  child: SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 2, // Maximum 2 players per team
+                      itemBuilder: (BuildContext context, int index) {
+                        // Check if player exists at this index
+                        bool hasPlayer = index < teamB.length &&
+                            teamB[index].isNotEmpty &&
+                            teamB[index]['name'] != null &&
+                            teamB[index]['name'].toString().isNotEmpty;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: hasPlayer
+                              ? playerCard(
+                            teamB[index]['name'] ?? "Unknown",
+                            true, // isPlayer = true
+                            teamB[index]['image'] ?? "assets/images/default_avatar.svg",
+
+                          )
+                              : GestureDetector(
+                            onTap: (){
+                              controller.showDailogue(context,index: index,team: "teamB");
+                            },
+                                child: Column(
+                                                            children: [
+                                Container(
+
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white
+                                  ),
+                                  child: Icon(CupertinoIcons.add),
+                                ),
+                                Text("Available")
+                                                            ],
+                                                          ),
+                              )
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "A",
+                  "Team A",
                   style: Get.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ) ??
                       const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  "B",
+                  "Team B",
                   style: Get.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ) ??
                       const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
-            ).paddingOnly(top: 10),
+            ),
           ],
         ).paddingOnly(left: 15, right: 15, top: 10, bottom: 5),
       ),
@@ -498,7 +566,7 @@ class DetailsScreen extends GetView<DetailsController> {
           title: Text("Type of Court ( 2 court )",
               style: Get.textTheme.bodyLarge),
           subtitle:
-          Text("Outdoor, crystal, Double", style: Get.textTheme.headlineLarge),
+          Text("${controller.localMatchData['courtType']}", style: Get.textTheme.headlineLarge),
         ),
         ListTile(
           leading: Icon(Icons.calendar_month_outlined,
