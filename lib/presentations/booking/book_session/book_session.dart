@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
@@ -17,21 +18,21 @@ class BookSession extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10), // Add top spacing
+              const SizedBox(height: 5), // Add top spacing
               _buildDatePicker(),
-              _buildTimeOfDayTabs(),  // <-- Added here
-              // Conditional spacing based on whether multi-date summary is showing
-              Obx(() {
+              Transform.translate(
+                  offset: Offset(0, -Get.height * 0.03),
+                  child: _buildTimeOfDayTabs()),  // <-- Added here
+              Transform.translate(
+                  offset: Offset(0, -Get.height * 0.02),
+                  child: _buildMultiDateSummary()),
+              Obx((){
                 final totalSelections = controller.getTotalSelectionsCount();
-                return SizedBox(height: totalSelections > 0 ? 16 : 8);
-              }),
-              _buildMultiDateSummary(),
-              // Conditional spacing after multi-date summary
-              Obx(() {
-                final totalSelections = controller.getTotalSelectionsCount();
-                return SizedBox(height: totalSelections > 0 ? 12 : 4);
-              }),
-              _buildAllCourtsWithSlots(),
+                return Transform.translate(
+                    offset: Offset(0,totalSelections == 0? -Get.height * 0.03:-Get.height*0.02),
+                    child: _buildAllCourtsWithSlots());
+              })
+
             ],
           ),
         ),
@@ -47,12 +48,12 @@ class BookSession extends StatelessWidget {
       if (totalSelections == 0) return const SizedBox.shrink();
 
       return Container(
-        margin: const EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: 0),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,84 +173,56 @@ class BookSession extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-
             /// Toggle wrapped with Obx
-            Obx(() => InkWell(
-              onTap: () async {
-                controller.showUnavailableSlots.value =
-                !controller.showUnavailableSlots.value;
+            Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    controller.showUnavailableSlots.value
+                        ? "Show Available Slots"
+                        : "Show Unavailable Slots",
+                    style: Get.textTheme.labelSmall
+                        ?.copyWith(color: AppColors.darkGrey),
+                  ),
+                  const SizedBox(width: 8),
+                  Transform.scale(
+                    scale: 0.7, // 👈 shrink switch
+                    child: CupertinoSwitch(
+                      value: controller.showUnavailableSlots.value,
+                      activeTrackColor: AppColors.secondaryColor,
+                      onChanged: (val) async {
+                        controller.showUnavailableSlots.value = val;
 
-                controller.isLoadingCourts.value = true;
-                await controller.getAvailableCourtsById(
-                  controller.argument.id!,
-                  showUnavailable: controller.showUnavailableSlots.value,
-                );
-                controller.slots.refresh();
-                controller.isLoadingCourts.value = false;
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.showUnavailableSlots.value
-                          ? "Show Available"
-                          : "Show Unavailable",
-                      style: Get.textTheme.labelMedium!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
-                      ),
+                        controller.isLoadingCourts.value = true;
+                        await controller.getAvailableCourtsById(
+                          controller.argument.id!,
+                          showUnavailable: controller.showUnavailableSlots.value,
+                        );
+                        controller.slots.refresh();
+                        controller.isLoadingCourts.value = false;
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 35,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: controller.showUnavailableSlots.value
-                            ? AppColors.secondaryColor
-                            : AppColors.blackColor.withOpacity(0.3),
-                      ),
-                      child: AnimatedAlign(
-                        duration: const Duration(milliseconds: 200),
-                        alignment: controller.showUnavailableSlots.value
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          margin: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            )),
+            ))
+
           ],
         ),
-
 
         /// Date picker wrapped separately with Obx
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -Get.height*0.0),
+              offset: Offset(0, -19),
               child: Container(
                 width: 30,
                 height: Get.height*0.07,
-                // color: Colors.grey,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10),
                     color: AppColors.textFieldColor.withAlpha(100),
                     border: Border.all(color: AppColors.blackColor.withAlpha(10))
                 ),
@@ -273,110 +246,108 @@ class BookSession extends StatelessWidget {
                 selectionMode: SelectionMode.alwaysFirst(),
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
+
+                /// 👇 Wrap focusedDate with Obx
                 focusedDate: controller.selectedDate.value,
+
                 itemExtent: 55,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final currentDate = DateTime(date.year, date.month, date.day);
-                  if (currentDate.isBefore(today)) {
-                    return const SizedBox.shrink();
-                  }
-                  final dayName = DateFormat('E').format(date);
-                  final monthName = DateFormat('MMM').format(date);
-                  final dateString =
-                      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                  final dateSelections =
-                      controller.getSelectionsByDate()[dateString] ?? [];
-                  return GestureDetector(
-                    onTap: onTap,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      child: SizedBox(
-                        height: 60,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Removed negative transform for better spacing
-                            Container(
-                              height: Get.height * 0.07,
-                              width: Get.width * 0.13,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: isSelected
-                                    ? Colors.black
-                                    : dateSelections.isNotEmpty
-                                    ? AppColors.primaryColor.withOpacity(0.1)
-                                    : AppColors.playerCardBackgroundColor,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Colors.transparent
-                                      : dateSelections.isNotEmpty
-                                      ? AppColors.primaryColor
-                                      : AppColors.blackColor.withAlpha(20),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${date.day}",
-                                    style: Get.textTheme.titleMedium!.copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : AppColors.textColor,
-                                    ),
-                                  ),
+                  /// 👇 Wrap this with Obx so each item listens to Rx values
+                  return Obx(() {
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    final currentDate = DateTime(date.year, date.month, date.day);
+                    if (currentDate.isBefore(today)) {
+                      return const SizedBox.shrink();
+                    }
 
-                                  Text(
-                                    dayName,
-                                    style: Get.textTheme.bodySmall!.copyWith(
-                                      fontSize: 10,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ],
+                    final dayName = DateFormat('E').format(date);
+                    final dateString =
+                        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                    final dateSelections =
+                        controller.getSelectionsByDate()[dateString] ?? [];
+
+                    return GestureDetector(
+                      onTap: onTap,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            height: Get.height * 0.07,
+                            width: Get.width * 0.13,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: isSelected
+                                  ? Colors.black
+                                  : dateSelections.isNotEmpty
+                                  ? AppColors.primaryColor.withValues(alpha: 0.1)
+                                  : AppColors.playerCardBackgroundColor,
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.transparent
+                                    : dateSelections.isNotEmpty
+                                    ? AppColors.primaryColor
+                                    : AppColors.blackColor.withAlpha(10),
                               ),
                             ),
-                            if (dateSelections.isNotEmpty)
-                              Positioned(
-                                top: -2,
-                                right: -6,
-                                child: Container(
-                                  height: 16,
-                                  width: 16,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "${date.day}",
+                                  style: Get.textTheme.titleMedium!.copyWith(
+                                    fontSize: 18,
                                     color: isSelected
-                                        ? AppColors.secondaryColor
-                                        : AppColors.primaryColor,
+                                        ? Colors.white
+                                        : dateSelections.isNotEmpty
+                                        ? AppColors.primaryColor
+                                        : AppColors.textColor,
                                   ),
-                                  child: Text(
-                                    "${dateSelections.length}",
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                ),
+                                Text(
+                                  dayName,
+                                  style: Get.textTheme.bodySmall!.copyWith(
+                                    fontSize: 11,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : dateSelections.isNotEmpty
+                                        ? AppColors.primaryColor
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (dateSelections.isNotEmpty)
+                            Positioned(
+                              top: 1,
+                              right: -3,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                child: Text(
+                                  "${dateSelections.length}",
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
-                    ),
-                  );
+                    );
+                  });
                 },
+
                 onDateChange: (date) async {
                   controller.selectedDate.value = date;
                   controller.isLoadingCourts.value = true;
@@ -388,7 +359,8 @@ class BookSession extends StatelessWidget {
                   controller.isLoadingCourts.value = false;
                 },
               ),
-            ),
+            )
+
           ],
         )),
       ],
@@ -467,11 +439,12 @@ class BookSession extends StatelessWidget {
       );
     });
   }
+
   /// Build all courts with their slots
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
       if (controller.isLoadingCourts.value) {
-        return _buildLoadingShimmer();
+        return CourtSlotsShimmer();
       }
 
       final slotsData = controller.slots.value;
@@ -487,7 +460,7 @@ class BookSession extends StatelessWidget {
         children: [
           // PageView for courts
           SizedBox(
-            height: Get.height * 0.47,
+            height: Get.height * 0.43,
             child: PageView.builder(
               controller: controller.pageController,
               onPageChanged: (index) {
@@ -505,10 +478,7 @@ class BookSession extends StatelessWidget {
               },
             ),
           ),
-
-          const SizedBox(height: 6),
-
-          /// 👇 Swipe hint with arrow animation
+          /// Swipe hint with arrow animation
           Obx(() {
             final currentPage = controller.currentPage.value;
 
@@ -534,6 +504,7 @@ class BookSession extends StatelessWidget {
       );
     });
   }
+  /// Build all courts with their slots
   /// Build individual court section with its slots
   Widget _buildCourtSection(dynamic courtData) {
     final courtName = courtData.courtName ?? 'Unknown Court';
@@ -548,7 +519,7 @@ class BookSession extends StatelessWidget {
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16), // Reduced margin for better spacing
+      margin: const EdgeInsets.only(bottom: 10), // Reduced margin for better spacing
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -780,92 +751,7 @@ class BookSession extends StatelessWidget {
     );
   }
   /// Loading shimmer effect
-  Widget _buildLoadingShimmer() {
-    final totalPages = 2;
-    return SizedBox(
-      height: Get.height * 0.47 + 80,
-      child: PageView.builder(
-        itemCount: totalPages,
-        itemBuilder: (context, pageIndex) {
-          return Column(
-            children: List.generate(2, (courtIndex) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Court title bar
-                      Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
 
-                      // Court subtitle
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                        height: 14,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Slots grid
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 2.2,
-                          ),
-                          itemCount: 8,
-                          itemBuilder: (_, __) => Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          );
-        },
-      ),
-    );
-  }
   Widget _buildSwipeHint(String text, IconData icon) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(seconds: 1),
@@ -999,6 +885,83 @@ class BookSession extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+class CourtSlotsShimmer extends StatelessWidget {
+  const CourtSlotsShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Column(
+        children: List.generate(2, (courtIndex) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.zero,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Court Header Placeholder
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    // color: Colors.grey.shade200,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 16,
+                        width: 100,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        width: 50,
+                        height: 12,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// Slots Grid Placeholder
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: GridView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 8, // fake 8 slots
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 2.8,
+                    ),
+                    itemBuilder: (_, __) => Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
