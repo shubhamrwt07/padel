@@ -19,6 +19,7 @@ class BookSessionController extends GetxController {
   var noonCount = 0.obs;
   var nightCount = 0.obs;
 
+
   // Cache base slot lists (after unavailable/available toggle applied)
   final Map<String, List<Slots>> _originalSlotsCache = {};
   void _autoSelectTab() {
@@ -157,8 +158,7 @@ class BookSessionController extends GetxController {
 
     isLoadingCourts.value = true;
 
-    // Clear current date selections only, keep other dates
-    _clearCurrentDateSelections();
+    // Do not clear current date selections here; we want selections to persist
 
     try {
       final date = selectedDate.value ?? DateTime.now();
@@ -172,15 +172,13 @@ class BookSessionController extends GetxController {
         registerClubId: clubId,
       );
 
-      if (result != null) {
-        // Apply filtering based on toggle first
-        for (var court in result.data ?? []) {
-          final base = court.slots ?? [];
-          if (showUnavailable) {
-            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
-          } else {
-            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
-          }
+      // Apply filtering based on toggle first
+      for (var court in result.data ?? []) {
+        final base = court.slots ?? [];
+        if (showUnavailable) {
+          court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+        } else {
+          court.slots = base.where((s) => _isAvailableSlot(s)).toList();
         }
       }
 
@@ -269,17 +267,7 @@ class BookSessionController extends GetxController {
     log("Selected ${multiDateSelections.length} slots across multiple dates, Total: ₹${totalAmount.value}");
   }
 
-  void _clearCurrentDateSelections() {
-    final currentDate = selectedDate.value ?? DateTime.now();
-    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
-
-    // Remove selections for current date only
-    multiDateSelections.removeWhere((key, value) => key.startsWith(dateString));
-
-    // Clear legacy collections (they represent current date only)
-    selectedSlots.clear();
-    selectedSlotsWithCourtInfo.clear();
-  }
+  
 
   void _recalculateTotalAmount() {
     int total = 0;
@@ -402,7 +390,7 @@ class BookSessionController extends GetxController {
     return false;
   }
 
-  // Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
+// Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
   bool _isUnavailableSlot(Slots slot) {
     final availability = slot.availabilityStatus?.toLowerCase();
     final isBlocked = availability == "maintenance" ||
@@ -412,7 +400,6 @@ class BookSessionController extends GetxController {
     final isPast = isPastAndUnavailable(slot);
     return isPast || isBlocked || isBooked;
   }
-
   // Helper: available when not unavailable and status is available/empty
   bool _isAvailableSlot(Slots slot) {
     final status = slot.status?.toLowerCase() ?? '';
@@ -437,28 +424,14 @@ class BookSessionController extends GetxController {
         return;
       }
 
-      // Group by date and club
-      final Map<String, Map<String, dynamic>> groupedByDate = {};
+      final clubId = argument.id!;
+      final List<Map<String, dynamic>> allSlots = [];
 
       multiDateSelections.forEach((key, selection) {
         final slot = selection['slot'] as Slots;
         final courtId = selection['courtId'] as String;
         final courtName = selection['courtName'] as String;
         final dateString = selection['date'] as String;
-        final dateTime = selection['dateTime'] as DateTime;
-        final clubId = argument.id!;
-
-        // Create date-specific key
-        final dateKey = '${dateString}_$clubId';
-
-        if (!groupedByDate.containsKey(dateKey)) {
-          groupedByDate[dateKey] = {
-            "slot": [],
-            "register_club_id": clubId,
-            "date": dateString,
-            "dateTime": dateTime,
-          };
-        }
 
         final slotEntry = {
           "businessHours": slot.businessHours
@@ -485,16 +458,14 @@ class BookSessionController extends GetxController {
           ]
         };
 
-        (groupedByDate[dateKey]!["slot"] as List).add(slotEntry);
+        allSlots.add(slotEntry);
       });
 
-      // Convert to final payload format (grouped by date)
-      final List<Map<String, dynamic>> cartPayload = groupedByDate.values
-          .map((dateGroup) => {
-        "slot": dateGroup["slot"],
-        "register_club_id": dateGroup["register_club_id"],
-      })
-          .toList();
+      // Create single payload object with all slots
+      final List<Map<String, dynamic>> cartPayload = [{
+        "slot": allSlots,
+        "register_club_id": clubId,
+      }];
 
       log("Multi-Date Cart Payload: $cartPayload");
 
