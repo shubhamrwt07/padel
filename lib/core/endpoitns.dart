@@ -9,10 +9,10 @@ class AppEndpoints {
   static const String sendOTP = "${BASE_URL}sentOtp";
   static const String verifyOTP = "${BASE_URL}verifyOtp";
   static const String resetPassword = "${BASE_URL}forgotPassword";
-  static const String getClub =
-      "${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
+  static const String getClub ="${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getAllActiveCourtsForSlotWise = "${BASE_URL}court/saveCourt/getAllActiveCourtsForSlotWise?";
   static const String getLocations = "${BASE_URL}court/state/getStates";
+  // Cart Urls -----------------------------------------------------------------
 
 
   ///Cart Urls------------------------------------------------------------------
@@ -29,8 +29,9 @@ class AppEndpoints {
 
   ///Open Matches---------------------------------------------------------------
   static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
+  static const String getAllMatches = "${BASE_URL}court/openmatch/getAllOpenMatches";
+  static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68d2300a723257df65e574ab";
   static const String getOpenMatches = "${BASE_URL}court/openmatch/getOpenMatches";
-  static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68be7b412a1d4c80ee2cc02f";
   static const String createUserForOpenMatch = "${BASE_URL}customerSignupWithOutPassword";
   static const String addUserForOpenMatch = "${BASE_URL}court/openmatch/addPlayerToMatch";
 }

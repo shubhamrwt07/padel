@@ -44,35 +44,31 @@ class AddPlayerScreen extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: AppColors.labelBlackColor,
                 ),).paddingOnly(top: Get.height*0.02),
-                Obx(() => RadioGroup<String>(
-                  groupValue: controller.gender.value,
-                  onChanged: (val) => controller.gender.value = val!,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ["Female", "Male", "Other"].map((g) {
-                      return Expanded(
-                        child: RadioListTile<String>(
-                          value: g, // each radio’s own value
-                          title: Text(
-                            g,
-                            style: Get.textTheme.headlineSmall,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          // ⛔️ don’t use groupValue or onChanged here, RadioGroup handles it
+                Obx(() => Row(
+                  children: ["Female", "Male", "Other"].map((g) {
+                    return Expanded(
+                      child: RadioListTile<String>(
+                        title: Text(
+                          g,
+                          style: Get.textTheme.headlineSmall,
+                          overflow: TextOverflow.ellipsis, // Prevent overflow to new line
+                          maxLines: 1, // Force single line
                         ),
-                      );
-                    }).toList(),
-                  ),
+                        dense: true, // Compact layout
+                        value: g,
+                        groupValue: controller.gender.value,
+                        onChanged: (value) => controller.gender.value = value!,
+                        contentPadding: EdgeInsets.zero, // Optional: tighter spacing
+                      ),
+                    );
+                  }).toList(),
                 )),
                 Text("Player Level",style: Get.textTheme.headlineSmall!.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.labelBlackColor,
                 ),).paddingOnly(top: Get.height*0.02,bottom: Get.height*0.01),
                 Obx(() => DropdownButtonFormField<String>(
-                  initialValue: controller.playerLevel.value,
+                  value: controller.playerLevel.value,
                   isDense: true,dropdownColor: AppColors.whiteColor,
                   items: controller.playerLevels.map((level) {
                     return DropdownMenuItem(

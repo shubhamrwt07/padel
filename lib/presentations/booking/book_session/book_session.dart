@@ -274,36 +274,33 @@ class BookSession extends StatelessWidget {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
-                itemExtent: 56,
+                itemExtent: 55,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   final now = DateTime.now();
                   final today = DateTime(now.year, now.month, now.day);
                   final currentDate = DateTime(date.year, date.month, date.day);
-
                   if (currentDate.isBefore(today)) {
                     return const SizedBox.shrink();
                   }
-
                   final dayName = DateFormat('E').format(date);
                   final monthName = DateFormat('MMM').format(date);
                   final dateString =
                       "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
                   final dateSelections =
                       controller.getSelectionsByDate()[dateString] ?? [];
-
                   return GestureDetector(
                     onTap: onTap,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       child: SizedBox(
-                        height: 64,
+                        height: 60,
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
                             // Removed negative transform for better spacing
                             Container(
-                              height: 56,
-                              width: 50,
+                              height: Get.height * 0.07,
+                              width: Get.width * 0.13,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
