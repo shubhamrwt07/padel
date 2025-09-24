@@ -110,9 +110,9 @@ class AddPlayerController extends GetxController{
 
   @override
   void onInit() {
-    final args = Get.arguments as Map;
-    matchId.value = args["matchId"];
-    selectedTeam.value = args["team"];
+    final args = Get.arguments ;
+    matchId.value = args["matchId"]??"";
+    selectedTeam.value = args["team"]??"";
     if (args["needAllOpenMatches"] == true) {
       allOpenMatchController = Get.isRegistered<AllOpenMatchController>()
           ? Get.find<AllOpenMatchController>()

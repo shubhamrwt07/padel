@@ -71,7 +71,7 @@ class OpenMatchRepository {
     }
   }
 
-  Future<OpenMatchDetailsModel> getParticularMatch() async {
+  Future<OpenMatchDetailsModel> getParticularMatch(String clubId) async {
     log("mes 2");
     try {
       log(AppEndpoints.getParticularMatch);
