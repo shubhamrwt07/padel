@@ -18,7 +18,11 @@ import '../open_matches/addPlayer/add_player_controller.dart';
 class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
 
-  RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{
+    "name": "",
+    "image": "https://rowthtech.s3.amazonaws.com/padel/Fri%20Aug%2022%202025%2005%3A19%3A30%20GMT%2B0000%20%28Coordinated%20Universal%20Time%29image_picker_E100D48B-B5D6-41D2-AEFA-C47D7367C28C-8325-000002DE113C3B90.png",
+    "userId": "rewrwwerw",
+  }].obs;
 
   RxList<Map<String, dynamic>> teamB = <Map<String, dynamic>>[].obs;
 
