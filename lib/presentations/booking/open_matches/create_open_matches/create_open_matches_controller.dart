@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../../../data/request_models/home_models/get_club_name_model.dart';
@@ -11,10 +12,22 @@ import '../../../../repositories/cart/cart_repository.dart';
 import '../../../../repositories/home_repository/home_repository.dart';
 import '../../../cart/cart_controller.dart';
 import '../../../cart/cart_screen.dart';
+
 class CreateOpenMatchesController extends GetxController {
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
+  RxInt currentPage = 0.obs;
+  var selectedTimeOfDay = 0.obs; // 0 = Morning, 1 = Noon, 2 = Night
+
+  var morningCount = 0.obs;
+  var noonCount = 0.obs;
+  var nightCount = 0.obs;
+
+  // Cache base slot lists (after unavailable/available toggle applied)
+  final Map<String, List<Slots>> _originalSlotsCache = {};
+
+  PageController pageController = PageController();
 
   // OLD: Single date selections
   RxList<Slots> selectedSlots = <Slots>[].obs;
@@ -47,13 +60,107 @@ class CreateOpenMatchesController extends GetxController {
     selectedSlotsWithCourtInfo.clear();
     multiDateSelections.clear();
     totalAmount.value = 0;
+    pageController.dispose();
     super.onClose();
   }
 
-  Future<void> getAvailableCourtsById(String clubId) async {
+  void _autoSelectTab() {
+    final now = DateTime.now();
+    final hour = now.hour;
+
+    if (hour >= 6 && hour <= 11 && morningCount.value > 0) {
+      selectedTimeOfDay.value = 0; // Morning
+    } else if (hour >= 12 && hour <= 17 && noonCount.value > 0) {
+      selectedTimeOfDay.value = 1; // Noon
+    } else if (hour >= 18 && hour <= 23 && nightCount.value > 0) {
+      selectedTimeOfDay.value = 2; // Night
+    } else {
+      // Fallback: pick first tab that has slots
+      if (morningCount.value > 0) {
+        selectedTimeOfDay.value = 0;
+      } else if (noonCount.value > 0) {
+        selectedTimeOfDay.value = 1;
+      } else if (nightCount.value > 0) {
+        selectedTimeOfDay.value = 2;
+      } else {
+        selectedTimeOfDay.value = 0; // default
+      }
+    }
+
+    filterSlotsByTimeOfDay();
+  }
+
+  void filterSlotsByTimeOfDay() {
+    final tab = selectedTimeOfDay.value;
+    final courts = slots.value?.data ?? [];
+    for (final court in courts) {
+      final courtId = court.sId ?? '';
+      final baseList = _originalSlotsCache[courtId] ?? List<Slots>.from(court.slots ?? []);
+      court.slots = baseList.where((s) {
+        final hour = _parseHour24(s.time);
+        if (hour == null) return false;
+        if (tab == 0) return hour >= 6 && hour <= 11; // Morning 6-11 am
+        if (tab == 1) return hour >= 12 && hour <= 17; // Noon 12-5 pm
+        return hour >= 18 && hour <= 23; // Night 6-11 pm
+      }).toList();
+    }
+    _recalculateTimeOfDayCounts();
+    slots.refresh();
+  }
+
+  void _recalculateTimeOfDayCounts() {
+    morningCount.value = 0;
+    noonCount.value = 0;
+    nightCount.value = 0;
+    _originalSlotsCache.forEach((_, list) {
+      for (final s in list) {
+        final hour = _parseHour24(s.time);
+        if (hour == null) continue;
+        if (hour >= 6 && hour <= 11) {
+          morningCount.value++;
+        } else if (hour >= 12 && hour <= 17) {
+          noonCount.value++;
+        } else if (hour >= 18 && hour <= 23) {
+          nightCount.value++;
+        }
+      }
+    });
+  }
+
+  int? _parseHour24(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return null;
+    final t = timeStr.trim().toLowerCase();
+    try {
+      // Try h:mm a first
+      final dt = DateFormat('h:mm a').parseStrict(t);
+      return dt.hour;
+    } catch (_) {
+      try {
+        final dt = DateFormat('h a').parseStrict(t);
+        return dt.hour;
+      } catch (_) {
+        // Fallback manual parse: "10:30 am" or "10 am"
+        final parts = t.split(' ');
+        if (parts.length == 2) {
+          final isPm = parts[1] == 'pm';
+          final hm = parts[0].split(':');
+          final h = int.tryParse(hm[0]);
+          if (h == null) return null;
+          var hour = h % 12;
+          if (isPm) hour += 12;
+          return hour;
+        }
+        return null;
+      }
+    }
+  }
+
+  Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
     log("=== DEBUG API CALL ===");
     log("Fetching courts for club: $clubId");
     log("Selected date: ${selectedDate.value}");
+    log("Show unavailable: $showUnavailable");
+
     isLoadingCourts.value = true;
 
     // Clear current date selections only, keep other dates
@@ -71,7 +178,30 @@ class CreateOpenMatchesController extends GetxController {
         registerClubId: clubId,
       );
 
+      if (result != null) {
+        // Apply filtering based on toggle first
+        for (var court in result.data ?? []) {
+          final base = court.slots ?? [];
+          if (showUnavailable) {
+            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+          } else {
+            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
+          }
+        }
+      }
+
       slots.value = result;
+      // Build base cache and counts, then apply current time-of-day filter
+      _originalSlotsCache.clear();
+      final courts = slots.value?.data ?? [];
+      for (final court in courts) {
+        _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
+      }
+      _recalculateTimeOfDayCounts();
+
+      filterSlotsByTimeOfDay();
+      _autoSelectTab();
+
       slots.refresh();
 
     } catch (e, stackTrace) {
@@ -207,48 +337,91 @@ class CreateOpenMatchesController extends GetxController {
   }
 
   bool isPastAndUnavailable(Slots slot) {
-    if (slot.status == "booked") return true;
-    if (slot.status != "available") return true;
+    // Treat booked or explicitly unavailable statuses as unavailable
+    final status = slot.status?.toLowerCase() ?? '';
+    if (status == 'booked') return true;
+    if (status.isNotEmpty && status != 'available') return true;
+
+    // If time is missing or malformed, don't mark as past (avoid crashes)
+    final rawTime = slot.time;
+    if (rawTime == null || rawTime.trim().isEmpty) {
+      return false;
+    }
 
     final now = DateTime.now();
     final selected = selectedDate.value ?? now;
 
-    final timeString = slot.time!.toLowerCase().trim();
-    final parts = timeString.split(" ");
-    final timePart = parts[0];
-    final amPm = parts.length > 1 ? parts[1] : "";
+    try {
+      final timeString = rawTime.toLowerCase().trim();
 
-    int hour = 0;
-    int minute = 0;
+      // Try common formats first
+      DateTime? parsed;
+      for (final pattern in const ['h:mm a', 'h a', 'HH:mm', 'H:mm', 'HH']) {
+        try {
+          parsed = DateFormat(pattern).parseStrict(timeString);
+          break;
+        } catch (_) {}
+      }
 
-    if (timePart.contains(":")) {
-      final timePieces = timePart.split(":");
-      hour = int.parse(timePieces[0]);
-      minute = int.parse(timePieces[1]);
-    } else {
-      hour = int.parse(timePart);
-    }
+      int hour;
+      int minute;
+      if (parsed != null) {
+        hour = parsed.hour;
+        minute = parsed.minute;
+      } else {
+        // Fallback manual parse: supports "10", "10:30", with optional am/pm
+        String t = timeString;
+        String meridiem = '';
+        final parts = t.split(' ');
+        if (parts.length == 2) {
+          t = parts[0];
+          meridiem = parts[1];
+        }
+        final timePieces = t.split(':');
+        hour = int.tryParse(timePieces[0]) ?? 0;
+        minute = timePieces.length > 1 ? int.tryParse(timePieces[1]) ?? 0 : 0;
+        if (meridiem == 'pm' && hour != 12) hour += 12;
+        if (meridiem == 'am' && hour == 12) hour = 0;
+      }
 
-    if (amPm == "pm" && hour != 12) hour += 12;
-    if (amPm == "am" && hour == 12) hour = 0;
+      final slotDateTime = DateTime(
+        selected.year,
+        selected.month,
+        selected.day,
+        hour,
+        minute,
+      );
 
-    final slotDateTime = DateTime(
-      selected.year,
-      selected.month,
-      selected.day,
-      hour,
-      minute,
-    );
+      final isToday = selected.year == now.year &&
+          selected.month == now.month &&
+          selected.day == now.day;
 
-    final isToday = selected.year == now.year &&
-        selected.month == now.month &&
-        selected.day == now.day;
-
-    if (isToday && now.isAfter(slotDateTime)) {
-      return true;
+      if (isToday && now.isAfter(slotDateTime)) {
+        return true;
+      }
+    } catch (_) {
+      // On any parsing error, consider it not past to be safe
+      return false;
     }
 
     return false;
+  }
+
+  // Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
+  bool _isUnavailableSlot(Slots slot) {
+    final availability = slot.availabilityStatus?.toLowerCase();
+    final isBlocked = availability == "maintenance" ||
+        availability == "weather conditions" ||
+        availability == "staff unavailability";
+    final isBooked = (slot.status?.toLowerCase() == 'booked');
+    final isPast = isPastAndUnavailable(slot);
+    return isPast || isBlocked || isBooked;
+  }
+
+  // Helper: available when not unavailable and status is available/empty
+  bool _isAvailableSlot(Slots slot) {
+    final status = slot.status?.toLowerCase() ?? '';
+    return !_isUnavailableSlot(slot) && (status == 'available' || status.isEmpty);
   }
 
   var cartLoader = false.obs;

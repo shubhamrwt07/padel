@@ -11,7 +11,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../configs/components/custom_button.dart';
 import 'create_open_matches_controller.dart';
 
-
 class CreateOpenMatchesScreen extends StatelessWidget {
   CreateOpenMatchesScreen({super.key});
 
@@ -21,28 +20,36 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
-      bottomNavigationBar: PrimaryButton(onTap: ()=>Get.toNamed(RoutesName.createQuestions), text: "Next").paddingOnly(left: Get.width*0.05,right: Get.width*0.05,bottom: Get.height*0.05,top: 10),
-      appBar: primaryAppBar(title: Text("Create match"),centerTitle: true, context: context),
+      bottomNavigationBar: PrimaryButton(
+          onTap: () => Get.toNamed(RoutesName.createQuestions),
+          text: "Next"
+      ).paddingOnly(left: Get.width*0.05, right: Get.width*0.05, bottom: Get.height*0.05, top: 10),
+      appBar: primaryAppBar(title: Text("Create match"), centerTitle: true, context: context),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 10),
               _buildDatePicker(),
+              _buildTimeOfDayTabs(),
 
-              // NEW: Multi-date selections summary
+              // Conditional spacing based on whether multi-date summary is showing
+              Obx(() {
+                final totalSelections = controller.getTotalSelectionsCount();
+                return SizedBox(height: totalSelections > 0 ? 16 : 8);
+              }),
+
               _buildMultiDateSummary(),
 
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.03),
-                child: _buildSlotHeader(context),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.03),
-                child: _buildAllCourtsWithSlots(),
-              ),
+              // Conditional spacing after multi-date summary
+              Obx(() {
+                final totalSelections = controller.getTotalSelectionsCount();
+                return SizedBox(height: totalSelections > 0 ? 12 : 4);
+              }),
 
+              _buildAllCourtsWithSlots(),
             ],
           ),
         ),
@@ -50,7 +57,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     );
   }
 
-  /// NEW: Multi-date selections summary widget
+  /// Multi-date selections summary widget
   Widget _buildMultiDateSummary() {
     return Obx(() {
       final selectionsByDate = controller.getSelectionsByDate();
@@ -170,183 +177,312 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     });
   }
 
-  /// 📅 Date Picker
+  /// Date Picker - Fixed spacing and toggle functionality
   Widget _buildDatePicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Select date", style: Get.textTheme.labelLarge)
-            .paddingOnly(bottom: 5),
-        Obx(
-              () => EasyDateTimeLinePicker.itemBuilder(
-            headerOptions: HeaderOptions(
-              headerBuilder: (_, context, date) => const SizedBox.shrink(),
+        /// Top Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Select Date",
+              style: Get.textTheme.labelLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            selectionMode: SelectionMode.alwaysFirst(),
-            firstDate: DateTime.now(),
-            lastDate: DateTime(2030, 3, 18),
-            focusedDate: controller.selectedDate.value,
-            itemExtent: 70,
-            itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-              final now = DateTime.now();
-              final today = DateTime(now.year, now.month, now.day);
-              final currentDate = DateTime(date.year, date.month, date.day);
 
-              if (currentDate.isBefore(today)) {
-                return const SizedBox.shrink();
-              }
+            /// Toggle wrapped with Obx
+            Obx(() => InkWell(
+              onTap: () async {
+                controller.showUnavailableSlots.value =
+                !controller.showUnavailableSlots.value;
 
-              final dayName = DateFormat('E').format(date);
-              final monthName = DateFormat('MMM').format(date);
+                controller.isLoadingCourts.value = true;
+                await controller.getAvailableCourtsById(
+                  controller.argument.id!,
+                  showUnavailable: controller.showUnavailableSlots.value,
+                );
+                controller.slots.refresh();
+                controller.isLoadingCourts.value = false;
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.showUnavailableSlots.value
+                          ? "Show Available"
+                          : "Show Unavailable",
+                      style: Get.textTheme.labelMedium!.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 35,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: controller.showUnavailableSlots.value
+                            ? AppColors.secondaryColor
+                            : AppColors.blackColor.withOpacity(0.3),
+                      ),
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        alignment: controller.showUnavailableSlots.value
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          margin: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+          ],
+        ),
 
-              // Check if this date has any selections
-              final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-              final dateSelections = controller.getSelectionsByDate()[dateString] ?? [];
-
-              return GestureDetector(
-                onTap: onTap,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  child: SizedBox(
-                    height: Get.height * 0.14,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(0, 6),
-                          child: Container(
-                            height: Get.height * 0.09,
-                            width: Get.width * 0.15,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: isSelected
-                                  ? Colors.black
-                                  : dateSelections.isNotEmpty
-                                  ? AppColors.primaryColor.withOpacity(0.1)
-                                  : AppColors.playerCardBackgroundColor,
-                              border: Border.all(
+        /// Date picker wrapped separately with Obx
+        Obx(() => Row(
+          children: [
+            Transform.translate(
+              offset: Offset(0, -Get.height*0.0),
+              child: Container(
+                width: 30,
+                height: Get.height*0.07,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldColor.withAlpha(100),
+                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
+                ),
+                child: RotatedBox(
+                  quarterTurns: 3, // 270 degrees
+                  child: Text(
+                    DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: EasyDateTimeLinePicker.itemBuilder(
+                headerOptions: HeaderOptions(
+                  headerBuilder: (_, context, date) => const SizedBox.shrink(),
+                ),
+                selectionMode: SelectionMode.alwaysFirst(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2030, 3, 18),
+                focusedDate: controller.selectedDate.value,
+                itemExtent: 55,
+                itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final currentDate = DateTime(date.year, date.month, date.day);
+                  if (currentDate.isBefore(today)) {
+                    return const SizedBox.shrink();
+                  }
+                  final dayName = DateFormat('E').format(date);
+                  final monthName = DateFormat('MMM').format(date);
+                  final dateString =
+                      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  final dateSelections =
+                      controller.getSelectionsByDate()[dateString] ?? [];
+                  return GestureDetector(
+                    onTap: onTap,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: SizedBox(
+                        height: 60,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              height: Get.height * 0.07,
+                              width: Get.width * 0.13,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
                                 color: isSelected
-                                    ? Colors.transparent
+                                    ? Colors.black
                                     : dateSelections.isNotEmpty
-                                    ? AppColors.primaryColor
-                                    : AppColors.blackColor.withAlpha(20),
+                                    ? AppColors.primaryColor.withOpacity(0.1)
+                                    : AppColors.playerCardBackgroundColor,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.transparent
+                                      : dateSelections.isNotEmpty
+                                      ? AppColors.primaryColor
+                                      : AppColors.blackColor.withAlpha(20),
+                                ),
                               ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(dayName,
-                                    style: Get.textTheme.bodySmall!.copyWith(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : Colors.black,
-                                    )),
-                                Text("${date.day}",
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "${date.day}",
                                     style: Get.textTheme.titleMedium!.copyWith(
-                                      fontSize: 22,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
                                           ? Colors.white
                                           : dateSelections.isNotEmpty
                                           ? AppColors.primaryColor
                                           : AppColors.textColor,
-                                    )),
-                                Text(monthName,
+                                    ),
+                                  ),
+                                  Text(
+                                    dayName,
                                     style: Get.textTheme.bodySmall!.copyWith(
+                                      fontSize: 10,
                                       color: isSelected
                                           ? Colors.white
                                           : dateSelections.isNotEmpty
                                           ? AppColors.primaryColor
                                           : Colors.black,
-                                    )),
-                              ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                            if (dateSelections.isNotEmpty)
+                              Positioned(
+                                top: -2,
+                                right: -6,
+                                child: Container(
+                                  height: 16,
+                                  width: 16,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isSelected
+                                        ? AppColors.secondaryColor
+                                        : AppColors.primaryColor,
+                                  ),
+                                  child: Text(
+                                    "${dateSelections.length}",
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        // Show selection count for this date
-                        if (dateSelections.isNotEmpty)
-                          Positioned(
-                            top: 0,
-                            right: -4,
-                            child: Container(
-                              height: 20,
-                              width: 20,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isSelected
-                                    ? AppColors.secondaryColor
-                                    : AppColors.primaryColor,
-                              ),
-                              child: Text(
-                                "${dateSelections.length}",
-                                style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
-            onDateChange: (date) async {
-              controller.selectedDate.value = date;
-              log("Selected date: $date");
-
-              // Force loading state
-              controller.isLoadingCourts.value = true;
-
-              await controller.getAvailableCourtsById(controller.argument.id!);
-
-              // Ensure UI updates
-              controller.slots.refresh();
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Header toggle between available/unavailable
-  Widget _buildSlotHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Available Courts & Slots',
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
-        Obx(() => Row(
-          children: [
-            Text(
-              controller.showUnavailableSlots.value
-                  ?"Show Available":"Show Unavailable",
-              style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Transform.scale(
-              scale: 0.7,
-              child: Switch(
-                value: controller.showUnavailableSlots.value,
-                onChanged: (value) =>
-                controller.showUnavailableSlots.value = value,
-                activeColor: Colors.white,
-                activeTrackColor: AppColors.secondaryColor,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: AppColors.blackColor,
+                  );
+                },
+                onDateChange: (date) async {
+                  controller.selectedDate.value = date;
+                  controller.isLoadingCourts.value = true;
+                  await controller.getAvailableCourtsById(
+                    controller.argument.id!,
+                    showUnavailable: controller.showUnavailableSlots.value,
+                  );
+                  controller.slots.refresh();
+                  controller.isLoadingCourts.value = false;
+                },
               ),
             ),
           ],
         )),
       ],
-    ).paddingOnly(top: 10, bottom: 0);
+    );
+  }
+
+  /// Time of Day Filter Tabs (Morning /Noon/ Night)
+  Widget _buildTimeOfDayTabs() {
+    return Obx(() {
+      final selectedTab = controller.selectedTimeOfDay.value;
+
+      final tabs = [
+        {"label": "Morning", "icon": Icons.wb_twilight_sharp, "count": controller.morningCount.value},
+        {"label": "Noon", "icon": Icons.wb_sunny, "count": controller.noonCount.value},
+        {"label": "Night", "icon": Icons.nightlight_round, "count": controller.nightCount.value},
+      ];
+
+      return Container(
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: AppColors.lightBlueColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(tabs.length, (index) {
+            final tab = tabs[index];
+            final isSelected = selectedTab == index;
+
+            return Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(30),
+                  onTap: () {
+                    controller.selectedTimeOfDay.value = index;
+                    controller.filterSlotsByTimeOfDay();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryColor.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          tab["icon"] as IconData,
+                          size: 18,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : Colors.black87,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${tab['label']} (${tab['count']})",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    });
   }
 
   /// Build all courts with their slots
@@ -356,98 +492,63 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         return _buildLoadingShimmer();
       }
 
-      log("Building courts widget...");
-      log("slots.value: ${controller.slots.value}");
-
       final slotsData = controller.slots.value;
 
-      if (slotsData == null) {
-        log("slotsData is null");
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.info_outline,
-                size: 48,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "Loading courts...",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Please wait while we fetch court information",
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
+      if (slotsData == null || slotsData.data == null || slotsData.data!.isEmpty) {
+        return const Center(child: Text("No courts available"));
       }
 
-      final slots = slotsData.data;
-      log("slots data: $slots");
-      log("slots length: ${slots?.length}");
-
-      if (slots == null || slots.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.event_busy,
-                size: 48,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "No courts available",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "No courts are available for the selected date.\nTry selecting a different date.",
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await controller.getAvailableCourtsById(controller.argument.id!);
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text("Retry"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
+      final courts = slotsData.data!;
+      final totalPages = (courts.length / 2).ceil();
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: slots.map((courtData) {
-          return _buildCourtSection(courtData);
-        }).toList(),
+        children: [
+          // PageView for courts
+          SizedBox(
+            height: Get.height * 0.47,
+            child: PageView.builder(
+              controller: controller.pageController,
+              onPageChanged: (index) {
+                controller.currentPage.value = index;
+              },
+              itemCount: totalPages,
+              itemBuilder: (context, pageIndex) {
+                final start = pageIndex * 2;
+                final end = (start + 2 > courts.length) ? courts.length : start + 2;
+                final courtsSlice = courts.sublist(start, end);
+
+                return Column(
+                  children: courtsSlice.map((court) => _buildCourtSection(court)).toList(),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          /// Swipe hint with arrow animation
+          Obx(() {
+            final currentPage = controller.currentPage.value;
+
+            if (totalPages <= 1) return const SizedBox.shrink();
+
+            if (currentPage == 0) {
+              // First page → swipe left
+              return _buildSwipeHint("Swipe Left for more slots ", Icons.arrow_right_alt);
+            } else if (currentPage == totalPages - 1) {
+              // Last page → swipe right
+              return _buildSwipeHint("Swipe Right", Icons.arrow_left);
+            }
+            return const SizedBox.shrink();
+          }),
+
+          const SizedBox(height: 6),
+
+          /// Dot indicator placed right below courts
+          _buildDotIndicator(totalPages),
+          const SizedBox(height: 26),
+
+        ],
       );
     });
   }
@@ -457,18 +558,16 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     final courtName = courtData.courtName ?? 'Unknown Court';
     final slotTimes = courtData.slots ?? [];
 
-    // Use courtType from register_club_id instead of features
     final courtType = courtData.registerClubId?.courtType ??
         courtData.register_club_id?.courtType ??
         'Standard court';
 
     final featureText = courtType;
 
-    // Debug logging for court data
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -487,7 +586,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           // Court Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.whiteColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
@@ -505,17 +604,16 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         courtName,
                         style: Get.textTheme.titleSmall!.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
+                          color: AppColors.blackColor,
                         ),
                       ),
                     ),
-                    // Show selected slots count for this court
                     Obx(() {
                       final courtId = courtData.sId ?? '';
                       final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
                       return selectedCount > 0
                           ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.secondaryColor,
                           borderRadius: BorderRadius.circular(12),
@@ -533,7 +631,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     }),
                   ],
                 ),
-                const SizedBox(height: 0),
+                const SizedBox(height: 4),
                 Text(
                   featureText,
                   style: Get.textTheme.bodySmall!.copyWith(
@@ -546,10 +644,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
 
           // Slots Grid
           Padding(
-            padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
+            padding: const EdgeInsets.all(12),
             child: _buildSlotsGrid(slotTimes, courtData.sId ?? ''),
           ),
-
         ],
       ),
     );
@@ -560,7 +657,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     if (slotTimes.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(0),
+          padding: EdgeInsets.all(20),
           child: Column(
             children: [
               Icon(
@@ -583,26 +680,14 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       );
     }
 
-    // Filter slots based on toggle
-    final filteredSlots = slotTimes.where((slot) {
-      final availability = slot.availabilityStatus?.toLowerCase();
-      final isBlocked = availability == "maintenance" ||
-          availability == "weather conditions" ||
-          availability == "staff unavailability";
-      final isUnavailable = controller.isPastAndUnavailable(slot);
-      final isBooked = slot.status?.toLowerCase() == "booked";
-
-      final isAvailableSlot = !(isUnavailable || isBlocked || isBooked);
-
-      return controller.showUnavailableSlots.value
-          ? !isAvailableSlot
-          : isAvailableSlot;
-    }).toList();
+    // Controller already filtered available/unavailable lists.
+    // Use provided list directly to avoid double-filtering.
+    final filteredSlots = slotTimes;
 
     if (filteredSlots.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               Icon(
@@ -645,14 +730,13 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 2.2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 2.5,
       ),
       itemCount: filteredSlots.length,
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
-        // Wrap in Obx so it rebuilds when selectedSlots changes
         return Obx(() => _buildSlotTile(slot, courtId));
       },
     );
@@ -662,14 +746,12 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
 
-    // Check if this slot is unavailable
     final isUnavailable = controller.isPastAndUnavailable(slot) ||
         (slot.status?.toLowerCase() == 'booked') ||
         (slot.availabilityStatus?.toLowerCase() == 'maintenance') ||
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    // Colors
     Color backgroundColor;
     Color textColor;
 
@@ -698,22 +780,20 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(5),
           border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey.shade300,
+            color: isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
             width: 1,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Center(
-          child: Text(
-            slot.time ?? '',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: textColor,
-            ),
+        alignment: Alignment.center,
+        child: Text(
+          slot.time ?? '',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: textColor,
           ),
         ),
       ),
@@ -722,80 +802,141 @@ class CreateOpenMatchesScreen extends StatelessWidget {
 
   /// Loading shimmer effect
   Widget _buildLoadingShimmer() {
-    return Column(
-      children: List.generate(2, (courtIndex) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Court Header shimmer
-                Container(
-                  height: 50,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
+    final totalPages = 2;
+    return SizedBox(
+      height: Get.height * 0.47 + 80,
+      child: PageView.builder(
+        itemCount: totalPages,
+        itemBuilder: (context, pageIndex) {
+          return Column(
+            children: List.generate(2, (courtIndex) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-
-                // Court type text shimmer
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  height: 12,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                // Slots Grid shimmer
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 2.2,
-                    ),
-                    itemCount: 8, // Show 2 rows of 4 slots
-                    itemBuilder: (_, __) => Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Court title bar
+                      Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+
+                      // Court subtitle
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                        height: 14,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Slots grid
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 2.5,
+                          ),
+                          itemCount: 8,
+                          itemBuilder: (_, __) => Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        );
-      }),
+              );
+            }),
+          );
+        },
+      ),
     );
   }
 
+  Widget _buildSwipeHint(String text, IconData icon) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(seconds: 1),
+      tween: Tween(begin: 0, end: 10),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: value),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon == Icons.arrow_left) Icon(icon, color: AppColors.primaryColor),
+              const SizedBox(width: 6),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 6),
+              if (icon == Icons.arrow_right_alt) Icon(icon, color: AppColors.primaryColor),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Dot indicator for page view
+  Widget _buildDotIndicator(int totalPages) {
+    return Obx(() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(totalPages, (index) {
+          final isActive = index == controller.currentPage.value;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            height: isActive ? 10 : 8,
+            width: isActive ? 10 : 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive ? AppColors.primaryColor : Colors.grey.shade400,
+            ),
+          );
+        }),
+      );
+    });
+  }
 }
