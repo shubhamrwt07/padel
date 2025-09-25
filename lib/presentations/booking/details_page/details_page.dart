@@ -10,8 +10,10 @@ import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_pl
 
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
+import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
 import '../../../configs/routes/routes_name.dart';
+import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../generated/assets.dart';
 import 'details_page_controller.dart';
 
@@ -23,6 +25,8 @@ class DetailsScreen extends GetView<DetailsController> {
   @override
   Widget build(BuildContext context) {
     final data = controller.localMatchData;
+    List slots = data['slot'];
+    log("Slots ${slots.length}");
 
     return BackgroundContainer(
       child: Scaffold(
@@ -86,204 +90,196 @@ class DetailsScreen extends GetView<DetailsController> {
         ),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          child:
-
-
-
-
-              Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // club + date card
-                Container(
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: AppColors.whiteColor,
-                    border: Border.all(
-                      color: AppColors.blackColor.withAlpha(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // club + date card
+              Container(
+                width: Get.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: AppColors.whiteColor,
+                  border: Border.all(color: AppColors.blackColor.withAlpha(20)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text(
+                        data['clubName'] ?? "Unknown club",
+                        style:
+                            Get.textTheme.headlineLarge?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ) ??
+                            const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      subtitle: Text(
+                        "${data['matchDate'] ?? ""} | ${data['matchTime'] ?? ""}",
+                        style:
+                            Get.textTheme.displaySmall?.copyWith(
+                              fontSize: 11,
+                              color: AppColors.darkGreyColor,
+                            ) ??
+                            const TextStyle(fontSize: 11),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          data['clubName'] ?? "Unknown club",
-                          style: Get.textTheme.headlineLarge?.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ) ??
-                              const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    Center(
+                      child: Container(
+                        height: 1,
+                        width: Get.width * .88,
+                        color: AppColors.blackColor.withAlpha(30),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        gameDetails(
+                          "Gender",
+                          "${data['gender']}",
+                          AppColors.blackColor,
+                          13,
                         ),
-                        subtitle: Text(
-                          "${data['matchDate'] ?? ""} | ${data['matchTime']?? ""}",
-                          style: Get.textTheme.displaySmall?.copyWith(
-                            fontSize: 11,
-                            color: AppColors.darkGreyColor,
-                          ) ??
-                              const TextStyle(fontSize: 11),
+                        gameDetails(
+                          "Game Level",
+                          data['skillLevel'] ?? "-",
+                          AppColors.blackColor,
+                          13,
+                        ),
+                        gameDetails(
+                          "Price",
+                          data['price'],
+                          AppColors.primaryColor,
+                          16,
+                        ),
+                      ],
+                    ).paddingOnly(
+                      top: Get.height * 0.01,
+                      bottom: Get.height * 0.01,
+                    ),
+                  ],
+                ),
+              ).paddingOnly(top: Get.height * 0.03),
+
+              // match type
+              Container(
+                height: Get.height * .045,
+                width: Get.width,
+                alignment: Alignment.centerLeft,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFf4f6fc),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+                ),
+                child: Text(
+                  "Open match",
+                  style: Get.textTheme.bodyLarge,
+                ).paddingOnly(left: 14),
+              ).paddingOnly(top: Get.height * .015, bottom: Get.height * .015),
+
+              // game card
+              gameCard(
+                teamA: controller.teamA,
+                teamB: controller.teamB,
+              ),
+
+              SizedBox(height: Get.height * .015),
+
+              // club info card
+              Container(
+                width: Get.width,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withAlpha(10),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      height: Get.height * .1,
+                      width: Get.width * .3,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor.withAlpha(10),
+                        border: Border.all(
+                          color: AppColors.blackColor.withAlpha(10),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          Assets.imagesImgDummy2,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      Center(
-                        child: Container(
-                          height: 1,
-                          width: Get.width * .88,
-                          color: AppColors.blackColor.withAlpha(30),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    ),
+                    Container(
+                      color: const Color(0xFFf4f6fc),
+                      width: Get.width * .51,
+                      height: Get.height * .1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          gameDetails(
-                            "Gender",
-                            "${data['gender']}",
-                            AppColors.blackColor,
-                            13,
-                          ),
-                          gameDetails(
-                            "Game Level",
-                            data['skillLevel'] ?? "-",
-                            AppColors.blackColor,
-                            13,
-                          ),
-                          gameDetails(
-                            "Price",
-                            data['price'],
-                            AppColors.primaryColor,
-                            16,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                data['clubName'] ?? "",
+                                style:
+                                    Get.textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ) ??
+                                    const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              Icon(
+                                Icons.directions,
+                                color: AppColors.secondaryColor,
+                              ),
+                            ],
+                          ).paddingOnly(bottom: 5),
+                          Text(
+                            data['address'] ?? "Unknown address, please update",
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                Get.textTheme.displaySmall?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 11,
+                                ) ??
+                                const TextStyle(fontSize: 11),
+                          ).paddingOnly(bottom: 10),
+                          Text(
+                            "More Info",
+                            style:
+                                Get.textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primaryColor,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.primaryColor,
+                                ) ??
+                                const TextStyle(fontWeight: FontWeight.w500),
                           ),
                         ],
-                      ).paddingOnly(
-                        top: Get.height * 0.01,
-                        bottom: Get.height * 0.01,
                       ),
-                    ],
-                  ),
-                ).paddingOnly(top: Get.height * 0.03),
-
-                // match type
-                Container(
-                  height: Get.height * .045,
-                  width: Get.width,
-                  alignment: Alignment.centerLeft,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFf4f6fc),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.blackColor.withAlpha(10),
                     ),
-                  ),
-                  child: Text(
-                    "Open match",
-                    style: Get.textTheme.bodyLarge,
-                  ).paddingOnly(left: 14),
-                ).paddingOnly(
-                  top: Get.height * .015,
-                  bottom: Get.height * .015,
-                ),
+                  ],
+                ).paddingAll(15),
+              ),
 
-                // game card
-                 gameCard(
-                      teamA: controller.teamA ?? [],
-                      teamB: controller.teamB??[],
-                    ),
+              information(),
 
-
-                SizedBox(height: Get.height * .015),
-
-                // club info card
-                Container(
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withAlpha(10),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.blackColor.withAlpha(10),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        height: Get.height * .1,
-                        width: Get.width * .3,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withAlpha(10),
-                          border: Border.all(
-                            color: AppColors.blackColor.withAlpha(10),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            Assets.imagesImgDummy2,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        color: const Color(0xFFf4f6fc),
-                        width: Get.width * .51,
-                        height: Get.height * .1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  data['clubName'] ?? "",
-                                  style:
-                                  Get.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ) ??
-                                      const TextStyle(
-                                          fontWeight: FontWeight.w500),
-                                ),
-                                Icon(
-                                  Icons.directions,
-                                  color: AppColors.secondaryColor,
-                                ),
-                              ],
-                            ).paddingOnly(bottom: 5),
-                            Text(
-                              data['address'] ??
-                                  "Unknown address, please update",
-                              overflow: TextOverflow.ellipsis,
-                              style: Get.textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 11,
-                              ) ??
-                                  const TextStyle(fontSize: 11),
-                            ).paddingOnly(bottom: 10),
-                            Text(
-                              "More Info",
-                              style: Get.textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primaryColor,
-                                decoration: TextDecoration.underline,
-                                decorationColor: AppColors.primaryColor,
-                              ) ??
-                                  const TextStyle(
-                                      fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ).paddingAll(15),
-                ),
-
-                information(),
-              ],
-            ).paddingAll(16)
-
+              // Add some bottom padding to prevent content from being hidden behind the bottom bar
+              SizedBox(height: Get.height * 0.02),
+            ],
+          ).paddingAll(16),
         ),
+        // Add the bottom bar here
+        bottomNavigationBar: bottomBar(context, controller),
       ),
     );
   }
@@ -310,7 +306,11 @@ class DetailsScreen extends GetView<DetailsController> {
   }
 
   Widget gameDetails(
-      String title, String subtitle, Color color, double fontSize) {
+    String title,
+    String subtitle,
+    Color color,
+    double fontSize,
+  ) {
     return Container(
       alignment: Alignment.center,
       color: Colors.transparent,
@@ -321,11 +321,12 @@ class DetailsScreen extends GetView<DetailsController> {
           SizedBox(height: Get.height * .01),
           Text(
             subtitle,
-            style: Get.textTheme.headlineMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: fontSize,
-            ) ??
+            style:
+                Get.textTheme.headlineMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: fontSize,
+                ) ??
                 TextStyle(
                   color: color,
                   fontWeight: FontWeight.w600,
@@ -350,202 +351,239 @@ class DetailsScreen extends GetView<DetailsController> {
               color: Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color:
-                image.isNotEmpty ? AppColors.whiteColor : AppColors.primaryColor,
+                color: image.isNotEmpty
+                    ? AppColors.whiteColor
+                    : AppColors.primaryColor,
               ),
             ),
             child: image.isEmpty
                 ? const Icon(
-              CupertinoIcons.profile_circled,
-              size: 20,
-              color: AppColors.primaryColor,
-            )
-                : ClipOval(
-              child: Image.network(image,fit: BoxFit.cover,)
-            ),
+                    CupertinoIcons.profile_circled,
+                    size: 20,
+                    color: AppColors.primaryColor,
+                  )
+                : ClipOval(child: Image.network(image, fit: BoxFit.cover)),
           ),
           const SizedBox(height: 5),
           Text(
             name,
-            style: Get.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ) ??
+            style:
+                Get.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ) ??
                 const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 0),
           showSubtitle
               ? Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.green.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            height: 16,
-            width: 30,
-            child: Text(
-              "B/C",
-              style: Get.textTheme.bodyLarge?.copyWith(
-                color: Colors.green,
-              ) ??
-                  const TextStyle(color: Colors.green),
-            ),
-          )
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  height: 16,
+                  width: 30,
+                  child: Text(
+                    "B/C",
+                    style:
+                        Get.textTheme.bodyLarge?.copyWith(
+                          color: Colors.green,fontSize: 10
+                        ) ??
+                        const TextStyle(color: Colors.green),
+                  ),
+                )
               : const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget gameCard({required List  teamA, required List  teamB}) {
-    return Container(
-      height: Get.height * .20,
-      width: Get.width,
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.blackColor.withAlpha(10)),
-        color: const Color(0xFFf4f6fc),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IntrinsicHeight(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Players",
-              style: Get.textTheme.headlineLarge?.copyWith(
-                color: AppColors.blackColor,
-              ) ??
-                  const TextStyle(color: AppColors.blackColor),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Team A Players
-                Expanded(
-                  child: SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 2, // Maximum 2 players per team
-                      itemBuilder: (BuildContext context, int index) {
-                        // Check if player exists at this index
-                        bool hasPlayer = index < teamA.length &&
-                            teamA[index].isNotEmpty &&
-                            teamA[index]['name'] != null &&
-                            teamA[index]['name'].toString().isNotEmpty;
+  Widget gameCard({required RxList<Map<String, dynamic>> teamA, required RxList<Map<String, dynamic>> teamB}) {
+    return GetBuilder<DetailsController>(
+      builder: (controller) => Container(
+        height: Get.height * .20,
+        width: Get.width,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+          color: const Color(0xFFf4f6fc),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IntrinsicHeight(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Players",
+                style:
+                    Get.textTheme.headlineLarge?.copyWith(
+                      color: AppColors.blackColor,
+                    ) ??
+                    const TextStyle(color: AppColors.blackColor),
+              ),
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Team A Players
+                  Expanded(
+                    child: SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(left: 10),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 2, // Maximum 2 players per team
+                        itemBuilder: (BuildContext context, int index) {
+                          // Check if player exists at this index
+                          bool hasPlayer =
+                              index < controller.teamA.length &&
+                              controller.teamA[index].isNotEmpty &&
+                              controller.teamA[index]['name'] != null &&
+                              controller.teamA[index]['name'].toString().isNotEmpty;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: hasPlayer
-                              ? playerCard(
-                            teamA[index]['name'] ?? "Unknown",
-                            true, // isPlayer = true
-                            teamA[index]['image']??"" ,
-
-                          )
-                              :GestureDetector(
-                            onTap: (){
-                              controller.showDailogue(context,index: index,team: "teamA");
-                            },
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white
-                                      ),
-                                               height: 50,
-                                                         width: 50,
-                                                         child: Icon(CupertinoIcons.add),
-                                                              ),
-                                    Text("Available")
-                                  ],
-                                ),
-                              )
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                // Divider
-                Container(
-                  height: Get.height * .1,
-                  width: 1,
-                  color: AppColors.blackColor.withAlpha(30),
-                ),
-
-                // Team B Players
-                Expanded(
-                  child: SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 2, // Maximum 2 players per team
-                      itemBuilder: (BuildContext context, int index) {
-                        // Check if player exists at this index
-                        bool hasPlayer = index < teamB.length &&
-                            teamB[index].isNotEmpty &&
-                            teamB[index]['name'] != null &&
-                            teamB[index]['name'].toString().isNotEmpty;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: hasPlayer
-                              ? playerCard(
-                            teamB[index]['name'] ?? "Unknown",
-                            true, // isPlayer = true
-                            teamB[index]['image'] ?? "assets/images/default_avatar.svg",
-
-                          )
-                              : GestureDetector(
-                            onTap: (){
-                              controller.showDailogue(context,index: index,team: "teamB");
-                            },
-                                child: Column(
-                                                            children: [
-                                Container(
-
-                                  height: 50,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 30),
+                            child: hasPlayer
+                                ? playerCard(
+                                    controller.teamA[index]['name'] ?? "Unknown",
+                                    true, // isPlayer = true
+                                    controller.teamA[index]['image'] ?? "",
+                                  )
+                                : GestureDetector(
+                                    onTap: () {
+                                      controller.showDailogue(
+                                        context,
+                                        index: index,
+                                        team: "teamA",
+                                      );
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.white,
+                                            border: Border.all(
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                          height: 50,
+                                          width: 50,
+                                          child: Icon(
+                                            CupertinoIcons.add,
+                                            color: AppColors.primaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          "Available",
+                                          style: Get.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Icon(CupertinoIcons.add),
-                                ),
-                                Text("Available")
-                                                            ],
-                                                          ),
-                              )
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Team A",
-                  style: Get.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ) ??
-                      const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  "Team B",
-                  style: Get.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ) ??
-                      const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          ],
-        ).paddingOnly(left: 15, right: 15, top: 10, bottom: 5),
+
+                  // Divider
+                  Container(
+                    height: Get.height*0.1,
+                    width: 1,
+                    color: AppColors.blackColor.withAlpha(30),
+                  ),
+
+                  // Team B Players
+                  Expanded(
+                    child: SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(left: 20),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 2, // Maximum 2 players per team
+                        itemBuilder: (BuildContext context, int index) {
+                          // Check if player exists at this index
+                          bool hasPlayer =
+                              index < controller.teamB.length &&
+                              controller.teamB[index].isNotEmpty &&
+                              controller.teamB[index]['name'] != null &&
+                              controller.teamB[index]['name'].toString().isNotEmpty;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 30),
+                            child: hasPlayer
+                                ? playerCard(
+                                  controller.teamB[index]['name'] ?? "Unknown",
+                                  true, // isPlayer = true
+                                  controller.teamB[index]['image'] ??
+                                      "assets/images/default_avatar.svg",
+                                )
+                                : GestureDetector(
+                                  onTap: () {
+                                    controller.showDailogue(
+                                      context,
+                                      index: index,
+                                      team: "teamB",
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 50,
+                                        width: 50,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                          border: Border.all(color: AppColors.primaryColor)
+                                        ),
+                                        child: Icon(CupertinoIcons.add,color: AppColors.primaryColor,),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        "Available",
+                                        style: Get.textTheme.bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Team A",
+                    style:
+                        Get.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ) ??
+                        const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    "Team B",
+                    style:
+                        Get.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ) ??
+                        const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ],
+          ).paddingOnly(left: 15, right: 15, top: 10, bottom: 5),
+        ),
       ),
     );
   }
@@ -556,29 +594,41 @@ class DetailsScreen extends GetView<DetailsController> {
       children: [
         Text(
           "Information",
-          style: Get.textTheme.headlineLarge?.copyWith(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ) ??
+          style:
+              Get.textTheme.headlineLarge?.copyWith(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ) ??
               const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         ListTile(
-          title: Text("Type of Court ( 2 court )",
-              style: Get.textTheme.bodyLarge),
-          subtitle:
-          Text("${controller.localMatchData['courtType']}", style: Get.textTheme.headlineLarge),
+          title: Text(
+            "Type of Court ( 2 court )",
+            style: Get.textTheme.bodyLarge,
+          ),
+          subtitle: Text(
+            "${controller.localMatchData['courtType']}",
+            style: Get.textTheme.headlineLarge,
+          ),
         ),
         ListTile(
-          leading: Icon(Icons.calendar_month_outlined,
-              color: AppColors.textColor),
+          leading: Icon(
+            Icons.calendar_month_outlined,
+            color: AppColors.textColor,
+          ),
           title: Text("End registration", style: Get.textTheme.bodyLarge),
-          subtitle: Text("Today at 10:00 PM",
-              style: Get.textTheme.headlineLarge),
+          subtitle: Text(
+            "Today at 10:00 PM",
+            style: Get.textTheme.headlineLarge,
+          ),
         ),
       ],
     ).paddingOnly(top: Get.height * 0.01);
   }
-  Widget bottomBar(BuildContext context) {
+
+  Widget bottomBar(BuildContext context, DetailsController controller) {
+    final data = controller.localMatchData;
+
     return Container(
       height: Get.height * .12,
       padding: const EdgeInsets.only(top: 10),
@@ -608,10 +658,18 @@ class DetailsScreen extends GetView<DetailsController> {
               ),
             ],
           ),
-          child: PrimaryButton(
-            height: 50,
-            onTap: () {},
-            text: "Book Now",
+          child: Obx(
+            () => PrimaryButton(
+              height: 50,
+              onTap: () {
+                controller.createMatch();
+              },
+              // Show Book Now + Price
+              text: "Book Now Price ${data['price'] ?? '0'}",
+              child: controller.isLoading.value
+                  ? AppLoader(size: 25, strokeWidth: 3)
+                  : null,
+            ),
           ),
         ).paddingOnly(bottom: Get.height * 0.03),
       ),

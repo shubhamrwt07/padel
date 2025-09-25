@@ -69,15 +69,17 @@ class CreateOpenMatchesController extends GetxController {
 
 
  void onNext(){
+
+   log("Slots -> $selectedSlots");
    detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName??"");
    detailsController.localMatchData.update("clubId", (v)=>slots.value!.data![0].registerClubId!.sId??"");
    detailsController.localMatchData.update("matchDate", (v)=>selectedDate.value??"");
-   detailsController.localMatchData.update("matchTime", (v)=>"${selectedSlots.value.first.time}-${selectedSlots.value.last.time} "??"");
+   detailsController.localMatchData.update("matchTime", (v)=>selectedSlots.value.first.time??"");
    detailsController.localMatchData.update("price", (v)=>totalAmount.toString()??"");
-
-   detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
+   detailsController.localMatchData.update("slot", (v)=>selectedSlots.value);
+   detailsController.localMatchData.update("courtName", (v)=>slots.value!.data![0].courtName??"");
+   // detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
    Get.toNamed(RoutesName.createQuestions);
-
 
  }
   void _autoSelectTab() {
@@ -105,7 +107,6 @@ class CreateOpenMatchesController extends GetxController {
 
     filterSlotsByTimeOfDay();
   }
-
   void filterSlotsByTimeOfDay() {
     final tab = selectedTimeOfDay.value;
     final courts = slots.value?.data ?? [];
@@ -123,7 +124,6 @@ class CreateOpenMatchesController extends GetxController {
     _recalculateTimeOfDayCounts();
     slots.refresh();
   }
-
   void _recalculateTimeOfDayCounts() {
     morningCount.value = 0;
     noonCount.value = 0;
@@ -142,7 +142,6 @@ class CreateOpenMatchesController extends GetxController {
       }
     });
   }
-
   int? _parseHour24(String? timeStr) {
     if (timeStr == null || timeStr.isEmpty) return null;
     final t = timeStr.trim().toLowerCase();
@@ -170,7 +169,6 @@ class CreateOpenMatchesController extends GetxController {
       }
     }
   }
-
   Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
     log("=== DEBUG API CALL ===");
     log("Fetching courts for club: $clubId");

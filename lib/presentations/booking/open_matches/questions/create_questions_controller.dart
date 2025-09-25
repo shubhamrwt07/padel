@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 
@@ -19,37 +20,38 @@ class CreateQuestionsController extends GetxController{
       switch (currentStep.value) {
         case 1:
           if (selectedLevel.value.isEmpty) {
-            Get.snackbar("Required", "Please select a level before proceeding");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select a level before proceeding");
             return;
           }
           break;
         case 2:
           if (selectedSport.value.isEmpty) {
-            Get.snackbar("Required", "Please select a sport before proceeding");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select a sport before proceeding");
+
             return;
           }
           break;
         case 3:
           if (selectedTraining.value.isEmpty) {
-            Get.snackbar("Required", "Please select training before proceeding");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select training before proceeding");
             return;
           }
           break;
         case 4:
           if (selectedAgeGroup.value.isEmpty) {
-            Get.snackbar("Required", "Please select an age group before proceeding");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select an age group before proceeding");
             return;
           }
           break;
         case 5:
           if (selectedVolley.value.isEmpty) {
-            Get.snackbar("Required", "Please select volley option before proceeding");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select volley option before proceeding");
             return;
           }
           break;
         case 6:
           if (selectedWallRebound.value.isEmpty) {
-            Get.snackbar("Required", "Please select wall rebound before submitting");
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select wall rebound before submitting");
             return;
           }
           break;

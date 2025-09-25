@@ -26,7 +26,6 @@ class OpenMatchRepository {
         AppEndpoints.createMatches,
         data: data,
       );
-
       if (response.statusCode == 200) {
         CustomLogger.logMessage(
           msg: "Match created successfully: ${response.data}",
