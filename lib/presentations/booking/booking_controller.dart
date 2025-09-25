@@ -5,14 +5,13 @@ import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart'
 
 class BookingController extends GetxController
     with GetSingleTickerProviderStateMixin {
-
+  DetailsController detailsController=Get.put(DetailsController());
   late TabController tabController;
 Rx<Courts> courtsData=Courts().obs;
 
   @override
   void onInit() {
     super.onInit();
-    courtsData.value = Get.arguments["data"];
     tabController = TabController(
       length: 4,
       vsync: this,
@@ -20,6 +19,9 @@ Rx<Courts> courtsData=Courts().obs;
 
     );
     WidgetsBinding.instance.addPostFrameCallback((callback){
+      courtsData.value = Get.arguments["data"];
+      detailsController.localMatchData.update("address", (v)=>"${courtsData.value.city},${courtsData.value.address}"??"");
+
       log("Data Fetch Successfully-> ${courtsData.value}");
     });
   }
