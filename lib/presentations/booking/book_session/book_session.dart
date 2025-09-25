@@ -460,7 +460,7 @@ class BookSession extends StatelessWidget {
         children: [
           // PageView for courts
           SizedBox(
-            height: Get.height * 0.43,
+            height: Get.height * 0.45,
             child: PageView.builder(
               controller: controller.pageController,
               onPageChanged: (index) {
