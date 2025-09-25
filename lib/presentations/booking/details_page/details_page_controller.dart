@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/open_match_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
@@ -30,10 +31,11 @@ class DetailsController extends GetxController {
 
   Map<String, dynamic> localMatchData = {
     "clubName": "Unknown club",
+    "courtName":"Court 1",
     "clubId": "clubid",
     "matchDate": "Unknown date",
     "matchTime": "Unknown time",
-    "skillLevel": "easy",
+    "skillLevel": "Beginner",
     "price": "Unknown price",
     "address": "add here",
     "gender": "",
@@ -49,32 +51,23 @@ class DetailsController extends GetxController {
 
     isLoading.value = true;
     try {
-      // Handle slots: single object or list
-      final slotData = localMatchData["slot"];
-      List<GetAllActiveCourtsForSlotWiseModel> slotsList = [];
-
-      if (slotData is GetAllActiveCourtsForSlotWiseModel) {
-        slotsList = [slotData];
-      } else if (slotData is List<GetAllActiveCourtsForSlotWiseModel>) {
-        slotsList = slotData;
-      } else {
-        slotsList = [];
-      }
-
-      // Convert slots to JSON and format bookingDate
-      final slotsJson = slotsList.map((slot) {
-        final slotMap = slot.toJson();
-
-        if (slotMap['bookingDate'] is DateTime) {
-          // Format as YYYY-MM-DD
-          slotMap['bookingDate'] =
-              DateFormat('yyyy-MM-dd').format(slotMap['bookingDate']);
-        }
-
-        return slotMap;
+      // Handle slots: convert to required format
+      final slotData = localMatchData["slot"] as List<Slots>? ?? [];
+      final slotsJson = slotData.map((slot) => {
+        "slotId": slot.sId,
+        "businessHours": slot.businessHours?.map((bh) => {
+          "time": bh.time,
+          "day": bh.day,
+        }).toList() ?? [],
+        "slotTimes": [{
+          "time": slot.time,
+          "amount": slot.amount,
+        }],
+        "courtName": localMatchData["courtName"] ?? "",
+        "bookingDate": DateTime.now().toIso8601String(),
       }).toList();
 
-      // Format matchDate as string too if needed
+      // Format matchDate
       final matchDate = localMatchData["matchDate"];
       final matchDateString = matchDate is DateTime
           ? DateFormat('yyyy-MM-dd').format(matchDate)
@@ -82,31 +75,27 @@ class DetailsController extends GetxController {
 
       // Prepare request body
       final body = {
-        "clubName": localMatchData["clubName"],
+        "slot": slotsJson,
         "clubId": localMatchData["clubId"],
         "matchDate": matchDateString,
-        "matchTime": localMatchData["matchTime"],
         "skillLevel": localMatchData["skillLevel"],
-        "price": localMatchData["price"],
-        "address": localMatchData["address"],
-        "gender": "male",
+        "skillDetails": ["Yes", "no"],
         "matchStatus": "open",
-        "slot": slotsJson,
-        "teamA": teamA.map((p) => p["_id"] ?? p).toList(),
-        "teamB": teamB.map((p) => p["_id"] ?? p).toList(),
-        "courtType": localMatchData["courtType"],
-        "court": localMatchData["court"],
+        "matchTime": localMatchData["matchTime"],
+        "teamA": teamA.map((p) => p["userId"] ?? p["_id"] ?? p).toList(),
+        "teamB": teamB.map((p) => p["userId"] ?? p["_id"] ?? p).toList(),
       };
 
+      log("Request Body: $body");
       final response = await repository.createMatch(data: body);
 
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
       log("Match Created -> ${response.toJson()}");
 
-      Get.back();
+      // Get.back();
+      Get.offAllNamed(RoutesName.bottomNav);
     } catch (e, st) {
       log("error=$e,$st");
-      SnackBarUtils.showErrorSnackBar("Failed to create match. Please try again.");
     } finally {
       isLoading.value = false;
     }
@@ -230,6 +219,9 @@ class DetailsController extends GetxController {
 
         // Add player to correct team and index
         addPlayerToTeam(team, index, newPlayer);
+
+        // Update UI
+        update();
 
         // Show success message
         SnackBarUtils.showSuccessSnackBar("Player added successfully!");

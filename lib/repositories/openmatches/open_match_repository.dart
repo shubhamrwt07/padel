@@ -22,8 +22,6 @@ class OpenMatchRepository {
     required dynamic data,
   }) async {
     try {
-      log("suceess$data");
-
       final response = await dioClient.post(
         AppEndpoints.createMatches,
         data: data,
