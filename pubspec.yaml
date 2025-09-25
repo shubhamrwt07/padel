@@ -33,7 +33,7 @@ dependencies:
   flutter_local_notifications:
   firebase_messaging:
   timezone:
-  permission_handler:
+  permission_handler: ^12.0.1
   firebase_core:
   flutter_dash:
   shimmer:
