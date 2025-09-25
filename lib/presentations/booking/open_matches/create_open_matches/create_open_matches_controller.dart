@@ -74,7 +74,7 @@ class CreateOpenMatchesController extends GetxController {
    detailsController.localMatchData.update("matchDate", (v)=>selectedDate.value??"");
    detailsController.localMatchData.update("matchTime", (v)=>"${selectedSlots.value.first.time}-${selectedSlots.value.last.time} "??"");
    detailsController.localMatchData.update("price", (v)=>totalAmount.toString()??"");
-   detailsController.localMatchData.update("slot", (v)=>selectedSlots.value??[]);
+   detailsController.localMatchData.update("slot", (v)=>slts.value??[]);
 
    detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
    Get.toNamed(RoutesName.createQuestions);
