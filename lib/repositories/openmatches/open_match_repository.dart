@@ -22,11 +22,12 @@ class OpenMatchRepository {
     required dynamic data,
   }) async {
     try {
+      log("suceess$data");
+
       final response = await dioClient.post(
         AppEndpoints.createMatches,
         data: data,
       );
-
       if (response.statusCode == 200) {
         CustomLogger.logMessage(
           msg: "Match created successfully: ${response.data}",

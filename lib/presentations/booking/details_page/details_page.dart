@@ -10,8 +10,10 @@ import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_pl
 
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
+import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
 import '../../../configs/routes/routes_name.dart';
+import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../generated/assets.dart';
 import 'details_page_controller.dart';
 
@@ -23,6 +25,8 @@ class DetailsScreen extends GetView<DetailsController> {
   @override
   Widget build(BuildContext context) {
     final data = controller.localMatchData;
+List slots=data['slot'];
+    log("Slots ${slots.length}");
 
     return BackgroundContainer(
       child: Scaffold(
@@ -85,13 +89,8 @@ class DetailsScreen extends GetView<DetailsController> {
           ],
         ),
         body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child:
-
-
-
-
-              Column(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // club + date card
@@ -187,11 +186,10 @@ class DetailsScreen extends GetView<DetailsController> {
                 ),
 
                 // game card
-                 gameCard(
-                      teamA: controller.teamA ?? [],
-                      teamB: controller.teamB??[],
-                    ),
-
+                gameCard(
+                  teamA: controller.teamA ?? [],
+                  teamB: controller.teamB??[],
+                ),
 
                 SizedBox(height: Get.height * .015),
 
@@ -280,10 +278,14 @@ class DetailsScreen extends GetView<DetailsController> {
                 ),
 
                 information(),
+
+                // Add some bottom padding to prevent content from being hidden behind the bottom bar
+                SizedBox(height: Get.height * 0.02),
               ],
             ).paddingAll(16)
-
         ),
+        // Add the bottom bar here
+        bottomNavigationBar: bottomBar(context, controller),
       ),
     );
   }
@@ -361,7 +363,7 @@ class DetailsScreen extends GetView<DetailsController> {
               color: AppColors.primaryColor,
             )
                 : ClipOval(
-              child: Image.network(image,fit: BoxFit.cover,)
+                child: Image.network(image,fit: BoxFit.cover,)
             ),
           ),
           const SizedBox(height: 5),
@@ -435,33 +437,33 @@ class DetailsScreen extends GetView<DetailsController> {
                             teamA[index]['name'].toString().isNotEmpty;
 
                         return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: hasPlayer
-                              ? playerCard(
-                            teamA[index]['name'] ?? "Unknown",
-                            true, // isPlayer = true
-                            teamA[index]['image']??"" ,
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: hasPlayer
+                                ? playerCard(
+                              teamA[index]['name'] ?? "Unknown",
+                              true, // isPlayer = true
+                              teamA[index]['image']??"" ,
 
-                          )
-                              :GestureDetector(
-                            onTap: (){
-                              controller.showDailogue(context,index: index,team: "teamA");
-                            },
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white
-                                      ),
-                                               height: 50,
-                                                         width: 50,
-                                                         child: Icon(CupertinoIcons.add),
-                                                              ),
-                                    Text("Available")
-                                  ],
-                                ),
-                              )
+                            )
+                                :GestureDetector(
+                              onTap: (){
+                                controller.showDailogue(context,index: index,team: "teamA");
+                              },
+                              child: Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white
+                                    ),
+                                    height: 50,
+                                    width: 50,
+                                    child: Icon(CupertinoIcons.add),
+                                  ),
+                                  Text("Available")
+                                ],
+                              ),
+                            )
                         );
                       },
                     ),
@@ -490,34 +492,34 @@ class DetailsScreen extends GetView<DetailsController> {
                             teamB[index]['name'].toString().isNotEmpty;
 
                         return Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: hasPlayer
-                              ? playerCard(
-                            teamB[index]['name'] ?? "Unknown",
-                            true, // isPlayer = true
-                            teamB[index]['image'] ?? "assets/images/default_avatar.svg",
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: hasPlayer
+                                ? playerCard(
+                              teamB[index]['name'] ?? "Unknown",
+                              true, // isPlayer = true
+                              teamB[index]['image'] ?? "assets/images/default_avatar.svg",
 
-                          )
-                              : GestureDetector(
-                            onTap: (){
-                              controller.showDailogue(context,index: index,team: "teamB");
-                            },
-                                child: Column(
-                                                            children: [
-                                Container(
+                            )
+                                : GestureDetector(
+                              onTap: (){
+                                controller.showDailogue(context,index: index,team: "teamB");
+                              },
+                              child: Column(
+                                children: [
+                                  Container(
 
-                                  height: 50,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white
+                                    height: 50,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white
+                                    ),
+                                    child: Icon(CupertinoIcons.add),
                                   ),
-                                  child: Icon(CupertinoIcons.add),
-                                ),
-                                Text("Available")
-                                                            ],
-                                                          ),
-                              )
+                                  Text("Available")
+                                ],
+                              ),
+                            )
                         );
                       },
                     ),
@@ -578,7 +580,10 @@ class DetailsScreen extends GetView<DetailsController> {
       ],
     ).paddingOnly(top: Get.height * 0.01);
   }
-  Widget bottomBar(BuildContext context) {
+
+  Widget bottomBar(BuildContext context, DetailsController controller) {
+    final data = controller.localMatchData;
+
     return Container(
       height: Get.height * .12,
       padding: const EdgeInsets.only(top: 10),
@@ -608,11 +613,17 @@ class DetailsScreen extends GetView<DetailsController> {
               ),
             ],
           ),
-          child: PrimaryButton(
+          child: Obx(() => PrimaryButton(
             height: 50,
-            onTap: () {},
-            text: "Book Now",
-          ),
+            onTap: () {
+              controller.createMatch();
+            },
+            // Show Book Now + Price
+            text: "Book Now Price ${data['price'] ?? '0'}",
+            child: controller.isLoading.value
+                ? AppLoader(size: 25, strokeWidth: 3)
+                : null,
+          )),
         ).paddingOnly(bottom: Get.height * 0.03),
       ),
     );

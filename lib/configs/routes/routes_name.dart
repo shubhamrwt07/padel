@@ -50,7 +50,6 @@ class RoutesName {
   static const String registration = '/registration';
   static const String packages = '/packages';
 
-
   static const String openMatch = '/openMatch';
   static const String createQuestions = '/createQuestions';
   static const String allOpenMatch = '/allOpenMatch';
