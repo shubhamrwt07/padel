@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,7 @@ import 'package:padel_mobile/presentations/booking/details_page/details_model.da
 import 'package:padel_mobile/presentations/booking/open_matches/open_match_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
-
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
@@ -16,10 +15,13 @@ import '../../../configs/components/primary_text_feild.dart';
 import '../../../configs/components/snack_bars.dart';
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../handler/logger.dart';
+import '../../../services/payment_services/razorpay.dart';
 import '../open_matches/addPlayer/add_player_controller.dart';
-
 class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
+  RxBool isProcessing = false.obs;
+  var option = ''.obs;
+  late RazorpayPaymentService _paymentService;
 
   RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{
     "name": "",
@@ -46,10 +48,42 @@ class DetailsController extends GetxController {
     "courtType": "",
     "court": {"type": "", "endRegistration": "Today at 10:00 PM"}
   };
-  Future<void> createMatch() async {
-    if (isLoading.value) return;
 
-    isLoading.value = true;
+  // Modified method to handle payment success callback
+  Future<void> onPaymentSuccess({
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  }) async {
+    log("Payment successful - ID: $paymentId, Order: $orderId, Signature: $signature");
+
+    try {
+      // Show payment success message first
+      SnackBarUtils.showSuccessSnackBar("Payment successful! Creating match...");
+
+      // Keep processing true while creating match
+      isProcessing.value = true;
+
+      // Now create the match after successful payment
+      await createMatchAfterPayment();
+
+    } catch (e) {
+      log("Error after payment success: $e");
+      SnackBarUtils.showErrorSnackBar("Payment successful but match creation failed: $e");
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
+  // Handle payment failure
+  void onPaymentError(String error) {
+    log("Payment failed: $error");
+    isProcessing.value = false;
+    SnackBarUtils.showErrorSnackBar("Payment failed: $error");
+  }
+
+  // Separate method for creating match after payment success
+  Future<void> createMatchAfterPayment() async {
     try {
       // Handle slots: convert to required format
       final slotData = localMatchData["slot"] as List<Slots>? ?? [];
@@ -89,16 +123,87 @@ class DetailsController extends GetxController {
       log("Request Body: $body");
       final response = await repository.createMatch(data: body);
 
+      // Show match created successfully message
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
       log("Match Created -> ${response.toJson()}");
 
-      // Get.back();
+      // Navigate to bottom navigation after successful match creation
       Get.offAllNamed(RoutesName.bottomNav);
     } catch (e, st) {
-      log("error=$e,$st");
-    } finally {
-      isLoading.value = false;
+      log("Match creation error: $e, $st");
+      SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
+      throw e; // Re-throw to be caught by payment success handler
     }
+  }
+
+  // Main method that immediately shows payment sheet when book button is pressed
+  Future<void> initiatePaymentAndCreateMatch() async {
+    // Validate that teams have at least minimum required players
+    if (!validateTeams()) {
+      SnackBarUtils.showWarningSnackBar("Please add required players to both teams");
+      return;
+    }
+
+    // Start processing immediately when book button is hit
+    isProcessing.value = true;
+
+    try {
+      // Extract price from localMatchData
+      final priceString = localMatchData['price']?.toString() ?? '0';
+      final price = double.tryParse(priceString.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+
+      if (price <= 0) {
+        SnackBarUtils.showErrorSnackBar("Invalid price amount");
+        isProcessing.value = false;
+        return;
+      }
+
+      // Immediately open Razorpay payment sheet using your service structure
+      await _paymentService.initiatePayment(
+        keyId: 'rzp_test_1DP5mmOlF5G5ag',
+        amount: price,
+        currency: 'INR',
+        name: 'Matchacha Padel',
+        description: 'Payment for court booking and match creation',
+        orderId: '', // You can generate order ID from your backend if needed
+        userEmail: profileController.profileModel.value?.response?.email ?? 'test@example.com',
+        userContact: '9999999999',
+        notes: {
+          'user_id': profileController.profileModel.value?.response?.sId ?? '123',
+          'club_id': localMatchData['clubId'],
+          'match_date': localMatchData['matchDate'].toString(),
+          'match_time': localMatchData['matchTime'].toString(),
+        },
+        theme: '#F37254', // Your app's primary color
+        paymentMethods: ['card', 'netbanking', 'upi', 'wallet'], // Enable all methods
+      );
+    } catch (e) {
+      isProcessing.value = false;
+      log("Payment initiation error: $e");
+      SnackBarUtils.showErrorSnackBar("Failed to initiate payment: $e");
+    }
+    // Note: isProcessing will be set to false in success/failure callbacks
+  }
+
+  // Validate teams before payment
+  bool validateTeams() {
+    // Check if at least one player in Team A has valid data
+    bool teamAValid = teamA.isNotEmpty &&
+        teamA.any((player) =>
+        player['name'] != null &&
+            player['name'].toString().isNotEmpty &&
+            player['userId'] != null &&
+            player['userId'].toString().isNotEmpty);
+
+    // For open matches, Team B can be empty initially
+    // But you can add validation if needed
+    return teamAValid;
+  }
+
+  // Legacy method - kept for backward compatibility but now redirects to payment
+  @Deprecated('Use initiatePaymentAndCreateMatch instead')
+  Future<void> startPayment() async {
+    await initiatePaymentAndCreateMatch();
   }
 
   ///show Cancel Match Dialog Box-----------------------------------------------
@@ -132,6 +237,7 @@ class DetailsController extends GetxController {
       ),
     );
   }
+
   OpenMatchesController openMatchesController = Get.put(OpenMatchesController());
   ProfileController profileController = Get.put(ProfileController());
   final fullNameController = TextEditingController();
@@ -491,6 +597,33 @@ class DetailsController extends GetxController {
 
   @override
   void onInit() {
+    // Initialize payment service with callbacks
+    _paymentService = RazorpayPaymentService();
+
+    // Set up payment callbacks
+    _paymentService.onPaymentSuccess = (response) {
+      onPaymentSuccess(
+        paymentId: response.paymentId ?? '',
+        orderId: response.orderId ?? '',
+        signature: response.signature ?? '',
+      );
+    };
+
+    _paymentService.onPaymentFailure = (response) {
+      String errorMessage = 'Payment failed';
+      if (response.code == Razorpay.PAYMENT_CANCELLED) {
+        errorMessage = 'Payment was cancelled';
+      } else if (response.message != null) {
+        errorMessage = response.message!;
+      }
+      onPaymentError(errorMessage);
+    };
+
+    _paymentService.onExternalWallet = (response) {
+      // Handle external wallet if needed
+      log('External wallet used: ${response.walletName}');
+    };
+
     WidgetsBinding.instance.addPostFrameCallback((v) {
       profileController.fetchUserProfile();
       // Create a new map to ensure type safety
@@ -503,5 +636,12 @@ class DetailsController extends GetxController {
       teamA.first.addAll(profileData);
     });
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    // Dispose payment service
+    _paymentService.dispose();
+    super.onClose();
   }
 }

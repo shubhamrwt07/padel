@@ -76,6 +76,8 @@ class CreateOpenMatchesController extends GetxController {
    detailsController.localMatchData.update("matchDate", (v)=>selectedDate.value??"");
    detailsController.localMatchData.update("matchTime", (v)=>selectedSlots.value.first.time??"");
    detailsController.localMatchData.update("price", (v)=>totalAmount.toString()??"");
+
+   detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
    detailsController.localMatchData.update("slot", (v)=>selectedSlots.value);
    detailsController.localMatchData.update("courtName", (v)=>slots.value!.data![0].courtName??"");
    // detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
@@ -212,10 +214,8 @@ class CreateOpenMatchesController extends GetxController {
         _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
       }
       _recalculateTimeOfDayCounts();
-
       filterSlotsByTimeOfDay();
       _autoSelectTab();
-
       slots.refresh();
 
     } catch (e, stackTrace) {
@@ -226,7 +226,6 @@ class CreateOpenMatchesController extends GetxController {
       isLoadingCourts.value = false;
     }
   }
-
   void toggleSlotSelection(Slots slot, {String? courtId, String? courtName}) {
     // Resolve court info
     Map<String, String>? resolvedCourtInfo;
@@ -241,9 +240,7 @@ class CreateOpenMatchesController extends GetxController {
     } else {
       resolvedCourtInfo = _findCourtInfoForSlot(slot);
     }
-
     if (resolvedCourtInfo == null) return;
-
     final slotId = slot.sId ?? '';
     final resolvedCourtId = resolvedCourtInfo['courtId'] ?? '';
     final resolvedCourtName = resolvedCourtInfo['courtName'] ?? '';
