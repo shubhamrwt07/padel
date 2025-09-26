@@ -659,14 +659,15 @@ class DetailsScreen extends GetView<DetailsController> {
             ],
           ),
           child: Obx(
-            () => PrimaryButton(
+                () => PrimaryButton(
               height: 50,
               onTap: () {
-                controller.createMatch();
+                // Call the new payment method instead of directly creating match
+                controller.initiatePaymentAndCreateMatch();
               },
               // Show Book Now + Price
-              text: "Book Now Price ${data['price'] ?? '0'}",
-              child: controller.isLoading.value
+              text: "Pay & Book Now ${data['price'] ?? '₹0'}",
+              child: (controller.isLoading.value || controller.isProcessing.value)
                   ? AppLoader(size: 25, strokeWidth: 3)
                   : null,
             ),
@@ -674,8 +675,7 @@ class DetailsScreen extends GetView<DetailsController> {
         ).paddingOnly(bottom: Get.height * 0.03),
       ),
     );
-  }
-}
+  }}
 
 class BackgroundContainer extends StatelessWidget {
   final Widget child;

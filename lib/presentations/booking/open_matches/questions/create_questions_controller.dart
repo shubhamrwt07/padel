@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
-import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 
 class CreateQuestionsController extends GetxController{

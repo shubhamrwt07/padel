@@ -21,11 +21,29 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       bottomNavigationBar: PrimaryButton(
-          onTap: () {
-            controller.onNext();
-          },
-          text: "Next"
-      ).paddingOnly(left: Get.width*0.05, right: Get.width*0.05, bottom: Get.height*0.05, top: 10),
+        onTap: () {
+          if (controller.getTotalSelectionsCount() == 0) {
+            Get.snackbar(
+              "No Slot Selected",
+              "Please select at least one slot before continuing.",
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: AppColors.primaryColor,
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(12),
+              borderRadius: 8,
+            );
+            return;
+          }
+          controller.onNext();
+        },
+        text: "Next",
+      ).paddingOnly(
+        left: Get.width * 0.05,
+        right: Get.width * 0.05,
+        bottom: Get.height * 0.05,
+        top: 10,
+      ),
+
       appBar: primaryAppBar(title: Text("Create match"), centerTitle: true, context: context),
       body: SingleChildScrollView(
         child: Padding(
