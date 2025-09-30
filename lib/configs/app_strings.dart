@@ -57,6 +57,7 @@ class AppStrings{
   static const String editProfile = "Edit Profile";
   static const String booking = "Booking";
   static const String payments = "Payments";
+  static const String openMatch = "Open Match";
   static const String cart = "Cart";
   static const String helpSupport = "Help & Support";
   static const String privacy = "Privacy";

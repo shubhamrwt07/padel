@@ -9,7 +9,6 @@ import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
 import '../../configs/routes/routes_name.dart';
 import '../../generated/assets.dart';
-
 class CartScreen extends StatelessWidget {
   final String buttonType;
   final CartController controller = Get.put(CartController());

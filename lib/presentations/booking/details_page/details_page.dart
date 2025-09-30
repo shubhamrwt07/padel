@@ -1,13 +1,9 @@
 import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
-import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
-
+import 'package:intl/intl.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../configs/components/loader_widgets.dart';
@@ -19,15 +15,12 @@ import 'details_page_controller.dart';
 
 class DetailsScreen extends GetView<DetailsController> {
   final DetailsController controller = Get.put(DetailsController());
-
   DetailsScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     final data = controller.localMatchData;
     List slots = data['slot'];
     log("Slots ${slots.length}");
-
     return BackgroundContainer(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -105,6 +98,7 @@ class DetailsScreen extends GetView<DetailsController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
+
                       title: Text(
                         data['clubName'] ?? "Unknown club",
                         style:
@@ -118,14 +112,14 @@ class DetailsScreen extends GetView<DetailsController> {
                             ),
                       ),
                       subtitle: Text(
-                        "${data['matchDate'] ?? ""} | ${data['matchTime'] ?? ""}",
-                        style:
-                            Get.textTheme.displaySmall?.copyWith(
-                              fontSize: 11,
-                              color: AppColors.darkGreyColor,
-                            ) ??
+                        "${formatMatchDateAt(data['matchDate'] ?? "")} | ${data['matchTime'] ?? ""}",
+                        style: Get.textTheme.displaySmall?.copyWith(
+                          fontSize: 11,
+                          color: AppColors.darkGreyColor,
+                        ) ??
                             const TextStyle(fontSize: 11),
                       ),
+
                     ),
                     Center(
                       child: Container(
@@ -713,4 +707,41 @@ class BackgroundContainer extends StatelessWidget {
       ),
     );
   }
+
 }
+String formatMatchDateAt(dynamic dateInput) {
+  if (dateInput == null) return "";
+
+  try {
+    DateTime date;
+    if (dateInput is DateTime) {
+      date = dateInput;
+    } else if (dateInput is String && dateInput.isNotEmpty) {
+      date = DateTime.parse(dateInput);
+    } else {
+      return "";
+    }
+
+    final day = date.day;
+    final suffix = getDaySuffix(day);
+    final month = DateFormat("MMM").format(date);
+    final year = date.year;
+    return "$day$suffix $month $year";
+  } catch (e) {
+    return "";
+  }
+}
+String getDaySuffix(int day) {
+  if (day >= 11 && day <= 13) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+

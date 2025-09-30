@@ -37,6 +37,8 @@ dependencies:
   firebase_core:
   flutter_dash:
   shimmer:
+  firebase_crashlytics:
+
 
 
 dev_dependencies:

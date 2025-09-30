@@ -56,6 +56,7 @@ class Assets {
   static const String imagesLocation = 'assets/images/location.svg';
   static const String imagesLocker = 'assets/images/locker.svg';
   static const String imagesNum = 'assets/images/num.svg';
+  static const String imagesOpenMatch = 'assets/images/openMatch.png';
   static const String imagesPadelIcon = 'assets/images/padel_icon.svg';
   static const String imagesParking = 'assets/images/parking.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';

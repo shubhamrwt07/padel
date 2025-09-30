@@ -5,6 +5,7 @@ import '../../core/network/dio_client.dart';
 import '../../data/request_models/open matches/add_player_to_open_match_model.dart';
 import '../../data/request_models/open matches/create_user_for_open_match_model.dart';
 import '../../data/response_models/openmatch_model/all_open_matches.dart';
+import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../data/response_models/openmatch_model/open_match_model.dart';
 import '../../handler/logger.dart';
 class OpenMatchRepository {
@@ -39,6 +40,40 @@ class OpenMatchRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Match creation failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+  ///Get Open Match Bookings by Type (Upcoming / Completed)---------------------------
+  Future<OpenMatchBookingModel?> getOpenMatchBookings({
+    required String type, // "upcoming" or "completed"
+  }) async {
+    try {
+      final url =
+          "${AppEndpoints.openMatchBooking}?type=$type";
+
+      CustomLogger.logMessage(
+        msg: "Fetching Open Match Bookings: $url",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.get(url);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Open Match Bookings fetched successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return OpenMatchBookingModel.fromJson(response.data);
+      } else {
+        throw Exception(
+            "Failed to fetch open match bookings. Status: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Error fetching open match bookings: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );
