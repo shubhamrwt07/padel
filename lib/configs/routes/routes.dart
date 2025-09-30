@@ -54,6 +54,8 @@ import '../../presentations/booking/open_matches/questions/create_question_scree
 import '../../presentations/bottomnav/bottom_nav_binding.dart';
 import '../../presentations/chat/chat_binding.dart';
 import '../../presentations/booking/open_matches/open_match_binding.dart';
+import '../../presentations/openmatchbooking/openmatch_booking_binding.dart';
+import '../../presentations/openmatchbooking/openmatch_booking_screen.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/registration/registration_americano_screen.dart';
 import '../../presentations/scoreview/score_view_screen .dart';
@@ -267,6 +269,13 @@ class Routes {
       name: RoutesName.createOpenMatch,
       page: () => CreateOpenMatchesScreen(),
       binding: CreateOpenMatchesBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.matchBooking,
+      page: () => OpenMatchBookingScreen(),
+      binding: OpenMatchBookingBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

@@ -1,0 +1,596 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
+
+import '../../configs/app_colors.dart';
+import '../../configs/components/app_bar.dart';
+import '../../configs/components/primary_button.dart';
+import '../../configs/components/no_internet_widget.dart';
+
+import '../../configs/routes/routes_name.dart';
+import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
+import '../../generated/assets.dart';
+import '../../handler/logger.dart';
+import '../booking/details_page/details_page.dart';
+import 'openmatch_booking_controller.dart';
+
+class OpenMatchBookingScreen extends StatelessWidget {
+  final String? buttonType;
+  final OpenMatchBookingController controller =
+  Get.put(OpenMatchBookingController());
+
+  OpenMatchBookingScreen({super.key, this.buttonType});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: primaryAppBar(
+        centerTitle: true,
+
+        title: const Text("Open matches"),
+        context: context,
+      ),
+      body:           Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          tabBar(controller),
+          Expanded(
+            child: TabBarView(
+              controller: controller.tabController,
+              children: [
+                _buildMatchesTab(context, completed: false),
+                _buildMatchesTab(context, completed: true),
+              ],
+            ),
+          ),
+        ],
+      )
+      ,
+    );
+  }
+
+  Widget tabBar(OpenMatchBookingController controller) {
+    return Container(
+      color: Colors.white,
+      child: TabBar(
+        controller: controller.tabController,
+        indicatorColor: AppColors.primaryColor,
+        labelColor: AppColors.primaryColor,
+        unselectedLabelColor: AppColors.labelBlackColor,
+        labelStyle:
+        const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        unselectedLabelStyle:
+        const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        tabs: const [
+          Tab(text: "Upcoming"),
+          Tab(text: "Completed"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchesTab(BuildContext context, {required bool completed}) {
+    return RefreshIndicator(
+      edgeOffset: 1,
+      displacement: Get.width * .2,
+      color: AppColors.primaryColor,
+      onRefresh: () async{
+        if (controller.tabController.index == 0) {
+          controller. fetchOpenMatchesBooking(type: 'upcoming');
+        } else if (controller.tabController.index == 1) {
+          controller.   fetchOpenMatchesBooking(type: 'completed');
+        }
+      },
+      child: Column(
+        children: [
+          _buildAllMatchesAndFilter(context),
+          Obx(() {
+            if (controller.isLoading.value) {
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: 6,
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  itemBuilder: (context, index) =>
+                      // CircularProgressIndicator()
+                      const MatchCardSkeleton().paddingOnly(bottom: 8),
+                ),
+              );
+            }
+            if (controller.openMatchesList.isEmpty) {
+              return Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No Open Matches available.",
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Expanded(
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: controller.openMatchesList.length,
+                padding: EdgeInsets.zero,
+                itemBuilder: (context, index) {
+                  final matches = controller.openMatchesList[index];
+                  return Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: _buildMatchCard(
+                      context,
+                      match: matches,
+                      completed: completed,
+                    ),
+                  );
+                },
+              ),
+            );
+          }),
+        ],
+      ).paddingOnly(left: Get.width * 0.03, right: Get.width * 0.03),
+    );
+  }
+
+  Widget _buildAllMatchesAndFilter(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("All Matches", style: Get.textTheme.headlineMedium),
+        // GestureDetector(
+        //   onTap: () {
+        //     Get.bottomSheet(
+        //       filter(context),
+        //       isScrollControlled: true,
+        //       backgroundColor: Colors.transparent,
+        //     );
+        //   },
+        //   child: Container(
+        //     height: 35,
+        //     width: 35,
+        //     decoration: BoxDecoration(
+        //       color: AppColors.primaryColor.withOpacity(0.2),
+        //       borderRadius: BorderRadius.circular(5),
+        //     ),
+        //     child: Image.asset(Assets.imagesIcFilter, scale: 3.5),
+        //   ),
+        // ),
+      ],
+    ).paddingOnly(
+      top: Get.height * 0.01,
+      bottom: 5,
+      left: Get.width * 0.025,
+      right: Get.width * 0.025,
+    );
+  }
+
+  Widget _buildMatchCard(
+      BuildContext context, {
+        bool completed = false,
+        OpenMatchBookingData? match,
+      }) {
+    return GestureDetector(
+      onTap: () {
+        final id = match?.sId;
+        Get.to(
+              () => DetailsScreen(
+            // buttonType: completed ? "completed" : "upcoming",
+            // matchId: id,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        CustomLogger.logMessage(
+          msg: "Selected Match Id -> $id",
+          level: LogLevel.debug,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: AppColors.primaryColor.withOpacity(0.1),
+          border: Border.all(color: AppColors.blackColor.withOpacity(0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildMatchHeader(context, match),
+            _buildPlayerRow(completed: completed, match: match),
+            Divider(
+              thickness: 1.5,
+              height: 0,
+              color: AppColors.blackColor.withOpacity(0.5),
+            ).paddingOnly(bottom: 3),
+            _buildMatchFooter(context, match),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match) {
+    final slots = match?.slot ?? [];
+    final times = slots
+        .expand((slot) => slot.slotTimes ?? [])
+        .map((st) => st.time ?? "")
+        .where((t) => t.isNotEmpty)
+        .join(" | ");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: Get.width * 0.6,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "${formatDayOnly(match?.matchDate ?? "")} ",
+                  style: Get.textTheme.headlineSmall!.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                  "${formatDateOnly(match?.matchDate ?? "")} | $times",
+                  style: Get.textTheme.headlineSmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            Text(
+              "${match?.skillLevel ?? "N/A"} | ",
+              style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
+            ),
+            Icon(
+              match?.gender == "female"
+                  ? Icons.female
+                  : match?.gender == "male"
+                  ? Icons.male
+                  : Icons.wc,
+              size: 14,
+            ),
+            Text(
+              match?.gender?.capitalizeFirst ?? "",
+              style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
+            ),
+          ],
+        ).paddingOnly(top: 2),
+      ],
+    ).paddingOnly(bottom: 8);
+  }
+
+  Widget _buildPlayerRow({
+    required bool completed,
+    required OpenMatchBookingData? match,
+  }) {
+    final teamAPlayers = match?.teamA ?? [];
+    final teamBPlayers = match?.teamB ?? [];
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // --- Team A ---
+          ...teamAPlayers.take(2).map((player) {
+            final user = player.userId;
+            if (!completed && (user?.name?.isEmpty ?? true)) {
+              // In upcoming: replace empty with Add slot
+              return _buildAddPlayerSlot(
+                onTap: () {
+                  final id = match?.sId;
+                  Get.toNamed(
+                    RoutesName.addPlayer,
+                    arguments: {"matchId": id, "team": "teamA"},
+                  );
+                },
+              ).paddingOnly(bottom: 6);
+            }
+            return _buildPlayerSlot(
+              imageUrl: user?.profilePic ?? '',
+              name: user?.name ?? '',
+              category: true,
+              completed: completed,
+              level: user?.level?.split(" ").first ?? "-",
+            ).paddingOnly(bottom: 6);
+          }),
+
+          if (completed)
+          // Empty slots if completed → show Unknown
+            ...List.generate(
+              (2 - teamAPlayers.length.clamp(0, 2)),
+                  (_) => _buildPlayerSlot(
+                imageUrl: '',
+                name: '',
+                category: true,
+                completed: completed,
+                level: "-",
+              ).paddingOnly(bottom: 6),
+            )
+          else if (teamAPlayers.length < 2)
+          // Show Add icon only if less than 2 players
+            _buildAddPlayerSlot(
+              onTap: () {
+                final id = match?.sId;
+                Get.toNamed(
+                  RoutesName.addPlayer,
+                  arguments: {"matchId": id, "team": "teamA"},
+                );
+              },
+            ).paddingOnly(bottom: 6),
+
+
+          // Divider
+          Container(
+            width: 1,
+            color: AppColors.blackColor.withOpacity(0.5),
+          ).paddingOnly(bottom: 25),
+
+          // --- Team B ---
+          ...teamBPlayers.take(2).map((player) {
+            final user = player.userId;
+            if (!completed && (user?.name?.isEmpty ?? true)) {
+              return _buildAddPlayerSlot(
+                onTap: () {
+                  final id = match?.sId;
+                  Get.toNamed(
+                    RoutesName.addPlayer,
+                    arguments: {"matchId": id, "team": "teamB"},
+                  );
+                },
+              ).paddingOnly(bottom: 6);
+            }
+            return _buildPlayerSlot(
+              imageUrl: user?.profilePic ?? '',
+              name: user?.name ?? '',
+              category: true,
+              completed: completed,
+              level: user?.level?.split(" ").first ?? "-",
+            ).paddingOnly(bottom: 6);
+          }),
+
+          if (completed)
+            ...List.generate(
+              (2 - teamBPlayers.length.clamp(0, 2)),
+                  (_) => _buildPlayerSlot(
+                imageUrl: '',
+                name: '',
+                category: true,
+                completed: completed,
+                level: "-",
+              ).paddingOnly(bottom: 6),
+            )
+          else if (teamAPlayers.length < 2)
+          // Show Add icon only if less than 2 players
+            _buildAddPlayerSlot(
+              onTap: () {
+                final id = match?.sId;
+                Get.toNamed(
+                  RoutesName.addPlayer,
+                  arguments: {"matchId": id, "team": "teamB"},
+                );
+              },
+            ).paddingOnly(bottom: 6),
+
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildPlayerSlot({
+    required String imageUrl,
+    required String name,
+    required bool category,
+    required bool completed,
+    required String level,
+  }) {
+    return Column(
+      children: [
+        Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.whiteColor,
+            border: Border.all(
+              color:
+              imageUrl.isEmpty ? AppColors.primaryColor : Colors.transparent,
+            ),
+          ),
+          child: imageUrl.isEmpty
+              ? CircleAvatar(
+            backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+            child: Text(
+              (name.isNotEmpty ? name[0] : "?").toUpperCase(),
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )
+              : ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                width: 50,
+                height: 50,
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child:
+                      CircularProgressIndicator()
+                    // LoadingWidget(color: AppColors.primaryColor),
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => CircleAvatar(
+                backgroundColor: Colors.grey.shade300,
+                child: Text(
+                  (name.isNotEmpty ? name[0] : "?").toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: Get.width * 0.13,
+          child: Text(
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            name.isNotEmpty ? name : 'Unknown',
+            style: Get.textTheme.bodySmall!.copyWith(
+              color: name.isNotEmpty
+                  ? AppColors.darkGreyColor
+                  : AppColors.primaryColor,
+              fontSize: 11,
+            ),
+          ).paddingOnly(top: Get.height * 0.003),
+        ),
+        if (category)
+          Container(
+            height: 17,
+            width: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: AppColors.secondaryColor.withOpacity(0.2),
+            ),
+            child: Text(
+              level,
+              style: Get.textTheme.displaySmall!.copyWith(
+                color: AppColors.secondaryColor,
+              ),
+            ),
+          ).paddingOnly(top: 4),
+      ],
+    );
+  }
+
+  Widget _buildMatchFooter(BuildContext context, OpenMatchBookingData? match) {
+    final slots = match?.slot ?? [];
+    final totalAmount = slots.isNotEmpty
+        ? slots
+        .expand((slot) => slot.slotTimes ?? [])
+        .map((st) => (st.amount ?? 0) as int)
+        .fold(0, (a, b) => a + b)
+        : 0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              match?.clubId?.clubName ?? "N/A",
+              style: Get.textTheme.labelLarge!.copyWith(fontSize: 11),
+            ),
+            Row(
+              children: [
+                Image.asset(Assets.imagesIcLocation, scale: 3),
+                Text(
+                  "${match?.clubId?.city ?? "N/A"} ${match?.clubId?.zipCode ?? ""}",
+                  style: Get.textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Icon(Icons.currency_rupee,
+                size: 18, color: AppColors.primaryColor)
+                .paddingOnly(top: 2),
+            Text(
+              formatAmount(totalAmount),
+              style: Get.textTheme.titleMedium!.copyWith(
+                color: AppColors.primaryColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddPlayerSlot({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.whiteColor,
+              border: Border.all(color: AppColors.primaryColor),
+            ),
+            child: const Icon(Icons.add,
+                size: 24, color: AppColors.primaryColor),
+          ),
+          SizedBox(
+            width: Get.width * 0.13,
+            child: Text(
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              "Available",
+              style: Get.textTheme.bodySmall!.copyWith(
+                color: AppColors.primaryColor,
+                fontSize: 11,
+              ),
+            ).paddingOnly(top: Get.height * 0.003),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  // Helper functions
+  String formatDayOnly(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('EEE').format(date);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String formatDateOnly(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd MMM yyyy').format(date);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String formatAmount(int amount) => amount.toString();
+}

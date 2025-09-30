@@ -268,7 +268,7 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
             ? PrimaryButton(
             width: Get.width * 0.35,
             height: 40,
-            onTap: (){controller.onSubmit();}, // ✅ direct API call
+            onTap: (){controller.onSubmit();},
             text: "Submit")
             : ElevatedButton(
           onPressed: controller.goNext,
