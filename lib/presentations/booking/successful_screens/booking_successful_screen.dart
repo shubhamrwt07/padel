@@ -39,7 +39,7 @@ class BookingSuccessfulScreen extends StatelessWidget {
             ),
           ).paddingOnly(bottom: Get.height * 0.02),
           GestureDetector(
-            onTap: () => Get.toNamed(RoutesName.bookingConfirmAndCancel),
+            onTap: () => Get.toNamed(RoutesName.bookingHistory),
             child: Container(
               color: Colors.transparent,
               child: Text(

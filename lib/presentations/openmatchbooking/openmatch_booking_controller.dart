@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
@@ -8,13 +9,12 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
   late TabController tabController;
 
   RxString selectedSlot = 'Morning'.obs;
+
   RxBool showFilter = false.obs;
   final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
   final RxString selectedCategory = 'Select Category'.obs;
-
   final List<String> categories = ['Level A', 'Level B', 'Level C'];
   final GlobalKey dropdownKey = GlobalKey();
-
   var selectedDate = DateTime.now().obs;
 
   RxList<String> selectedTimings = <String>[].obs;
@@ -29,23 +29,28 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
   @override
   void onInit() {
     super.onInit();
-
-    // 1️⃣ Initialize TabController first
     tabController = TabController(length: 2, vsync: this);
 
-    // 2️⃣ Add listener for tab changes
-    tabController.addListener(() {
-      if (!tabController.indexIsChanging) {
-        String type = tabController.index == 0 ? 'upcoming' : 'completed';
-        fetchOpenMatchesBooking(type: type);
+    // Use animation listener instead of regular listener
+    tabController.animation!.addListener(() {
+      final value = tabController.animation!.value;
+      // Only trigger when animation completes
+      if (value == value.roundToDouble()) {
+        final index = value.round();
+        if (index != tabController.previousIndex) {
+          _onTabChanged(index);
+        }
       }
     });
-
-    // 3️⃣ Call the initial API after setting up TabController
     fetchOpenMatchesBooking(type: 'upcoming');
   }
-
-
+  void _onTabChanged(int newIndex) {
+    // Immediately clear and show loading
+    openMatchesList.value = <OpenMatchBookingData>[];
+    isLoading.value = true;
+    String type = newIndex == 0 ? 'upcoming' : 'completed';
+    fetchOpenMatchesBooking(type: type);
+  }
   void selectSlot(String slot) {
     selectedSlot.value = slot;
   }
@@ -82,16 +87,17 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
   }
 
   Future<void> fetchOpenMatchesBooking({required String type}) async {
-    isLoading.value = true;
     try {
       final response = await repository.getOpenMatchBookings(type: type);
+
       if ((response?.data ?? []).isNotEmpty) {
-        openMatchesList.assignAll(response!.data!.toList());
+        openMatchesList.value = response!.data!.toList();
       } else {
-        openMatchesList.clear();
+        openMatchesList.value = [];
       }
     } catch (e) {
       CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
+      openMatchesList.value = [];
     } finally {
       isLoading.value = false;
     }
@@ -101,5 +107,11 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
     showNoInternetScreen.value = false;
     String type = tabController.index == 0 ? 'upcoming' : 'completed';
     await fetchOpenMatchesBooking(type: type);
+  }
+
+  @override
+  void onClose() {
+    tabController.dispose();
+    super.onClose();
   }
 }

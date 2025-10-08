@@ -136,10 +136,11 @@ class BookSessionController extends GetxController {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await getAvailableCourtsById(argument.id!);
+
+
     });
   }
-
-  @override
+   @override
   void onClose() {
     selectedSlots.clear();
     selectedSlotsWithCourtInfo.clear();

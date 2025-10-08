@@ -163,9 +163,9 @@ class BookSession extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Top Row
+        /// Top Row with only title
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               "Select Date",
@@ -173,44 +173,10 @@ class BookSession extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            /// Toggle wrapped with Obx
-            Obx(() => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    controller.showUnavailableSlots.value
-                        ? "Show Available Slots"
-                        : "Show Unavailable Slots",
-                    style: Get.textTheme.labelSmall
-                        ?.copyWith(color: AppColors.darkGrey),
-                  ),
-                  const SizedBox(width: 8),
-                  Transform.scale(
-                    scale: 0.7, // 👈 shrink switch
-                    child: CupertinoSwitch(
-                      value: controller.showUnavailableSlots.value,
-                      activeTrackColor: AppColors.secondaryColor,
-                      onChanged: (val) async {
-                        controller.showUnavailableSlots.value = val;
-
-                        controller.isLoadingCourts.value = true;
-                        await controller.getAvailableCourtsById(
-                          controller.argument.id!,
-                          showUnavailable: controller.showUnavailableSlots.value,
-                        );
-                        controller.slots.refresh();
-                        controller.isLoadingCourts.value = false;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ))
-
           ],
-        ),
+        ).paddingOnly(top: 10),
+
+        const SizedBox(height: 8),
 
         /// Date picker wrapped separately with Obx
         Obx(() => Row(
@@ -222,7 +188,7 @@ class BookSession extends StatelessWidget {
                 height: Get.height*0.07,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10),
                     color: AppColors.textFieldColor.withAlpha(100),
                     border: Border.all(color: AppColors.blackColor.withAlpha(10))
                 ),
@@ -246,13 +212,9 @@ class BookSession extends StatelessWidget {
                 selectionMode: SelectionMode.alwaysFirst(),
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
-
-                /// 👇 Wrap focusedDate with Obx
                 focusedDate: controller.selectedDate.value,
-
                 itemExtent: 55,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                  /// 👇 Wrap this with Obx so each item listens to Rx values
                   return Obx(() {
                     final now = DateTime.now();
                     final today = DateTime(now.year, now.month, now.day);
@@ -347,7 +309,6 @@ class BookSession extends StatelessWidget {
                     );
                   });
                 },
-
                 onDateChange: (date) async {
                   controller.selectedDate.value = date;
                   controller.isLoadingCourts.value = true;
@@ -360,9 +321,65 @@ class BookSession extends StatelessWidget {
                 },
               ),
             )
-
           ],
         )),
+
+        const SizedBox(height: 12),
+
+        /// Toggle row moved here below date picker
+        Obx(() => Transform.translate(
+          offset: Offset(0, -Get.height * .05),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              /// Left text — indicates current view
+              Text(
+                controller.showUnavailableSlots.value
+                    ? "Unavailable Slots"
+                    : "Available Slots",
+                style: Get.textTheme.titleSmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blackColor,
+                ),
+              ),
+
+              /// Right toggle + label
+              Row(
+                children: [
+                  Text(
+                    controller.showUnavailableSlots.value
+                        ? "Show Available Slots"
+                        : "Show Unavailable Slots",
+                    style: Get.textTheme.labelSmall?.copyWith(
+                      color: AppColors.darkGrey,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Transform.scale(
+                    scale: 0.8,
+                    child: CupertinoSwitch(
+                      value: controller.showUnavailableSlots.value,
+                      activeTrackColor: AppColors.secondaryColor,
+                      onChanged: (val) async {
+                        controller.showUnavailableSlots.value = val;
+                        controller.isLoadingCourts.value = true;
+
+                        await controller.getAvailableCourtsById(
+                          controller.argument.id!,
+                          showUnavailable: controller.showUnavailableSlots.value,
+                        );
+
+                        controller.slots.refresh();
+                        controller.isLoadingCourts.value = false;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )),
+
       ],
     );
   }
@@ -734,7 +751,7 @@ class BookSession extends StatelessWidget {
           border: Border.all(
             color: isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
 
-          width: 1,
+            width: 1,
           ),
         ),
         alignment: Alignment.center,

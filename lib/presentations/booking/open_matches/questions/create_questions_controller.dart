@@ -48,7 +48,14 @@ class CreateQuestionsController extends GetxController{
             return;
           }
           break;
+
         case 6:
+          if (selectPlayerLevel.value.isEmpty) {
+            SnackBarUtils.showWarningSnackBar("Required\nPlease select player level");
+            return;
+          }
+          break;
+        case 7:
           if (selectedWallRebound.value.isEmpty) {
             SnackBarUtils.showWarningSnackBar("Required\nPlease select wall rebound before submitting");
             return;
@@ -56,7 +63,7 @@ class CreateQuestionsController extends GetxController{
           break;
       }
 
-      if (currentStep.value < 6) {
+      if (currentStep.value < 7) {
         currentStep.value++;
       }
     }
@@ -75,8 +82,9 @@ class CreateQuestionsController extends GetxController{
   //
   var selectedVolley = ''.obs;
   var selectedWallRebound = ''.obs;
+  var selectPlayerLevel =''.obs;
   onSubmit(){
-    log("Selected answers ${selectedLevel.value} ${selectedSport.value} ${selectedTraining.value} ${selectedAgeGroup.value} ${selectedVolley.value} ${selectedWallRebound.value}");
+    log("Selected answers ${selectedLevel.value} ${selectedSport.value} ${selectedTraining.value} ${selectedAgeGroup.value} ${selectedVolley.value} ${selectedWallRebound.value} ${selectPlayerLevel.value}");
     Get.to(()=>DetailsScreen (),);
 
   }
