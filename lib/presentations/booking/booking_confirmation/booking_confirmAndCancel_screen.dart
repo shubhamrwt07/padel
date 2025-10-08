@@ -176,7 +176,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
               // ✅ Show booking status
               bookingDetailRow(
                 context,
-                "Booking Status" ,
+                "Status" ,
                 booking.bookingStatus?.capitalizeFirst ?? "N/A",
               ),
 

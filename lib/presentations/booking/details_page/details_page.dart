@@ -133,7 +133,7 @@ class DetailsScreen extends GetView<DetailsController> {
                       children: [
                         gameDetails(
                           "Gender",
-                          "${data['gender']}",
+                          "${'male'}",
                           AppColors.blackColor,
                           13,
                         ),

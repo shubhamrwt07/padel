@@ -41,7 +41,9 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
                       if (controller.currentStep.value == 3) _buildTrainingSelection(controller),
                       if (controller.currentStep.value == 4) _buildAgeSelection(controller),
                       if (controller.currentStep.value == 5) _buildVolleySelection(controller),
-                      if (controller.currentStep.value == 6) _buildWallReboundSelection(controller),
+                      if (controller.currentStep.value == 6) _buildPlayerLevel(controller),
+
+                      if (controller.currentStep.value == 7) _buildWallReboundSelection(controller),
                     ],
                   ),
                 ),
@@ -77,7 +79,7 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
   }
   Widget _buildProgressBar() {
     return Row(
-      children: List.generate(6, (index) {
+      children: List.generate(7, (index) {
         bool isActive = controller.currentStep.value > index;
         return Expanded(
           child: Container(
@@ -209,6 +211,32 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
       ],
     );
   }
+  Widget _buildPlayerLevel(CreateQuestionsController controller)  {
+    final options = [
+      'A – Top Player: Can compete in professional-level tournaments, executing advanced shots with precision.',
+      'B1 – Experienced Player: Consistently performs smashes outside the court, dominates game stages, and adapts tactics to control the match.',
+      'B2 – Advanced Player: Shows consistency with all shots, controls game pace and shot depth, executes winners, and adjusts strategies based on play.',
+      'C1 – Confident Player: Comfortably controls ball speed and direction, uses the double glass effectively, makes strategic shot choices, and communicates with a partner to gain an edge.',
+      'C2 – Intermediate Player: Displays consistency with basic shots, familiar with double glass usage, incorporates spin, and positions well on the court with a partner.',
+      'D1 – Amateur Player: Executes all basic shots, familiar with glass usage, and transitions smoothly between the net and baseline.',
+      'D2 – Novice Player: Plays a few games per month, understands the rules, and manages short rallies with control.',
+      'E – Entry Level: Ideal for players who are brand-new to racket sports.',
+    ];
+
+    final style = Get.textTheme.headlineMedium;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Which padel player are you?", style: style),
+        const SizedBox(height: 16),
+        ...options.map((option) => Obx(() => _buildOption(
+          title: option,
+          isSelected: controller.selectPlayerLevel.value == option,
+          onTap: () => controller.selectPlayerLevel.value = option,
+        ))),
+      ],
+    );
+  }
 
 
 
@@ -264,7 +292,7 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
           ),
         const Spacer(),
 
-        Obx(() => controller.currentStep.value == 6
+        Obx(() => controller.currentStep.value == 7
             ? PrimaryButton(
             width: Get.width * 0.35,
             height: 40,
