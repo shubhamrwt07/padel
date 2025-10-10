@@ -1,5 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../cart/cart_controller.dart';
 import 'americano/americano_screen.dart';
@@ -7,6 +11,57 @@ import 'open_matches/open_match_screen.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
+
+  /// Helper method to download image
+  Future<File?> _downloadImage(String imageUrl) async {
+    try {
+      final response = await http.get(Uri.parse(imageUrl));
+
+      if (response.statusCode == 200) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/padel_club_${DateTime.now().millisecondsSinceEpoch}.jpg');
+        await file.writeAsBytes(response.bodyBytes);
+        return file;
+      }
+    } catch (e) {
+      print('Error downloading image: $e');
+    }
+    return null;
+  }
+
+  /// Share image with text
+  Future<void> _shareWithImage() async {
+    try {
+      final imageUrl = controller.courtsData.value.courtImage?.isNotEmpty == true
+          ? controller.courtsData.value.courtImage!.first
+          : null;
+
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        final imageFile = await _downloadImage(imageUrl);
+
+        if (imageFile != null) {
+          await Share.shareXFiles(
+            [XFile(imageFile.path)],
+            text: 'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
+            subject: 'Padel Club Details',
+          );
+        }
+      } else {
+        _shareTextOnly();
+      }
+    } catch (e) {
+      print('Error sharing: $e');
+      _shareTextOnly();
+    }
+  }
+
+  /// Fallback: Share text only
+  void _shareTextOnly() {
+    Share.share(
+      'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
+      subject: 'Padel Club Details',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +128,16 @@ class BookingScreen extends GetView<BookingController> {
                             Row(
                               children: [
                                 /// Share button
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: AppColors.whiteColor,
-                                  child: SvgPicture.asset(
-                                    Assets.imagesIcShareBooking,
-                                  ),
-                                ).paddingOnly(right: 15),
+                                GestureDetector(
+                                  onTap: _shareWithImage,
+                                  child: CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: AppColors.whiteColor,
+                                    child: SvgPicture.asset(
+                                      Assets.imagesIcShareBooking,
+                                    ),
+                                  ).paddingOnly(right: 15),
+                                ),
 
                                 /// Cart with badge
                                 GestureDetector(
@@ -96,12 +154,12 @@ class BookingScreen extends GetView<BookingController> {
                                         ),
                                       ),
 
-                                      /// 🔹 Badge showing total slots in cart
+                                      /// 🔹 Live Badge for Total Slots in Cart
                                       Positioned(
                                         right: -2,
                                         top: -2,
                                         child: Obx(() {
-                                          final slotCount = CartController().totalSlot.value; // use totalSlot
+                                          final slotCount = Get.find<CartController>().totalSlot.value;
                                           return slotCount > 0
                                               ? Container(
                                             padding: const EdgeInsets.all(4),
@@ -123,7 +181,7 @@ class BookingScreen extends GetView<BookingController> {
                                       ),
                                     ],
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ],

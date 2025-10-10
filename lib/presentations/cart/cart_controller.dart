@@ -24,10 +24,7 @@ class CartController extends GetxController {
 
   // Totals
   RxInt totalPrice = 0.obs;
-  RxInt totalSlot = 0.obs;
-
-  /// 🔹 Reactive variable to track total number of items in the cart
-  RxInt cartCount = 0.obs;
+  RxInt totalSlot = 0.obs; // 🔹 Tracks total number of slots
 
   @override
   void onInit() {
@@ -52,15 +49,11 @@ class CartController extends GetxController {
 
         // Update totals
         calculateTotals();
-
-        // 🔹 Update count for badge
-        cartCount.value = cartItems.length;
       } else {
         cartItems.clear();
         selectedClubIds.clear();
         totalPrice.value = 0;
         totalSlot.value = 0;
-        cartCount.value = 0;
       }
 
       log("Cart Items length: ${cartItems.length}");
@@ -70,7 +63,6 @@ class CartController extends GetxController {
       selectedClubIds.clear();
       totalPrice.value = 0;
       totalSlot.value = 0;
-      cartCount.value = 0;
     } finally {
       isLoading.value = false;
     }
@@ -88,7 +80,7 @@ class CartController extends GetxController {
       if (item.slot != null && item.slot!.isNotEmpty) {
         for (var slot in item.slot!) {
           if (slot.slotTimes != null) {
-            slots += slot.slotTimes!.length;
+            slots += slot.slotTimes!.length; // Count total slots
             for (var slotTime in slot.slotTimes!) {
               price += int.tryParse(slotTime.amount?.toString() ?? "0") ?? 0;
             }
@@ -98,7 +90,7 @@ class CartController extends GetxController {
     }
 
     totalPrice.value = price;
-    totalSlot.value = slots;
+    totalSlot.value = slots; // 🔹 Update reactive slot count
   }
 
   // 🔹 Toggle club selection
@@ -226,14 +218,6 @@ class CartController extends GetxController {
       isBooking.value = false;
     }
   }
-
-  // 🔹 Utility Methods
-  void increaseCartCount() => cartCount.value++;
-  void decreaseCartCount() {
-    if (cartCount.value > 0) cartCount.value--;
-  }
-
-  void resetCartCount() => cartCount.value = 0;
 }
 
 extension CartControllerBooking on CartController {

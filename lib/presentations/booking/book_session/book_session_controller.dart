@@ -9,6 +9,10 @@ import '../../../repositories/home_repository/home_repository.dart';
 import '../../cart/cart_controller.dart';
 
 class BookSessionController extends GetxController {
+  // Booking limits
+  static const int MAX_SLOTS = 24;
+  static const int MAX_DAYS = 5;
+
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
@@ -205,6 +209,47 @@ class BookSessionController extends GetxController {
     }
   }
 
+  /// Get unique dates from selections
+  Set<String> _getUniqueDates() {
+    final Set<String> dates = {};
+    multiDateSelections.forEach((key, selection) {
+      final dateString = selection['date'] as String;
+      dates.add(dateString);
+    });
+    return dates;
+  }
+
+  /// Check if adding a new slot would violate limits
+  bool _canAddSlot() {
+    final currentCount = multiDateSelections.length;
+    if (currentCount >= MAX_SLOTS) {
+      Get.snackbar(
+        "Booking Limit Reached",
+        "You can select a maximum of $MAX_SLOTS slots.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 3),
+      );
+      return false;
+    }
+
+    final uniqueDates = _getUniqueDates();
+    if (uniqueDates.length >= MAX_DAYS) {
+      Get.snackbar(
+        "Day Limit Reached",
+        "You can book for a maximum of $MAX_DAYS days only.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 3),
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   void toggleSlotSelection(Slots slot, {String? courtId, String? courtName}) {
     // Resolve court info
     Map<String, String>? resolvedCourtInfo;
@@ -238,6 +283,11 @@ class BookSessionController extends GetxController {
       selectedSlots.removeWhere((s) => s.sId == slotId);
       selectedSlotsWithCourtInfo.remove(compositeKey);
     } else {
+      // Check limits before adding
+      if (!_canAddSlot()) {
+        return;
+      }
+
       // Add selection
       multiDateSelections[multiDateKey] = {
         'slot': slot,
