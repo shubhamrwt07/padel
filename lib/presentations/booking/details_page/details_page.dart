@@ -8,12 +8,11 @@ import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
-import '../../../configs/routes/routes_name.dart';
-import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../generated/assets.dart';
 import 'details_page_controller.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class DetailsScreen extends GetView<DetailsController> {
+class DetailsScreen extends StatelessWidget {
   final DetailsController controller = Get.put(DetailsController());
   DetailsScreen({super.key});
   @override
@@ -133,7 +132,7 @@ class DetailsScreen extends GetView<DetailsController> {
                       children: [
                         gameDetails(
                           "Gender",
-                          "${'male'}",
+                          'male',
                           AppColors.blackColor,
                           13,
                         ),
@@ -332,60 +331,70 @@ class DetailsScreen extends GetView<DetailsController> {
     );
   }
 
-  Widget playerCard(String name, bool showSubtitle, String image) {
-    log("IMage ${image}");
+  Widget playerCard(String name, bool showSubtitle, String image, String? skillLevel) {
+    log("Image: $image, Skill Level: $skillLevel");
     return GestureDetector(
       onTap: () {},
       child: Column(
         children: [
-          Container(
-            height: 50,
-            width: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: image.isNotEmpty
-                    ? AppColors.whiteColor
-                    : AppColors.primaryColor,
-              ),
-            ),
-            child: image.isEmpty
-                ? const Icon(
-                    CupertinoIcons.profile_circled,
-                    size: 20,
-                    color: AppColors.primaryColor,
-                  )
-                : ClipOval(child: Image.network(image, fit: BoxFit.cover)),
+        Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: image.isNotEmpty
+                ? AppColors.whiteColor
+                : AppColors.primaryColor,
           ),
+        ),
+        child: image.isEmpty
+            ? const Icon(
+          CupertinoIcons.profile_circled,
+          size: 20,
+          color: AppColors.primaryColor,
+        )
+            : ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: image,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => const Center(
+              child: CupertinoActivityIndicator(),
+            ),
+            errorWidget: (context, url, error) => const Icon(
+              CupertinoIcons.profile_circled,
+              size: 20,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ),
+      ),
           const SizedBox(height: 5),
           Text(
             name,
-            style:
-                Get.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ) ??
-                const TextStyle(fontWeight: FontWeight.w500),
+            style: Get.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w500,
+            ) ?? const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 0),
-          showSubtitle
+          showSubtitle && skillLevel != null && skillLevel.isNotEmpty
               ? Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  height: 16,
-                  width: 30,
-                  child: Text(
-                    "B/C",
-                    style:
-                        Get.textTheme.bodyLarge?.copyWith(
-                          color: Colors.green,fontSize: 10
-                        ) ??
-                        const TextStyle(color: Colors.green),
-                  ),
-                )
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.green.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            height: 16,
+            width: 30,
+            child: Text(
+              skillLevel,
+              style: Get.textTheme.bodyLarge?.copyWith(
+                color: Colors.green,
+                fontSize: 10,
+              ) ?? const TextStyle(color: Colors.green),
+            ),
+          )
               : const SizedBox(height: 20),
         ],
       ),
@@ -408,11 +417,9 @@ class DetailsScreen extends GetView<DetailsController> {
             children: [
               Text(
                 "Players",
-                style:
-                    Get.textTheme.headlineLarge?.copyWith(
-                      color: AppColors.blackColor,
-                    ) ??
-                    const TextStyle(color: AppColors.blackColor),
+                style: Get.textTheme.headlineLarge?.copyWith(
+                  color: AppColors.blackColor,
+                ) ?? const TextStyle(color: AppColors.blackColor),
               ),
               const SizedBox(height: 5),
               Row(
@@ -425,59 +432,58 @@ class DetailsScreen extends GetView<DetailsController> {
                       child: ListView.builder(
                         padding: EdgeInsets.only(left: 10),
                         scrollDirection: Axis.horizontal,
-                        itemCount: 2, // Maximum 2 players per team
+                        itemCount: 2,
                         itemBuilder: (BuildContext context, int index) {
-                          // Check if player exists at this index
                           bool hasPlayer =
                               index < controller.teamA.length &&
-                              controller.teamA[index].isNotEmpty &&
-                              controller.teamA[index]['name'] != null &&
-                              controller.teamA[index]['name'].toString().isNotEmpty;
+                                  controller.teamA[index].isNotEmpty &&
+                                  controller.teamA[index]['name'] != null &&
+                                  controller.teamA[index]['name'].toString().isNotEmpty;
 
                           return Padding(
                             padding: const EdgeInsets.only(right: 30),
                             child: hasPlayer
                                 ? playerCard(
-                                    controller.teamA[index]['name'] ?? "Unknown",
-                                    true, // isPlayer = true
-                                    controller.teamA[index]['image'] ?? "",
-                                  )
+                              controller.teamA[index]['name'] ?? "Unknown",
+                              true,
+                              controller.teamA[index]['image'] ?? "",
+                              controller.teamA[index]['level'] ?? "",
+                            )
                                 : GestureDetector(
-                                    onTap: () {
-                                      controller.showDailogue(
-                                        context,
-                                        index: index,
-                                        team: "teamA",
-                                      );
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.white,
-                                            border: Border.all(
-                                              color: AppColors.primaryColor,
-                                            ),
-                                          ),
-                                          height: 50,
-                                          width: 50,
-                                          child: Icon(
-                                            CupertinoIcons.add,
-                                            color: AppColors.primaryColor,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          "Available",
-                                          style: Get.textTheme.bodyLarge
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                        ),
-                                      ],
+                              onTap: () {
+                                controller.showDailogue(
+                                  context,
+                                  index: index,
+                                  team: "teamA",
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                    height: 50,
+                                    width: 50,
+                                    child: Icon(
+                                      CupertinoIcons.add,
+                                      color: AppColors.primaryColor,
                                     ),
                                   ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "Available",
+                                    style: Get.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -486,7 +492,7 @@ class DetailsScreen extends GetView<DetailsController> {
 
                   // Divider
                   Container(
-                    height: Get.height*0.1,
+                    height: Get.height * 0.1,
                     width: 1,
                     color: AppColors.blackColor.withAlpha(30),
                   ),
@@ -498,55 +504,58 @@ class DetailsScreen extends GetView<DetailsController> {
                       child: ListView.builder(
                         padding: EdgeInsets.only(left: 20),
                         scrollDirection: Axis.horizontal,
-                        itemCount: 2, // Maximum 2 players per team
+                        itemCount: 2,
                         itemBuilder: (BuildContext context, int index) {
-                          // Check if player exists at this index
                           bool hasPlayer =
                               index < controller.teamB.length &&
-                              controller.teamB[index].isNotEmpty &&
-                              controller.teamB[index]['name'] != null &&
-                              controller.teamB[index]['name'].toString().isNotEmpty;
+                                  controller.teamB[index].isNotEmpty &&
+                                  controller.teamB[index]['name'] != null &&
+                                  controller.teamB[index]['name'].toString().isNotEmpty;
 
                           return Padding(
                             padding: const EdgeInsets.only(right: 30),
                             child: hasPlayer
                                 ? playerCard(
-                                  controller.teamB[index]['name'] ?? "Unknown",
-                                  true, // isPlayer = true
-                                  controller.teamB[index]['image'] ??
-                                      "assets/images/default_avatar.svg",
-                                )
+                              controller.teamB[index]['name'] ?? "Unknown",
+                              true,
+                              controller.teamB[index]['image'] ?? "",
+                              controller.teamB[index]['level'] ?? "", // PASS LEVEL HERE
+                            )
                                 : GestureDetector(
-                                  onTap: () {
-                                    controller.showDailogue(
-                                      context,
-                                      index: index,
-                                      team: "teamB",
-                                    );
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white,
-                                          border: Border.all(color: AppColors.primaryColor)
-                                        ),
-                                        child: Icon(CupertinoIcons.add,color: AppColors.primaryColor,),
+                              onTap: () {
+                                controller.showDailogue(
+                                  context,
+                                  index: index,
+                                  team: "teamB",
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 50,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: AppColors.primaryColor,
                                       ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        "Available",
-                                        style: Get.textTheme.bodyLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                      ),
-                                    ],
+                                    ),
+                                    child: Icon(
+                                      CupertinoIcons.add,
+                                      color: AppColors.primaryColor,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "Available",
+                                    style: Get.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -559,19 +568,15 @@ class DetailsScreen extends GetView<DetailsController> {
                 children: [
                   Text(
                     "Team A",
-                    style:
-                        Get.textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ) ??
-                        const TextStyle(fontWeight: FontWeight.w600),
+                    style: Get.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ) ?? const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   Text(
                     "Team B",
-                    style:
-                        Get.textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ) ??
-                        const TextStyle(fontWeight: FontWeight.w600),
+                    style: Get.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ) ?? const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -581,7 +586,6 @@ class DetailsScreen extends GetView<DetailsController> {
       ),
     );
   }
-
   Widget information() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
