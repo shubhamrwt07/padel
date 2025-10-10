@@ -190,6 +190,8 @@ class CartScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Text(
+
+
                                       formatCreatedAt(slot.bookingDate ?? ""),
                                       style: Theme.of(context)
                                           .textTheme

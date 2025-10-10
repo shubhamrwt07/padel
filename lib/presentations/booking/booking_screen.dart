@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
+import '../cart/cart_controller.dart';
 import 'americano/americano_screen.dart';
 import 'open_matches/open_match_screen.dart';
 
@@ -19,7 +19,7 @@ class BookingScreen extends GetView<BookingController> {
             children: [
               Stack(
                 children: [
-      
+                  /// Background image
                   SizedBox(
                     height: Get.height * 0.25,
                     width: Get.width,
@@ -31,13 +31,13 @@ class BookingScreen extends GetView<BookingController> {
                           ? CachedNetworkImage(
                         imageUrl: imageUrl,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
                       )
-                          : SizedBox.shrink();
+                          : const SizedBox.shrink();
                     }),
                   ),
-      
-      
+
+                  /// Overlay and top bar
                   Container(
                     height: Get.height * 0.25,
                     width: Get.width,
@@ -53,6 +53,7 @@ class BookingScreen extends GetView<BookingController> {
                     ),
                     child: Column(
                       children: [
+                        /// Top row (Back + Share + Cart)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -62,7 +63,7 @@ class BookingScreen extends GetView<BookingController> {
                                 color: Colors.transparent,
                                 height: 30,
                                 width: 40,
-                                child: Icon(
+                                child: const Icon(
                                   Icons.arrow_back,
                                   color: AppColors.whiteColor,
                                   size: 24,
@@ -71,6 +72,7 @@ class BookingScreen extends GetView<BookingController> {
                             ),
                             Row(
                               children: [
+                                /// Share button
                                 CircleAvatar(
                                   radius: 18,
                                   backgroundColor: AppColors.whiteColor,
@@ -78,21 +80,56 @@ class BookingScreen extends GetView<BookingController> {
                                     Assets.imagesIcShareBooking,
                                   ),
                                 ).paddingOnly(right: 15),
+
+                                /// Cart with badge
                                 GestureDetector(
-                                  onTap: ()=>Get.to(()=>CartScreen(buttonType: "true")),
-                                  child: CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: AppColors.whiteColor,
-                                    child: Icon(
-                                      Icons.shopping_cart_outlined,
-                                      color: AppColors.blackColor,
-                                    ),
+                                  onTap: () => Get.to(() => CartScreen(buttonType: "true")),
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: AppColors.whiteColor,
+                                        child: const Icon(
+                                          Icons.shopping_cart_outlined,
+                                          color: AppColors.blackColor,
+                                        ),
+                                      ),
+
+                                      /// 🔹 Badge showing total slots in cart
+                                      Positioned(
+                                        right: -2,
+                                        top: -2,
+                                        child: Obx(() {
+                                          final slotCount = CartController().totalSlot.value; // use totalSlot
+                                          return slotCount > 0
+                                              ? Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Text(
+                                              '$slotCount',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                              : const SizedBox.shrink();
+                                        }),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ).paddingOnly(top: Get.height * 0.06),
+
+                        /// Club name
                         Obx(() {
                           final clubName = controller.courtsData.value.clubName ?? 'Unknown Club';
                           return Text(
@@ -103,12 +140,13 @@ class BookingScreen extends GetView<BookingController> {
                                 .copyWith(color: AppColors.whiteColor),
                           ).paddingOnly(top: Get.height * 0.02);
                         }),
-      
+
+                        /// Club address
                         Obx(() {
                           final address = controller.courtsData.value.address ?? 'Address not available';
                           final city = controller.courtsData.value.city ?? '';
                           final fullAddress = city.isNotEmpty ? "$address, $city" : address;
-      
+
                           return Text(
                             fullAddress,
                             style: Theme.of(context)
@@ -116,18 +154,15 @@ class BookingScreen extends GetView<BookingController> {
                                 .labelLarge!
                                 .copyWith(color: AppColors.whiteColor),
                             textAlign: TextAlign.center,
-                          ).paddingOnly();
+                          );
                         }),
-      
-      
                       ],
-                    ).paddingOnly(
-                      left: Get.width * 0.03,
-                      right: Get.width * 0.03,
-                    ),
+                    ).paddingSymmetric(horizontal: Get.width * 0.03),
                   ),
                 ],
               ),
+
+              /// Main content
               Transform.translate(
                 offset: const Offset(0, -15),
                 child: Container(
@@ -147,11 +182,10 @@ class BookingScreen extends GetView<BookingController> {
                         child: TabBarView(
                           controller: controller.tabController,
                           children: [
-                             HomeContent(),
-                             BookSession(),
-                             // OpenMatches(),
+                            HomeContent(),
+                            BookSession(),
                             OpenMatchesScreen(),
-                            AmericanoScreen()
+                            AmericanoScreen(),
                           ],
                         ),
                       ),

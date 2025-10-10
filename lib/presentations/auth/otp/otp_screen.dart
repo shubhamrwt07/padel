@@ -104,40 +104,44 @@ class OtpScreen extends GetView<OtpController> {
             );
           }),
 
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: AppStrings.doNotReceiveCode,
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: AppColors.darkGreyColor,
+          Obx(() {
+            final isTimerFinished = controller.secondsRemaining.value == 0;
+            final isResending = controller.isResending.value;
+
+            return RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: AppStrings.doNotReceiveCode,
+                    style: Get.textTheme.headlineLarge!.copyWith(
+                      color: AppColors.darkGreyColor,
+                    ),
                   ),
-                ),
-                WidgetSpan(
-                  child: GestureDetector(
-                    onTap: controller.secondsRemaining.value == 0
-                        ? controller.resendOtp
-                        : null,
-                    child: Obx(
-                      ()=> Container(
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: (isTimerFinished && !isResending)
+                          ? controller.resendOtp
+                          : null,
+                      child: Container(
                         color: Colors.transparent,
                         child: Text(
-                          AppStrings.resend,
-                          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                            color: controller.secondsRemaining.value == 0
+                          isResending
+                              ? "Resend..."
+                              : AppStrings.resend,
+                          style: Get.textTheme.headlineMedium!.copyWith(
+                            color: (isTimerFinished && !isResending)
                                 ? AppColors.primaryColor
-                                : Colors.grey, // disabled look
-                            decoration: TextDecoration.underline,
+                                : Colors.grey,
+                            decoration:isResending?TextDecoration.none: TextDecoration.underline,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
+                ],
+              ),
+            );
+          }),
           Obx(
     ()=> PrimaryButton(
               onTap: () {

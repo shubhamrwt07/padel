@@ -49,10 +49,18 @@ class OtpController extends GetxController {
     }
   }
 
+  var isResending = false.obs;
 
+  Future<void> resendOtp() async {
+    if (isResending.value) return;
+    isResending.value = true;
+    if (arguments['type'] == OtpScreenType.createAccount) {
+      await signUpController.sendOTP();
+    } else {
+      await forgotPasswordController.sendOTP();
+    }
 
-  void resendOtp() async{
-  await forgotPasswordController.sendOTP();
+    isResending.value = false;
     startTimer();
   }
   Timer? _timer;

@@ -128,7 +128,7 @@ class DetailsController extends GetxController {
       log("Match Created -> ${response.toJson()}");
 
       // Navigate to bottom navigation after successful match creation
-      Get.offAllNamed(RoutesName.bottomNav);
+      Get.offAllNamed(RoutesName.matchBooking);
     } catch (e, st) {
       log("Match creation error: $e, $st");
       SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
@@ -287,7 +287,6 @@ class DetailsController extends GetxController {
   /// Enhanced create user method with team assignment
   Future<void> createUserAndAddToTeam({required int index, required String team}) async {
     if (isLoading.value || Get.isSnackbarOpen) return;
-
     // Validation
     if (fullNameController.text.isEmpty) {
       return SnackBarUtils.showWarningSnackBar("Please Enter Full Name");

@@ -9,7 +9,6 @@ import '../../configs/routes/routes_name.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../generated/assets.dart';
 import '../../handler/logger.dart';
-import '../booking/details_page/details_page.dart';
 import 'openmatch_booking_controller.dart';
 class OpenMatchBookingScreen extends StatelessWidget {
   final String? buttonType;
@@ -27,7 +26,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         title: const Text("Open matches"),
         context: context,
       ),
-      body:           Column(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           tabBar(controller),

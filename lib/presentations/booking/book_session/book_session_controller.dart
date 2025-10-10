@@ -19,9 +19,10 @@ class BookSessionController extends GetxController {
   var noonCount = 0.obs;
   var nightCount = 0.obs;
 
-
   // Cache base slot lists (after unavailable/available toggle applied)
   final Map<String, List<Slots>> _originalSlotsCache = {};
+  final Map<String, List<Slots>> _allSlotsCache = {}; // Combined slots cache
+
   void _autoSelectTab() {
     final now = DateTime.now();
     final hour = now.hour;
@@ -89,7 +90,6 @@ class BookSessionController extends GetxController {
     if (timeStr == null || timeStr.isEmpty) return null;
     final t = timeStr.trim().toLowerCase();
     try {
-      // Try h:mm a first
       final dt = DateFormat('h:mm a').parseStrict(t);
       return dt.hour;
     } catch (_) {
@@ -97,7 +97,6 @@ class BookSessionController extends GetxController {
         final dt = DateFormat('h a').parseStrict(t);
         return dt.hour;
       } catch (_) {
-        // Fallback manual parse: "10:30 am" or "10 am"
         final parts = t.split(' ');
         if (parts.length == 2) {
           final isPm = parts[1] == 'pm';
@@ -112,11 +111,9 @@ class BookSessionController extends GetxController {
       }
     }
   }
-  PageController pageController = PageController();
-  // OLD: Single date selections
-  RxList<Slots> selectedSlots = <Slots>[].obs;
 
-  // NEW: Multi-date selections - key format: "date_courtId_slotId"
+  PageController pageController = PageController();
+  RxList<Slots> selectedSlots = <Slots>[].obs;
   RxMap<String, Map<String, dynamic>> multiDateSelections = <String, Map<String, dynamic>>{}.obs;
 
   RxInt totalAmount = 0.obs;
@@ -125,7 +122,6 @@ class BookSessionController extends GetxController {
   RxBool isLoadingCourts = false.obs;
   CartRepository cartRepository = CartRepository();
 
-  // Keep existing for backward compatibility
   RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
 
   @override
@@ -136,18 +132,16 @@ class BookSessionController extends GetxController {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await getAvailableCourtsById(argument.id!);
-
-
     });
   }
-   @override
+
+  @override
   void onClose() {
     selectedSlots.clear();
     selectedSlotsWithCourtInfo.clear();
     multiDateSelections.clear();
     totalAmount.value = 0;
     pageController.dispose();
-
     super.onClose();
   }
 
@@ -158,8 +152,6 @@ class BookSessionController extends GetxController {
     log("Show unavailable: $showUnavailable");
 
     isLoadingCourts.value = true;
-
-    // Do not clear current date selections here; we want selections to persist
 
     try {
       final date = selectedDate.value ?? DateTime.now();
@@ -173,20 +165,28 @@ class BookSessionController extends GetxController {
         registerClubId: clubId,
       );
 
-      // Apply filtering based on toggle first
+      // Store ALL slots (both available and unavailable)
+      _allSlotsCache.clear();
       for (var court in result.data ?? []) {
-        final base = court.slots ?? [];
+        _allSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
+      }
+
+      // Apply filtering based on toggle
+      for (var court in result.data ?? []) {
+        final base = _allSlotsCache[court.sId ?? ''] ?? [];
         if (showUnavailable) {
-          court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+          // Show BOTH available and unavailable
+          court.slots = List<Slots>.from(base);
         } else {
+          // Show only available
           court.slots = base.where((s) => _isAvailableSlot(s)).toList();
         }
       }
 
       slots.value = result;
-      // Build base cache and counts, then apply current time-of-day filter
-      _originalSlotsCache
-        ..clear();
+
+      // Build original cache from filtered slots for time-of-day filtering
+      _originalSlotsCache.clear();
       final courts = slots.value?.data ?? [];
       for (final court in courts) {
         _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
@@ -195,8 +195,6 @@ class BookSessionController extends GetxController {
 
       filterSlotsByTimeOfDay();
       _autoSelectTab();
-
-
 
     } catch (e, stackTrace) {
       log("Error occurred: $e");
@@ -232,8 +230,6 @@ class BookSessionController extends GetxController {
 
     // Multi-date key format: "date_courtId_slotId"
     final multiDateKey = '${dateString}_${resolvedCourtId}_$slotId';
-
-    // Legacy key for current date compatibility
     final compositeKey = '${resolvedCourtId}_$slotId';
 
     if (multiDateSelections.containsKey(multiDateKey)) {
@@ -262,13 +258,9 @@ class BookSessionController extends GetxController {
       };
     }
 
-    // Recalculate total amount from all dates
     _recalculateTotalAmount();
-
     log("Selected ${multiDateSelections.length} slots across multiple dates, Total: ₹${totalAmount.value}");
   }
-
-  
 
   void _recalculateTotalAmount() {
     int total = 0;
@@ -279,7 +271,6 @@ class BookSessionController extends GetxController {
     totalAmount.value = total;
   }
 
-  /// Find court information for a given slot
   Map<String, String>? _findCourtInfoForSlot(Slots targetSlot) {
     final data = slots.value?.data ?? [];
 
@@ -321,12 +312,10 @@ class BookSessionController extends GetxController {
   }
 
   bool isPastAndUnavailable(Slots slot) {
-    // Treat booked or explicitly unavailable statuses as unavailable
     final status = slot.status?.toLowerCase() ?? '';
     if (status == 'booked') return true;
     if (status.isNotEmpty && status != 'available') return true;
 
-    // If time is missing or malformed, don't mark as past (avoid crashes)
     final rawTime = slot.time;
     if (rawTime == null || rawTime.trim().isEmpty) {
       return false;
@@ -338,7 +327,6 @@ class BookSessionController extends GetxController {
     try {
       final timeString = rawTime.toLowerCase().trim();
 
-      // Try common formats first
       DateTime? parsed;
       for (final pattern in const ['h:mm a', 'h a', 'HH:mm', 'H:mm', 'HH']) {
         try {
@@ -353,7 +341,6 @@ class BookSessionController extends GetxController {
         hour = parsed.hour;
         minute = parsed.minute;
       } else {
-        // Fallback manual parse: supports "10", "10:30", with optional am/pm
         String t = timeString;
         String meridiem = '';
         final parts = t.split(' ');
@@ -384,14 +371,12 @@ class BookSessionController extends GetxController {
         return true;
       }
     } catch (_) {
-      // On any parsing error, consider it not past to be safe
       return false;
     }
 
     return false;
   }
 
-// Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
   bool _isUnavailableSlot(Slots slot) {
     final availability = slot.availabilityStatus?.toLowerCase();
     final isBlocked = availability == "maintenance" ||
@@ -401,7 +386,7 @@ class BookSessionController extends GetxController {
     final isPast = isPastAndUnavailable(slot);
     return isPast || isBlocked || isBooked;
   }
-  // Helper: available when not unavailable and status is available/empty
+
   bool _isAvailableSlot(Slots slot) {
     final status = slot.status?.toLowerCase() ?? '';
     return !_isUnavailableSlot(slot) && (status == 'available' || status.isEmpty);
@@ -462,7 +447,6 @@ class BookSessionController extends GetxController {
         allSlots.add(slotEntry);
       });
 
-      // Create single payload object with all slots
       final List<Map<String, dynamic>> cartPayload = [{
         "slot": allSlots,
         "register_club_id": clubId,
@@ -475,7 +459,6 @@ class BookSessionController extends GetxController {
         await controller.getCartItems();
 
         Get.to(() => CartScreen(buttonType: "true"))?.then((_) async {
-          // Clear all selections
           multiDateSelections.clear();
           selectedSlots.clear();
           selectedSlotsWithCourtInfo.clear();
@@ -545,12 +528,10 @@ class BookSessionController extends GetxController {
     return total;
   }
 
-  // NEW: Get total selections across all dates
   int getTotalSelectionsCount() {
     return multiDateSelections.length;
   }
 
-  // NEW: Get selections grouped by date
   Map<String, List<Map<String, dynamic>>> getSelectionsByDate() {
     final Map<String, List<Map<String, dynamic>>> result = {};
 
@@ -564,7 +545,6 @@ class BookSessionController extends GetxController {
     return result;
   }
 
-  // NEW: Clear all selections (useful for reset functionality)
   void clearAllSelections() {
     multiDateSelections.clear();
     selectedSlots.clear();
