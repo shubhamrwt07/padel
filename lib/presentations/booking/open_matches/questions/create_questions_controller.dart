@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 
 class CreateQuestionsController extends GetxController{
 
@@ -10,6 +11,7 @@ class CreateQuestionsController extends GetxController{
 
     super.onInit();
   }
+    DetailsController detailsController=Get.put(DetailsController());
 
   var currentStep = 1.obs;
   var selectedLevel = ''.obs;
@@ -84,6 +86,15 @@ class CreateQuestionsController extends GetxController{
   var selectedWallRebound = ''.obs;
   var selectPlayerLevel =''.obs;
   onSubmit(){
+    detailsController.localMatchData.update("skillLevel", (v)=>selectedLevel.value);
+    detailsController.localMatchData.update("skillDetails", (v)=> [
+      selectedSport.value,
+      selectedTraining.value,
+      selectedAgeGroup.value,
+      selectedVolley.value,
+      selectedWallRebound.value,
+      selectPlayerLevel.value,
+    ],);
     log("Selected answers ${selectedLevel.value} ${selectedSport.value} ${selectedTraining.value} ${selectedAgeGroup.value} ${selectedVolley.value} ${selectedWallRebound.value} ${selectPlayerLevel.value}");
     Get.to(()=>DetailsScreen (),);
 

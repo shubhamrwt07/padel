@@ -11,18 +11,33 @@ import '../../generated/assets.dart';
 import '../../handler/logger.dart';
 import 'openmatch_booking_controller.dart';
 class OpenMatchBookingScreen extends StatelessWidget {
-  final String? buttonType;
-  final OpenMatchBookingController controller =
-  Get.put(OpenMatchBookingController());
-
-  OpenMatchBookingScreen({super.key, this.buttonType});
+  final OpenMatchBookingController controller = Get.put(OpenMatchBookingController());
+  OpenMatchBookingScreen({super.key,});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: primaryAppBar(
         centerTitle: true,
-
+        leading:GestureDetector(
+          onTap: () {
+            if(controller.argument.value == "profile") {
+              Get.back();
+            }else if(controller.argument.value == "detailPage"){
+              Get.toNamed(RoutesName.bottomNav);
+            }
+          },
+          child: Container(
+            color: Colors.transparent,
+            height: 30,
+            width: 40,
+            child: Icon(
+              Icons.arrow_back,
+              color: AppColors.blackColor,
+              size: 22,
+            ),
+          ),
+        ) ,
         title: const Text("Open matches"),
         context: context,
       ),

@@ -171,7 +171,9 @@ class ProfileUi extends GetView<ProfileController> {
               isSelected:  controller.selectedIndex.value == 4,
               onTap: (){
                 controller.selectedIndex.value = 4;
-                Get.toNamed(RoutesName.matchBooking);
+                Get.toNamed(RoutesName.matchBooking,arguments: {
+                  "type": "profile"
+                });
               },
             ),
           ),

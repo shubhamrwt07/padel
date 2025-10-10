@@ -37,7 +37,8 @@ class DetailsController extends GetxController {
     "clubId": "clubid",
     "matchDate": "Unknown date",
     "matchTime": "Unknown time",
-    "skillLevel": "Beginner",
+    "skillLevel": "A",
+    "skillDetails":[],
     "price": "Unknown price",
     "address": "add here",
     "gender": "",
@@ -113,12 +114,17 @@ class DetailsController extends GetxController {
         "clubId": localMatchData["clubId"],
         "matchDate": matchDateString,
         "skillLevel": localMatchData["skillLevel"],
-        "skillDetails": ["Yes", "no"],
+        "skillDetails": localMatchData["skillDetails"],
         "matchStatus": "open",
         "matchTime": localMatchData["matchTime"],
-        "teamA": teamA.map((p) => p["userId"] ?? p["_id"] ?? p).toList(),
-        "teamB": teamB.map((p) => p["userId"] ?? p["_id"] ?? p).toList(),
-      };
+        "teamA": teamA
+            .where((p) => (p["userId"] ?? p["_id"]) != null && (p["userId"] ?? p["_id"]).toString().isNotEmpty)
+            .map((p) => p["userId"] ?? p["_id"])
+            .toList(),
+        "teamB": teamB
+            .where((p) => (p["userId"] ?? p["_id"]) != null && (p["userId"] ?? p["_id"]).toString().isNotEmpty)
+            .map((p) => p["userId"] ?? p["_id"])
+            .toList(),      };
 
       log("Request Body: $body");
       final response = await repository.createMatch(data: body);
@@ -128,7 +134,9 @@ class DetailsController extends GetxController {
       log("Match Created -> ${response.toJson()}");
 
       // Navigate to bottom navigation after successful match creation
-      Get.offAllNamed(RoutesName.matchBooking);
+      Get.offAllNamed(RoutesName.matchBooking,arguments: {
+        "type": "detailPage"
+      });
     } catch (e, st) {
       log("Match creation error: $e, $st");
       SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
@@ -245,17 +253,18 @@ class DetailsController extends GetxController {
   final phoneController = TextEditingController();
   RxBool isLoading = false.obs;
   RxString gender = 'Male'.obs;
-  RxString playerLevel = 'All Players'.obs;
-  List<String> playerLevels = [
-    'All Players',
-    'A',
-    'B',
-    'C',
-    'D',
-    'A/B',
-    'B/C',
-    'C/D',
-  ];
+  RxString playerLevel = 'A'.obs;
+
+  final Map<String, String> playerLevelMap = {
+    'A': 'A – Top Player',
+    'B1': 'B1 – Experienced Player',
+    'B2': 'B2 – Advanced Player',
+    'C1': 'C1 – Confident Player',
+    'C2': 'C2 – Intermediate Player',
+    'D1': 'D1 – Amateur Player',
+    'D2': 'D2 – Novice Player',
+    'E': 'E – Entry Level',
+  };
 
   /// Add player to team method
   void addPlayerToTeam(String team, int index, Map<String, dynamic> playerData) {
@@ -315,11 +324,12 @@ class DetailsController extends GetxController {
       final response = await repository.createUserForOpenMatch(body: body);
 
       if (response?.status == "200") {
-        // Create player data object with explicit typing
+        // Create player data object with explicit typing INCLUDING LEVEL
         Map<String, dynamic> newPlayer = <String, dynamic>{
           "name": fullNameController.text.trim(),
           "image": "",
           "userId": response!.response!.sId!,
+          "level": playerLevel.value, // ADD THIS LINE
         };
 
         // Add player to correct team and index
@@ -346,14 +356,13 @@ class DetailsController extends GetxController {
       isLoading.value = false;
     }
   }
-
   /// Clear form fields
   void clearForm() {
     fullNameController.clear();
     emailController.clear();
     phoneController.clear();
     gender.value = 'Male';
-    playerLevel.value = 'All Players';
+    playerLevel.value = 'A';
   }
 
   /// Show dialog method updated to use new system
@@ -471,35 +480,39 @@ class DetailsController extends GetxController {
                             ),
                           ).paddingOnly(top: Get.height * 0.02, bottom: Get.height * 0.01),
 
-                          Obx(() => DropdownButtonFormField<String>(
-                            value: playerLevel.value,
-                            isDense: true,
-                            dropdownColor: AppColors.whiteColor,
-                            items: playerLevels.map((level) {
-                              return DropdownMenuItem(
-                                value: level,
-                                child: Text(
-                                  level,
-                                  style: Get.textTheme.headlineMedium!.copyWith(
-                                    color: AppColors.textColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) => playerLevel.value = value!,
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.textFieldColor,
+                          Obx(
+                                () => DropdownButtonFormField<String>(
+                              value: playerLevel.value,
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(12)),
-                                borderSide: BorderSide.none,
+                                  dropdownColor: AppColors.whiteColor,
+                                  items: playerLevelMap.entries.map((entry) {
+                                return DropdownMenuItem(
+                                  value: entry.key,
+                                  child: Text(
+                                    entry.value,
+                                    style: Get.textTheme.headlineMedium!.copyWith(
+                                      color: AppColors.textColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) => playerLevel.value = value!,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.textFieldColor,
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
                             ),
-                          )),
-
+                          ),
                           SizedBox(height: 20),
                         ],
                       ),
@@ -619,23 +632,31 @@ class DetailsController extends GetxController {
     };
 
     _paymentService.onExternalWallet = (response) {
-      // Handle external wallet if needed
       log('External wallet used: ${response.walletName}');
     };
 
-    WidgetsBinding.instance.addPostFrameCallback((v) {
-      profileController.fetchUserProfile();
-      // Create a new map to ensure type safety
+    profileController.fetchUserProfile();
 
-      Map<String, dynamic> profileData = <String, dynamic>{
-        "name": profileController.profileModel.value?.response!.name ?? "",
-        "image": profileController.profileModel.value?.response!.profilePic ?? "",
-        "userId": profileController.profileModel.value?.response!.sId ?? ""
-      };
-      teamA.first.addAll(profileData);
-    });
+    String skillLevel = "";
+    final skillDetails = localMatchData['skillDetails'];
+    if (skillDetails != null && skillDetails is List && skillDetails.isNotEmpty) {
+      skillLevel = skillDetails.last.toString();
+    } else if (localMatchData['skillLevel'] != null) {
+      skillLevel = localMatchData['skillLevel'].toString();
+    }
+
+    Map<String, dynamic> profileData = <String, dynamic>{
+      "name": profileController.profileModel.value?.response!.name ?? "",
+      "image": profileController.profileModel.value?.response!.profilePic ?? "",
+      "userId": profileController.profileModel.value?.response!.sId ?? "",
+      "level": skillLevel, // This should now be non-empty
+    };
+
+    teamA.first.addAll(profileData);
+
     super.onInit();
   }
+
 
   @override
   void onClose() {

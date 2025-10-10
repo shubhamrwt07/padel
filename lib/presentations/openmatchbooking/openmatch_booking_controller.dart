@@ -26,9 +26,11 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
 
   OpenMatchRepository repository = Get.put(OpenMatchRepository());
 
+  var argument = "".obs;
   @override
   void onInit() {
     super.onInit();
+    argument.value = Get.arguments["type"];
     tabController = TabController(length: 2, vsync: this);
 
     // Use animation listener instead of regular listener
