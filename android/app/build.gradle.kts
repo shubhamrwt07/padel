@@ -26,8 +26,8 @@ android {
 
     defaultConfig {
         applicationId = "com.matchacha.app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = 34
+        minSdk = 21
+        targetSdk = 35
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName

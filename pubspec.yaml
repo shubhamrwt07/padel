@@ -38,6 +38,7 @@ dependencies:
   flutter_dash:
   shimmer:
   firebase_crashlytics:
+  share_plus:
 
 
 
