@@ -213,16 +213,15 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
   }
   Widget _buildPlayerLevel(CreateQuestionsController controller)  {
     final options = [
-      'A – Top Player: Can compete in professional-level tournaments, executing advanced shots with precision.',
-      'B1 – Experienced Player: Consistently performs smashes outside the court, dominates game stages, and adapts tactics to control the match.',
-      'B2 – Advanced Player: Shows consistency with all shots, controls game pace and shot depth, executes winners, and adjusts strategies based on play.',
-      'C1 – Confident Player: Comfortably controls ball speed and direction, uses the double glass effectively, makes strategic shot choices, and communicates with a partner to gain an edge.',
-      'C2 – Intermediate Player: Displays consistency with basic shots, familiar with double glass usage, incorporates spin, and positions well on the court with a partner.',
-      'D1 – Amateur Player: Executes all basic shots, familiar with glass usage, and transitions smoothly between the net and baseline.',
-      'D2 – Novice Player: Plays a few games per month, understands the rules, and manages short rallies with control.',
-      'E – Entry Level: Ideal for players who are brand-new to racket sports.',
+      'A – Top Player',
+      'B1 – Experienced Player',
+      'B2 – Advanced Player',
+      'C1 – Confident Player',
+      'C2 – Intermediate Player',
+      'D1 – Amateur Player',
+      'D2 – Novice Player',
+      'E – Entry Level',
     ];
-
     final style = Get.textTheme.headlineMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
