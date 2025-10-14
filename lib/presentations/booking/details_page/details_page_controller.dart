@@ -116,6 +116,10 @@ class DetailsController extends GetxController {
         "matchDate": matchDateString,
         "skillLevel": localMatchData["skillLevel"],
         "skillDetails": localMatchData["skillDetails"],
+        // Include the selected player level (fallback to any existing match-level value)
+        "playerLevel": (playerLevel.value.isNotEmpty
+            ? playerLevel.value
+            : (localMatchData["playerLevel"]?.toString() ?? "")),
         "matchStatus": "open",
         "matchTime": localMatchData["matchTime"],
         "teamA": teamA
