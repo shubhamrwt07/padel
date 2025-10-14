@@ -56,6 +56,7 @@ class OpenMatchBookingData {
   List<Slot>? slot;
   String? matchType;
   String? skillLevel;
+  String? playerLevel;
   List<String>? skillDetails;
   String? matchDate;
   String? matchTime;
@@ -78,6 +79,7 @@ class OpenMatchBookingData {
         this.slot,
         this.matchType,
         this.skillLevel,
+        this.playerLevel,
         this.skillDetails,
         this.matchDate,
         this.matchTime,
@@ -106,6 +108,7 @@ class OpenMatchBookingData {
     }
     matchType = json['matchType'];
     skillLevel = json['skillLevel'];
+    playerLevel = json['playerLevel'];
     skillDetails = json['skillDetails'].cast<String>();
     matchDate = json['matchDate'];
     matchTime = json['matchTime'];
@@ -146,6 +149,7 @@ class OpenMatchBookingData {
     }
     data['matchType'] = this.matchType;
     data['skillLevel'] = this.skillLevel;
+    data['playerLevel'] = this.playerLevel;
     data['skillDetails'] = this.skillDetails;
     data['matchDate'] = this.matchDate;
     data['matchTime'] = this.matchTime;
@@ -169,13 +173,70 @@ class OpenMatchBookingData {
     data['__v'] = this.iV;
     return data;
   }
+
+  // Convenience: first player's level code (e.g., "B2").
+  // Prefers Team A first player's user level, falls back to match-level playerLevel.
+  String get firstPlayerLevelCode {
+    final String fromTeamA = (teamA != null && teamA!.isNotEmpty)
+        ? (teamA!.first.userId?.level ?? '')
+        : '';
+    final String source = fromTeamA.isNotEmpty ? fromTeamA : (playerLevel ?? '');
+    return _extractLevelCode(source);
+  }
+
+  // Full text for first player's level (e.g., "B2 – Advanced Player").
+  String get firstPlayerLevelText {
+    final String fromTeamA = (teamA != null && teamA!.isNotEmpty)
+        ? (teamA!.first.userId?.level ?? '')
+        : '';
+    final String source = fromTeamA.isNotEmpty ? fromTeamA : (playerLevel ?? '');
+    return source.isNotEmpty ? source : '-';
+  }
+
+  // Level codes for both Team A players (index 0 and 1)
+  String get teamAPlayer1LevelCode {
+    final String value = (teamA != null && teamA!.isNotEmpty)
+        ? (teamA![0].userId?.level ?? '')
+        : '';
+    return _extractLevelCode(value.isNotEmpty ? value : (playerLevel ?? ''));
+  }
+
+  String get teamAPlayer2LevelCode {
+    final String value = (teamA != null && teamA!.length > 1)
+        ? (teamA![1].userId?.level ?? '')
+        : '';
+    return _extractLevelCode(value);
+  }
+
+  // Level codes for both Team B players (index 0 and 1)
+  String get teamBPlayer1LevelCode {
+    final String value = (teamB != null && teamB!.isNotEmpty)
+        ? (teamB![0].userId?.level ?? '')
+        : '';
+    return _extractLevelCode(value);
+  }
+
+  String get teamBPlayer2LevelCode {
+    final String value = (teamB != null && teamB!.length > 1)
+        ? (teamB![1].userId?.level ?? '')
+        : '';
+    return _extractLevelCode(value);
+  }
+
+  static String _extractLevelCode(String value) {
+    if (value.isEmpty) return '-';
+    // Handles formats like "B2 – Advanced Player" or "B2 - Advanced Player"
+    final parts = value.split(RegExp(r"\s*[–-]\s*"));
+    final code = parts.isNotEmpty ? parts.first.trim() : '';
+    return code.isNotEmpty ? code : '-';
+  }
 }
 
 class ClubId {
   Location? location;
   String? sId;
-  String? clubName;
   String? ownerId;
+  String? clubName;
   int? iV;
   String? address;
   List<BusinessHours>? businessHours;
@@ -197,8 +258,8 @@ class ClubId {
   ClubId(
       {this.location,
         this.sId,
-        this.clubName,
         this.ownerId,
+        this.clubName,
         this.iV,
         this.address,
         this.businessHours,
@@ -222,8 +283,8 @@ class ClubId {
         ? new Location.fromJson(json['location'])
         : null;
     sId = json['_id'];
-    clubName = json['clubName'];
     ownerId = json['ownerId'];
+    clubName = json['clubName'];
     iV = json['__v'];
     address = json['address'];
     if (json['businessHours'] != null) {
@@ -254,8 +315,8 @@ class ClubId {
       data['location'] = this.location!.toJson();
     }
     data['_id'] = this.sId;
-    data['clubName'] = this.clubName;
     data['ownerId'] = this.ownerId;
+    data['clubName'] = this.clubName;
     data['__v'] = this.iV;
     data['address'] = this.address;
     if (this.businessHours != null) {
@@ -399,6 +460,30 @@ class TeamA {
     return data;
   }
 }
+class TeamB {
+  UserId? userId;
+  String? joinedAt;
+  String? sId;
+
+  TeamB({this.userId, this.joinedAt, this.sId});
+
+  TeamB.fromJson(Map<String, dynamic> json) {
+    userId =
+    json['userId'] != null ? new UserId.fromJson(json['userId']) : null;
+    joinedAt = json['joinedAt'];
+    sId = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.userId != null) {
+      data['userId'] = this.userId!.toJson();
+    }
+    data['joinedAt'] = this.joinedAt;
+    data['_id'] = this.sId;
+    return data;
+  }
+}
 
 class UserId {
   Location? location;
@@ -501,8 +586,6 @@ class UserId {
   }
 }
 
-
-
 class CreatedBy {
   Location? location;
   String? sId;
@@ -596,30 +679,6 @@ class CreatedBy {
     data['dob'] = this.dob;
     data['gender'] = this.gender;
     data['profilePic'] = this.profilePic;
-    return data;
-  }
-}
-class TeamB {
-  UserId? userId;
-  String? joinedAt;
-  String? sId;
-
-  TeamB({this.userId, this.joinedAt, this.sId});
-
-  TeamB.fromJson(Map<String, dynamic> json) {
-    userId =
-    json['userId'] != null ? new UserId.fromJson(json['userId']) : null;
-    joinedAt = json['joinedAt'];
-    sId = json['_id'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.userId != null) {
-      data['userId'] = this.userId!.toJson();
-    }
-    data['joinedAt'] = this.joinedAt;
-    data['_id'] = this.sId;
     return data;
   }
 }

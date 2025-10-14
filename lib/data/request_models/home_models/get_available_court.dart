@@ -1,12 +1,11 @@
+
 class GetAllActiveCourtsForSlotWiseModel {
   String? status;
   bool? success;
   int? count;
   List<Data>? data;
-
   GetAllActiveCourtsForSlotWiseModel(
       {this.status, this.success, this.count, this.data});
-
   GetAllActiveCourtsForSlotWiseModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     success = json['success'];
@@ -18,7 +17,6 @@ class GetAllActiveCourtsForSlotWiseModel {
       });
     }
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
@@ -30,21 +28,18 @@ class GetAllActiveCourtsForSlotWiseModel {
     return data;
   }
 }
-
 class Data {
   String? sId;
   String? clubName;
   RegisterClubId? registerClubId;
   String? courtName;
   List<Slots>? slots;
-
   Data(
       {this.sId,
         this.clubName,
         this.registerClubId,
         this.courtName,
         this.slots});
-
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubName = json['clubName'];
@@ -59,7 +54,6 @@ class Data {
       });
     }
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
@@ -74,20 +68,16 @@ class Data {
     return data;
   }
 }
-
 class RegisterClubId {
   String? sId;
   String? clubName;
-  List<String>? courtType;
-
+  String? courtType;
   RegisterClubId({this.sId, this.clubName, this.courtType});
-
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubName = json['clubName'];
-    courtType = json['courtType'].cast<String>();
+    courtType = json['courtType'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
@@ -96,7 +86,6 @@ class RegisterClubId {
     return data;
   }
 }
-
 class Slots {
   String? sId;
   String? time;
@@ -104,7 +93,6 @@ class Slots {
   String? status;
   String? availabilityStatus;
   List<BusinessHours>? businessHours;
-
   Slots(
       {this.sId,
         this.time,
@@ -112,7 +100,6 @@ class Slots {
         this.status,
         this.availabilityStatus,
         this.businessHours});
-
   Slots.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     time = json['time'];
@@ -126,7 +113,6 @@ class Slots {
       });
     }
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
@@ -141,20 +127,16 @@ class Slots {
     return data;
   }
 }
-
 class BusinessHours {
   String? time;
   String? day;
   String? sId;
-
   BusinessHours({this.time, this.day, this.sId});
-
   BusinessHours.fromJson(Map<String, dynamic> json) {
     time = json['time'];
     day = json['day'];
     sId = json['_id'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['time'] = this.time;
@@ -163,3 +145,5 @@ class BusinessHours {
     return data;
   }
 }
+ 
+ 

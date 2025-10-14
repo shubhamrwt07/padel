@@ -303,26 +303,35 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final player = teamAPlayers[i];
         final user = player.userId;
 
-        if (!completed && (user?.name?.isEmpty ?? true)) {
+        if (!completed && user == null) {
           teamAWidgets.add(
             _buildAddPlayerSlot(
-              onTap: () {
+              onTap: () async {
                 final id = match?.sId;
-                Get.toNamed(
+                final result = await Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamA"},
+                  arguments: {"matchId": id, "team": "teamA", "needOpenMatches": true},
                 );
+                if (result == true) {
+                  final type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
+                  await controller.fetchOpenMatchesBooking(type: type);
+                }
               },
             ),
           );
         } else {
+          final userCode = extractLevelCode(user?.level ?? '');
+          final levelCode = (i == 0 && (userCode == '-' || userCode.isEmpty))
+              ? (match?.firstPlayerLevelCode ?? '-')
+              : userCode;
           teamAWidgets.add(
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               name: user?.name ?? '',
+              // Show level badge for any filled player slot
               category: true,
               completed: completed,
-              level: user?.level?.split(" ").first ?? "-",
+              level: levelCode,
             ),
           );
         }
@@ -333,7 +342,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: '',
               name: '',
-              category: true,
+              // Do not show badge on empty slots
+              category: false,
               completed: completed,
               level: "-",
             ),
@@ -361,15 +371,19 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final player = teamBPlayers[i];
         final user = player.userId;
 
-        if (!completed && (user?.name?.isEmpty ?? true)) {
+        if (!completed && user == null) {
           teamBWidgets.add(
             _buildAddPlayerSlot(
-              onTap: () {
+              onTap: () async {
                 final id = match?.sId;
-                Get.toNamed(
+                final result = await Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamB"},
+                  arguments: {"matchId": id, "team": "teamB", "needOpenMatches": true},
                 );
+                if (result == true) {
+                  final type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
+                  await controller.fetchOpenMatchesBooking(type: type);
+                }
               },
             ),
           );
@@ -378,9 +392,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               name: user?.name ?? '',
+              // Show level badge for any filled player slot
               category: true,
               completed: completed,
-              level: user?.level?.split(" ").first ?? "-",
+              // Use player's own level, showing only the code (e.g., "B2")
+              level: extractLevelCode(user?.level ?? ''),
             ),
           );
         }
@@ -391,7 +407,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: '',
               name: '',
-              category: true,
+              // Do not show badge on empty slots
+              category: false,
               completed: completed,
               level: "-",
             ),
@@ -638,4 +655,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
     }
   }
   String formatAmount(int amount) => amount.toString();
+  String extractLevelCode(String value) {
+    if (value.isEmpty) return '-';
+    // Handles formats like "B2 – Advanced Player" or "B2 - Advanced Player"
+    final parts = value.split(RegExp(r"\s*[–-]\s*"));
+    final code = parts.isNotEmpty ? parts.first.trim() : '';
+    return code.isNotEmpty ? code : '-';
+  }
 }

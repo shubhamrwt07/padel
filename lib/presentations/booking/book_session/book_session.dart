@@ -7,7 +7,6 @@ import 'package:shimmer/shimmer.dart';
 class BookSession extends StatelessWidget {
   BookSession({super.key});
   final BookSessionController controller = Get.put(BookSessionController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,51 +14,32 @@ class BookSession extends StatelessWidget {
       bottomNavigationBar: _bottomButton(),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
+          padding: const EdgeInsets.only(left: 16,right: 16,bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 5),
+              const SizedBox(height: 5), // Add top spacing
               _buildDatePicker(),
               Transform.translate(
-                offset: Offset(0, -Get.height * 0.03),
-                child: _buildTimeOfDayTabs(),
-              ),
+                  offset: Offset(0, -Get.height * 0.03),
+                  child: _buildTimeOfDayTabs()),  // <-- Added here
               Transform.translate(
-                offset: Offset(0, -Get.height * 0.02),
-                child: _buildMultiDateSummary(),
-              ),
-              Obx(() {
+                  offset: Offset(0, -Get.height * 0.02),
+                  child: _buildMultiDateSummary()),
+              Obx((){
                 final totalSelections = controller.getTotalSelectionsCount();
                 return Transform.translate(
-                  offset: Offset(
-                    0,
-                    totalSelections == 0
-                        ? -Get.height * 0.03
-                        : -Get.height * 0.02,
-                  ),
-                  child: _buildAllCourtsWithSlots(),
-                );
+                    offset: Offset(0,totalSelections == 0? -Get.height * 0.03:-Get.height*0.02),
+                    child: _buildAllCourtsWithSlots());
               })
+
             ],
           ),
         ),
       ),
     );
   }
-
-  /// Helper function to safely convert any value to String
-  String _getStringValue(dynamic value) {
-    if (value == null) return '';
-    if (value is String) return value;
-    if (value is List && value.isNotEmpty) {
-      return value.first.toString();
-    }
-    if (value is List) return '';
-    return value.toString();
-  }
-
-  /// Multi-date selections summary widget
+  /// NEW: Multi-date selections summary widget
   Widget _buildMultiDateSummary() {
     return Obx(() {
       final selectionsByDate = controller.getSelectionsByDate();
@@ -73,9 +53,7 @@ class BookSession extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.primaryColor.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,10 +71,7 @@ class BookSession extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.secondaryColor,
                         borderRadius: BorderRadius.circular(12),
@@ -125,20 +100,11 @@ class BookSession extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            /// Show summary by date
+            // Show summary by date
             ...selectionsByDate.entries.map((entry) {
               final date = entry.key;
               final selections = entry.value;
-              final dateString = _getStringValue(date);
-
-              DateTime parsedDate;
-              try {
-                parsedDate = DateTime.parse(dateString);
-              } catch (e) {
-                parsedDate = DateTime.now();
-              }
-
-              final formattedDate = DateFormat('MMM dd, yyyy').format(parsedDate);
+              final formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.parse(date));
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 6),
@@ -166,20 +132,14 @@ class BookSession extends StatelessWidget {
                       children: selections.map((selection) {
                         final slot = selection['slot'];
                         final courtName = selection['courtName'];
-                        final slotTimeStr = _getStringValue(slot?.time ?? slot.time);
-                        final courtNameStr = _getStringValue(courtName);
-
                         return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: AppColors.primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '$slotTimeStr - $courtNameStr',
+                            '${slot.time} - $courtName',
                             style: TextStyle(
                               fontSize: 11,
                               color: AppColors.primaryColor,
@@ -198,7 +158,6 @@ class BookSession extends StatelessWidget {
       );
     });
   }
-
   /// 📅 Date Picker - Fixed spacing and toggle functionality
   Widget _buildDatePicker() {
     return Column(
@@ -223,27 +182,23 @@ class BookSession extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: const Offset(0, -19),
+              offset: Offset(0, -19),
               child: Container(
                 width: 30,
-                height: Get.height * 0.07,
+                height: Get.height*0.07,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: AppColors.textFieldColor.withAlpha(100),
-                  border: Border.all(
-                    color: AppColors.blackColor.withAlpha(10),
-                  ),
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldColor,
+                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
                 ),
                 child: RotatedBox(
-                  quarterTurns: 3,
+                  quarterTurns: 3, // 270 degrees
                   child: Text(
-                    DateFormat('MMM').format(
-                      controller.selectedDate.value ?? DateTime.now(),
-                    ),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                    DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.labelBlackColor
                     ),
                   ),
                 ),
@@ -259,13 +214,11 @@ class BookSession extends StatelessWidget {
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
                 itemExtent: 55,
-                itemBuilder: (context, date, isSelected, isDisabled, isToday,
-                    onTap) {
+                itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   return Obx(() {
                     final now = DateTime.now();
                     final today = DateTime(now.year, now.month, now.day);
-                    final currentDate =
-                    DateTime(date.year, date.month, date.day);
+                    final currentDate = DateTime(date.year, date.month, date.day);
                     if (currentDate.isBefore(today)) {
                       return const SizedBox.shrink();
                     }
@@ -291,8 +244,7 @@ class BookSession extends StatelessWidget {
                               color: isSelected
                                   ? Colors.black
                                   : dateSelections.isNotEmpty
-                                  ? AppColors.primaryColor
-                                  .withValues(alpha: 0.1)
+                                  ? AppColors.primaryColor.withValues(alpha: 0.1)
                                   : AppColors.playerCardBackgroundColor,
                               border: Border.all(
                                 color: isSelected
@@ -427,11 +379,11 @@ class BookSession extends StatelessWidget {
             ],
           ),
         )),
+
       ],
     );
   }
-
-  /// Time of Day Filter Tabs (Morning / Noon / Night)
+  /// Time of Day Filter Tabs (Morning /Noon/ Night)
   Widget _buildTimeOfDayTabs() {
     return Obx(() {
       final selectedTab = controller.selectedTimeOfDay.value;
@@ -509,14 +461,12 @@ class BookSession extends StatelessWidget {
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
       if (controller.isLoadingCourts.value) {
-        return const CourtSlotsShimmer();
+        return CourtSlotsShimmer();
       }
 
       final slotsData = controller.slots.value;
 
-      if (slotsData == null ||
-          slotsData.data == null ||
-          slotsData.data!.isEmpty) {
+      if (slotsData == null || slotsData.data == null || slotsData.data!.isEmpty) {
         return const Center(child: Text("No courts available"));
       }
 
@@ -525,7 +475,7 @@ class BookSession extends StatelessWidget {
 
       return Column(
         children: [
-          /// PageView for courts
+          // PageView for courts
           SizedBox(
             height: Get.height * 0.45,
             child: PageView.builder(
@@ -536,19 +486,15 @@ class BookSession extends StatelessWidget {
               itemCount: totalPages,
               itemBuilder: (context, pageIndex) {
                 final start = pageIndex * 2;
-                final end =
-                (start + 2 > courts.length) ? courts.length : start + 2;
+                final end = (start + 2 > courts.length) ? courts.length : start + 2;
                 final courtsSlice = courts.sublist(start, end);
 
                 return Column(
-                  children: courtsSlice
-                      .map((court) => _buildCourtSection(court))
-                      .toList(),
+                  children: courtsSlice.map((court) => _buildCourtSection(court)).toList(),
                 );
               },
             ),
           ),
-
           /// Swipe hint with arrow animation
           Obx(() {
             final currentPage = controller.currentPage.value;
@@ -556,11 +502,10 @@ class BookSession extends StatelessWidget {
             if (totalPages <= 1) return const SizedBox.shrink();
 
             if (currentPage == 0) {
-              return _buildSwipeHint(
-                "Swipe Left for more slots ",
-                Icons.arrow_right_alt,
-              );
+              // First page → swipe left
+              return _buildSwipeHint("Swipe Left for more slots ", Icons.arrow_right_alt);
             } else if (currentPage == totalPages - 1) {
+              // Last page → swipe right
               return _buildSwipeHint("Swipe Right", Icons.arrow_left);
             }
             return const SizedBox.shrink();
@@ -571,27 +516,27 @@ class BookSession extends StatelessWidget {
           /// Dot indicator placed right below courts
           _buildDotIndicator(totalPages),
           const SizedBox(height: 26),
+
         ],
       );
     });
   }
-
+  /// Build all courts with their slots
   /// Build individual court section with its slots
   Widget _buildCourtSection(dynamic courtData) {
-    final courtName = _getStringValue(courtData.courtName);
+    final courtName = courtData.courtName ?? 'Unknown Court';
     final slotTimes = courtData.slots ?? [];
 
-    /// Safely get court type
-    var courtTypeValue = courtData.registerClubId?.courtType ??
+    final courtType = courtData.registerClubId?.courtType ??
         courtData.register_club_id?.courtType ??
         'Standard court';
-    final courtType = _getStringValue(courtTypeValue);
-    final featureText = courtType.isEmpty ? 'Standard court' : courtType;
+
+    final featureText = courtType;
 
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10), // Reduced margin for better spacing
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -607,10 +552,10 @@ class BookSession extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Court Header
+          // Court Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12), // Increased padding
             decoration: BoxDecoration(
               color: AppColors.whiteColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
@@ -625,7 +570,7 @@ class BookSession extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        courtName.isEmpty ? 'Unknown Court' : courtName,
+                        courtName,
                         style: Get.textTheme.titleSmall!.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.blackColor,
@@ -634,14 +579,10 @@ class BookSession extends StatelessWidget {
                     ),
                     Obx(() {
                       final courtId = courtData.sId ?? '';
-                      final selectedCount =
-                      controller.getSelectedSlotsCountForCourt(courtId);
+                      final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
                       return selectedCount > 0
                           ? Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.secondaryColor,
                           borderRadius: BorderRadius.circular(12),
@@ -670,16 +611,15 @@ class BookSession extends StatelessWidget {
             ),
           ),
 
-          /// Slots Grid
+          // Slots Grid
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12), // Consistent padding
             child: _buildSlotsGrid(slotTimes, courtData.sId ?? ''),
           ),
         ],
       ),
     );
   }
-
   /// Build slots grid for a specific court
   Widget _buildSlotsGrid(List<dynamic> slotTimes, String courtId) {
     if (slotTimes.isEmpty) {
@@ -708,6 +648,8 @@ class BookSession extends StatelessWidget {
       );
     }
 
+    // Controller already filtered available/unavailable lists.
+    // Use provided list directly to avoid double-filtering.
     final filteredSlots = slotTimes;
 
     if (filteredSlots.isEmpty) {
@@ -767,7 +709,6 @@ class BookSession extends StatelessWidget {
       },
     );
   }
-
   /// Build individual slot tile
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
@@ -792,9 +733,6 @@ class BookSession extends StatelessWidget {
       textColor = Colors.black;
     }
 
-    /// Safely get slot time
-    final slotTime = _getStringValue(slot.time);
-
     return GestureDetector(
       onTap: isUnavailable
           ? null
@@ -811,14 +749,14 @@ class BookSession extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(5),
           border: Border.all(
-            color:
-            isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
+            color: isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
+
             width: 1,
           ),
         ),
         alignment: Alignment.center,
         child: Text(
-          slotTime.isEmpty ? '--' : slotTime,
+          slot.time ?? '',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -829,8 +767,8 @@ class BookSession extends StatelessWidget {
       ),
     );
   }
+  /// Loading shimmer effect
 
-  /// Swipe hint with animation
   Widget _buildSwipeHint(String text, IconData icon) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(seconds: 1),
@@ -842,8 +780,7 @@ class BookSession extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon == Icons.arrow_left)
-                Icon(icon, color: AppColors.primaryColor),
+              if (icon == Icons.arrow_left) Icon(icon, color: AppColors.primaryColor),
               const SizedBox(width: 6),
               Text(
                 text,
@@ -854,15 +791,16 @@ class BookSession extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              if (icon == Icons.arrow_right_alt)
-                Icon(icon, color: AppColors.primaryColor),
+              if (icon == Icons.arrow_right_alt) Icon(icon, color: AppColors.primaryColor),
             ],
           ),
         );
       },
+      onEnd: () {
+        // 🔄 Restart the animation by rebuilding
+      },
     );
   }
-
   /// Dot indicator for page view
   Widget _buildDotIndicator(int totalPages) {
     return Obx(() {
@@ -884,7 +822,6 @@ class BookSession extends StatelessWidget {
       );
     });
   }
-
   /// Bottom bar with total & book button
   Widget _bottomButton() {
     return Container(
@@ -904,6 +841,8 @@ class BookSession extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          /// Dot indicator OUTSIDE button
+
           /// Book Now button
           Obx(
                 () => CustomButton(
@@ -967,8 +906,6 @@ class BookSession extends StatelessWidget {
     );
   }
 }
-
-/// Loading shimmer effect for courts
 class CourtSlotsShimmer extends StatelessWidget {
   const CourtSlotsShimmer({super.key});
 
@@ -992,6 +929,7 @@ class CourtSlotsShimmer extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
+                    // color: Colors.grey.shade200,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
@@ -1022,7 +960,7 @@ class CourtSlotsShimmer extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 8,
+                    itemCount: 8, // fake 8 slots
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       crossAxisSpacing: 10,

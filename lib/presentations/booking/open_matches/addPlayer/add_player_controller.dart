@@ -49,12 +49,8 @@ class AddPlayerController extends GetxController {
 
     isLoading.value = true;
     try {
-      // Map playerLevel for API (B1/B2 both become B)
-      final apiLevel = playerLevel.value.startsWith("B")
-          ? "B"
-          : playerLevel.value.startsWith("C")
-          ? "C"
-          : playerLevel.value;
+      // Send exact selected level code (e.g., A, B1, B2, C1...)
+      final apiLevel = playerLevel.value;
 
       final body = {
         "name": fullNameController.text.trim(),
@@ -100,7 +96,8 @@ class AddPlayerController extends GetxController {
       if (response?.match != null) {
         await openMatchesController?.fetchMatchesForSelection();
         await allOpenMatchController?.fetchOpenMatches();
-        Get.back();
+        // Return success to caller so it can refresh immediately
+        Get.back(result: true);
         SnackBarUtils.showSuccessSnackBar(
             response?.message ?? "Player added successfully");
         CustomLogger.logMessage(
