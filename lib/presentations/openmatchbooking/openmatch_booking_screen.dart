@@ -45,6 +45,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           tabBar(controller),
+
           Expanded(
             child: TabBarView(
               controller: controller.tabController,

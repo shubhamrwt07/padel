@@ -296,7 +296,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                   child: Text(
                     DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                       color: Colors.grey,
                     ),
                   ),
@@ -437,9 +437,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       final selectedTab = controller.selectedTimeOfDay.value;
 
       final tabs = [
-        {"label": "Morning", "icon": Icons.wb_twilight_sharp, "count": controller.morningCount.value},
-        {"label": "Noon", "icon": Icons.wb_sunny, "count": controller.noonCount.value},
-        {"label": "Night", "icon": Icons.nightlight_round, "count": controller.nightCount.value},
+        {"label": "Morning", "icon": Icons.wb_twilight_sharp},
+        {"label": "Noon", "icon": Icons.wb_sunny},
+        {"label": "Night", "icon": Icons.nightlight_round},
       ];
 
       return Container(
@@ -484,7 +484,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          "${tab['label']} (${tab['count']})",
+                          tab['label'] as String,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -573,16 +573,38 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     });
   }
 
+  /// Helper method to safely extract court type as String
+  String _getCourtType(dynamic courtData) {
+    try {
+      var courtType = courtData.registerClubId?.courtType ??
+          courtData.register_club_id?.courtType ??
+          'Standard court';
+
+      // Handle case where courtType is a list
+      if (courtType is List) {
+        return courtType.isNotEmpty ? courtType.first.toString() : 'Standard court';
+      }
+
+      // Handle null case
+      if (courtType == null) {
+        return 'Standard court';
+      }
+
+      // Return as string
+      return courtType.toString();
+    } catch (e) {
+      log("Error extracting court type: $e");
+      return 'Standard court';
+    }
+  }
+
   /// Build individual court section with its slots
   Widget _buildCourtSection(dynamic courtData) {
     final courtName = courtData.courtName ?? 'Unknown Court';
     final slotTimes = courtData.slots ?? [];
 
-    final courtType = courtData.registerClubId?.courtType ??
-        courtData.register_club_id?.courtType ??
-        'Standard court';
-
-    final featureText = courtType;
+    // Use the helper method to safely get court type
+    final featureText = _getCourtType(courtData);
 
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 

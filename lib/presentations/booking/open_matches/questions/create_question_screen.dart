@@ -113,16 +113,64 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
   Widget _buildSportSelection() {
     final sports = ['Tennis', 'Badminton', 'Squash', 'Others'];
     final style = Get.textTheme.headlineMedium;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Select the racket sport you have played before ?",  style:style),
+        Text(
+          "Select the racket sport(s) you have played before ?",
+          style: style,
+        ),
         const SizedBox(height: 16),
-        ...sports.map((sport) => Obx(() => _buildOption(
-          title: sport,
-          isSelected: controller.selectedSport.value == sport,
-          onTap: () => controller.selectedSport.value = sport,
-        ))),
+
+        // Multi-select options
+        ...sports.map((sport) => Obx(() {
+          final isSelected = controller.selectedSports.contains(sport);
+          return GestureDetector(
+            onTap: () {
+              if (isSelected) {
+                controller.selectedSports.remove(sport);
+              } else {
+                controller.selectedSports.add(sport);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 4)
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ✅ Circular "radio-like" visual indicator
+                  Icon(
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: AppColors.primaryColor,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      sport,
+                      style: Get.textTheme.labelLarge!.copyWith(
+                        color: AppColors.labelBlackColor,
+                      ),
+                      softWrap: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        })),
       ],
     );
   }
