@@ -610,5 +610,4 @@ class HomeScreen extends GetView<HomeController> {
       ).paddingOnly(bottom: 5),
     );
   }
-
 }

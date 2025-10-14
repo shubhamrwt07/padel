@@ -69,7 +69,6 @@ class CreateOpenMatchesController extends GetxController {
 
 
  void onNext(){
-
    log("Slots -> $selectedSlots");
    detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName??"");
    detailsController.localMatchData.update("clubId", (v)=>slots.value!.data![0].registerClubId!.sId??"");
@@ -82,7 +81,6 @@ class CreateOpenMatchesController extends GetxController {
    detailsController.localMatchData.update("courtName", (v)=>slots.value!.data![0].courtName??"");
    // detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
    Get.toNamed(RoutesName.createQuestions);
-
  }
   void _autoSelectTab() {
     final now = DateTime.now();
@@ -259,6 +257,22 @@ class CreateOpenMatchesController extends GetxController {
       selectedSlots.removeWhere((s) => s.sId == slotId);
       selectedSlotsWithCourtInfo.remove(compositeKey);
     } else {
+      // Enforce consecutiveness for selections within the same date and court
+      final isAllowed = _isConsecutiveSelectionAllowed(
+        resolvedCourtId,
+        slotId,
+        dateString,
+      );
+      if (!isAllowed) {
+        Get.snackbar(
+          " Please Select Consecutive Slots",
+          "",
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
+        return;
+      }
       // Add selection
       multiDateSelections[multiDateKey] = {
         'slot': slot,
@@ -283,6 +297,66 @@ class CreateOpenMatchesController extends GetxController {
     _recalculateTotalAmount();
 
     log("Selected ${multiDateSelections.length} slots across multiple dates, Total: ₹${totalAmount.value}");
+  }
+
+  // Validate that with the candidate slot included, all selected slots
+  // for a given (date, court) form a contiguous block in the court's
+  // base slot list (post availability filtering but pre time-of-day filter).
+  bool _isConsecutiveSelectionAllowed(String courtId, String slotId, String dateString) {
+    // Gather existing selections for same date and court
+    final List<String> existingSlotIds = [];
+    multiDateSelections.forEach((key, selection) {
+      final sameDate = selection['date'] == dateString;
+      final sameCourt = selection['courtId'] == courtId;
+      if (sameDate && sameCourt) {
+        final Slots s = selection['slot'] as Slots;
+        if (s.sId != null) existingSlotIds.add(s.sId!);
+      }
+    });
+
+    // If none selected yet for this court/date, always allow
+    if (existingSlotIds.isEmpty) return true;
+
+    // Build index list from the base cache
+    final List<int> indices = [];
+    for (final id in existingSlotIds) {
+      final idx = _getSlotIndexInCourt(courtId, id);
+      if (idx == -1) {
+        // If we cannot resolve index, fail open (allow) to avoid blocking due to data inconsistencies
+        return true;
+      }
+      indices.add(idx);
+    }
+    // Add candidate index
+    final candidateIdx = _getSlotIndexInCourt(courtId, slotId);
+    if (candidateIdx == -1) return true; // fail open
+
+    indices.add(candidateIdx);
+    indices.sort();
+
+    // Check contiguity: no gaps between sorted indices
+    for (int i = 1; i < indices.length; i++) {
+      if (indices[i] != indices[i - 1] + 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Get the index of a slot within the base slot list for a court
+  int _getSlotIndexInCourt(String courtId, String slotId) {
+    final List<Slots> baseList = _originalSlotsCache[courtId] ?? [];
+    for (int i = 0; i < baseList.length; i++) {
+      if (baseList[i].sId == slotId) return i;
+    }
+    // As a fallback, try the currently shown (possibly time-filtered) slots list
+    final data = slots.value?.data ?? [];
+    final court = data.firstWhereOrNull((c) => c.sId == courtId);
+    final currentList = court?.slots ?? [];
+    for (int i = 0; i < currentList.length; i++) {
+      if (currentList[i].sId == slotId) return i;
+    }
+    return -1;
   }
 
   void _clearCurrentDateSelections() {

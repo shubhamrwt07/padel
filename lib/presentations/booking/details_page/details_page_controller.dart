@@ -39,6 +39,7 @@ class DetailsController extends GetxController {
     "matchTime": "Unknown time",
     "skillLevel": "A",
     "skillDetails":[],
+    "playerLevel":"",
     "price": "Unknown price",
     "address": "add here",
     "gender": "",
@@ -253,7 +254,7 @@ class DetailsController extends GetxController {
   final phoneController = TextEditingController();
   RxBool isLoading = false.obs;
   RxString gender = 'Male'.obs;
-  RxString playerLevel = 'A'.obs;
+  RxString playerLevel = ''.obs;
 
   final Map<String, String> playerLevelMap = {
     'A': 'A – Top Player',
@@ -480,13 +481,41 @@ class DetailsController extends GetxController {
                             ),
                           ).paddingOnly(top: Get.height * 0.02, bottom: Get.height * 0.01),
 
-                          Obx(
-                                () => DropdownButtonFormField<String>(
-                              value: playerLevel.value,
+                          Obx(() {
+                            final currentValue = playerLevelMap.containsKey(playerLevel.value)
+                                ? playerLevel.value
+                                : null; // ✅ Prevents crash if value not in map
+
+                            return DropdownButtonFormField<String>(
+                              value: currentValue,
                               isDense: true,
-                                  dropdownColor: AppColors.whiteColor,
-                                  items: playerLevelMap.entries.map((entry) {
-                                return DropdownMenuItem(
+                              dropdownColor: AppColors.whiteColor,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.textFieldColor,
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              hint: Text(
+                                "Select Player Level",
+                                style: Get.textTheme.headlineMedium!.copyWith(
+                                  color: AppColors.textColor.withOpacity(0.6),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: AppColors.textColor,
+                              ),
+                              items: playerLevelMap.entries.map((entry) {
+                                return DropdownMenuItem<String>(
                                   value: entry.key,
                                   child: Text(
                                     entry.value,
@@ -497,23 +526,13 @@ class DetailsController extends GetxController {
                                   ),
                                 );
                               }).toList(),
-                              onChanged: (value) => playerLevel.value = value!,
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: AppColors.textFieldColor,
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 12,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 20),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  playerLevel.value = value;
+                                }
+                              },
+                            );
+                          })
                         ],
                       ),
                     ),
@@ -638,18 +657,25 @@ class DetailsController extends GetxController {
     profileController.fetchUserProfile();
 
     String skillLevel = "";
-    final skillDetails = localMatchData['skillDetails'];
-    if (skillDetails != null && skillDetails is List && skillDetails.isNotEmpty) {
-      skillLevel = skillDetails.last.toString();
-    } else if (localMatchData['skillLevel'] != null) {
-      skillLevel = localMatchData['skillLevel'].toString();
+    // Prefer explicitly selected player level label if present
+    if ((localMatchData['playerLevel'] ?? '').toString().isNotEmpty) {
+      skillLevel = localMatchData['playerLevel'].toString();
+    } else {
+      final skillDetails = localMatchData['skillDetails'];
+      if (skillDetails != null && skillDetails is List && skillDetails.isNotEmpty) {
+        skillLevel = skillDetails.last.toString();
+      } else if (localMatchData['skillLevel'] != null) {
+        skillLevel = localMatchData['skillLevel'].toString();
+      }
     }
 
     Map<String, dynamic> profileData = <String, dynamic>{
       "name": profileController.profileModel.value?.response!.name ?? "",
       "image": profileController.profileModel.value?.response!.profilePic ?? "",
       "userId": profileController.profileModel.value?.response!.sId ?? "",
-      "level": skillLevel, // This should now be non-empty
+      // Store both label and short code where possible
+      "levelLabel": skillLevel,
+      "level": skillLevel.toString().split(' ').first,
     };
 
     teamA.first.addAll(profileData);

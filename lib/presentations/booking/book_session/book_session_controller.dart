@@ -17,7 +17,7 @@ class BookSessionController extends GetxController {
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
   RxInt currentPage = 0.obs;
-  var selectedTimeOfDay = 0.obs; // 0 = Morning, 1 = Noon, 2 = Night
+  var selectedTimeOfDay = 0.obs;
 
   var morningCount = 0.obs;
   var noonCount = 0.obs;

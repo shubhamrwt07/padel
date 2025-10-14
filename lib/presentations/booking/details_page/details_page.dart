@@ -13,7 +13,10 @@ import 'details_page_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class DetailsScreen extends StatelessWidget {
-  final DetailsController controller = Get.put(DetailsController());
+  final DetailsController controller =
+      Get.isRegistered<DetailsController>()
+          ? Get.find<DetailsController>()
+          : Get.put(DetailsController());
   DetailsScreen({super.key});
   @override
   Widget build(BuildContext context) {
@@ -385,8 +388,8 @@ class DetailsScreen extends StatelessWidget {
               color: Colors.green.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
+            padding: EdgeInsets.symmetric(horizontal: 6),
             height: 16,
-            width: 30,
             child: Text(
               skillLevel,
               style: Get.textTheme.bodyLarge?.copyWith(
@@ -447,7 +450,7 @@ class DetailsScreen extends StatelessWidget {
                               controller.teamA[index]['name'] ?? "Unknown",
                               true,
                               controller.teamA[index]['image'] ?? "",
-                              controller.teamA[index]['level'] ?? "",
+                              controller.teamA[index]['level'] ?? controller.teamA[index]['levelLabel'] ?? "",
                             )
                                 : GestureDetector(
                               onTap: () {
@@ -519,7 +522,7 @@ class DetailsScreen extends StatelessWidget {
                               controller.teamB[index]['name'] ?? "Unknown",
                               true,
                               controller.teamB[index]['image'] ?? "",
-                              controller.teamB[index]['level'] ?? "", // PASS LEVEL HERE
+                              controller.teamB[index]['level'] ?? controller.teamB[index]['levelLabel'] ?? "",
                             )
                                 : GestureDetector(
                               onTap: () {
