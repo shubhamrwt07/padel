@@ -377,29 +377,27 @@ class DetailsController extends GetxController {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Dialog(
-            insetPadding: EdgeInsets.all(10),
+            insetPadding: const EdgeInsets.all(10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             child: Container(
               width: double.infinity,
               constraints: BoxConstraints(
-                  maxHeight: Get.height * 0.8,
-                  maxWidth: Get.width
+                maxHeight: Get.height * 0.8,
+                maxWidth: Get.width,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Dialog Header
+                  // ---------------- HEADER ----------------
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.whiteColor,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -413,19 +411,20 @@ class DetailsController extends GetxController {
                         ),
                         IconButton(
                           onPressed: () => Get.back(),
-                          icon: Icon(Icons.close, color: AppColors.labelBlackColor),
+                          icon: const Icon(Icons.close, color: AppColors.labelBlackColor),
                         ),
                       ],
                     ),
                   ),
 
-                  // Dialog Body
+                  // ---------------- BODY ----------------
                   Flexible(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // First Name
                           _textFieldWithLabel(
                             "First Name",
                             action: TextInputAction.next,
@@ -433,6 +432,8 @@ class DetailsController extends GetxController {
                             fullNameController,
                             context,
                           ),
+
+                          // Email
                           _textFieldWithLabel(
                             "Email",
                             action: TextInputAction.next,
@@ -440,6 +441,8 @@ class DetailsController extends GetxController {
                             emailController,
                             context,
                           ),
+
+                          // Phone Number
                           _textFieldWithLabel(
                             "Phone Number",
                             action: TextInputAction.next,
@@ -449,6 +452,7 @@ class DetailsController extends GetxController {
                             context,
                           ),
 
+                          // Gender
                           Text(
                             "Gender",
                             style: Get.textTheme.headlineSmall!.copyWith(
@@ -477,6 +481,7 @@ class DetailsController extends GetxController {
                             }).toList(),
                           )),
 
+                          // Player Level
                           Text(
                             "Player Level",
                             style: Get.textTheme.headlineSmall!.copyWith(
@@ -488,68 +493,71 @@ class DetailsController extends GetxController {
                           Obx(() {
                             final currentValue = playerLevelMap.containsKey(playerLevel.value)
                                 ? playerLevel.value
-                                : null; // ✅ Prevents crash if value not in map
+                                : null;
 
-                            return DropdownButtonFormField<String>(
-                              value: currentValue,
-                              isDense: true,
-                              dropdownColor: AppColors.whiteColor,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: AppColors.textFieldColor,
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 12,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              hint: Text(
-                                "Select Player Level",
-                                style: Get.textTheme.headlineMedium!.copyWith(
-                                  color: AppColors.textColor.withOpacity(0.6),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: AppColors.textColor,
-                              ),
-                              items: playerLevelMap.entries.map((entry) {
-                                return DropdownMenuItem<String>(
-                                  value: entry.key,
-                                  child: Text(
-                                    entry.value,
-                                    style: Get.textTheme.headlineMedium!.copyWith(
-                                      color: AppColors.textColor,
-                                      fontWeight: FontWeight.w500,
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                DropdownButtonFormField<String>(
+                                  value: currentValue,
+                                  isDense: true,
+                                  dropdownColor: AppColors.whiteColor,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: AppColors.textFieldColor,
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 12, horizontal: 12),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  playerLevel.value = value;
-                                }
-                              },
+                                  hint: Text(
+                                    "Select Player Level",
+                                    style: Get.textTheme.headlineMedium!.copyWith(
+                                      color: AppColors.textColor.withOpacity(0.6),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.textColor,
+                                  ),
+                                  items: playerLevelMap.entries.map((entry) {
+                                    return DropdownMenuItem<String>(
+                                      value: entry.key,
+                                      child: Text(
+                                        entry.value,
+                                        style: Get.textTheme.headlineMedium!.copyWith(
+                                          color: AppColors.textColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      playerLevel.value = value;
+                                    }
+                                  },
+                                ),
+
+                                const SizedBox(height: 20), // ✅ Space after Player Level field
+                              ],
                             );
-                          })
+                          }),
                         ],
                       ),
                     ),
                   ),
 
-                  // Dialog Footer
+                  // ---------------- FOOTER ----------------
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.whiteColor,
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(20),
-                      ),
+                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black12,
@@ -564,15 +572,15 @@ class DetailsController extends GetxController {
                           child: OutlinedButton(
                             onPressed: () => Get.back(),
                             style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 15),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: Text("Cancel"),
+                            child: const Text("Cancel"),
                           ),
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Expanded(
                           child: Obx(
                                 () => PrimaryButton(

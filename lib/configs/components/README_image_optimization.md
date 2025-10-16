@@ -101,3 +101,5 @@ The optimizations are automatically applied when using the new image widgets. No
 3. Preload images for better user experience
 4. Monitor cache size and clear when necessary
 5. Use appropriate placeholder and error widgets
+
+

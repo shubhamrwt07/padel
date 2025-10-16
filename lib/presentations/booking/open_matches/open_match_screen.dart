@@ -118,7 +118,7 @@ class OpenMatchesScreen extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: AppColors.textFieldColor.withAlpha(100),
+                      color: AppColors.textFieldColor,
                       border: Border.all(color: AppColors.blackColor.withAlpha(10))
                   ),
                   child: RotatedBox(
@@ -126,8 +126,8 @@ class OpenMatchesScreen extends StatelessWidget {
                     child: Text(
                       DateFormat('MMM').format(controller.selectedDate.value), // "SEP"
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
+                        fontWeight: FontWeight.w900,
+                          color: AppColors.labelBlackColor
                       ),
                     ),
                   ),
