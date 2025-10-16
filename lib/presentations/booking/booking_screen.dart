@@ -1,56 +1,108 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../cart/cart_controller.dart';
 import 'americano/americano_screen.dart';
 import 'open_matches/open_match_screen.dart';
+import 'widgets/booking_exports.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
 
-  /// Helper method to download image
-  Future<File?> _downloadImage(String imageUrl) async {
+  /// Try getting image file from cache or download if not available
+  Future<File?> _getCachedOrDownloadImage(String imageUrl) async {
     try {
-      final response = await http.get(Uri.parse(imageUrl));
+      final cacheManager = DefaultCacheManager();
+      final fileInfo = await cacheManager.getFileFromCache(imageUrl);
 
+      // ✅ Use cached image if available
+      if (fileInfo != null && await fileInfo.file.exists()) {
+        return fileInfo.file;
+      }
+
+      // ⬇️ Otherwise download and cache it
+      final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
-        final tempDir = await getTemporaryDirectory();
-        final file = File('${tempDir.path}/padel_club_${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await file.writeAsBytes(response.bodyBytes);
+        final file = await cacheManager.putFile(
+          imageUrl,
+          response.bodyBytes,
+          fileExtension: 'jpg',
+        );
         return file;
       }
     } catch (e) {
-      print('Error downloading image: $e');
+      debugPrint('Error getting cached/downloaded image: $e');
     }
     return null;
   }
 
-  /// Share image with text
+  /// Share image with text (optimized for smoother UI)
   Future<void> _shareWithImage() async {
     try {
       final imageUrl = controller.courtsData.value.courtImage?.isNotEmpty == true
           ? controller.courtsData.value.courtImage!.first
           : null;
 
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        final imageFile = await _downloadImage(imageUrl);
+      // Show loader immediately
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
 
-        if (imageFile != null) {
+      await Future.delayed(const Duration(milliseconds: 150)); // ensure loader shows
+
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        // Run cache/download logic in background isolate
+        final imagePath = await compute((url) async {
+          try {
+            final cacheManager = DefaultCacheManager();
+            final fileInfo = await cacheManager.getFileFromCache(url);
+
+            if (fileInfo != null && await fileInfo.file.exists()) {
+              return fileInfo.file.path;
+            }
+
+            final response = await http.get(Uri.parse(url));
+            if (response.statusCode == 200) {
+              final file = await cacheManager.putFile(
+                url,
+                response.bodyBytes,
+                fileExtension: 'jpg',
+              );
+              return file.path;
+            }
+          } catch (_) {}
+          return null;
+        }, imageUrl);
+
+        Get.back(); // close loader
+
+        if (imagePath != null) {
           await Share.shareXFiles(
-            [XFile(imageFile.path)],
-            text: 'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
+            [XFile(imagePath)],
+            text:
+            'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
             subject: 'Padel Club Details',
           );
+        } else {
+          _shareTextOnly();
         }
       } else {
+        Get.back();
         _shareTextOnly();
       }
     } catch (e) {
-      print('Error sharing: $e');
+      debugPrint('Error sharing: $e');
+      if (Get.isDialogOpen ?? false) Get.back();
       _shareTextOnly();
     }
   }
