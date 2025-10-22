@@ -9,6 +9,7 @@ import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../configs/components/custom_button.dart';
+import '../../../../handler/text_formatter.dart';
 import 'create_open_matches_controller.dart';
 
 class CreateOpenMatchesScreen extends StatelessWidget {
@@ -281,10 +282,10 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -Get.height*0.0),
+              offset: Offset(0, -Get.height*0.003),
               child: Container(
                 width: 30,
-                height: Get.height*0.07,
+                height: Get.height*0.06,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -297,7 +298,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      color: Colors.grey,
+                      color: AppColors.labelBlackColor,
                     ),
                   ),
                 ),
@@ -312,7 +313,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
-                itemExtent: 55,
+                itemExtent: 46,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   final now = DateTime.now();
                   final today = DateTime(now.year, now.month, now.day);
@@ -336,8 +337,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                           clipBehavior: Clip.none,
                           children: [
                             Container(
-                              height: Get.height * 0.07,
-                              width: Get.width * 0.13,
+                              height: Get.height * 0.06,
+                              width: Get.width * 0.11,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
@@ -830,7 +831,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          slot.time ?? '',
+          formatTimeSlot(slot.time??""),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,

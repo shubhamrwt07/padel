@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../handler/text_formatter.dart';
+
 class BookSession extends StatelessWidget {
   BookSession({super.key});
   final BookSessionController controller = Get.put(BookSessionController());
@@ -182,10 +184,10 @@ class BookSession extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -19),
+              offset: Offset(0, -23),
               child: Container(
                 width: 30,
-                height: Get.height*0.07,
+                height: Get.height*0.06,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -213,7 +215,7 @@ class BookSession extends StatelessWidget {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
-                itemExtent: 55,
+                itemExtent: 46,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   return Obx(() {
                     final now = DateTime.now();
@@ -236,8 +238,8 @@ class BookSession extends StatelessWidget {
                         children: [
                           Container(
                             margin: const EdgeInsets.only(top: 6),
-                            height: Get.height * 0.07,
-                            width: Get.width * 0.13,
+                            height: Get.height * 0.06,
+                            width: Get.width * 0.11,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
@@ -334,9 +336,7 @@ class BookSession extends StatelessWidget {
             children: [
               /// Left text — indicates current view
               Text(
-                controller.showUnavailableSlots.value
-                    ? "Unavailable Slots"
-                    : "Available Slots",
+                 "Available Slots",
                 style: Get.textTheme.titleSmall!.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.blackColor,
@@ -756,7 +756,7 @@ class BookSession extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          slot.time ?? '',
+          formatTimeSlot(slot.time??""),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,

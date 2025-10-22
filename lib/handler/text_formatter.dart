@@ -48,3 +48,21 @@ extension StringExtension on String {
     return passwordRegex.hasMatch(this);
   }
 }
+  String formatTimeSlot(String raw) {
+    try {
+      // Normalize input (e.g., remove extra spaces, lowercase)
+      final normalized = raw.trim().toLowerCase();
+
+      // Extract hour
+      final hourPart = normalized.split(" ")[0];
+      final periodPart = normalized.contains("pm") ? "pm" : "am";
+
+      int hour = int.tryParse(hourPart) ?? 0;
+      if (hour == 0) hour = 12; // for 12-hour clock display
+
+      // Return formatted time with :00
+      return "$hour:00 $periodPart";
+    } catch (_) {
+      return raw; // fallback if parsing fails
+    }
+  }

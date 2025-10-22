@@ -190,6 +190,7 @@ class CreateOpenMatchesController extends GetxController {
       final result = await repository.fetchAvailableCourtsSlotWise(
         day: formattedDay,
         registerClubId: clubId,
+        date: selectedDate.value.toString()
       );
 
       if (result != null) {
