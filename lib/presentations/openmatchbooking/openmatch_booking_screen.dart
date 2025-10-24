@@ -87,6 +87,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       displacement: Get.width * .2,
       color: AppColors.primaryColor,
       onRefresh: () async {
+        controller.resetPagination();
         String type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
         await controller.fetchOpenMatchesBooking(type: type);
       },
@@ -131,21 +132,46 @@ class OpenMatchBookingScreen extends StatelessWidget {
               }
 
               // Show list
-              return ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: controller.openMatchesList.length,
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) {
-                  final matches = controller.openMatchesList[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: _buildMatchCard(
-                      context,
-                      match: matches,
-                      completed: completed,
-                    ),
-                  );
+              return NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                      controller.hasMoreData.value &&
+                      !controller.isLoadingMore.value) {
+                    controller.loadMoreData();
+                  }
+                  return false;
                 },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: controller.openMatchesList.length + (controller.hasMoreData.value ? 1 : 0),
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    // Show loading indicator at the end
+                    if (index == controller.openMatchesList.length) {
+                      return Obx(() {
+                        if (controller.isLoadingMore.value) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      });
+                    }
+                    
+                    final matches = controller.openMatchesList[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: _buildMatchCard(
+                        context,
+                        match: matches,
+                        completed: completed,
+                      ),
+                    );
+                  },
+                ),
               );
             }),
           ),

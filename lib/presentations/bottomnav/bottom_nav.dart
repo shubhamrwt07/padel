@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../configs/app_colors.dart';
 import '../../generated/assets.dart';
 import 'bottom_nav_controller.dart';
+import '../drawer/zoom_drawer_wrapper.dart';
 
 class BottomNavUi extends StatelessWidget {
   BottomNavUi({super.key});
@@ -14,8 +15,9 @@ class BottomNavUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Obx(() => controller.getCurrentPage()),
+    return ZoomDrawerWrapper(
+      child: Scaffold(
+        body: Obx(() => controller.getCurrentPage()),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
@@ -91,7 +93,9 @@ class BottomNavUi extends StatelessWidget {
                 return GButton(
                   haptic: true,
                   gap: 10,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  borderRadius: BorderRadius.circular(30),
+
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
                   icon: isSvg ? Icons.circle : tab['icon'],
                   text: tab['label'],
                   iconColor: Colors.black,
@@ -113,10 +117,11 @@ class BottomNavUi extends StatelessWidget {
                   ),
                 );
               }),
-            ).paddingOnly(left: 15, right: 15),
+            ).paddingOnly(left: 0, right:0 ),
           ),
         ),
       ).paddingOnly(bottom: 24),
+      ),
     );
   }
   Shader getGradientShader(Rect bounds) {

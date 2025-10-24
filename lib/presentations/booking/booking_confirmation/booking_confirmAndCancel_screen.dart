@@ -22,15 +22,23 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           },
         ),
         centerTitle: true,
-        title: Obx(
-              () => Text(
-            controller.cancelBooking.value
-                ? (controller.slotToCancel.value != null
-                ? "Cancel Slot"
-                : AppStrings.bookingCancellation)
-                : AppStrings.bookingConfirmation,
-          ),
-        ),
+        title: Obx(() {
+          if (controller.cancelBooking.value) {
+            return Text(
+              controller.slotToCancel.value != null
+                  ? "Cancel Slot"
+                  : AppStrings.bookingCancellation,
+            );
+          }
+
+          // Check booking status for the title
+          final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
+          if (status == "in-progress" || status == "refunded" || status == "cancelled") {
+            return const Text("Booking Cancellation");
+          }
+
+          return Text(AppStrings.bookingConfirmation);
+        }),
         context: context,
       ),
       body: Obx(() {
@@ -72,7 +80,13 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!controller.cancelBooking.value)  SuccessImage().paddingOnly(top: Get.height*0.03,bottom: Get.height*0.03),
+              if (!controller.cancelBooking.value)
+                Obx(() {
+                  final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
+                  final isCancelled = status == "in-progress" || status == "refunded" || status == "cancelled";
+                  return SuccessImage(isCancelled: isCancelled)
+                      .paddingOnly(top: Get.height*0.03, bottom: Get.height*0.03);
+                }),
               bookingDetailsCard(context),
               paymentDetailsCard(context),
               if (!controller.cancelBooking.value) _showCancelButtonIfAllowed(),
@@ -100,6 +114,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       bookingMessage = "Your refund successfully credited.";
     } else if (booking.bookingStatus?.toLowerCase() == "completed") {
       bookingMessage = "Your booking has been successfully completed.";
+    } else if (booking.bookingStatus?.toLowerCase() == "cancelled") {
+      bookingMessage = "Your booking has been cancelled.";
     }
 
     return Column(
@@ -134,12 +150,12 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                     backgroundColor: Colors.grey.shade200,
                     child: ClipOval(
                       child: CachedNetworkImage(
-                        imageUrl: booking.userId?.profilePic ?? "",
-                        fit: BoxFit.cover,
-                        width: 44,
-                        height: 44,
-                        placeholder: (context, url) => CircularProgressIndicator(),
-                        errorWidget: (context, url, error) => Icon(Icons.error)
+                          imageUrl: booking.userId?.profilePic ?? "",
+                          fit: BoxFit.cover,
+                          width: 44,
+                          height: 44,
+                          placeholder: (context, url) => CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => Icon(Icons.error)
                       ),
                     ),
                   ),
@@ -176,7 +192,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
               // ✅ Show booking status
               bookingDetailRow(
                 context,
-                "Status" ,
+                "Status",
                 booking.bookingStatus?.capitalizeFirst ?? "N/A",
               ),
 
@@ -187,6 +203,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       }).toList(),
     );
   }
+
   Widget paymentDetailsCard(BuildContext context) {
     final booking = controller.bookingDetails.value!.booking!;
     final status = booking.bookingStatus?.toLowerCase();
@@ -214,7 +231,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             bookingDetailRow(
               context,
               "Refunded Amount",
-              "₹ ${(booking.refundAmount  ?? 0).toStringAsFixed(2)}",
+              "₹ ${(booking.refundAmount ?? 0).toStringAsFixed(2)}",
             ),
         ],
       ),

@@ -103,3 +103,6 @@ The optimizations are automatically applied when using the new image widgets. No
 5. Use appropriate placeholder and error widgets
 
 
+
+
+

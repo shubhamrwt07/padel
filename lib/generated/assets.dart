@@ -11,6 +11,7 @@ class Assets {
   static const String imagesIcAmericano = 'assets/images/ic_americano.svg';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
+  static const String imagesIcBookingcancellation = 'assets/images/ic_bookingcancellation.svg';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcCelebration = 'assets/images/ic_celebration.svg';

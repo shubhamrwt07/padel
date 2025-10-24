@@ -17,10 +17,14 @@ class BookingHistoryRepository {
 
   BookingHistoryRepository._internal();
 
-  Future<BookingHistoryModel> getBookingHistory({required String type}) async {
+  Future<BookingHistoryModel> getBookingHistory({
+    required String type,
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
       if (kDebugMode) {
-        print("Making API call for type: $type");
+        print("Making API call for type: $type, page: $page, limit: $limit");
       }
       if (kDebugMode) {
         print("Endpoint: ${AppEndpoints.bookingHistory}");
@@ -28,7 +32,11 @@ class BookingHistoryRepository {
 
       final response = await dioClient.get(
         AppEndpoints.bookingHistory,
-        queryParameters: {'type': type},
+        queryParameters: {
+          'type': type,
+          'page': page,
+          'limit': limit,
+        },
       );
 
       if (kDebugMode) {

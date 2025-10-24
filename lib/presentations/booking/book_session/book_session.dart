@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../handler/text_formatter.dart';
+
 class BookSession extends StatelessWidget {
   BookSession({super.key});
   final BookSessionController controller = Get.put(BookSessionController());
@@ -182,10 +184,10 @@ class BookSession extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -19),
+              offset: Offset(0, -23),
               child: Container(
                 width: 30,
-                height: Get.height*0.07,
+                height: Get.height*0.06,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -213,7 +215,7 @@ class BookSession extends StatelessWidget {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
-                itemExtent: 55,
+                itemExtent: 46,
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                   return Obx(() {
                     final now = DateTime.now();
@@ -236,8 +238,8 @@ class BookSession extends StatelessWidget {
                         children: [
                           Container(
                             margin: const EdgeInsets.only(top: 6),
-                            height: Get.height * 0.07,
-                            width: Get.width * 0.13,
+                            height: Get.height * 0.06,
+                            width: Get.width * 0.11,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
@@ -324,7 +326,6 @@ class BookSession extends StatelessWidget {
           ],
         )),
 
-        const SizedBox(height: 12),
 
         /// Toggle row moved here below date picker
         Obx(() => Transform.translate(
@@ -334,9 +335,7 @@ class BookSession extends StatelessWidget {
             children: [
               /// Left text — indicates current view
               Text(
-                controller.showUnavailableSlots.value
-                    ? "Unavailable Slots"
-                    : "Available Slots",
+                 "Available Slots",
                 style: Get.textTheme.titleSmall!.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.blackColor,
@@ -536,7 +535,7 @@ class BookSession extends StatelessWidget {
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10), // Reduced margin for better spacing
+      margin: const EdgeInsets.only(bottom: 0), // Reduced margin for better spacing
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -555,7 +554,7 @@ class BookSession extends StatelessWidget {
           // Court Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12), // Increased padding
+            padding: const EdgeInsets.only(left: 12,right: 12,top: 10), // Increased padding
             decoration: BoxDecoration(
               color: AppColors.whiteColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
@@ -698,8 +697,8 @@ class BookSession extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
         childAspectRatio: 2.5,
       ),
       itemCount: filteredSlots.length,
@@ -756,7 +755,7 @@ class BookSession extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          slot.time ?? '',
+          formatTimeSlot(slot.time??""),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,

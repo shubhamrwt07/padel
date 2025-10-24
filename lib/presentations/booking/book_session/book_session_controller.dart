@@ -165,8 +165,10 @@ class BookSessionController extends GetxController {
       log("Club ID: $clubId");
 
       final result = await repository.fetchAvailableCourtsSlotWise(
+
         day: formattedDay,
         registerClubId: clubId,
+        date: selectedDate.value.toString()  ,
       );
 
       // Store ALL slots (both available and unavailable)

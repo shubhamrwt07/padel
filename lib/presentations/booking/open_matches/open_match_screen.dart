@@ -113,7 +113,7 @@ class OpenMatchesScreen extends StatelessWidget {
               children: [
                 Container(
                   width: 30,
-                  height: Get.height*0.07,
+                  height: Get.height*0.06,
                   // color: Colors.grey,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -141,7 +141,7 @@ class OpenMatchesScreen extends StatelessWidget {
                     firstDate: DateTime.now(),
                     lastDate: DateTime(2030, 3, 18),
                     focusedDate: controller.selectedDate.value,
-                    itemExtent: 55,
+                    itemExtent: 46,
                     itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                       final dayName = DateFormat('E').format(date);
 
@@ -150,8 +150,8 @@ class OpenMatchesScreen extends StatelessWidget {
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
                           child: Container(
-                            height: Get.height * 0.07,
-                            width: Get.width * 0.13,
+                            height: Get.height * 0.06,
+                            width: Get.width * 0.11,
                             key: ValueKey(isSelected),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(

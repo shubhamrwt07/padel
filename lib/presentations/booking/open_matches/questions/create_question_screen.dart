@@ -95,7 +95,7 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
     );
   }
   Widget _buildLevelSelection() {
-    final levels = ['Benninger', 'Intermediate', 'Advanced', 'Professional'];
+    final levels = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
     final style = Get.textTheme.headlineMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
