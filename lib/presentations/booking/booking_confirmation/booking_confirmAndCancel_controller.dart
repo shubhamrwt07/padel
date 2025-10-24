@@ -111,7 +111,7 @@ class BookingConfirmAndCancelController extends GetxController {
           msg: result?.message ?? "Updated",
           level: LogLevel.debug,
         );
-        SnackBarUtils.showSuccessSnackBar(result?.message ?? "Updated");
+        SnackBarUtils.showSuccessSnackBar( "Your booking has been successfully canceled.");
         otherReasonController.clear();
       } else {
         SnackBarUtils.showErrorSnackBar("Booking update failed");

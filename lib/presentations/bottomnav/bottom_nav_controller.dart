@@ -1,6 +1,10 @@
+import 'package:padel_mobile/presentations/bookinghistory/booking_history_controller.dart';
+import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
+import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_screen.dart';
 
@@ -9,13 +13,14 @@ import '../home/home_controller.dart';
 
 class BottomNavigationController extends GetxController {
   HomeController homeController = Get.put(HomeController());
-  CartController cartController = Get.put(CartController());
-  ProfileController profileController = Get.put(ProfileController());
+  BookingHistoryController bookingHistoryController= Get.put(BookingHistoryController());
+  OpenMatchBookingController openMatchBookingController= Get.put(OpenMatchBookingController());
   final List<Map<String, dynamic>> tabs = [
     {'icon': Assets.imagesIcHomeBottomBar, 'label': 'Home','isSvg': true, 'size': 21.0},
+    {'icon': Icons.calendar_month_outlined, 'label': 'Bookings', 'size': 30.0},
+    {'icon':  Assets.imagesIcProfile, 'label': 'Open Matches', 'isSvg': true, 'size': 22.0},
     {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 20.0},
-    {'icon': Icons.shopping_cart_outlined, 'label': 'Cart', 'size': 24.0},
-    {'icon':  Assets.imagesIcProfile, 'label': 'Profile', 'isSvg': true, 'size': 22.0},
+
   ];
 
 
@@ -25,13 +30,13 @@ class BottomNavigationController extends GetxController {
   // List of pages (you can expand this as needed)
   final List<Widget> pages = [
 HomeScreen(),
-SizedBox(
-height: Get.height,
-  width: Get.width,
-  child: Center(child: Text("Coming Soon",style: TextStyle(fontSize: 15),)),
-),
-    CartScreen(buttonType: '',),
-ProfileUi()
+BookingHistoryUi(),
+    OpenMatchBookingScreen(),
+    SizedBox(
+      height: Get.height,
+      width: Get.width,
+      child: Center(child: Text("Coming Soon",style: TextStyle(fontSize: 15),)),
+    ),
   ];
 
   // Function to update selected index

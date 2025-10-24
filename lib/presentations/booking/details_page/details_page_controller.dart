@@ -296,6 +296,7 @@ class DetailsController extends GetxController {
     // Update the reactive lists
     teamA.refresh();
     teamB.refresh();
+
   }
 
   /// Enhanced create user method with team assignment

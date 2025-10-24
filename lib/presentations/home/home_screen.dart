@@ -12,6 +12,7 @@ import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
+import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
 
 import '../../data/request_models/home_models/get_club_name_model.dart';
 
@@ -25,7 +26,25 @@ class HomeScreen extends GetView<HomeController> {
       child: Scaffold(
         appBar: primaryAppBar(
           showLeading: false,
-          title: _buildAppBarTitle(context),
+          title: Row(
+            children: [
+              // Drawer menu icon
+              IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  final drawerController = Get.find<CustomZoomDrawerController>();
+                  drawerController.toggleDrawer();
+                },
+              ),
+
+
+              // Space between icon and title
+              const SizedBox(width: 0),
+
+              // Existing title widget
+              Expanded(child: _buildAppBarTitle(context)),
+            ],
+          ),
           action: [
             InkWell(
               onTap: () => Get.toNamed(RoutesName.notification),
@@ -34,6 +53,7 @@ class HomeScreen extends GetView<HomeController> {
           ],
           context: context,
         ),
+
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
           child: Column(

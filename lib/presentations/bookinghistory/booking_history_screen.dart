@@ -28,7 +28,7 @@ class BookingHistoryUi extends StatelessWidget {
               children: [
                 _tabContent(context, type: "upcoming"),
                 _tabContent(context, type: "completed"),
-                _tabContent(context, type: "cancelled"), // ✅ new tab
+                _tabContent(context, type: "cancelled"),
               ],
             ),
           ),
@@ -84,9 +84,28 @@ class BookingHistoryUi extends StatelessWidget {
         color: Colors.white,
         onRefresh: () async => controller.refreshBookings(),
         child: ListView.builder(
+          controller: controller.scrollController,
           physics: AlwaysScrollableScrollPhysics(),
-          itemCount: bookings.length,
+          itemCount: bookings.length + (controller.hasMoreData(type) ? 1 : 0),
           itemBuilder: (context, index) {
+            // Show loading indicator at the bottom
+            if (index == bookings.length) {
+              return Obx(() {
+                if (controller.isLoadingMore.value) {
+                  return Container(
+                    padding: EdgeInsets.all(16),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              });
+            }
+
             final booking = bookings[index];
             final club = booking.registerClubId;
 
@@ -112,7 +131,6 @@ class BookingHistoryUi extends StatelessWidget {
       );
     });
   }
-
   Widget bookingCard(BuildContext context, booking, club) {
     return Container(
       margin: const EdgeInsets.only(bottom: 0),
@@ -262,7 +280,6 @@ class BookingHistoryUi extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-
                   // Booking info skeleton (3 inline segments)
                   Row(
                     children: [

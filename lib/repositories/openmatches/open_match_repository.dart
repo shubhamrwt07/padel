@@ -49,10 +49,12 @@ class OpenMatchRepository {
   ///Get Open Match Bookings by Type (Upcoming / Completed)---------------------------
   Future<OpenMatchBookingModel?> getOpenMatchBookings({
     required String type, // "upcoming" or "completed"
+    int page = 1,
+    int limit = 10,
   }) async {
     try {
       final url =
-          "${AppEndpoints.openMatchBooking}?type=$type";
+          "${AppEndpoints.openMatchBooking}?type=$type&page=$page&limit=$limit";
 
       CustomLogger.logMessage(
         msg: "Fetching Open Match Bookings: $url",

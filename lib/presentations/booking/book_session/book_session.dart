@@ -326,7 +326,6 @@ class BookSession extends StatelessWidget {
           ],
         )),
 
-        const SizedBox(height: 12),
 
         /// Toggle row moved here below date picker
         Obx(() => Transform.translate(
@@ -536,7 +535,7 @@ class BookSession extends StatelessWidget {
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10), // Reduced margin for better spacing
+      margin: const EdgeInsets.only(bottom: 0), // Reduced margin for better spacing
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -555,7 +554,7 @@ class BookSession extends StatelessWidget {
           // Court Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12), // Increased padding
+            padding: const EdgeInsets.only(left: 12,right: 12,top: 10), // Increased padding
             decoration: BoxDecoration(
               color: AppColors.whiteColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
@@ -698,8 +697,8 @@ class BookSession extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
         childAspectRatio: 2.5,
       ),
       itemCount: filteredSlots.length,

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:padel_mobile/generated/assets.dart';
+
 class SuccessImage extends StatelessWidget {
-  const SuccessImage({super.key});
+  final bool isCancelled;
+
+  const SuccessImage({
+    super.key,
+    this.isCancelled = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +26,14 @@ class SuccessImage extends StatelessWidget {
             ),
           );
         },
-        child: SvgPicture.asset(Assets.imagesImgBookingConfirm),
+        child: isCancelled
+            ? SvgPicture.asset(Assets.imagesIcBookingcancellation)
+            : SvgPicture.asset(Assets.imagesImgBookingConfirm),
       ),
     );
   }
 }
+
+// Alternative version if you have a cancel SVG asset:
+// Replace the Icon widget with:
+// SvgPicture.asset(Assets.imagesImgBookingCancel)
