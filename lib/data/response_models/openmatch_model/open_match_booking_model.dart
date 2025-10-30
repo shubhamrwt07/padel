@@ -1,3 +1,4 @@
+
 class OpenMatchBookingModel {
   bool? success;
   List<OpenMatchBookingData>? data;
@@ -180,7 +181,9 @@ class OpenMatchBookingData {
     final String fromTeamA = (teamA != null && teamA!.isNotEmpty)
         ? (teamA!.first.userId?.level ?? '')
         : '';
-    final String source = fromTeamA.isNotEmpty ? fromTeamA : (playerLevel ?? '');
+    final String source = fromTeamA.isNotEmpty
+        ? fromTeamA
+        : (playerLevel ?? createdBy?.level ?? skillLevel ?? '');
     return _extractLevelCode(source);
   }
 
@@ -189,7 +192,9 @@ class OpenMatchBookingData {
     final String fromTeamA = (teamA != null && teamA!.isNotEmpty)
         ? (teamA!.first.userId?.level ?? '')
         : '';
-    final String source = fromTeamA.isNotEmpty ? fromTeamA : (playerLevel ?? '');
+    final String source = fromTeamA.isNotEmpty
+        ? fromTeamA
+        : (playerLevel ?? createdBy?.level ?? skillLevel ?? '');
     return source.isNotEmpty ? source : '-';
   }
 
@@ -243,7 +248,8 @@ class ClubId {
   String? city;
   int? courtCount;
   List<String>? courtImage;
-  String? courtType;
+  List<String>? courtName;
+  List<String>? courtType;
   String? createdAt;
   List<String>? features;
   bool? isActive;
@@ -266,6 +272,7 @@ class ClubId {
         this.city,
         this.courtCount,
         this.courtImage,
+        this.courtName,
         this.courtType,
         this.createdAt,
         this.features,
@@ -296,7 +303,8 @@ class ClubId {
     city = json['city'];
     courtCount = json['courtCount'];
     courtImage = json['courtImage'].cast<String>();
-    courtType = json['courtType'];
+    courtName = json['courtName'].cast<String>();
+    courtType = json['courtType'].cast<String>();
     createdAt = json['createdAt'];
     features = json['features'].cast<String>();
     isActive = json['isActive'];
@@ -326,6 +334,7 @@ class ClubId {
     data['city'] = this.city;
     data['courtCount'] = this.courtCount;
     data['courtImage'] = this.courtImage;
+    data['courtName'] = this.courtName;
     data['courtType'] = this.courtType;
     data['createdAt'] = this.createdAt;
     data['features'] = this.features;
@@ -507,6 +516,7 @@ class UserId {
   String? gender;
   String? profilePic;
   String? level;
+  String? lastName;
 
   UserId(
       {this.location,
@@ -529,9 +539,115 @@ class UserId {
         this.dob,
         this.gender,
         this.profilePic,
-        this.level});
+        this.level,
+        this.lastName});
 
   UserId.fromJson(Map<String, dynamic> json) {
+    location = json['location'] != null
+        ? new Location.fromJson(json['location'])
+        : null;
+    sId = json['_id'];
+    email = json['email'];
+    countryCode = json['countryCode'];
+    phoneNumber = json['phoneNumber'];
+    name = json['name'];
+    lastname = json['lastname'];
+    password = json['password'];
+    city = json['city'];
+    agreeTermsAndCondition = json['agreeTermsAndCondition'];
+    category = json['category'];
+    isActive = json['isActive'];
+    isDeleted = json['isDeleted'];
+    role = json['role'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    iV = json['__v'];
+    dob = json['dob'];
+    gender = json['gender'];
+    profilePic = json['profilePic'];
+    level = json['level'];
+    lastName = json['lastName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.location != null) {
+      data['location'] = this.location!.toJson();
+    }
+    data['_id'] = this.sId;
+    data['email'] = this.email;
+    data['countryCode'] = this.countryCode;
+    data['phoneNumber'] = this.phoneNumber;
+    data['name'] = this.name;
+    data['lastname'] = this.lastname;
+    data['password'] = this.password;
+    data['city'] = this.city;
+    data['agreeTermsAndCondition'] = this.agreeTermsAndCondition;
+    data['category'] = this.category;
+    data['isActive'] = this.isActive;
+    data['isDeleted'] = this.isDeleted;
+    data['role'] = this.role;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    data['__v'] = this.iV;
+    data['dob'] = this.dob;
+    data['gender'] = this.gender;
+    data['profilePic'] = this.profilePic;
+    data['level'] = this.level;
+    data['lastName'] = this.lastName;
+    return data;
+  }
+}
+
+
+
+class CreatedBy {
+  Location? location;
+  String? sId;
+  String? email;
+  String? countryCode;
+  int? phoneNumber;
+  String? name;
+  String? lastname;
+  String? password;
+  String? city;
+  bool? agreeTermsAndCondition;
+  String? category;
+  bool? isActive;
+  bool? isDeleted;
+  String? role;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+  String? dob;
+  String? gender;
+  String? profilePic;
+  String? level;
+
+  CreatedBy(
+      {this.location,
+        this.sId,
+        this.email,
+        this.countryCode,
+        this.phoneNumber,
+        this.name,
+        this.lastname,
+        this.password,
+        this.city,
+        this.agreeTermsAndCondition,
+        this.category,
+        this.isActive,
+        this.isDeleted,
+        this.role,
+        this.createdAt,
+        this.updatedAt,
+        this.iV,
+        this.dob,
+        this.gender,
+        this.profilePic,
+        this.level});
+
+  CreatedBy.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
         ? new Location.fromJson(json['location'])
         : null;
@@ -586,99 +702,3 @@ class UserId {
   }
 }
 
-class CreatedBy {
-  Location? location;
-  String? sId;
-  String? email;
-  String? countryCode;
-  int? phoneNumber;
-  String? name;
-  String? lastname;
-  String? password;
-  String? city;
-  bool? agreeTermsAndCondition;
-  String? category;
-  bool? isActive;
-  bool? isDeleted;
-  String? role;
-  String? createdAt;
-  String? updatedAt;
-  int? iV;
-  String? dob;
-  String? gender;
-  String? profilePic;
-
-  CreatedBy(
-      {this.location,
-        this.sId,
-        this.email,
-        this.countryCode,
-        this.phoneNumber,
-        this.name,
-        this.lastname,
-        this.password,
-        this.city,
-        this.agreeTermsAndCondition,
-        this.category,
-        this.isActive,
-        this.isDeleted,
-        this.role,
-        this.createdAt,
-        this.updatedAt,
-        this.iV,
-        this.dob,
-        this.gender,
-        this.profilePic});
-
-  CreatedBy.fromJson(Map<String, dynamic> json) {
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
-    sId = json['_id'];
-    email = json['email'];
-    countryCode = json['countryCode'];
-    phoneNumber = json['phoneNumber'];
-    name = json['name'];
-    lastname = json['lastname'];
-    password = json['password'];
-    city = json['city'];
-    agreeTermsAndCondition = json['agreeTermsAndCondition'];
-    category = json['category'];
-    isActive = json['isActive'];
-    isDeleted = json['isDeleted'];
-    role = json['role'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    iV = json['__v'];
-    dob = json['dob'];
-    gender = json['gender'];
-    profilePic = json['profilePic'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.location != null) {
-      data['location'] = this.location!.toJson();
-    }
-    data['_id'] = this.sId;
-    data['email'] = this.email;
-    data['countryCode'] = this.countryCode;
-    data['phoneNumber'] = this.phoneNumber;
-    data['name'] = this.name;
-    data['lastname'] = this.lastname;
-    data['password'] = this.password;
-    data['city'] = this.city;
-    data['agreeTermsAndCondition'] = this.agreeTermsAndCondition;
-    data['category'] = this.category;
-    data['isActive'] = this.isActive;
-    data['isDeleted'] = this.isDeleted;
-    data['role'] = this.role;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['__v'] = this.iV;
-    data['dob'] = this.dob;
-    data['gender'] = this.gender;
-    data['profilePic'] = this.profilePic;
-    return data;
-  }
-}

@@ -3,9 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../../handler/text_formatter.dart';
-
 class BookSession extends StatelessWidget {
   BookSession({super.key});
   final BookSessionController controller = Get.put(BookSessionController());
@@ -530,7 +528,9 @@ class BookSession extends StatelessWidget {
         courtData.register_club_id?.courtType ??
         'Standard court';
 
-    final featureText = courtType;
+    final String featureText = courtType is List
+        ? (courtType as List).whereType<String>().join(', ')
+        : (courtType?.toString() ?? 'Standard court');
 
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 

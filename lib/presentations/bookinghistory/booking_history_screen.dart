@@ -10,11 +10,14 @@ class BookingHistoryUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BookingHistoryController controller = Get.put(BookingHistoryController());
+    // ✅ FIX: Use Get.put with a tag or ensure single instance
+    final BookingHistoryController controller = Get.put(
+      BookingHistoryController(),
+      tag: 'booking_history',
+    );
 
     return Scaffold(
       appBar: primaryAppBar(
-        showLeading: true,
         centerTitle: true,
         title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
         context: context,
@@ -26,9 +29,10 @@ class BookingHistoryUi extends StatelessWidget {
             child: TabBarView(
               controller: controller.tabController,
               children: [
-                _tabContent(context, type: "upcoming"),
-                _tabContent(context, type: "completed"),
-                _tabContent(context, type: "cancelled"),
+                // ✅ FIX: Pass controller directly instead of using Get.find
+                _tabContent(context, controller: controller, type: "upcoming"),
+                _tabContent(context, controller: controller, type: "completed"),
+                _tabContent(context, controller: controller, type: "cancelled"),
               ],
             ),
           ),
@@ -51,26 +55,28 @@ class BookingHistoryUi extends StatelessWidget {
         tabs: const [
           Tab(text: "Upcoming"),
           Tab(text: "Completed"),
-          Tab(text: "Cancelled"), // ✅ new
+          Tab(text: "Cancelled"),
         ],
       ),
     );
   }
 
-  Widget _tabContent(BuildContext context, {required String type}) {
-    final BookingHistoryController controller = Get.find();
-
+  // ✅ FIX: Accept controller as parameter
+  Widget _tabContent(BuildContext context, {
+    required BookingHistoryController controller,
+    required String type,
+  }) {
     return Obx(() {
       final bookings = (type == "completed")
-          ? controller.completedBookings.value?.data ?? []
+          ? (controller.completedBookings.value?.data ?? [])
           : (type == "cancelled")
-          ? controller.cancelledBookings.value?.data ?? []
-          : controller.upcomingBookings.value?.data ?? [];
+          ? (controller.cancelledBookings.value?.data ?? [])
+          : (controller.upcomingBookings.value?.data ?? []);
 
       if (controller.isLoading.value) {
         return ListView.builder(
           itemCount: 10,
-          itemBuilder: (context,index){
+          itemBuilder: (context, index) {
             return bookingCardShimmer(context);
           },
         );
@@ -85,7 +91,7 @@ class BookingHistoryUi extends StatelessWidget {
         onRefresh: () async => controller.refreshBookings(),
         child: ListView.builder(
           controller: controller.scrollController,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: bookings.length + (controller.hasMoreData(type) ? 1 : 0),
           itemBuilder: (context, index) {
             // Show loading indicator at the bottom
@@ -93,7 +99,7 @@ class BookingHistoryUi extends StatelessWidget {
               return Obx(() {
                 if (controller.isLoadingMore.value) {
                   return Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Center(
                       child: CircularProgressIndicator(
                         color: AppColors.primaryColor,
@@ -101,7 +107,7 @@ class BookingHistoryUi extends StatelessWidget {
                     ),
                   );
                 } else {
-                  return SizedBox.shrink();
+                  return const SizedBox.shrink();
                 }
               });
             }
@@ -111,19 +117,19 @@ class BookingHistoryUi extends StatelessWidget {
 
             return GestureDetector(
               onTap: () {
-                if (booking.sId != null && booking.sId!.isNotEmpty) {
+                final bookingId = booking.sId;
+                if (bookingId != null && bookingId.isNotEmpty) {
                   Get.toNamed(
                     RoutesName.bookingConfirmAndCancel,
                     arguments: {
-                      "id": booking.sId!,
-                      "fromCompleted": type == "completed", // ✅ pass flag
+                      "id": bookingId,
+                      "fromCompleted": type == "completed",
                     },
                   );
                 } else {
                   Get.snackbar("Error", "Booking ID not available");
                 }
               },
-
               child: bookingCard(context, booking, club),
             );
           },
@@ -131,7 +137,8 @@ class BookingHistoryUi extends StatelessWidget {
       );
     });
   }
-  Widget bookingCard(BuildContext context, booking, club) {
+
+  Widget bookingCard(BuildContext context, dynamic booking, dynamic club) {
     return Container(
       margin: const EdgeInsets.only(bottom: 0),
       padding: EdgeInsets.only(
@@ -176,32 +183,8 @@ class BookingHistoryUi extends StatelessWidget {
                     ],
                   ).paddingOnly(top: 3, bottom: 3),
                 ),
-                if (booking.slot != null && booking.slot!.isNotEmpty)
-                  Row(
-                    children: [
-                      const Icon(Icons.alarm, size: 15),
-                      Text(
-                        formatDate(booking.bookingDate),
-                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          color: AppColors.blackColor,
-                        ),
-                      ).paddingOnly(left: 5),
-                      if (booking.slot!.first.slotTimes != null &&
-                          booking.slot!.first.slotTimes!.isNotEmpty)
-                        Text(
-                          booking.slot!.first.slotTimes!.first.time ?? "",
-                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                            color: AppColors.blackColor,
-                          ),
-                        ).paddingOnly(left: 5),
-                      Text(
-                        "(60m)",
-                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          color: AppColors.labelBlackColor,
-                        ),
-                      ).paddingOnly(left: 5),
-                    ],
-                  ),
+                // ✅ CRITICAL FIX: Safe slot checking
+                _buildSlotInfo(context, booking),
               ],
             ),
           ),
@@ -211,15 +194,107 @@ class BookingHistoryUi extends StatelessWidget {
     ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10);
   }
 
+  // ✅ NEW: Separate method for slot info with proper null checks
+  Widget _buildSlotInfo(BuildContext context, dynamic booking) {
+    try {
+      // Check if booking has slot data
+      if (booking.slot == null) return const SizedBox.shrink();
+
+      // Ensure slot is a list
+      final slotList = booking.slot;
+      if (slotList is! List || slotList.isEmpty) return const SizedBox.shrink();
+
+      // Get first slot
+      final firstSlot = slotList[0];
+      if (firstSlot == null) return const SizedBox.shrink();
+
+      // Check if slotTimes exists
+      final slotTimes = firstSlot.slotTimes;
+      if (slotTimes == null) {
+        // Show only date if no time available
+        return Row(
+          children: [
+            const Icon(Icons.alarm, size: 15),
+            Text(
+              formatDate(booking.bookingDate),
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.blackColor,
+              ),
+            ).paddingOnly(left: 5),
+            Text(
+              "(60m)",
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.labelBlackColor,
+              ),
+            ).paddingOnly(left: 5),
+          ],
+        );
+      }
+
+      if (slotTimes is! List || slotTimes.isEmpty) {
+        return Row(
+          children: [
+            const Icon(Icons.alarm, size: 15),
+            Text(
+              formatDate(booking.bookingDate),
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.blackColor,
+              ),
+            ).paddingOnly(left: 5),
+            Text(
+              "(60m)",
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.labelBlackColor,
+              ),
+            ).paddingOnly(left: 5),
+          ],
+        );
+      }
+
+      final firstTime = slotTimes[0];
+      final timeString = firstTime?.time ?? "";
+
+      return Row(
+        children: [
+          const Icon(Icons.alarm, size: 15),
+          Text(
+            formatDate(booking.bookingDate),
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              color: AppColors.blackColor,
+            ),
+          ).paddingOnly(left: 5),
+          if (timeString.isNotEmpty)
+            Text(
+              timeString,
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                color: AppColors.blackColor,
+              ),
+            ).paddingOnly(left: 5),
+          Text(
+            "(60m)",
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              color: AppColors.labelBlackColor,
+            ),
+          ).paddingOnly(left: 5),
+        ],
+      );
+    } catch (e) {
+      print("Error building slot info: $e");
+      return const SizedBox.shrink();
+    }
+  }
+
   String formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('EEE, dd MMMM').format(date); // e.g., Thu, 27 June
+      return DateFormat('EEE, dd MMMM').format(date);
     } catch (e) {
+      print("Error parsing date: $e");
       return dateStr;
     }
   }
+
   Widget bookingCardShimmer(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade200,
@@ -246,7 +321,6 @@ class BookingHistoryUi extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Club name skeleton
                   Container(
                     height: 14,
                     width: Get.width * 0.4,
@@ -256,8 +330,6 @@ class BookingHistoryUi extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-
-                  // Location skeleton
                   Row(
                     children: [
                       Container(
@@ -280,7 +352,6 @@ class BookingHistoryUi extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Booking info skeleton (3 inline segments)
                   Row(
                     children: [
                       Container(
@@ -314,8 +385,6 @@ class BookingHistoryUi extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Arrow icon skeleton
             Container(
               height: 18,
               width: 18,
@@ -329,6 +398,4 @@ class BookingHistoryUi extends StatelessWidget {
       ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10),
     );
   }
-
-
 }

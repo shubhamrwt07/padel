@@ -172,7 +172,7 @@ class RegisterClubId {
   String? city;
   int? courtCount;
   List<String>? courtImage;
-  String? courtType;
+  List<String>? courtType;
   String? createdAt;
   List<String>? features;
   bool? isActive;
@@ -225,7 +225,14 @@ class RegisterClubId {
     city = json['city'];
     courtCount = json['courtCount'];
     courtImage = json['courtImage'].cast<String>();
-    courtType = json['courtType'];
+    final ct = json['courtType'];
+    if (ct is List) {
+      courtType = ct.whereType<String>().toList();
+    } else if (ct is String) {
+      courtType = [ct];
+    } else {
+      courtType = null;
+    }
     createdAt = json['createdAt'];
     features = json['features'].cast<String>();
     isActive = json['isActive'];

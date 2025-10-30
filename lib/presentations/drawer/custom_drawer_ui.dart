@@ -157,17 +157,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Obx(
-                () => ProfileRow(
-              icon: Icon(Icons.calendar_month_outlined, size: 20, color: controller.selectedIndex.value == 0 ? AppColors.primaryColor : AppColors.labelBlackColor),
-              title: AppStrings.booking,
-              isSelected: controller.selectedIndex.value == 0,
-              onTap: () {
-                controller.selectedIndex.value = 0;
-                Get.toNamed(RoutesName.bookingHistory);
-              },
-            ).paddingOnly(top: Get.height * .05),
-          ),
+
           Obx(
                 () => ProfileRow(
               icon: Image.asset(Assets.imagesIcBalanceWallet, scale: 5, color: controller.selectedIndex.value == 3 ? AppColors.primaryColor : AppColors.labelBlackColor),
@@ -179,17 +169,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
               },
             ),
           ),
-          Obx(
-                () => ProfileRow(
-              icon: Image.asset(Assets.imagesOpenMatch, scale: 5, color: controller.selectedIndex.value == 4 ? AppColors.primaryColor : AppColors.blackColor),
-              title: AppStrings.openMatch,
-              isSelected: controller.selectedIndex.value == 4,
-              onTap: () {
-                controller.selectedIndex.value = 4;
-                Get.toNamed(RoutesName.matchBooking, arguments: {"type": "profile"});
-              },
-            ),
-          ),
+
           Obx(
                 () => ProfileRow(
               icon: Icon(Icons.shopping_cart_outlined, size: 20, color: controller.selectedIndex.value == 5 ? AppColors.primaryColor : AppColors.labelBlackColor),

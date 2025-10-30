@@ -6,7 +6,7 @@ import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
 
 class ZoomDrawerWrapper extends StatelessWidget {
   final Widget child;
-  
+
   const ZoomDrawerWrapper({
     super.key,
     required this.child,
@@ -15,7 +15,7 @@ class ZoomDrawerWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final drawerController = Get.put(CustomZoomDrawerController());
-    
+
     return ZoomDrawer(
       controller: drawerController.zoomDrawerController,
       menuScreen: const CustomDrawerUi(),
@@ -23,7 +23,7 @@ class ZoomDrawerWrapper extends StatelessWidget {
       borderRadius: 20.0,
       showShadow: true,
       angle: 0.0,
-      slideWidth: MediaQuery.of(context).size.width * 0.8,
+      slideWidth: MediaQuery.of(context).size.width * 0.65,
       menuBackgroundColor: Colors.white,
       openCurve: Curves.easeInOut,
       closeCurve: Curves.easeInOut,

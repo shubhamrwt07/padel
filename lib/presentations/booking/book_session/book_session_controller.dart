@@ -13,6 +13,9 @@ class BookSessionController extends GetxController {
   static const int MAX_SLOTS = 24;
   static const int MAX_DAYS = 5;
 
+  // Date formatter for consistency
+  static final _dateFormatter = DateFormat('yyyy-MM-dd');
+
   final selectedDate = Rxn<DateTime>();
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
@@ -160,15 +163,16 @@ class BookSessionController extends GetxController {
     try {
       final date = selectedDate.value ?? DateTime.now();
       final formattedDay = _getWeekday(date.weekday);
+      final formattedDate = _dateFormatter.format(date);
 
       log("Formatted day: $formattedDay");
+      log("Formatted date: $formattedDate");
       log("Club ID: $clubId");
 
       final result = await repository.fetchAvailableCourtsSlotWise(
-
         day: formattedDay,
         registerClubId: clubId,
-        date: selectedDate.value.toString()  ,
+        date: formattedDate,
       );
 
       // Store ALL slots (both available and unavailable)
@@ -206,6 +210,14 @@ class BookSessionController extends GetxController {
       log("Error occurred: $e");
       log("Stack trace: $stackTrace");
       slots.value = null;
+
+      Get.snackbar(
+        "Error",
+        "Failed to load courts. Please try again.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
     } finally {
       isLoadingCourts.value = false;
     }
@@ -273,7 +285,7 @@ class BookSessionController extends GetxController {
     final resolvedCourtId = resolvedCourtInfo['courtId'] ?? '';
     final resolvedCourtName = resolvedCourtInfo['courtName'] ?? '';
     final currentDate = selectedDate.value ?? DateTime.now();
-    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final dateString = _dateFormatter.format(currentDate);
 
     // Multi-date key format: "date_courtId_slotId"
     final multiDateKey = '${dateString}_${resolvedCourtId}_$slotId';
@@ -445,7 +457,6 @@ class BookSessionController extends GetxController {
   }
 
   var cartLoader = false.obs;
-
   void addToCart() async {
     try {
       if (cartLoader.value) return;
@@ -551,7 +562,7 @@ class BookSessionController extends GetxController {
 
   bool isSlotSelected(Slots slot, String courtId) {
     final currentDate = selectedDate.value ?? DateTime.now();
-    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final dateString = _dateFormatter.format(currentDate);
     final multiDateKey = '${dateString}_${courtId}_${slot.sId}';
 
     return multiDateSelections.containsKey(multiDateKey);
@@ -559,7 +570,7 @@ class BookSessionController extends GetxController {
 
   int getSelectedSlotsCountForCourt(String courtId) {
     final currentDate = selectedDate.value ?? DateTime.now();
-    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final dateString = _dateFormatter.format(currentDate);
 
     return multiDateSelections.keys.where((key) =>
     key.startsWith(dateString) && key.contains('_${courtId}_')
@@ -568,7 +579,7 @@ class BookSessionController extends GetxController {
 
   int getTotalAmountForCourt(String courtId) {
     final currentDate = selectedDate.value ?? DateTime.now();
-    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final dateString = _dateFormatter.format(currentDate);
 
     int total = 0;
     multiDateSelections.forEach((key, selection) {

@@ -64,9 +64,10 @@ class AddPlayerScreen extends StatelessWidget {
                         ),
                         dense: true,
                         value: g,
-                        groupValue: controller.gender.value,
-                        onChanged: (value) =>
-                        controller.gender.value = value!,
+                        groupValue: controller.gender.value.isEmpty
+                            ? null // 👈 No gender selected by default
+                            : controller.gender.value,
+                        onChanged: (value) => controller.gender.value = value!,
                         contentPadding: EdgeInsets.zero,
                       ),
                     );

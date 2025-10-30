@@ -842,7 +842,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       ),
     );
   }
-
   /// Loading shimmer effect
   Widget _buildLoadingShimmer() {
     final totalPages = 2;
@@ -930,7 +929,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildSwipeHint(String text, IconData icon) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(seconds: 1),
@@ -960,7 +958,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       },
     );
   }
-
   /// Dot indicator for page view
   Widget _buildDotIndicator(int totalPages) {
     return Obx(() {

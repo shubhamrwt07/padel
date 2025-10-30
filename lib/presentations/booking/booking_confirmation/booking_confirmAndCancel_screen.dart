@@ -23,6 +23,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         ),
         centerTitle: true,
         title: Obx(() {
+          // 🧭 If cancelling a slot, show proper title
           if (controller.cancelBooking.value) {
             return Text(
               controller.slotToCancel.value != null
@@ -31,9 +32,20 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             );
           }
 
-          // Check booking status for the title
+          // 🧩 Determine title from booking status
           final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
-          if (status == "in-progress" || status == "refunded" || status == "cancelled") {
+
+          if (status == "rejected") {
+            return const Text(
+              "Booking Cancellation Rejected",
+              style: TextStyle(
+                color: AppColors.appBlue, // 👈 red title for rejected booking
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          } else if (status == "in-progress" ||
+              status == "refunded" ||
+              status == "cancelled") {
             return const Text("Booking Cancellation");
           }
 
@@ -41,6 +53,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         }),
         context: context,
       ),
+
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -239,6 +252,17 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
   }
 
   Widget bookingDetailRow(BuildContext context, String title, String value) {
+    Color valueColor = AppColors.labelBlackColor;
+
+    // ✅ If status is Rejected — show in red
+    if (title.toLowerCase() == "status" && value.toLowerCase() == "rejected") {
+      valueColor = Colors.red;
+    }
+
+    // (Optional) you can handle other colors too if needed:
+    // if (title.toLowerCase() == "status" && value.toLowerCase() == "completed") valueColor = Colors.green;
+    // if (title.toLowerCase() == "status" && value.toLowerCase() == "cancelled") valueColor = Colors.orange;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -253,7 +277,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-              color: AppColors.labelBlackColor,
+              color: valueColor,
               fontWeight: FontWeight.w600,
             ),
           ),

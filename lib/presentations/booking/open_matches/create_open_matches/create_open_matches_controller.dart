@@ -169,62 +169,62 @@ class CreateOpenMatchesController extends GetxController {
       }
     }
   }
-  Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
-    log("=== DEBUG API CALL ===");
-    log("Fetching courts for club: $clubId");
-    log("Selected date: ${selectedDate.value}");
-    log("Show unavailable: $showUnavailable");
-
-    isLoadingCourts.value = true;
-
-    // Clear current date selections only, keep other dates
-    _clearCurrentDateSelections();
-
-    try {
-      final date = selectedDate.value ?? DateTime.now();
-      final formattedDay = _getWeekday(date.weekday);
-
-      log("Formatted day: $formattedDay");
-      log("Club ID: $clubId");
-
-      final result = await repository.fetchAvailableCourtsSlotWise(
-        day: formattedDay,
-        registerClubId: clubId,
-        date: selectedDate.value.toString()
-      );
-
-      if (result != null) {
-        // Apply filtering based on toggle first
-        for (var court in result.data ?? []) {
-          final base = court.slots ?? [];
-          if (showUnavailable) {
-            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
-          } else {
-            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
-          }
-        }
-      }
-
-      slots.value = result;
-      // Build base cache and counts, then apply current time-of-day filter
-      _originalSlotsCache.clear();
-      final courts = slots.value?.data ?? [];
-      for (final court in courts) {
-        _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
-      }
-      _recalculateTimeOfDayCounts();
-      filterSlotsByTimeOfDay();
-      _autoSelectTab();
-      slots.refresh();
-
-    } catch (e, stackTrace) {
-      log("Error occurred: $e");
-      log("Stack trace: $stackTrace");
-      slots.value = null;
-    } finally {
-      isLoadingCourts.value = false;
-    }
-  }
+  // Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
+  //   log("=== DEBUG API CALL ===");
+  //   log("Fetching courts for club: $clubId");
+  //   log("Selected date: ${selectedDate.value}");
+  //   log("Show unavailable: $showUnavailable");
+  //
+  //   isLoadingCourts.value = true;
+  //
+  //   // Clear current date selections only, keep other dates
+  //   _clearCurrentDateSelections();
+  //
+  //   try {
+  //     final date = selectedDate.value ?? DateTime.now();
+  //     final formattedDay = _getWeekday(date.weekday);
+  //
+  //     log("Formatted day: $formattedDay");
+  //     log("Club ID: $clubId");
+  //
+  //     final result = await repository.fetchAvailableCourtsSlotWise(
+  //       day: formattedDay,
+  //       registerClubId: clubId,
+  //       date: selectedDate.value.toString()
+  //     );
+  //
+  //     if (result != null) {
+  //       // Apply filtering based on toggle first
+  //       for (var court in result.data ?? []) {
+  //         final base = court.slots ?? [];
+  //         if (showUnavailable) {
+  //           court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+  //         } else {
+  //           court.slots = base.where((s) => _isAvailableSlot(s)).toList();
+  //         }
+  //       }
+  //     }
+  //
+  //     slots.value = result;
+  //     // Build base cache and counts, then apply current time-of-day filter
+  //     _originalSlotsCache.clear();
+  //     final courts = slots.value?.data ?? [];
+  //     for (final court in courts) {
+  //       _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
+  //     }
+  //     _recalculateTimeOfDayCounts();
+  //     filterSlotsByTimeOfDay();
+  //     _autoSelectTab();
+  //     slots.refresh();
+  //
+  //   } catch (e, stackTrace) {
+  //     log("Error occurred: $e");
+  //     log("Stack trace: $stackTrace");
+  //     slots.value = null;
+  //   } finally {
+  //     isLoadingCourts.value = false;
+  //   }
+  // }
   void toggleSlotSelection(Slots slot, {String? courtId, String? courtName}) {
     // Resolve court info
     Map<String, String>? resolvedCourtInfo;
@@ -240,6 +240,7 @@ class CreateOpenMatchesController extends GetxController {
       resolvedCourtInfo = _findCourtInfoForSlot(slot);
     }
     if (resolvedCourtInfo == null) return;
+
     final slotId = slot.sId ?? '';
     final resolvedCourtId = resolvedCourtInfo['courtId'] ?? '';
     final resolvedCourtName = resolvedCourtInfo['courtName'] ?? '';
@@ -258,6 +259,26 @@ class CreateOpenMatchesController extends GetxController {
       selectedSlots.removeWhere((s) => s.sId == slotId);
       selectedSlotsWithCourtInfo.remove(compositeKey);
     } else {
+      // CHECK: Prevent multi-date selection
+      // If there are existing selections, check if they're from a different date
+      if (multiDateSelections.isNotEmpty) {
+        // Get the first existing selection's date
+        final firstSelectionDate = multiDateSelections.values.first['date'] as String;
+
+        // If trying to select from a different date, show error and return
+        if (firstSelectionDate != dateString) {
+          Get.snackbar(
+            "Single Date Selection Only",
+            "Please select slots from only one date. Clear current selections to choose a different date.",
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.TOP,
+            duration: const Duration(seconds: 3),
+          );
+          return;
+        }
+      }
+
       // Enforce consecutiveness for selections within the same date and court
       final isAllowed = _isConsecutiveSelectionAllowed(
         resolvedCourtId,
@@ -266,7 +287,7 @@ class CreateOpenMatchesController extends GetxController {
       );
       if (!isAllowed) {
         Get.snackbar(
-          " Please Select Consecutive Slots",
+          "Please Select Consecutive Slots",
           "",
           backgroundColor: Colors.redAccent,
           colorText: Colors.white,
@@ -274,6 +295,7 @@ class CreateOpenMatchesController extends GetxController {
         );
         return;
       }
+
       // Add selection
       multiDateSelections[multiDateKey] = {
         'slot': slot,
@@ -297,9 +319,8 @@ class CreateOpenMatchesController extends GetxController {
     // Recalculate total amount from all dates
     _recalculateTotalAmount();
 
-    log("Selected ${multiDateSelections.length} slots across multiple dates, Total: ₹${totalAmount.value}");
+    log("Selected ${multiDateSelections.length} slots for date: $dateString, Total: ₹${totalAmount.value}");
   }
-
   // Validate that with the candidate slot included, all selected slots
   // for a given (date, court) form a contiguous block in the court's
   // base slot list (post availability filtering but pre time-of-day filter).
@@ -360,6 +381,7 @@ class CreateOpenMatchesController extends GetxController {
     return -1;
   }
 
+// Replace your existing _clearCurrentDateSelections method with this:
   void _clearCurrentDateSelections() {
     final currentDate = selectedDate.value ?? DateTime.now();
     final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
@@ -367,9 +389,119 @@ class CreateOpenMatchesController extends GetxController {
     // Remove selections for current date only
     multiDateSelections.removeWhere((key, value) => key.startsWith(dateString));
 
-    // Clear legacy collections (they represent current date only)
+    // Rebuild legacy collections based on currently selected date
     selectedSlots.clear();
     selectedSlotsWithCourtInfo.clear();
+
+    // Only add back slots that belong to the current date
+    multiDateSelections.forEach((key, selection) {
+      if (key.startsWith(dateString)) {
+        final slot = selection['slot'] as Slots;
+        final courtId = selection['courtId'] as String;
+        final courtName = selection['courtName'] as String;
+        final compositeKey = '${courtId}_${slot.sId}';
+
+        if (!selectedSlots.any((s) => s.sId == slot.sId)) {
+          selectedSlots.add(slot);
+        }
+        selectedSlotsWithCourtInfo[compositeKey] = {
+          'slot': slot,
+          'courtId': courtId,
+          'courtName': courtName,
+        };
+      }
+    });
+  }
+
+// NEW: Method to sync the legacy collections with current date selections
+  void _syncLegacyCollectionsWithCurrentDate() {
+    final currentDate = selectedDate.value ?? DateTime.now();
+    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+
+    // Clear legacy collections
+    selectedSlots.clear();
+    selectedSlotsWithCourtInfo.clear();
+
+    // Populate them with current date's selections only
+    multiDateSelections.forEach((key, selection) {
+      if (key.startsWith(dateString)) {
+        final slot = selection['slot'] as Slots;
+        final courtId = selection['courtId'] as String;
+        final courtName = selection['courtName'] as String;
+        final compositeKey = '${courtId}_${slot.sId}';
+
+        if (!selectedSlots.any((s) => s.sId == slot.sId)) {
+          selectedSlots.add(slot);
+        }
+        selectedSlotsWithCourtInfo[compositeKey] = {
+          'slot': slot,
+          'courtId': courtId,
+          'courtName': courtName,
+        };
+      }
+    });
+
+    // Recalculate total for current view
+    _recalculateTotalAmount();
+  }
+
+// Updated getAvailableCourtsById - doesn't clear selections
+  Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
+    log("=== DEBUG API CALL ===");
+    log("Fetching courts for club: $clubId");
+    log("Selected date: ${selectedDate.value}");
+    log("Show unavailable: $showUnavailable");
+
+    isLoadingCourts.value = true;
+
+    // Sync legacy collections with current date instead of clearing
+    _syncLegacyCollectionsWithCurrentDate();
+
+    try {
+      final date = selectedDate.value ?? DateTime.now();
+      final formattedDay = _getWeekday(date.weekday);
+
+      log("Formatted day: $formattedDay");
+      log("Club ID: $clubId");
+
+      final result = await repository.fetchAvailableCourtsSlotWise(
+          day: formattedDay,
+          registerClubId: clubId,
+          date: selectedDate.value.toString()
+      );
+
+      if (result != null) {
+        // Apply filtering based on toggle first
+        for (var court in result.data ?? []) {
+          final base = court.slots ?? [];
+          if (showUnavailable) {
+            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+          } else {
+            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
+          }
+        }
+      }
+
+      slots.value = result;
+
+      // Build base cache and counts, then apply current time-of-day filter
+      _originalSlotsCache.clear();
+      final courts = slots.value?.data ?? [];
+      for (final court in courts) {
+        _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
+      }
+      _recalculateTimeOfDayCounts();
+      filterSlotsByTimeOfDay();
+      _autoSelectTab();
+      slots.refresh();
+
+    } catch (e, stackTrace) {
+      log("Error occurred: $e");
+      log("Stack trace: $stackTrace");
+      slots.value = null;
+    } finally {
+      isLoadingCourts.value = false;
+    }
   }
 
   void _recalculateTotalAmount() {
@@ -486,10 +618,11 @@ class CreateOpenMatchesController extends GetxController {
         return true;
       }
     } catch (_) {
+
       // On any parsing error, consider it not past to be safe
+
       return false;
     }
-
     return false;
   }
 
@@ -672,7 +805,6 @@ class CreateOpenMatchesController extends GetxController {
   // NEW: Get selections grouped by date
   Map<String, List<Map<String, dynamic>>> getSelectionsByDate() {
     final Map<String, List<Map<String, dynamic>>> result = {};
-
     multiDateSelections.forEach((key, selection) {
       final dateString = selection['date'] as String;
       if (!result.containsKey(dateString)) {
@@ -680,7 +812,6 @@ class CreateOpenMatchesController extends GetxController {
       }
       result[dateString]!.add(selection);
     });
-
     return result;
   }
 

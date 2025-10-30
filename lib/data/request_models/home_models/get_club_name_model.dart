@@ -1,14 +1,14 @@
 class CourtsModel {
   bool? success;
   String? message;
-  CourtsData? data;
+  Data? data;
 
   CourtsModel({this.success, this.message, this.data});
 
   CourtsModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    data = json['data'] != null ? new CourtsData.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -22,25 +22,26 @@ class CourtsModel {
   }
 }
 
-class CourtsData {
+class Data {
   List<Courts>? courts;
   int? currentPage;
   int? totalPages;
   int? totalItems;
   int? itemsPerPage;
 
-  CourtsData(
-      {this.courts,
-        this.currentPage,
-        this.totalPages,
-        this.totalItems,
-        this.itemsPerPage});
+  Data({
+    this.courts,
+    this.currentPage,
+    this.totalPages,
+    this.totalItems,
+    this.itemsPerPage,
+  });
 
-  CourtsData.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<String, dynamic> json) {
     if (json['courts'] != null) {
       courts = <Courts>[];
       json['courts'].forEach((v) {
-        courts!.add(new Courts.fromJson(v));
+        courts!.add(Courts.fromJson(v));
       });
     }
     currentPage = json['currentPage'];
@@ -64,166 +65,187 @@ class CourtsData {
 
 class Courts {
   String? id;
-  String? ownerId;
   String? clubName;
-  String? courtType;
-  List<String>? courtImage;
-  int? courtCount;
-  List<BusinessHours>? businessHours;
-  String? description;
-  Location? location;
-  String? city;
+  String? ownerId;
+  int? iV;
   String? address;
+  List<BusinessHours>? businessHours;
+  String? city;
+  int? courtCount;
+  List<String>? courtImage;
+  List<String>? courtName;
+  List<String>? courtType;
+  String? createdAt;
+  String? description;
+  List<String>? features;
   bool? isActive;
   bool? isDeleted;
-  bool? isVerified;
   bool? isFeatured;
-  List<String>? features;
-  String? createdAt;
+  bool? isVerified;
+  Location? location;
   String? updatedAt;
-  int? iV;
   int? totalAmount;
+  String? state;
+  String? zipCode;
 
-  Courts(
-      {this.id,
-        this.ownerId,
-        this.clubName,
-        this.courtType,
-        this.courtImage,
-        this.courtCount,
-        this.businessHours,
-        this.description,
-        this.location,
-        this.city,
-        this.address,
-        this.isActive,
-        this.isDeleted,
-        this.isVerified,
-        this.isFeatured,
-        this.features,
-        this.createdAt,
-        this.updatedAt,
-        this.iV,
-        this.totalAmount});
+  Courts({
+    this.id,
+    this.clubName,
+    this.ownerId,
+    this.iV,
+    this.address,
+    this.businessHours,
+    this.city,
+    this.courtCount,
+    this.courtImage,
+    this.courtName,
+    this.courtType,
+    this.createdAt,
+    this.description,
+    this.features,
+    this.isActive,
+    this.isDeleted,
+    this.isFeatured,
+    this.isVerified,
+    this.location,
+    this.updatedAt,
+    this.totalAmount,
+    this.state,
+    this.zipCode,
+  });
 
   Courts.fromJson(Map<String, dynamic> json) {
     id = json['_id'];
-    ownerId = json['ownerId'];
     clubName = json['clubName'];
-    courtType = json['courtType'];
-
-    // Safely cast to List<String> or wrap single String in a List
-    var imageData = json['courtImage'];
-    if (imageData is List) {
-      courtImage = imageData.cast<String>();
-    } else if (imageData is String) {
-      courtImage = [imageData];
-    } else {
-      courtImage = [];
+    ownerId = json['ownerId'];
+    iV = json['__v'];
+    address = json['address'];
+    if (json['businessHours'] != null) {
+      businessHours = <BusinessHours>[];
+      json['businessHours'].forEach((v) {
+        businessHours!.add(BusinessHours.fromJson(v));
+      });
     }
-
+    city = json['city'];
     courtCount = json['courtCount'];
 
-    // Ensure businessHours is a list before iterating
-    if (json['businessHours'] is List) {
-      businessHours = (json['businessHours'] as List)
-          .map((v) => BusinessHours.fromJson(v))
-          .toList();
-    } else {
-      businessHours = [];
-    }
+    // Safe casting with null checks - handles both List and String
+    courtImage = _parseStringList(json['courtImage']);
+    courtName = _parseStringList(json['courtName']);
+    courtType = _parseStringList(json['courtType']);
 
+    createdAt = json['createdAt'];
     description = json['description'];
+
+    features = _parseStringList(json['features']);
+
+    isActive = json['isActive'];
+    isDeleted = json['isDeleted'];
+    isFeatured = json['isFeatured'];
+    isVerified = json['isVerified'];
     location = json['location'] != null
         ? Location.fromJson(json['location'])
         : null;
-    city = json['city'];
-    address = json['address'];
-    isActive = json['isActive'];
-    isDeleted = json['isDeleted'];
-    isVerified = json['isVerified'];
-    isFeatured = json['isFeatured'];
-
-    // Safely cast to List<String> or wrap single String in a List
-    var featuresData = json['features'];
-    if (featuresData is List) {
-      features = featuresData.cast<String>();
-    } else if (featuresData is String) {
-      features = [featuresData];
-    } else {
-      features = [];
-    }
-
-    createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    iV = json['__v'];
     totalAmount = json['totalAmount'];
+    state = json['state'];
+    zipCode = json['zipCode'];
   }
-  ///
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['_id'] = id;
-    data['ownerId'] = ownerId;
     data['clubName'] = clubName;
-    data['courtType'] = courtType;
-    data['courtImage'] = courtImage;
-    data['courtCount'] = courtCount;
+    data['ownerId'] = ownerId;
+    data['__v'] = iV;
+    data['address'] = address;
     if (businessHours != null) {
-      data['businessHours'] =
-          businessHours!.map((v) => v.toJson()).toList();
+      data['businessHours'] = businessHours!.map((v) => v.toJson()).toList();
     }
+    data['city'] = city;
+    data['courtCount'] = courtCount;
+    data['courtImage'] = courtImage;
+    data['courtName'] = courtName;
+    data['courtType'] = courtType;
+    data['createdAt'] = createdAt;
     data['description'] = description;
+    data['features'] = features;
+    data['isActive'] = isActive;
+    data['isDeleted'] = isDeleted;
+    data['isFeatured'] = isFeatured;
+    data['isVerified'] = isVerified;
     if (location != null) {
       data['location'] = location!.toJson();
     }
-    data['city'] = city;
-    data['address'] = address;
-    data['isActive'] = isActive;
-    data['isDeleted'] = isDeleted;
-    data['isVerified'] = isVerified;
-    data['isFeatured'] = isFeatured;
-    data['features'] = features;
-    data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
-    data['__v'] = iV;
     data['totalAmount'] = totalAmount;
+    data['state'] = state;
+    data['zipCode'] = zipCode;
     return data;
+  }
+
+  // Helper method to safely parse String lists from JSON
+  static List<String>? _parseStringList(dynamic value) {
+    if (value == null) return null;
+
+    if (value is List) {
+      return List<String>.from(value.map((x) => x?.toString() ?? ''));
+    } else if (value is String) {
+      return [value]; // Wrap single string in a list
+    }
+
+    return null;
   }
 }
 
 class BusinessHours {
   String? time;
   String? day;
-  String? sId;
+  String? id;
 
-  BusinessHours({this.time, this.day, this.sId});
+  BusinessHours({this.time, this.day, this.id});
 
   BusinessHours.fromJson(Map<String, dynamic> json) {
     time = json['time'];
     day = json['day'];
-    sId = json['_id'];
+    id = json['_id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['time'] = time;
     data['day'] = day;
-    data['_id'] = sId;
+    data['_id'] = id;
     return data;
   }
 }
+
 class Location {
   String? type;
   List<double>? coordinates;
+
   Location({this.type, this.coordinates});
+
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    coordinates = _parseDoubleList(json['coordinates']);
   }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['type'] = type;
     data['coordinates'] = coordinates;
     return data;
+  }
+
+  // Helper method to safely parse double lists from JSON
+  static List<double>? _parseDoubleList(dynamic value) {
+    if (value == null) return null;
+
+    if (value is List) {
+      return List<double>.from(value.map((x) => x?.toDouble() ?? 0.0));
+    }
+
+    return null;
   }
 }

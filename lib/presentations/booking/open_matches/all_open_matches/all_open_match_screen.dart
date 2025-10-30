@@ -15,101 +15,100 @@ class AllOpenMatchScreen extends StatelessWidget {
         title: const Text("Open Matches"),
         context: context,
       ),
-        body: RefreshIndicator(
-          edgeOffset: 1,
-          displacement: Get.width * .2,
-          color: AppColors.whiteColor,
-          onRefresh: () async {
-            await controller.fetchOpenMatches(); // <- call your API reload method
-          },
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "For your level",
-                    style: Get.textTheme.headlineLarge,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Get.bottomSheet(
-                        filter(context),
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                      );
-                    },
-                    child: Container(
-                      height: 35,
-                      width: 35,
-                      decoration: BoxDecoration(
-                          color: AppColors.playerCardBackgroundColor,
-                          borderRadius: BorderRadius.circular(5)
-                      ),
-                      child: Image.asset(
-                        Assets.imagesIcFilter,
-                        scale: 3.5,
-                      ),
+      body: RefreshIndicator(
+        edgeOffset: 1,
+        displacement: Get.width * .2,
+        color: AppColors.whiteColor,
+        onRefresh: () async {
+          await controller.fetchOpenMatches(); // <- reload API
+        },
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Text(
+                //   // "For your level",
+                //   style: Get.textTheme.headlineLarge,
+                // ),
+                GestureDetector(
+                  onTap: () {
+                    Get.bottomSheet(
+                      filter(context),
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                    );
+                  },
+                  child: Container(
+                    height: 35,
+                    width: 35,
+                    decoration: BoxDecoration(
+                      color: AppColors.playerCardBackgroundColor,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Image.asset(
+                      Assets.imagesIcFilter,
+                      scale: 3.5,
                     ),
                   ),
-                ],
-              ).paddingSymmetric(horizontal: 16),
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: 4,
-                      itemBuilder: (context, index) {
-                        return buildMatchCardShimmer();
-                      },
-                    ),
-                  );
-                }
-
-                final matches = controller.matchesBySelection.value;
-
-                if (matches == null || (matches.data?.isEmpty ?? true)) {
-                  return Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        Center(
-                          child: Column(
-                            children: [
-                              Icon(Icons.event_busy_outlined,
-                                  size: 50, color: AppColors.darkGrey),
-                              Text(
-                                'No matches available for this time',
-                                style: Get.textTheme.labelLarge
-                                    ?.copyWith(color: AppColors.darkGrey),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ).paddingSymmetric(vertical: Get.height * 0.35),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
+                ),
+              ],
+            ).paddingSymmetric(horizontal: 16),
+            Obx(() {
+              if (controller.isLoading.value) {
                 return Expanded(
-                  child: Scrollbar(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: matches.data!.length,
-                      itemBuilder: (context, index) {
-                        final m = matches.data![index];
-                        return _buildMatchCardFromData(context, m);
-                      },
-                    ),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      return buildMatchCardShimmer();
+                    },
                   ),
                 );
-              }),
-            ],
-          ),
-        )
+              }
 
+              final matches = controller.matchesBySelection.value;
+
+              if (matches == null || (matches.data?.isEmpty ?? true)) {
+                return Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            Icon(Icons.event_busy_outlined,
+                                size: 50, color: AppColors.darkGrey),
+                            Text(
+                              'No matches available for this time',
+                              style: Get.textTheme.labelLarge
+                                  ?.copyWith(color: AppColors.darkGrey),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ).paddingSymmetric(vertical: Get.height * 0.35),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Expanded(
+                child: Scrollbar(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: matches.data!.length,
+                    itemBuilder: (context, index) {
+                      final m = matches.data![index];
+                      return _buildMatchCardFromData(context, m);
+                    },
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 
@@ -130,7 +129,7 @@ class AllOpenMatchScreen extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () => Get.back(),
-                  icon: Icon(Icons.arrow_back, size: 22),
+                  icon: const Icon(Icons.arrow_back, size: 22),
                 ),
                 Text(
                   "Filters",
@@ -149,6 +148,7 @@ class AllOpenMatchScreen extends StatelessWidget {
                 ),
               ],
             ),
+
             // Date Picker
             Text(
               "Date",
@@ -186,9 +186,8 @@ class AllOpenMatchScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat(
-                          'dd MMM yyyy',
-                        ).format(controller.selectedDate.value),
+                        DateFormat('dd MMM yyyy')
+                            .format(controller.selectedDate.value),
                         style: Get.textTheme.bodyMedium,
                       ),
                       const Icon(
@@ -201,6 +200,8 @@ class AllOpenMatchScreen extends StatelessWidget {
                 ),
               );
             }),
+
+            // Timing
             Text(
               "Timing",
               style: Get.textTheme.headlineLarge!.copyWith(
@@ -219,17 +220,23 @@ class AllOpenMatchScreen extends StatelessWidget {
                         activeColor: AppColors.secondaryColor,
                         value: isSelected,
                         onChanged: (_) {
-                          controller.selectedTiming.value = label; // only one selected
+                          controller.selectedTiming.value = label;
                         },
                       ),
-                      Text(label,style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w400,color: AppColors.textColor),),
+                      Text(
+                        label,
+                        style: Get.textTheme.labelLarge!.copyWith(
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textColor,
+                        ),
+                      ),
                     ],
                   );
                 }).toList(),
               ),
             ),
 
-            // Player Level Dropdown
+            // 🌟 Beautiful Player Level Dropdown
             Text(
               "Player Level",
               style: Get.textTheme.headlineLarge!.copyWith(
@@ -238,12 +245,25 @@ class AllOpenMatchScreen extends StatelessWidget {
             ).paddingOnly(top: Get.height * 0.01),
             const SizedBox(height: 8),
             Obx(() {
+              final levels = [
+                'A – Top Player',
+                'B1 – Experienced Player',
+                'B2 – Advanced Player',
+                'C1 – Confident Player',
+                'C2 – Intermediate Player',
+                'D1 – Amateur Player',
+                'D2 – Novice Player',
+                'E – Entry Level',
+              ];
+
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: AppColors.primaryColor.withAlpha(10),
-                  border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+                  border:
+                  Border.all(color: AppColors.blackColor.withAlpha(10)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
@@ -251,25 +271,68 @@ class AllOpenMatchScreen extends StatelessWidget {
                         ? null
                         : controller.selectedLevel.value,
                     dropdownColor: Colors.white,
-                    hint: Text(
-                      "Select Levels",
-                      style: Get.textTheme.bodyMedium,
+                    hint: Row(
+                      children: [
+                        const Icon(Icons.sports_tennis_outlined,
+                            color: AppColors.textColor, size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Select Level",
+                          style: Get.textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
                     isExpanded: true,
-                    items: controller.playerLevels
-                        .map(
-                          (level) => DropdownMenuItem(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.textColor),
+                    items: levels.map((level) {
+                      final code = level.split('–').first.trim();
+                      final title = level.split('–').last.trim();
+
+                      return DropdownMenuItem(
                         value: level,
-                        child: Text(level, style: Get.textTheme.bodyMedium),
-                      ),
-                    )
-                        .toList(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              Container(
+                                height: 30,
+                                width: 30,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.secondaryColor.withAlpha(30),
+                                ),
+                                child: Text(
+                                  code,
+                                  style:
+                                  Get.textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondaryColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: Get.textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                     onChanged: (value) =>
                     controller.selectedLevel.value = value ?? '',
                   ),
                 ),
               );
             }),
+
             const SizedBox(height: 30),
             PrimaryButton(
               onTap: () {
@@ -282,64 +345,40 @@ class AllOpenMatchScreen extends StatelessWidget {
       ),
     );
   }
-  // Rich card from API data
+
+  // ---- Card builder methods remain unchanged ----
   Widget _buildMatchCardFromData(BuildContext context, MatchData data) {
     final dayStr = controller.getDay(data.matchDate);
     final dateOnlyStr = controller.getDate(data.matchDate);
     final timeStr = (data.matchTime ?? '').toLowerCase();
     final clubName = data.clubId?.clubName ?? '-';
-    // final address = data.clubId?.city != null && data.clubId?.zipCode != null
-    //     ? '${data.clubId?.city} ${data.clubId?.zipCode}'
-    //     : (data.clubId?.address ?? '-');
-    final address = data.clubId?.address??"N/A";
+    final address = data.clubId?.address ?? "N/A";
     final price = (data.slot?.isNotEmpty == true &&
         data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '₹${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '₹-';
 
-    // ---------------- Build players list ----------------
-
-    // Team A (max 2 players)
-    final teamAPlayers = (data.teamA ?? [])
-        .take(2)
-        .map((p) {
+    final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
-      // final name = p.userId?.name?.capitalizeFirst ?? '';
-      final level = p.userId?.level?.split(' ').first??"-";
-      if (pic != null && pic.isNotEmpty) {
-        return _buildFilledPlayer(pic, name,level);
-      } else {
-        // show player with no pic (fallback circle + initials maybe)
-        return _buildFilledPlayer("", name,level);
-      }
-    })
-        .toList();
+      final level = p.userId?.level?.split(' ').first ?? "-";
+      return _buildFilledPlayer(pic ?? "", name, level);
+    }).toList();
 
     while (teamAPlayers.length < 2) {
       teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
     }
 
-    // Team B (max 2 players)
-    final teamBPlayers = (data.teamB ?? [])
-        .take(2)
-        .map((p) {
+    final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
-      // final name = p.userId?.name?.capitalizeFirst ?? '';
-      final level = p.userId?.level?.split(' ').first??"-";
-      if (pic != null && pic.isNotEmpty) {
-        return _buildFilledPlayer(pic, name,level);
-      } else {
-        return _buildFilledPlayer("", name,level);
-      }
-    })
-        .toList();
+      final level = p.userId?.level?.split(' ').first ?? "-";
+      return _buildFilledPlayer(pic ?? "", name, level);
+    }).toList();
 
     while (teamBPlayers.length < 2) {
       teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
     }
-
 
     return Container(
       width: double.infinity,
@@ -351,7 +390,7 @@ class AllOpenMatchScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- Header ----------------
+          // Header
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -374,19 +413,19 @@ class AllOpenMatchScreen extends StatelessWidget {
                       ],
                     ),
                   ).paddingOnly(right: Get.width * 0.05),
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      data.skillLevel?.substring(0, 1).toUpperCase() ?? 'A/B',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.whiteColor, fontSize: 10),
-                    ),
-                  ),
+                  // Container(
+                  //   padding:
+                  //   const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  //   decoration: BoxDecoration(
+                  //     color: AppColors.secondaryColor,
+                  //     borderRadius: BorderRadius.circular(20),
+                  //   ),
+                  //   child: Text(
+                  //     data.skillLevel?.substring(0, 1).toUpperCase() ?? 'A/B',
+                  //     style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  //         color: AppColors.whiteColor, fontSize: 10),
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 6),
@@ -413,27 +452,22 @@ class AllOpenMatchScreen extends StatelessWidget {
             ],
           ).paddingOnly(top: 15, bottom: 10, left: 15),
 
-          // ---------------- Players Row ----------------
+          // Players Row
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: IntrinsicHeight(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // Team A slots
                   ...teamAPlayers,
-
-                  // Divider
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0), // decrease bottom height
+                    padding: const EdgeInsets.only(bottom: 20.0),
                     child: VerticalDivider(
                       color: AppColors.greyColor,
                       thickness: 1.5,
                       width: 0,
                     ),
                   ),
-
-                  // Team B slots
                   ...teamBPlayers,
                 ],
               ),
@@ -442,7 +476,7 @@ class AllOpenMatchScreen extends StatelessWidget {
 
           Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
 
-          // ---------------- Footer ----------------
+          // Footer
           Row(
             children: [
               Expanded(
@@ -490,7 +524,7 @@ class AllOpenMatchScreen extends StatelessWidget {
     ).paddingOnly(bottom: 12);
   }
 
-  Widget _buildFilledPlayer(String? imageUrl, String name,String level) {
+  Widget _buildFilledPlayer(String? imageUrl, String name, String level) {
     final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return Column(
@@ -505,7 +539,8 @@ class AllOpenMatchScreen extends StatelessWidget {
               fit: BoxFit.cover,
               width: 48,
               height: 48,
-              placeholder: (context, url) => CircularProgressIndicator(
+              placeholder: (context, url) =>
+              const CircularProgressIndicator(
                 color: AppColors.primaryColor,
               ),
               errorWidget: (context, url, error) => Text(
@@ -556,20 +591,22 @@ class AllOpenMatchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAvailableCircle(String team,String matchId) {
+  Widget _buildAvailableCircle(String team, String matchId) {
     return Column(
       children: [
         GestureDetector(
-          onTap: (){
+          onTap: () {
             Get.toNamed(
               RoutesName.addPlayer,
               arguments: {
                 "team": team,
                 "matchId": matchId,
-                "needAllOpenMatches":true
+                "needAllOpenMatches": true
               },
             );
-            CustomLogger.logMessage(msg: "Team -> $team \nMatch Id -> $matchId", level: LogLevel.debug);
+            CustomLogger.logMessage(
+                msg: "Team -> $team \nMatch Id -> $matchId",
+                level: LogLevel.debug);
           },
           child: Container(
             height: 48,
@@ -586,10 +623,10 @@ class AllOpenMatchScreen extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           "Available",
-          style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
+          style: Get.textTheme.labelSmall!
+              .copyWith(color: AppColors.primaryColor),
         )
       ],
     );
   }
 }
-
