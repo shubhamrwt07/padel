@@ -1,106 +1,109 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../handler/logger.dart';
 import '../../repositories/openmatches/open_match_repository.dart';
 
-class OpenMatchBookingController extends GetxController with GetSingleTickerProviderStateMixin {
-  late TabController tabController;
+class OpenMatchBookingController extends GetxController
+    with GetSingleTickerProviderStateMixin {
+  TabController? tabController;
 
+  // Reactive variables
   RxString selectedSlot = 'Morning'.obs;
-
   RxBool showFilter = false.obs;
+
   final List<String> slots = ['Morning', 'Afternoon', 'Evening'];
-  final RxString selectedCategory = 'Select Category'.obs;
   final List<String> categories = ['Level A', 'Level B', 'Level C'];
+
+  final RxString selectedCategory = 'Select Category'.obs;
+  final RxString selectedLevel = ''.obs;
+  final RxList<String> selectedTimings = <String>[].obs;
+  final Rx<DateTime> selectedDate = DateTime.now().obs;
+
   final GlobalKey dropdownKey = GlobalKey();
-  var selectedDate = DateTime.now().obs;
 
-  RxList<String> selectedTimings = <String>[].obs;
-  RxString selectedLevel = ''.obs;
+  // Loading and data state
+  RxBool isLoading = false.obs;
+  RxBool isLoadingMore = false.obs;
+  RxBool showNoInternetScreen = false.obs;
+  RxList<OpenMatchBookingData> openMatchesList = <OpenMatchBookingData>[].obs;
 
-  var isLoading = false.obs;
-  var isLoadingMore = false.obs;
-  var openMatchesList = <OpenMatchBookingData>[].obs;
-  var showNoInternetScreen = false.obs;
-  
-  // Pagination variables
-  var currentPage = 1.obs;
-  var hasMoreData = true.obs;
+  // Pagination
+  RxInt currentPage = 1.obs;
+  RxBool hasMoreData = true.obs;
   final int pageSize = 10;
 
-  OpenMatchRepository repository = Get.put(OpenMatchRepository());
+  // Misc
+  final OpenMatchRepository repository = Get.put(OpenMatchRepository());
+  RxString argument = "".obs;
 
-  var argument = "".obs;
-  @override
   @override
   void onInit() {
     super.onInit();
 
-    // Safely read arguments
+    // Handle arguments safely
     final args = Get.arguments;
-    if (args != null && args is Map && args.containsKey("type")) {
+    if (args is Map && args.containsKey("type")) {
       argument.value = args["type"];
     } else {
-      argument.value = "upcoming"; // or any sensible default
+      argument.value = "upcoming";
     }
 
-    tabController = TabController(length: 2, vsync: this);
+    // Initialize TabController
+    try {
+      tabController = TabController(length: 2, vsync: this);
+      tabController!.addListener(_handleTabChange);
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: "TabController initialization failed: $e",
+        level: LogLevel.error,
+      );
+    }
 
-    tabController.animation!.addListener(() {
-      final value = tabController.animation!.value;
-      if (value == value.roundToDouble()) {
-        final index = value.round();
-        if (index != tabController.previousIndex) {
-          _onTabChanged(index);
-        }
-      }
-    });
-
+    // Initial data load
     fetchOpenMatchesBooking(type: 'upcoming');
   }
 
-  void _onTabChanged(int newIndex) {
-    // Reset pagination and clear data
-    resetPagination();
-    String type = newIndex == 0 ? 'upcoming' : 'completed';
-    fetchOpenMatchesBooking(type: type);
+  void _handleTabChange() {
+    if (tabController == null) return;
+
+    // When tab index changes (and animation finishes)
+    if (!tabController!.indexIsChanging) {
+      resetPagination();
+      String type = tabController!.index == 0 ? 'upcoming' : 'completed';
+      fetchOpenMatchesBooking(type: type);
+    }
   }
-  
+
+  // Reset pagination and clear list
   void resetPagination() {
     currentPage.value = 1;
     hasMoreData.value = true;
-    openMatchesList.value = <OpenMatchBookingData>[];
-    isLoading.value = true;
+    openMatchesList.clear();
   }
-  void selectSlot(String slot) {
-    selectedSlot.value = slot;
-  }
+
+  void selectSlot(String slot) => selectedSlot.value = slot;
 
   Future<void> selectDate(BuildContext context) async {
     DateTime now = DateTime.now();
-    DateTime? pickedDate = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDate.value,
       firstDate: now,
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            textTheme: const TextTheme(
-              titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              bodyLarge: TextStyle(fontSize: 14),
-              bodyMedium: TextStyle(fontSize: 12),
-            ),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          textTheme: const TextTheme(
+            titleLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            bodyLarge: TextStyle(fontSize: 14),
+            bodyMedium: TextStyle(fontSize: 12),
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-    if (pickedDate != null) {
-      selectedDate.value = pickedDate;
-    }
+
+    if (pickedDate != null) selectedDate.value = pickedDate;
   }
 
   void clearAll() {
@@ -109,7 +112,10 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
     selectedLevel.value = '';
   }
 
-  Future<void> fetchOpenMatchesBooking({required String type, bool isLoadMore = false}) async {
+  Future<void> fetchOpenMatchesBooking({
+    required String type,
+    bool isLoadMore = false,
+  }) async {
     try {
       if (isLoadMore) {
         isLoadingMore.value = true;
@@ -123,54 +129,47 @@ class OpenMatchBookingController extends GetxController with GetSingleTickerProv
         limit: pageSize,
       );
 
-      if ((response?.data ?? []).isNotEmpty) {
-        final newData = response!.data!.toList();
-        
+      if (response != null && response.data != null && response.data!.isNotEmpty) {
+        final newData = response.data!;
+
         if (isLoadMore) {
-          // Append new data to existing list
           openMatchesList.addAll(newData);
         } else {
-          // Replace existing data
           openMatchesList.value = newData;
         }
-        
-        // Check if we have more data
+
         hasMoreData.value = newData.length >= pageSize;
       } else {
-        if (!isLoadMore) {
-          openMatchesList.value = [];
-        }
+        if (!isLoadMore) openMatchesList.clear();
         hasMoreData.value = false;
       }
     } catch (e) {
-      CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
-      if (!isLoadMore) {
-        openMatchesList.value = [];
-      }
+      CustomLogger.logMessage(msg: "Error fetching matches: $e", level: LogLevel.error);
+      if (!isLoadMore) openMatchesList.clear();
+      hasMoreData.value = false;
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
     }
   }
-  
+
   Future<void> loadMoreData() async {
     if (!hasMoreData.value || isLoadingMore.value) return;
-    
     currentPage.value++;
-    String type = tabController.index == 0 ? 'upcoming' : 'completed';
-    await fetchOpenMatchesBooking(type: type, isLoadMore: true);
+    final type = tabController?.index == 0 ? 'upcoming' : 'completed';
+    await fetchOpenMatchesBooking(type: type ?? 'upcoming', isLoadMore: true);
   }
-
   Future<void> retryFetch() async {
     showNoInternetScreen.value = false;
     resetPagination();
-    String type = tabController.index == 0 ? 'upcoming' : 'completed';
-    await fetchOpenMatchesBooking(type: type);
+    final type = tabController?.index == 0 ? 'upcoming' : 'completed';
+    await fetchOpenMatchesBooking(type: type ?? 'upcoming');
   }
 
   @override
   void onClose() {
-    tabController.dispose();
+    tabController?.removeListener(_handleTabChange);
+    tabController?.dispose();
     super.onClose();
   }
 }

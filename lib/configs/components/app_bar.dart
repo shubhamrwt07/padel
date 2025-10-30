@@ -14,8 +14,9 @@ AppBar primaryAppBar({
   SystemUiOverlayStyle? systemOverlayStyle,
   Color? titleTextColor,
   Color? leadingButtonColor,
-  bool showLeading = true, // NEW: control visibility of leading
+  bool? showLeading, // if null, determine via Navigator.canPop
 }) {
+  final bool shouldShowLeading = showLeading ?? Navigator.canPop(context);
   return AppBar(
     systemOverlayStyle: systemOverlayStyle,
     bottom: bottom,
@@ -24,7 +25,7 @@ AppBar primaryAppBar({
     centerTitle: centerTitle ?? false,
     automaticallyImplyLeading: false,
 
-    leading: showLeading
+    leading: shouldShowLeading
         ? leading ??
         GestureDetector(
           onTap: () {
@@ -41,7 +42,7 @@ AppBar primaryAppBar({
             ),
           ),
         )
-        : null, // hide leading if showLeading is false
+        : null, // hide leading if shouldShowLeading is false
 
     title: title,
     titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(

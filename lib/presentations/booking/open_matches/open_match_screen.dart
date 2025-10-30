@@ -39,7 +39,7 @@ class OpenMatchesScreen extends StatelessWidget {
              final booking = Get.put(BookSessionController());
               Get.toNamed(RoutesName.createOpenMatch, arguments: {"id":booking.argument});
             },
-          ),
+          ).paddingOnly(bottom: 20),
         ),
       ),
       body: SingleChildScrollView(
@@ -100,7 +100,7 @@ class OpenMatchesScreen extends StatelessWidget {
     );
   }
 
-  /// ---------------- DATE PICKER ----------------
+  /// --------------- DATE PICKER ---------------
   Widget _buildDatePicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

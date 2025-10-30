@@ -1,16 +1,13 @@
 import 'package:flutter/foundation.dart';
-
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/booking/boking_history_model.dart';
 import '../../data/request_models/booking/booking_confermation_model.dart';
 import '../../data/request_models/booking/cancel_booking_model.dart';
 import '../../handler/logger.dart';
-
 class BookingHistoryRepository {
   static final BookingHistoryRepository _instance = BookingHistoryRepository._internal();
   final DioClient dioClient = DioClient();
-
   factory BookingHistoryRepository() {
     return _instance;
   }

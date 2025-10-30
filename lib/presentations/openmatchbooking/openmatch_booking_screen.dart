@@ -15,64 +15,96 @@ class OpenMatchBookingScreen extends StatelessWidget {
   OpenMatchBookingScreen({super.key,});
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: primaryAppBar(
-        centerTitle: true,
-        leading:GestureDetector(
-          onTap: () {
-            if(controller.argument.value == "profile") {
-              Get.back();
-            }else if(controller.argument.value == "detailPage"){
-              Get.toNamed(RoutesName.bottomNav);
-            }
-          },
-          child: Container(
-            color: Colors.transparent,
-            height: 30,
-            width: 40,
-            child: Icon(
-              Icons.arrow_back,
-              color: AppColors.blackColor,
-              size: 22,
-            ),
-          ),
-        ) ,
-        title: const Text("Open matches"),
-        context: context,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          tabBar(controller),
+    final args = Get.arguments;
+    final String? backRoute =
+    (args is Map) ? args['backRoute'] as String? : null;
 
-          Expanded(
-            child: TabBarView(
-              controller: controller.tabController,
-              children: [
-                _buildMatchesTab(context, completed: false),
-                _buildMatchesTab(context, completed: true),
-              ],
+    return Obx(() {
+      final tabCtrl = controller.tabController;
+      if (tabCtrl == null) {
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(color: AppColors.primaryColor),
+          ),
+        );
+      }
+
+      return Scaffold(
+        appBar: primaryAppBar(
+          centerTitle: true,
+          showLeading: controller.argument.value == "detailPage" || Navigator.canPop(context),
+          leading: GestureDetector(
+            onTap: () {
+              if (backRoute != null && backRoute.isNotEmpty) {
+                Get.offNamed(backRoute);
+                return;
+              }
+              if (controller.argument.value == "detailPage") {
+                Get.offAllNamed(RoutesName.bottomNav);
+              } else if (controller.argument.value == "profile") {
+                Get.back();
+              } else {
+                Get.offAllNamed(RoutesName.bottomNav);
+              }
+            },
+            child: Container(
+              color: Colors.transparent,
+              height: 30,
+              width: 40,
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.blackColor,
+                size: 22,
+              ),
             ),
           ),
-        ],
-      )
-      ,
-    );
+          title: const Text("Open matches"),
+          context: context,
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            tabBar(controller),
+            const SizedBox(height: 4),
+            Expanded(
+              child: TabBarView(
+                controller: tabCtrl,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildMatchesTab(context, completed: false),
+                  _buildMatchesTab(context, completed: true),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget tabBar(OpenMatchBookingController controller) {
+    final tabCtrl = controller.tabController;
     return Container(
       color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: TabBar(
-        controller: controller.tabController,
+        controller: tabCtrl,
+        isScrollable: false,
         indicatorColor: AppColors.primaryColor,
+        indicatorWeight: 2.5,
         labelColor: AppColors.primaryColor,
-        unselectedLabelColor: AppColors.labelBlackColor,
-        labelStyle:
-        const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        unselectedLabelStyle:
-        const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        unselectedLabelColor: AppColors.labelBlackColor.withOpacity(0.6),
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         tabs: const [
           Tab(text: "Upcoming"),
           Tab(text: "Completed"),
@@ -80,7 +112,6 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildMatchesTab(BuildContext context, {required bool completed}) {
     return RefreshIndicator(
       edgeOffset: 1,
@@ -88,7 +119,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       color: AppColors.primaryColor,
       onRefresh: () async {
         controller.resetPagination();
-        String type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
+        String type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
         await controller.fetchOpenMatchesBooking(type: type);
       },
       child: Column(
@@ -160,7 +191,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                         return const SizedBox.shrink();
                       });
                     }
-                    
+
                     final matches = controller.openMatchesList[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -330,25 +361,48 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final user = player.userId;
 
         if (!completed && user == null) {
-          teamAWidgets.add(
-            _buildAddPlayerSlot(
-              onTap: () async {
-                final id = match?.sId;
-                final result = await Get.toNamed(
-                  RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamA", "needOpenMatches": true},
-                );
-                if (result == true) {
-                  final type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
-                  await controller.fetchOpenMatchesBooking(type: type);
-                }
-              },
-            ),
-          );
+          // For the first Team A slot, show level badge using model getter with robust fallbacks
+          if (i == 0) {
+            final String inferredLevel = extractLevelCode(
+              (
+                (match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
+                    ? match!.firstPlayerLevelCode
+                    : (match?.createdBy?.level ?? match?.playerLevel ?? match?.skillLevel ?? '')
+              ).trim(),
+            );
+            teamAWidgets.add(
+              _buildPlayerSlot(
+                imageUrl: '',
+                name: '',
+                category: true,
+                completed: completed,
+                level: inferredLevel,
+              ),
+            );
+          } else {
+            teamAWidgets.add(
+              _buildAddPlayerSlot(
+                onTap: () async {
+                  final id = match?.sId;
+                  final result = await Get.toNamed(
+                    RoutesName.addPlayer,
+                    arguments: {"matchId": id, "team": "teamA", "needOpenMatches": true},
+                  );
+                  if (result == true) {
+                    final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
+                    await controller.fetchOpenMatchesBooking(type: type);
+                  }
+                },
+              ),
+            );
+          }
         } else {
           final userCode = extractLevelCode(user?.level ?? '');
+          final String fallbackFromMatch = extractLevelCode(
+            (match?.firstPlayerLevelCode ?? '').trim(),
+          );
           final levelCode = (i == 0 && (userCode == '-' || userCode.isEmpty))
-              ? (match?.firstPlayerLevelCode ?? '-')
+              ? (fallbackFromMatch.isNotEmpty ? fallbackFromMatch : '-')
               : userCode;
           teamAWidgets.add(
             _buildPlayerSlot(
@@ -363,7 +417,25 @@ class OpenMatchBookingScreen extends StatelessWidget {
         }
       } else {
         // Empty slot
-        if (completed) {
+        if (!completed && i == 0) {
+          // Show inferred level for first Team A slot even when empty
+          final String inferredLevel = extractLevelCode(
+            (
+              (match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
+                  ? match!.firstPlayerLevelCode
+                  : (match?.createdBy?.level ?? match?.playerLevel ?? match?.skillLevel ?? '')
+            ).trim(),
+          );
+          teamAWidgets.add(
+            _buildPlayerSlot(
+              imageUrl: '',
+              name: '',
+              category: true,
+              completed: completed,
+              level: inferredLevel,
+            ),
+          );
+        } else if (completed) {
           teamAWidgets.add(
             _buildPlayerSlot(
               imageUrl: '',
@@ -407,7 +479,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   arguments: {"matchId": id, "team": "teamB", "needOpenMatches": true},
                 );
                 if (result == true) {
-                  final type = controller.tabController.index == 0 ? 'upcoming' : 'completed';
+                  final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
                   await controller.fetchOpenMatchesBooking(type: type);
                 }
               },

@@ -9,7 +9,7 @@ class AddPlayerController extends GetxController {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
 
-  RxString gender = 'Male'.obs;
+  RxString gender = ''.obs;
   RxString playerLevel = ''.obs;
 
   /// Updated: unique values for dropdown items
