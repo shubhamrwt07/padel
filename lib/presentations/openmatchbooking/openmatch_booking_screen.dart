@@ -22,15 +22,14 @@ class OpenMatchBookingScreen extends StatelessWidget {
     (args is Map) ? args['backRoute'] as String? : null;
 
     return Obx(() {
-      final tabCtrl = controller.tabController.value; // Now access .value
-      if (tabCtrl == null) {
+      if (!controller.isControllerReady.value) {
         return const Scaffold(
           body: Center(
             child: CircularProgressIndicator(color: AppColors.primaryColor),
           ),
         );
       }
-
+      
       return Scaffold(
         appBar: primaryAppBar(
           centerTitle: true,
@@ -38,7 +37,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           leading: GestureDetector(
             onTap: () {
               if (backRoute != null && backRoute.isNotEmpty) {
-                Get.offNamed(backRoute);
+                Get.toNamed(backRoute);
                 return;
               }
               if (controller.argument.value == "detailPage") {
@@ -46,7 +45,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               } else if (controller.argument.value == "profile") {
                 Get.back();
               } else {
-                Get.offAllNamed(RoutesName.bottomNav);
+                Get.toNamed(RoutesName.bottomNav);
               }
             },
             child: Container(
@@ -67,11 +66,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            tabBar(tabCtrl),
+            tabBar(controller.tabController!),
             const SizedBox(height: 4),
             Expanded(
               child: TabBarView(
-                controller: tabCtrl,
+                controller: controller.tabController!,
                 physics: const BouncingScrollPhysics(),
                 children: [
                   _buildMatchesTab(context, completed: false),
@@ -116,7 +115,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       color: AppColors.primaryColor,
       onRefresh: () async {
         controller.resetPagination();
-        String type = controller.tabController.value?.index == 0 ? 'upcoming' : 'completed';
+        String type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
         await controller.fetchOpenMatchesBooking(type: type);
       },
       child: Column(
@@ -386,7 +385,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     arguments: {"matchId": id, "team": "teamA", "needOpenMatches": true},
                   );
                   if (result == true) {
-                    final type = controller.tabController.value?.index == 0 ? 'upcoming' : 'completed';
+                    final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
                     await controller.fetchOpenMatchesBooking(type: type);
                   }
                 },
@@ -476,7 +475,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   arguments: {"matchId": id, "team": "teamB", "needOpenMatches": true},
                 );
                 if (result == true) {
-                  final type = controller.tabController.value?.index == 0 ? 'upcoming' : 'completed';
+                  final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
                   await controller.fetchOpenMatchesBooking(type: type);
                 }
               },

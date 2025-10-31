@@ -172,7 +172,7 @@ class DetailsController extends GetxController {
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
 
       // ✅ Navigate to match booking page
-      Get.offAllNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
+      Get.toNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
     } catch (e, st) {
       log("❌ Match creation error: $e\n$st");
       SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
