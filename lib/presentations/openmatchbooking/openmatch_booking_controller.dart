@@ -6,8 +6,10 @@ import '../../repositories/openmatches/open_match_repository.dart';
 
 class OpenMatchBookingController extends GetxController
     with GetSingleTickerProviderStateMixin {
-  // Make TabController reactive
-  Rx<TabController?> tabController = Rx<TabController?>(null);
+  // TabController - not reactive since TabBar needs non-null controller
+  TabController? _tabController;
+  TabController? get tabController => _tabController;
+  RxBool isControllerReady = false.obs;
 
   // Reactive variables
   RxString selectedSlot = 'Morning'.obs;
@@ -50,39 +52,22 @@ class OpenMatchBookingController extends GetxController
       argument.value = "upcoming";
     }
 
-    // Initialize TabController with error handling
-    try {
-      tabController.value = TabController(length: 2, vsync: this);
-      tabController.value!.addListener(_handleTabChange);
-
-      CustomLogger.logMessage(
-        msg: "TabController initialized successfully",
-        level: LogLevel.info,
-      );
-    } catch (e) {
-      CustomLogger.logMessage(
-        msg: "TabController initialization failed: $e",
-        level: LogLevel.error,
-      );
-    }
-
-    // Initial data load
-    fetchOpenMatchesBooking(type: 'upcoming');
+    // Initialize TabController with delay to ensure proper widget mounting
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tabController = TabController(length: 2, vsync: this);
+      _tabController!.addListener(_handleTabChange);
+      isControllerReady.value = true;
+      
+      // Initial data load
+      fetchOpenMatchesBooking(type: 'upcoming');
+    });
   }
 
   void _handleTabChange() {
-    if (tabController.value == null) {
-      CustomLogger.logMessage(
-        msg: "TabController is null in _handleTabChange",
-        level: LogLevel.warning,
-      );
-      return;
-    }
-
     // When tab index changes (and animation finishes)
-    if (!tabController.value!.indexIsChanging) {
+    if (_tabController != null && !_tabController!.indexIsChanging) {
       resetPagination();
-      String type = tabController.value!.index == 0 ? 'upcoming' : 'completed';
+      String type = _tabController!.index == 0 ? 'upcoming' : 'completed';
 
       CustomLogger.logMessage(
         msg: "Tab changed to: $type",
@@ -216,7 +201,7 @@ class OpenMatchBookingController extends GetxController
     }
 
     currentPage.value++;
-    final type = tabController.value?.index == 0 ? 'upcoming' : 'completed';
+    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
 
     CustomLogger.logMessage(
       msg: "Loading more data for $type - Page: ${currentPage.value}",
@@ -229,7 +214,7 @@ class OpenMatchBookingController extends GetxController
   Future<void> retryFetch() async {
     showNoInternetScreen.value = false;
     resetPagination();
-    final type = tabController.value?.index == 0 ? 'upcoming' : 'completed';
+    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
 
     CustomLogger.logMessage(
       msg: "Retrying fetch for $type",
@@ -246,8 +231,11 @@ class OpenMatchBookingController extends GetxController
       level: LogLevel.info,
     );
 
-    tabController.value?.removeListener(_handleTabChange);
-    tabController.value?.dispose();
+    if (_tabController != null) {
+      _tabController!.removeListener(_handleTabChange);
+      _tabController!.dispose();
+      _tabController = null;
+    }
     super.onClose();
   }
 }
