@@ -87,65 +87,95 @@ class DetailsController extends GetxController {
   // Separate method for creating match after payment success
   Future<void> createMatchAfterPayment() async {
     try {
-      // Handle slots: convert to required format
-      final slotData = localMatchData["slot"] as List<Slots>? ?? [];
-      final slotsJson = slotData.map((slot) => {
-        "slotId": slot.sId,
-        "businessHours": slot.businessHours?.map((bh) => {
-          "time": bh.time,
-          "day": bh.day,
-        }).toList() ?? [],
-        "slotTimes": [{
-          "time": slot.time,
-          "amount": slot.amount,
-        }],
-        "courtName": localMatchData["courtName"] ?? "",
-        "bookingDate": DateTime.now().toIso8601String(),
+      // ✅ Safely extract and format the selected match date
+      final matchDateValue = localMatchData["matchDate"];
+      DateTime? parsedMatchDate;
+
+      if (matchDateValue is DateTime) {
+        parsedMatchDate = matchDateValue;
+      } else if (matchDateValue != null) {
+        parsedMatchDate = DateTime.tryParse(matchDateValue.toString());
+      }
+
+      if (parsedMatchDate == null) {
+        log("⚠️ No valid matchDate found in localMatchData, using today");
+        parsedMatchDate = DateTime.now();
+      }
+
+      // ✅ Format both for backend
+      final formattedMatchDate = DateFormat('yyyy-MM-dd').format(parsedMatchDate);
+      final formattedBookingDate = parsedMatchDate.toIso8601String();
+
+      // ✅ Safely extract slots
+      final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
+
+      // ✅ Build slot JSONs using selected booking date (not current date)
+      final slotsJson = slotData.map((slot) {
+        return {
+          "slotId": slot.sId ?? "",
+          "businessHours": slot.businessHours?.map((bh) => {
+            "time": bh.time ?? "",
+            "day": bh.day ?? "",
+          }).toList() ??
+              [],
+          "slotTimes": [
+            {
+              "time": slot.time ?? "",
+              "amount": slot.amount ?? 0,
+            }
+          ],
+          "courtName": localMatchData["courtName"] ?? "",
+          "bookingDate": formattedBookingDate, // ✅ selected match date
+        };
       }).toList();
 
-      // Format matchDate
-      final matchDate = localMatchData["matchDate"];
-      final matchDateString = matchDate is DateTime
-          ? DateFormat('yyyy-MM-dd').format(matchDate)
-          : matchDate.toString();
-
-      // Prepare request body
+      // ✅ Prepare final request body
       final body = {
         "slot": slotsJson,
-        "clubId": localMatchData["clubId"],
-        "matchDate": matchDateString,
-        "skillLevel": localMatchData["skillLevel"],
-        "skillDetails": localMatchData["skillDetails"],
-        // Include the selected player level (fallback to any existing match-level value)
-        "playerLevel": (playerLevel.value.isNotEmpty
-            ? playerLevel.value
-            : (localMatchData["playerLevel"]?.toString() ?? "")),
+        "clubId": localMatchData["clubId"] ?? "",
+        "matchDate": formattedMatchDate, // ✅ selected match date
+        "skillLevel": localMatchData["skillLevel"] ?? "",
+
+        // 👇 Skill details
+        "customerScale": localMatchData["customerScale"] ?? "",
+        "customerRacketSport": localMatchData["customerRacketSport"] ?? "",
+        "receivingTP": localMatchData["receivingTP"] ?? "",
+        "customerAge": localMatchData["customerAge"] ?? "",
+        "volleyNetPositioning": localMatchData["volleyNetPositioning"] ?? "",
+        "playerLevel": localMatchData["playerLevel"] ?? "",
+        "reboundSkills": localMatchData["reboundSkills"] ?? "",
+
         "matchStatus": "open",
-        "matchTime": localMatchData["matchTime"],
+        "matchTime": localMatchData["matchTime"] ?? "",
+
+        // ✅ Proper team A and B mapping
         "teamA": teamA
-            .where((p) => (p["userId"] ?? p["_id"]) != null && (p["userId"] ?? p["_id"]).toString().isNotEmpty)
+            .where((p) =>
+        (p["userId"] ?? p["_id"]) != null &&
+            (p["userId"] ?? p["_id"]).toString().isNotEmpty)
             .map((p) => p["userId"] ?? p["_id"])
             .toList(),
         "teamB": teamB
-            .where((p) => (p["userId"] ?? p["_id"]) != null && (p["userId"] ?? p["_id"]).toString().isNotEmpty)
+            .where((p) =>
+        (p["userId"] ?? p["_id"]) != null &&
+            (p["userId"] ?? p["_id"]).toString().isNotEmpty)
             .map((p) => p["userId"] ?? p["_id"])
-            .toList(),      };
+            .toList(),
+      };
 
-      log("Request Body: $body");
+      log("✅ Final Match Request Body: ${body.toString()}");
+
+      // ✅ Call API
       final response = await repository.createMatch(data: body);
 
-      // Show match created successfully message
+      log("🎯 Match Created -> ${response.toJson()}");
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
-      log("Match Created -> ${response.toJson()}");
 
-      // Navigate to bottom navigation after successful match creation
-      Get.offAllNamed(RoutesName.matchBooking,arguments: {
-        "type": "detailPage"
-      });
+      // ✅ Navigate to match booking page
+      Get.offAllNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
     } catch (e, st) {
-      log("Match creation error: $e, $st");
+      log("❌ Match creation error: $e\n$st");
       SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
-      throw e; // Re-throw to be caught by payment success handler
     }
   }
 

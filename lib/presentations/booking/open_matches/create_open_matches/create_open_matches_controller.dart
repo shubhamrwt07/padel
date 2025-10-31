@@ -169,62 +169,6 @@ class CreateOpenMatchesController extends GetxController {
       }
     }
   }
-  // Future<void> getAvailableCourtsById(String clubId, {bool showUnavailable = false}) async {
-  //   log("=== DEBUG API CALL ===");
-  //   log("Fetching courts for club: $clubId");
-  //   log("Selected date: ${selectedDate.value}");
-  //   log("Show unavailable: $showUnavailable");
-  //
-  //   isLoadingCourts.value = true;
-  //
-  //   // Clear current date selections only, keep other dates
-  //   _clearCurrentDateSelections();
-  //
-  //   try {
-  //     final date = selectedDate.value ?? DateTime.now();
-  //     final formattedDay = _getWeekday(date.weekday);
-  //
-  //     log("Formatted day: $formattedDay");
-  //     log("Club ID: $clubId");
-  //
-  //     final result = await repository.fetchAvailableCourtsSlotWise(
-  //       day: formattedDay,
-  //       registerClubId: clubId,
-  //       date: selectedDate.value.toString()
-  //     );
-  //
-  //     if (result != null) {
-  //       // Apply filtering based on toggle first
-  //       for (var court in result.data ?? []) {
-  //         final base = court.slots ?? [];
-  //         if (showUnavailable) {
-  //           court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
-  //         } else {
-  //           court.slots = base.where((s) => _isAvailableSlot(s)).toList();
-  //         }
-  //       }
-  //     }
-  //
-  //     slots.value = result;
-  //     // Build base cache and counts, then apply current time-of-day filter
-  //     _originalSlotsCache.clear();
-  //     final courts = slots.value?.data ?? [];
-  //     for (final court in courts) {
-  //       _originalSlotsCache[court.sId ?? ''] = List<Slots>.from(court.slots ?? []);
-  //     }
-  //     _recalculateTimeOfDayCounts();
-  //     filterSlotsByTimeOfDay();
-  //     _autoSelectTab();
-  //     slots.refresh();
-  //
-  //   } catch (e, stackTrace) {
-  //     log("Error occurred: $e");
-  //     log("Stack trace: $stackTrace");
-  //     slots.value = null;
-  //   } finally {
-  //     isLoadingCourts.value = false;
-  //   }
-  // }
   void toggleSlotSelection(Slots slot, {String? courtId, String? courtName}) {
     // Resolve court info
     Map<String, String>? resolvedCourtInfo;
@@ -556,7 +500,7 @@ class CreateOpenMatchesController extends GetxController {
 
   bool isPastAndUnavailable(Slots slot) {
     // Treat booked or explicitly unavailable statuses as unavailable
-    final status = slot.status?.toLowerCase() ?? '';
+    final status = _normalizeStatus(slot.status);
     if (status == 'booked') return true;
     if (status.isNotEmpty && status != 'available') return true;
 
@@ -628,19 +572,24 @@ class CreateOpenMatchesController extends GetxController {
 
   // Helper: determine if a slot should be considered unavailable (past, booked, or blocked)
   bool _isUnavailableSlot(Slots slot) {
-    final availability = slot.availabilityStatus?.toLowerCase();
+    final availability = _normalizeStatus(slot.availabilityStatus);
     final isBlocked = availability == "maintenance" ||
         availability == "weather conditions" ||
         availability == "staff unavailability";
-    final isBooked = (slot.status?.toLowerCase() == 'booked');
+    final isBooked = (_normalizeStatus(slot.status) == 'booked');
     final isPast = isPastAndUnavailable(slot);
     return isPast || isBlocked || isBooked;
   }
 
   // Helper: available when not unavailable and status is available/empty
   bool _isAvailableSlot(Slots slot) {
-    final status = slot.status?.toLowerCase() ?? '';
+    final status = _normalizeStatus(slot.status);
     return !_isUnavailableSlot(slot) && (status == 'available' || status.isEmpty);
+  }
+
+  // Normalize status/availability strings to avoid case and whitespace issues
+  String _normalizeStatus(String? value) {
+    return (value ?? '').trim().toLowerCase();
   }
 
   var cartLoader = false.obs;
