@@ -28,7 +28,7 @@ class CreateQuestionsController extends GetxController {
   var selectedTraining = ''.obs;
   var selectedAgeGroup = ''.obs;
   var selectedVolley = ''.obs;
-  var selectedWallRebound = ''.obs;
+  var selectedReboundSkill = ''.obs;
   var selectPlayerLevel = ''.obs;
 
   /// ============================
@@ -87,7 +87,7 @@ class CreateQuestionsController extends GetxController {
         break;
 
       case 7:
-        if (selectedWallRebound.value.isEmpty) {
+        if (selectedReboundSkill.value.isEmpty) {
           SnackBarUtils.showWarningSnackBar(
               "Required\nPlease select wall rebound before submitting");
           return;
@@ -114,23 +114,24 @@ class CreateQuestionsController extends GetxController {
   /// Final Submission
   /// ============================
   void onSubmit() {
-    // ✅ Update local data map with user selections
-    detailsController.localMatchData.update("skillLevel", (v) => selectedLevel.value);
-    detailsController.localMatchData.update("playerLevel", (v) => selectPlayerLevel.value);
+    // ✅ Store each selected answer as a separate key in the local match data
+    detailsController.localMatchData.update("customerScale", (v) => selectedLevel.value, ifAbsent: () => selectedLevel.value);
+    detailsController.localMatchData.update("customerRacketSport", (v) => selectedSports.join(', '), ifAbsent: () => selectedSports.join(', '));
+    detailsController.localMatchData.update("receivingTP", (v) => selectedTraining.value, ifAbsent: () => selectedTraining.value);
+    detailsController.localMatchData.update("customerAge", (v) => selectedAgeGroup.value, ifAbsent: () => selectedAgeGroup.value);
+    detailsController.localMatchData.update("volleyNetPositioning", (v) => selectedVolley.value, ifAbsent: () => selectedVolley.value);
+    detailsController.localMatchData.update("playerLevel", (v) => selectPlayerLevel.value, ifAbsent: () => selectPlayerLevel.value);
 
-    detailsController.localMatchData.update("skillDetails", (v) => [
-      selectedSports.join(', '), // ✅ Join multiple sports
-      selectedTraining.value,
-      selectedAgeGroup.value,
-      selectedVolley.value,
-      selectedWallRebound.value,
-      selectPlayerLevel.value,
-    ]);
+    // ✅ New: Add reboundSkills
+    detailsController.localMatchData.update("reboundSkills", (v) => selectedReboundSkill.value, ifAbsent: () => selectedReboundSkill.value);
 
-    // ✅ Update player level shown in details page
+    // ✅ Update skillLevel for quick reference
+    detailsController.localMatchData.update("skillLevel", (v) => selectedLevel.value, ifAbsent: () => selectedLevel.value);
+
+    // ✅ Also update teamA player level info for display
     if (detailsController.teamA.isNotEmpty) {
       final current = Map<String, dynamic>.from(detailsController.teamA.first);
-      current['levelLabel'] = selectPlayerLevel.value; // e.g. "A – Top Player"
+      current['levelLabel'] = selectPlayerLevel.value;
       final shortCode = selectPlayerLevel.value.split(' ').first.trim();
       current['level'] = shortCode;
       detailsController.teamA[0] = current;
@@ -138,14 +139,7 @@ class CreateQuestionsController extends GetxController {
       detailsController.update();
     }
 
-    log("Selected answers: "
-        "Level: ${selectedLevel.value}, "
-        "Sports: ${selectedSports.join(', ')}, "
-        "Training: ${selectedTraining.value}, "
-        "Age: ${selectedAgeGroup.value}, "
-        "Volley: ${selectedVolley.value}, "
-        "Wall: ${selectedWallRebound.value}, "
-        "Player Level: ${selectPlayerLevel.value}");
+    log("Selected answers sent: ${detailsController.localMatchData}");
 
     Get.to(() => DetailsScreen());
   }

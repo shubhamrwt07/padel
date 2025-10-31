@@ -253,8 +253,8 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
         const SizedBox(height: 16),
         ...options.map((option) => Obx(() => _buildOption(
           title: option,
-          isSelected: controller.selectedWallRebound.value == option,
-          onTap: () => controller.selectedWallRebound.value = option,
+          isSelected: controller.selectedReboundSkill.value == option,
+          onTap: () => controller.selectedReboundSkill.value = option,
         ))),
       ],
     );

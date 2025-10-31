@@ -6,7 +6,8 @@ import '../../repositories/openmatches/open_match_repository.dart';
 
 class OpenMatchBookingController extends GetxController
     with GetSingleTickerProviderStateMixin {
-  TabController? tabController;
+  // Make TabController reactive
+  Rx<TabController?> tabController = Rx<TabController?>(null);
 
   // Reactive variables
   RxString selectedSlot = 'Morning'.obs;
@@ -49,10 +50,15 @@ class OpenMatchBookingController extends GetxController
       argument.value = "upcoming";
     }
 
-    // Initialize TabController
+    // Initialize TabController with error handling
     try {
-      tabController = TabController(length: 2, vsync: this);
-      tabController!.addListener(_handleTabChange);
+      tabController.value = TabController(length: 2, vsync: this);
+      tabController.value!.addListener(_handleTabChange);
+
+      CustomLogger.logMessage(
+        msg: "TabController initialized successfully",
+        level: LogLevel.info,
+      );
     } catch (e) {
       CustomLogger.logMessage(
         msg: "TabController initialization failed: $e",
@@ -65,12 +71,24 @@ class OpenMatchBookingController extends GetxController
   }
 
   void _handleTabChange() {
-    if (tabController == null) return;
+    if (tabController.value == null) {
+      CustomLogger.logMessage(
+        msg: "TabController is null in _handleTabChange",
+        level: LogLevel.warning,
+      );
+      return;
+    }
 
     // When tab index changes (and animation finishes)
-    if (!tabController!.indexIsChanging) {
+    if (!tabController.value!.indexIsChanging) {
       resetPagination();
-      String type = tabController!.index == 0 ? 'upcoming' : 'completed';
+      String type = tabController.value!.index == 0 ? 'upcoming' : 'completed';
+
+      CustomLogger.logMessage(
+        msg: "Tab changed to: $type",
+        level: LogLevel.debug,
+      );
+
       fetchOpenMatchesBooking(type: type);
     }
   }
@@ -80,6 +98,11 @@ class OpenMatchBookingController extends GetxController
     currentPage.value = 1;
     hasMoreData.value = true;
     openMatchesList.clear();
+
+    CustomLogger.logMessage(
+      msg: "Pagination reset",
+      level: LogLevel.debug,
+    );
   }
 
   void selectSlot(String slot) => selectedSlot.value = slot;
@@ -103,13 +126,24 @@ class OpenMatchBookingController extends GetxController
       ),
     );
 
-    if (pickedDate != null) selectedDate.value = pickedDate;
+    if (pickedDate != null) {
+      selectedDate.value = pickedDate;
+      CustomLogger.logMessage(
+        msg: "Date selected: $pickedDate",
+        level: LogLevel.debug,
+      );
+    }
   }
 
   void clearAll() {
     selectedDate.value = DateTime.now();
     selectedTimings.clear();
     selectedLevel.value = '';
+
+    CustomLogger.logMessage(
+      msg: "Filters cleared",
+      level: LogLevel.debug,
+    );
   }
 
   Future<void> fetchOpenMatchesBooking({
@@ -122,6 +156,11 @@ class OpenMatchBookingController extends GetxController
       } else {
         isLoading.value = true;
       }
+
+      CustomLogger.logMessage(
+        msg: "Fetching $type matches - Page: ${currentPage.value}, IsLoadMore: $isLoadMore",
+        level: LogLevel.info,
+      );
 
       final response = await repository.getOpenMatchBookings(
         type: type,
@@ -139,12 +178,26 @@ class OpenMatchBookingController extends GetxController
         }
 
         hasMoreData.value = newData.length >= pageSize;
+
+        CustomLogger.logMessage(
+          msg: "Successfully fetched ${newData.length} matches. Total: ${openMatchesList.length}",
+          level: LogLevel.info,
+        );
       } else {
         if (!isLoadMore) openMatchesList.clear();
         hasMoreData.value = false;
+
+        CustomLogger.logMessage(
+          msg: "No matches found for $type",
+          level: LogLevel.info,
+        );
       }
     } catch (e) {
-      CustomLogger.logMessage(msg: "Error fetching matches: $e", level: LogLevel.error);
+      CustomLogger.logMessage(
+        msg: "Error fetching $type matches: $e",
+        level: LogLevel.error,
+      );
+
       if (!isLoadMore) openMatchesList.clear();
       hasMoreData.value = false;
     } finally {
@@ -154,22 +207,47 @@ class OpenMatchBookingController extends GetxController
   }
 
   Future<void> loadMoreData() async {
-    if (!hasMoreData.value || isLoadingMore.value) return;
+    if (!hasMoreData.value || isLoadingMore.value) {
+      CustomLogger.logMessage(
+        msg: "LoadMore skipped - hasMoreData: ${hasMoreData.value}, isLoadingMore: ${isLoadingMore.value}",
+        level: LogLevel.debug,
+      );
+      return;
+    }
+
     currentPage.value++;
-    final type = tabController?.index == 0 ? 'upcoming' : 'completed';
-    await fetchOpenMatchesBooking(type: type ?? 'upcoming', isLoadMore: true);
+    final type = tabController.value?.index == 0 ? 'upcoming' : 'completed';
+
+    CustomLogger.logMessage(
+      msg: "Loading more data for $type - Page: ${currentPage.value}",
+      level: LogLevel.info,
+    );
+
+    await fetchOpenMatchesBooking(type: type, isLoadMore: true);
   }
+
   Future<void> retryFetch() async {
     showNoInternetScreen.value = false;
     resetPagination();
-    final type = tabController?.index == 0 ? 'upcoming' : 'completed';
-    await fetchOpenMatchesBooking(type: type ?? 'upcoming');
+    final type = tabController.value?.index == 0 ? 'upcoming' : 'completed';
+
+    CustomLogger.logMessage(
+      msg: "Retrying fetch for $type",
+      level: LogLevel.info,
+    );
+
+    await fetchOpenMatchesBooking(type: type);
   }
 
   @override
   void onClose() {
-    tabController?.removeListener(_handleTabChange);
-    tabController?.dispose();
+    CustomLogger.logMessage(
+      msg: "OpenMatchBookingController disposing",
+      level: LogLevel.info,
+    );
+
+    tabController.value?.removeListener(_handleTabChange);
+    tabController.value?.dispose();
     super.onClose();
   }
 }
