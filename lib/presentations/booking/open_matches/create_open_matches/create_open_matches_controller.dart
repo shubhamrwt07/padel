@@ -68,21 +68,58 @@ class CreateOpenMatchesController extends GetxController {
 
 
 
- void onNext(){
-   log("Slots -> $selectedSlots");
-   detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName??"");
-   detailsController.localMatchData.update("clubId", (v)=>slots.value!.data![0].registerClubId!.sId??"");
-   detailsController.localMatchData.update("matchDate", (v)=>selectedDate.value??"");
-   detailsController.localMatchData.update("matchTime", (v)=>selectedSlots.value.first.time??"");
-   detailsController.localMatchData.update("price", (v)=>totalAmount.toString()??"");
+  void onNext() {
+    log("Slots -> $selectedSlots");
 
-   detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
-   detailsController.localMatchData.update("slot", (v)=>selectedSlots.value);
-   detailsController.localMatchData.update("courtName", (v)=>slots.value!.data![0].courtName??"");
-   // detailsController.localMatchData.update("courtType", (v)=>slots.value!.data![0].registerClubId!.courtType??"");
-   Get.toNamed(RoutesName.createQuestions);
- }
-  void _autoSelectTab() {
+    if (multiDateSelections.isEmpty) {
+      Get.snackbar(
+        "No Slots Selected",
+        "Please select at least one slot before proceeding.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    // Collect all unique court IDs and names from selections
+    Map<String, String> courtsMap = {}; // courtId -> courtName
+    multiDateSelections.forEach((key, selection) {
+      final courtId = selection['courtId'] as String?;
+      final courtName = selection['courtName'] as String?;
+      if (courtId != null && courtId.isNotEmpty) {
+        courtsMap[courtId] = courtName ?? '';
+      }
+    });
+
+    List<String> courtIds = courtsMap.keys.toList();
+    List<String> courtNames = courtsMap.values.toList();
+
+    // For backward compatibility, use the first court as primary
+    String primaryCourtId = courtIds.first;
+    String primaryCourtName = courtNames.first;
+
+    detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName ?? "");
+    detailsController.localMatchData.update("clubId", (v) => slots.value!.data![0].registerClubId!.sId ?? "");
+    detailsController.localMatchData.update("matchDate", (v) => selectedDate.value ?? "");
+    detailsController.localMatchData.update("matchTime", (v) => selectedSlots.value.first.time ?? "");
+    detailsController.localMatchData.update("price", (v) => totalAmount.toString() ?? "");
+    detailsController.localMatchData.update("courtType", (v) => slots.value!.data![0].registerClubId!.courtType ?? "");
+    detailsController.localMatchData.update("slot", (v) => selectedSlots.value);
+
+    // Use direct assignment for new keys instead of update
+    detailsController.localMatchData["courtId"] = primaryCourtId;
+    detailsController.localMatchData["courtName"] = primaryCourtName;
+    detailsController.localMatchData["courtIds"] = courtIds;
+    detailsController.localMatchData["courtNames"] = courtNames;
+    detailsController.localMatchData["courtsDetails"] = courtsMap;
+
+    log("Selected Courts: ${courtIds.length}");
+    log("Court IDs: $courtIds");
+    log("Court Names: $courtNames");
+
+    Get.toNamed(RoutesName.createQuestions);
+  }  void _autoSelectTab() {
     final now = DateTime.now();
     final hour = now.hour;
 

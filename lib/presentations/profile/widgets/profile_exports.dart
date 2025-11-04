@@ -16,7 +16,6 @@ export 'package:padel_mobile/configs/components/primary_button.dart';
 export 'package:padel_mobile/configs/components/primary_text_feild.dart';
 export 'package:image_picker/image_picker.dart';
 export 'package:padel_mobile/configs/components/snack_bars.dart';
-export 'package:padel_mobile/data/response_models/home_models/profile_model.dart';
 export 'package:padel_mobile/repositories/home_repository/profile_repository.dart';
 export 'package:padel_mobile/repositories/authentication_repository/sign_up_repository.dart';
 export 'package:padel_mobile/data/response_models/get_locations_model.dart';

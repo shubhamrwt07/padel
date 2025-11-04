@@ -1,7 +1,7 @@
 class ProfileModel {
   String? status;
   String? message;
-  ProfileResponse? response;
+  Response? response;
 
   ProfileModel({this.status, this.message, this.response});
 
@@ -9,7 +9,7 @@ class ProfileModel {
     status = json['status'];
     message = json['message'];
     response = json['response'] != null
-        ? new ProfileResponse.fromJson(json['response'])
+        ? new Response.fromJson(json['response'])
         : null;
   }
 
@@ -24,14 +24,14 @@ class ProfileModel {
   }
 }
 
-class ProfileResponse {
+class Response {
   Location? location;
   String? sId;
   String? email;
   String? countryCode;
   int? phoneNumber;
   String? name;
-  String? lastname;
+  String? lastName;
   String? password;
   String? city;
   bool? agreeTermsAndCondition;
@@ -46,14 +46,14 @@ class ProfileResponse {
   String? gender;
   String? profilePic;
 
-  ProfileResponse(
+  Response(
       {this.location,
         this.sId,
         this.email,
         this.countryCode,
         this.phoneNumber,
         this.name,
-        this.lastname,
+        this.lastName,
         this.password,
         this.city,
         this.agreeTermsAndCondition,
@@ -68,7 +68,7 @@ class ProfileResponse {
         this.gender,
         this.profilePic});
 
-  ProfileResponse.fromJson(Map<String, dynamic> json) {
+  Response.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
         ? new Location.fromJson(json['location'])
         : null;
@@ -77,7 +77,7 @@ class ProfileResponse {
     countryCode = json['countryCode'];
     phoneNumber = json['phoneNumber'];
     name = json['name'];
-    lastname = json['lastname'];
+    lastName = json['lastName'];
     password = json['password'];
     city = json['city'];
     agreeTermsAndCondition = json['agreeTermsAndCondition'];
@@ -103,7 +103,7 @@ class ProfileResponse {
     data['countryCode'] = this.countryCode;
     data['phoneNumber'] = this.phoneNumber;
     data['name'] = this.name;
-    data['lastname'] = this.lastname;
+    data['lastName'] = this.lastName;
     data['password'] = this.password;
     data['city'] = this.city;
     data['agreeTermsAndCondition'] = this.agreeTermsAndCondition;

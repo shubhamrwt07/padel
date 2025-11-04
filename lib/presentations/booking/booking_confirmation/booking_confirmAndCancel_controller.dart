@@ -23,6 +23,10 @@ class BookingConfirmAndCancelController extends GetxController {
   RxBool isLoading = false.obs;
   RxString error = ''.obs;
 
+  // ✅ Rating fields
+  RxInt selectedRating = 0.obs;
+  TextEditingController ratingMessageController = TextEditingController();
+
   List<String> cancellationReasons = [
     "Change of plans",
     "Found better timing",
@@ -111,7 +115,7 @@ class BookingConfirmAndCancelController extends GetxController {
           msg: result?.message ?? "Updated",
           level: LogLevel.debug,
         );
-        SnackBarUtils.showSuccessSnackBar( "Your booking has been successfully canceled.");
+        SnackBarUtils.showSuccessSnackBar("Your booking has been successfully canceled.");
         otherReasonController.clear();
       } else {
         SnackBarUtils.showErrorSnackBar("Booking update failed");
@@ -123,9 +127,58 @@ class BookingConfirmAndCancelController extends GetxController {
     }
   }
 
+  /// ✅ Submit rating
+  Future<void> submitRating() async {
+    if (isLoading.value) return;
+
+    if (bookingDetails.value == null || bookingDetails.value!.booking == null) {
+      SnackBarUtils.showInfoSnackBar("Booking details not available");
+      return;
+    }
+
+    if (selectedRating.value == 0) {
+      SnackBarUtils.showWarningSnackBar("Please select a rating");
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final bookingId = bookingDetails.value!.booking!.sId;
+
+      final body = {
+        "bookingId": bookingId,
+        "rating": selectedRating.value,
+        "message": ratingMessageController.text.trim(),
+      };
+
+      // TODO: Replace with your actual API endpoint
+      // final result = await _bookingRepo.submitRating(body: body);
+
+      // For now, just show success
+      SnackBarUtils.showSuccessSnackBar("Thank you for your feedback!");
+
+      // Reset rating fields
+      selectedRating.value = 0;
+      ratingMessageController.clear();
+
+      CustomLogger.logMessage(
+        msg: "Rating submitted: ${selectedRating.value} stars",
+        level: LogLevel.debug,
+      );
+
+    } catch (e) {
+      CustomLogger.logMessage(msg: e, level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to submit rating. Please try again.");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     otherReasonController.dispose();
+    ratingMessageController.dispose();
     super.onClose();
   }
 }

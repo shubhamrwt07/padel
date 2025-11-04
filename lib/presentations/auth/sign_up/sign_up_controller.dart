@@ -136,7 +136,7 @@ class SignUpController extends GetxController {
     final body = {
       "email": emailController.text.trim(),
       "name": firstNameController.text.trim(),
-      "lastname": lastNameController.text.trim(),
+      "lastName": lastNameController.text.trim(),
       "countryCode": "+91",
       "phoneNumber": phoneController.text.trim(),
       "password": passwordController.text.trim(),

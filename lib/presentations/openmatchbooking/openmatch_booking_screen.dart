@@ -284,7 +284,6 @@ class OpenMatchBookingScreen extends StatelessWidget {
   }
 
   Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match)
-
   {
     final slots = match?.slot ?? [];
     final times = slots

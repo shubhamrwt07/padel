@@ -9,7 +9,7 @@ class OpenMatchesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Container(
-        height: Get.height * .09,
+        height: Get.height * .099,
         padding: const EdgeInsets.only(top: 10),
         decoration: const BoxDecoration(
           color: Colors.white,
