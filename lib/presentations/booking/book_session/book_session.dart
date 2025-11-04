@@ -182,29 +182,40 @@ class BookSession extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -23),
+              offset: Offset(0, -Get.height * 0.026),
               child: Container(
                 width: 30,
-                height: Get.height*0.06,
+                height: Get.height * 0.063,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.textFieldColor,
-                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
-                ),
-                child: RotatedBox(
-                  quarterTurns: 3, // 270 degrees
-                  child: Text(
-                    DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.labelBlackColor
-                    ),
+                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.textFieldColor,
+                  border: Border.all(
+                    color: AppColors.blackColor.withAlpha(10),
                   ),
                 ),
+                // Display month vertically (O C T)
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Prevents unnecessary extra spacing
+                  children: DateFormat('MMM')
+                      .format(controller.selectedDate.value ?? DateTime.now())
+                      .toUpperCase()
+                      .split('')
+                      .map(
+                        (char) => Text(
+                      char,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0, // Reduces space between letters
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+                      .toList(),
+                ),
               ),
-            ),
-            Expanded(
+            ),            Expanded(
               child: EasyDateTimeLinePicker.itemBuilder(
                 headerOptions: HeaderOptions(
                   headerBuilder: (_, context, date) => const SizedBox.shrink(),
@@ -260,7 +271,7 @@ class BookSession extends StatelessWidget {
                                 Text(
                                   "${date.day}",
                                   style: Get.textTheme.titleMedium!.copyWith(
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     color: isSelected
                                         ? Colors.white
                                         : dateSelections.isNotEmpty
@@ -268,15 +279,17 @@ class BookSession extends StatelessWidget {
                                         : AppColors.textColor,
                                   ),
                                 ),
-                                Text(
-                                  dayName,
-                                  style: Get.textTheme.bodySmall!.copyWith(
-                                    fontSize: 11,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : dateSelections.isNotEmpty
-                                        ? AppColors.primaryColor
-                                        : Colors.black,
+                                Transform.translate(offset: Offset(0, -2),
+                                  child: Text(
+                                    dayName,
+                                    style: Get.textTheme.bodySmall!.copyWith(
+                                      fontSize: 11,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : dateSelections.isNotEmpty
+                                          ? AppColors.primaryColor
+                                          : Colors.black,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -863,7 +876,7 @@ class BookSession extends StatelessWidget {
                 controller.addToCart();
               },
               child: controller.cartLoader.value
-                  ? CircularProgressIndicator(color: AppColors.whiteColor)
+                  ? CupertinoActivityIndicator(color: AppColors.whiteColor)
                   : Row(
                 children: [
                   Obx(

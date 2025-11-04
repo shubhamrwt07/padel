@@ -282,29 +282,40 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -Get.height*0.003),
+              offset: Offset(0, -Get.height * 0.003),
               child: Container(
                 width: 30,
-                height: Get.height*0.06,
+                height: Get.height * 0.063,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.textFieldColor.withAlpha(100),
-                    border: Border.all(color: AppColors.blackColor.withAlpha(10))
-                ),
-                child: RotatedBox(
-                  quarterTurns: 3, // 270 degrees
-                  child: Text(
-                    DateFormat('MMM').format(controller.selectedDate.value??DateTime.now()), // "SEP"
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.labelBlackColor,
-                    ),
+                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.textFieldColor,
+                  border: Border.all(
+                    color: AppColors.blackColor.withAlpha(10),
                   ),
                 ),
+                // Display month vertically (O C T)
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Prevents unnecessary extra spacing
+                  children: DateFormat('MMM')
+                      .format(controller.selectedDate.value ?? DateTime.now())
+                      .toUpperCase()
+                      .split('')
+                      .map(
+                        (char) => Text(
+                      char,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0, // Reduces space between letters
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+                      .toList(),
+                ),
               ),
-            ),
-            Expanded(
+            ),            Expanded(
               child: EasyDateTimeLinePicker.itemBuilder(
                 headerOptions: HeaderOptions(
                   headerBuilder: (_, context, date) => const SizedBox.shrink(),
@@ -361,7 +372,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                   Text(
                                     "${date.day}",
                                     style: Get.textTheme.titleMedium!.copyWith(
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
                                           ? Colors.white
@@ -370,15 +381,17 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                           : AppColors.textColor,
                                     ),
                                   ),
-                                  Text(
-                                    dayName,
-                                    style: Get.textTheme.bodySmall!.copyWith(
-                                      fontSize: 10,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : Colors.black,
+                                  Transform.translate(offset: Offset(0, -2),
+                                    child: Text(
+                                      dayName,
+                                      style: Get.textTheme.bodySmall!.copyWith(
+                                        fontSize: 11,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : dateSelections.isNotEmpty
+                                            ? AppColors.primaryColor
+                                            : Colors.black,
+                                      ),
                                     ),
                                   ),
                                 ],

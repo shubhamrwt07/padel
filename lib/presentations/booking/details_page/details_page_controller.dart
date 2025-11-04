@@ -85,6 +85,8 @@ class DetailsController extends GetxController {
   }
 
   // Separate method for creating match after payment success
+// Separate method for creating match after payment success
+// Separate method for creating match after payment success
   Future<void> createMatchAfterPayment() async {
     try {
       // ✅ Safely extract and format the selected match date
@@ -109,22 +111,36 @@ class DetailsController extends GetxController {
       // ✅ Safely extract slots
       final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
 
-      // ✅ Build slot JSONs using selected booking date (not current date)
-      final slotsJson = slotData.map((slot) {
+      // ✅ Extract court information - handle both single and multiple courts
+      final courtId = localMatchData["courtId"]?.toString() ?? "";
+      final courtIds = (localMatchData["courtIds"] as List?)?.map((e) => e.toString()).toList() ?? [];
+      final courtName = localMatchData["courtName"]?.toString() ?? "";
+
+      // ✅ Build slot JSONs with courtId inside each slot
+      final slotsJson = slotData.asMap().entries.map((entry) {
+        final index = entry.key;
+        final slot = entry.value;
+
+        // Use corresponding courtId from courtIds array, or fallback to single courtId
+        String slotCourtId = courtId;
+        if (courtIds.isNotEmpty && index < courtIds.length) {
+          slotCourtId = courtIds[index];
+        }
+
         return {
           "slotId": slot.sId ?? "",
           "businessHours": slot.businessHours?.map((bh) => {
             "time": bh.time ?? "",
             "day": bh.day ?? "",
-          }).toList() ??
-              [],
+          }).toList() ?? [],
           "slotTimes": [
             {
               "time": slot.time ?? "",
               "amount": slot.amount ?? 0,
             }
           ],
-          "courtName": localMatchData["courtName"] ?? "",
+          "courtName": courtName,
+          "courtId": slotCourtId, // ✅ Court ID inside slot
           "bookingDate": formattedBookingDate, // ✅ selected match date
         };
       }).toList();
@@ -137,6 +153,7 @@ class DetailsController extends GetxController {
         "skillLevel": localMatchData["skillLevel"] ?? "",
 
         // 👇 Skill details
+        "skillDetails": localMatchData["skillDetails"] ?? [],
         "customerScale": localMatchData["customerScale"] ?? "",
         "customerRacketSport": localMatchData["customerRacketSport"] ?? "",
         "receivingTP": localMatchData["receivingTP"] ?? "",
@@ -177,9 +194,7 @@ class DetailsController extends GetxController {
       log("❌ Match creation error: $e\n$st");
       SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
     }
-  }
-
-  // Main method that immediately shows payment sheet when book button is pressed
+  }  // Main method that immediately shows payment sheet when book button is pressed
   Future<void> initiatePaymentAndCreateMatch() async {
     // Validate that teams have at least minimum required players
     if (!validateTeams()) {

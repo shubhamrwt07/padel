@@ -124,7 +124,6 @@ class OpenMatchBookingController extends GetxController
     selectedDate.value = DateTime.now();
     selectedTimings.clear();
     selectedLevel.value = '';
-
     CustomLogger.logMessage(
       msg: "Filters cleared",
       level: LogLevel.debug,

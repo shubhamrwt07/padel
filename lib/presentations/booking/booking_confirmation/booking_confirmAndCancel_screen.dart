@@ -102,6 +102,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                 }),
               bookingDetailsCard(context),
               paymentDetailsCard(context),
+              if (!controller.cancelBooking.value) _showRatingSection(context),
               if (!controller.cancelBooking.value) _showCancelButtonIfAllowed(),
               if (controller.cancelBooking.value) cancelForm(context),
             ],
@@ -279,6 +280,163 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
               color: valueColor,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _showRatingSection(BuildContext context) {
+    final booking = controller.bookingDetails.value?.booking;
+    if (booking == null) return const SizedBox.shrink();
+
+    final status = booking.bookingStatus?.toLowerCase();
+
+    // ✅ Only show rating section when status is completed
+    if (status != "completed") {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.playerCardBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.lightGrace),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Rate this court (Padel Haus)",
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.labelBlackColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ⭐ Rating stars
+          Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: List.generate(5, (index) {
+              return GestureDetector(
+                onTap: () {
+                  controller.selectedRating.value = index + 1;
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    index < controller.selectedRating.value
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: index < controller.selectedRating.value
+                        ? const Color(0xFF4CAF50)
+                        : Colors.grey,
+                    size: 32,
+                  ),
+                ),
+              );
+            }),
+          )),
+
+          // Show rating value
+          Obx(() => controller.selectedRating.value > 0
+              ? Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              "${controller.selectedRating.value}.5",
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.labelBlackColor,
+              ),
+            ),
+          )
+              : const SizedBox.shrink()),
+
+          const SizedBox(height: 16),
+
+          // 💬 Message input
+          Text(
+            "Write a message",
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: AppColors.labelBlackColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.lightBlueColor.withAlpha(50),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.blackColor.withAlpha(10),
+              ),
+            ),
+            child: TextFormField(
+              controller: controller.ratingMessageController,
+              maxLines: 3,
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                color: AppColors.labelBlackColor,
+              ),
+              decoration: InputDecoration.collapsed(
+                hintText: "Write Here",
+                hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  color: AppColors.labelBlackColor.withOpacity(0.5),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Submit button
+          SizedBox(
+            width: double.infinity,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1DB954), Color(0xFF1E88E5)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (controller.selectedRating.value == 0) {
+                    SnackBarUtils.showWarningSnackBar("Please select a rating");
+                    return;
+                  }
+
+                  controller.submitRating();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: Text(
+                  "Submit",
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

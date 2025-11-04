@@ -96,7 +96,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                 Obx(() {
                   final profile = controller.profileModel.value?.response;
                   return Text(
-                    "${profile?.name ?? 'Unknown'} ${profile?.lastname ?? ""}",
+                    "${profile?.name ?? 'Unknown'} ${profile?.lastName ?? ""}",
                     style: Get.textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,

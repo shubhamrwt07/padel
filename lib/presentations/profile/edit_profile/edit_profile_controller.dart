@@ -20,7 +20,7 @@ class EditProfileController extends GetxController{
   void setValues() {
     final model = profileController.profileModel.value;
     nameController.text = model?.response?.name ?? '';
-    lastNameController.text = model?.response?.lastname ??'';
+    lastNameController.text = model?.response?.lastName ??'';
     emailController.text = model?.response?.email ?? '';
     phoneController.text = model?.response?.phoneNumber.toString() ?? '';
     selectedGender.value = model?.response?.gender ?? "";
