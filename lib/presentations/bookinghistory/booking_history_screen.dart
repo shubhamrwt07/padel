@@ -67,6 +67,7 @@ class BookingHistoryUi extends StatelessWidget {
     required String type,
   }) {
     return Obx(() {
+
       final bookings = (type == "completed")
           ? (controller.completedBookings.value?.data ?? [])
           : (type == "cancelled")
@@ -250,7 +251,6 @@ class BookingHistoryUi extends StatelessWidget {
           ],
         );
       }
-
       final firstTime = slotTimes[0];
       final timeString = firstTime?.time ?? "";
 

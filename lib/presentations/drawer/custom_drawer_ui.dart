@@ -179,6 +179,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                 controller.selectedIndex.value = 5;
                 Get.to(() => CartScreen(buttonType: "true"), transition: Transition.rightToLeft);
               },
+
             ),
           ),
           Obx(

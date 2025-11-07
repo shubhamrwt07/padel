@@ -8,6 +8,7 @@ import '../../../data/request_models/booking/booking_confermation_model.dart';
 import '../../../data/request_models/booking/cancel_booking_model.dart';
 import '../../../handler/logger.dart';
 import '../../../repositories/bookinghisory/booking_history_repository.dart';
+import '../../../repositories/review_repo/review_repository.dart'; // ✅ Add this import
 
 class BookingConfirmAndCancelController extends GetxController {
   RxBool cancelBooking = false.obs;
@@ -34,6 +35,7 @@ class BookingConfirmAndCancelController extends GetxController {
   ];
 
   final BookingHistoryRepository _bookingRepo = BookingHistoryRepository();
+  final ReviewRepository _reviewRepo = ReviewRepository(); // ✅ Add review repository
 
   @override
   void onInit() async {
@@ -94,7 +96,7 @@ class BookingConfirmAndCancelController extends GetxController {
         "id": bookingId,
         "status": "in-progress",
         "cancellationReason": otherReasonController.text.trim(),
-        if (slotId != null) "slotId": slotId, // ✅ only send slotId when needed
+        if (slotId != null) "slotId": slotId,
       };
 
       final result = await _bookingRepo.updateBookingStatus(body: body);
@@ -127,49 +129,83 @@ class BookingConfirmAndCancelController extends GetxController {
     }
   }
 
-  /// ✅ Submit rating
+  /// ✅ Submit rating with API integration
   Future<void> submitRating() async {
     if (isLoading.value) return;
 
+    // ✅ Ensure booking details are available
     if (bookingDetails.value == null || bookingDetails.value!.booking == null) {
       SnackBarUtils.showInfoSnackBar("Booking details not available");
       return;
     }
 
+    // ✅ Validate rating
     if (selectedRating.value == 0) {
       SnackBarUtils.showWarningSnackBar("Please select a rating");
+      return;
+    }
+
+    // ✅ Validate message
+    if (ratingMessageController.text.trim().isEmpty) {
+      SnackBarUtils.showWarningSnackBar("Please write a message");
       return;
     }
 
     isLoading.value = true;
 
     try {
-      final bookingId = bookingDetails.value!.booking!.sId;
+      final booking = bookingDetails.value!.booking!;
+      final String? clubId = booking.registerClubId;
 
+      if (clubId == null || clubId.isEmpty) {
+        SnackBarUtils.showErrorSnackBar("Club ID not found");
+        isLoading.value = false;
+        return;
+      }
+
+      // ✅ Prepare request body
       final body = {
-        "bookingId": bookingId,
-        "rating": selectedRating.value,
-        "message": ratingMessageController.text.trim(),
+        "reviewComment": ratingMessageController.text.trim(),
+        "reviewRating": selectedRating.value,
+        "register_club_id": clubId,
       };
 
-      // TODO: Replace with your actual API endpoint
-      // final result = await _bookingRepo.submitRating(body: body);
-
-      // For now, just show success
-      SnackBarUtils.showSuccessSnackBar("Thank you for your feedback!");
-
-      // Reset rating fields
-      selectedRating.value = 0;
-      ratingMessageController.clear();
-
       CustomLogger.logMessage(
-        msg: "Rating submitted: ${selectedRating.value} stars",
+        msg: "Submitting review: $body",
         level: LogLevel.debug,
       );
 
+      // ✅ API call
+      final result = await _reviewRepo.createReview(data: body);
+
+      // ✅ Success check
+      if (result.review != null) {
+        SnackBarUtils.showSuccessSnackBar(
+          result.message ?? "Thank you for your feedback!",
+        );
+
+        // Reset fields
+        selectedRating.value = 0;
+        ratingMessageController.clear();
+
+        CustomLogger.logMessage(
+          msg:
+          "Rating submitted successfully: ${result.review?.reviewRating} stars",
+          level: LogLevel.debug,
+        );
+      } else {
+        SnackBarUtils.showErrorSnackBar(
+          result.message ?? "Failed to submit rating",
+        );
+      }
     } catch (e) {
-      CustomLogger.logMessage(msg: e, level: LogLevel.error);
-      SnackBarUtils.showErrorSnackBar("Failed to submit rating. Please try again.");
+      CustomLogger.logMessage(
+        msg: "Submit rating error: $e",
+        level: LogLevel.error,
+      );
+      SnackBarUtils.showErrorSnackBar(
+        "Failed to submit rating. Please try again.",
+      );
     } finally {
       isLoading.value = false;
     }

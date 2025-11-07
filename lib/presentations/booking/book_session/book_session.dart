@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../handler/text_formatter.dart';
@@ -876,7 +877,10 @@ class BookSession extends StatelessWidget {
                 controller.addToCart();
               },
               child: controller.cartLoader.value
-                  ? CupertinoActivityIndicator(color: AppColors.whiteColor)
+                  ? LoadingAnimationWidget.waveDots(
+                color: AppColors.whiteColor,
+                size: 45,
+              )
                   : Row(
                 children: [
                   Obx(
@@ -912,7 +916,7 @@ class BookSession extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+          )
         ],
       ),
     );

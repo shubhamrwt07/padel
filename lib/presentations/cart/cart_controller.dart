@@ -13,11 +13,10 @@ class CartController extends GetxController {
   final CartRepository cartRepository = CartRepository();
   final ScrollController scrollController = ScrollController();
 
-  // Loading states
+  // Loading
   RxBool isLoading = false.obs;
   RxBool isBooking = false.obs;
   RxBool isBookingLoading = false.obs;
-
   // Cart data
   RxList<CartItems> cartItems = <CartItems>[].obs;
   RxSet<String> selectedClubIds = <String>{}.obs;
@@ -55,7 +54,6 @@ class CartController extends GetxController {
         totalPrice.value = 0;
         totalSlot.value = 0;
       }
-
       log("Cart Items length: ${cartItems.length}");
     } catch (e) {
       if (kDebugMode) print("Error fetching cart items: $e");
