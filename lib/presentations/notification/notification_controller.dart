@@ -71,6 +71,7 @@ class NotificationController extends GetxController {
           onTapped: _handleNotificationTapped,
           onForeground: _handleForegroundMessage,
           onBackground: _handleBackgroundMessage,
+          onTokenRefresh: _handleTokenRefresh,
         );
 
         // Get and store Firebase token
@@ -78,6 +79,24 @@ class NotificationController extends GetxController {
 
         // Check notification permission status
         await _checkNotificationPermission();
+
+        // Request permissions after a short delay to ensure Activity is available
+        // This handles the case where permissions couldn't be requested during initialization
+        Future.delayed(const Duration(seconds: 2), () async {
+          try {
+            final bool enabled = await _notificationService.areNotificationsEnabled();
+            if (!enabled) {
+              if (kDebugMode) {
+                print('⚠️ Notifications not enabled. Requesting permissions...');
+              }
+              await requestPermissions();
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Could not check/request permissions: $e');
+            }
+          }
+        });
 
         // Subscribe to stored topics
         await _restoreTopicSubscriptions();
@@ -100,37 +119,35 @@ class NotificationController extends GetxController {
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     if (!isInitialized.value) {
-      print('⚠️ Notification service not initialized');
+      if (kDebugMode) {
+        print('⚠️ Notification service not initialized');
+      }
       return false;
     }
 
     try {
-      final NotificationSettings settings = await FirebaseMessaging.instance
-          .requestPermission(
-            alert: true,
-            badge: true,
-            sound: true,
-            provisional: false,
-            criticalAlert: false,
-            announcement: false,
-          );
-
-      final bool granted =
-          settings.authorizationStatus == AuthorizationStatus.authorized;
+      // Use the service's requestPermissions method which handles both Android and iOS
+      final bool granted = await _notificationService.requestPermissions();
+      
       isNotificationEnabled.value = granted;
-
       await _storage.write(_notificationEnabledKey, granted);
 
       if (granted) {
         await _getAndStoreFirebaseToken();
-        print('✅ Notification permissions granted');
+        if (kDebugMode) {
+          print('✅ Notification permissions granted');
+        }
       } else {
-        print('❌ Notification permissions denied');
+        if (kDebugMode) {
+          print('❌ Notification permissions denied');
+        }
       }
 
       return granted;
     } catch (e) {
-      print('❌ Error requesting permissions: $e');
+      if (kDebugMode) {
+        print('❌ Error requesting permissions: $e');
+      }
       return false;
     }
   }
@@ -363,6 +380,41 @@ class NotificationController extends GetxController {
   /// Refresh token
   Future<void> refreshToken() async {
     await _getAndStoreFirebaseToken();
+  }
+
+  /// Test local notification (for debugging)
+  Future<bool> testLocalNotification() async {
+    if (!isInitialized.value) {
+      if (kDebugMode) {
+        print('⚠️ Notification service not initialized');
+      }
+      return false;
+    }
+
+    try {
+      final bool result = await _notificationService.testLocalNotification();
+      if (kDebugMode) {
+        print(result 
+            ? '✅ Test notification sent successfully' 
+            : '❌ Failed to send test notification');
+      }
+      return result;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error testing local notification: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Handle token refresh
+  void _handleTokenRefresh(String newToken) {
+    if (kDebugMode) {
+      print('🔄 Token refreshed: ${newToken.substring(0, 20)}...');
+    }
+    firebaseToken.value = newToken;
+    _storage.write(_tokenKey, newToken);
+    _sendTokenToServer(newToken);
   }
 
   @override
