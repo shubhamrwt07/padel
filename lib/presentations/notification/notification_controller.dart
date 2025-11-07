@@ -316,6 +316,7 @@ class NotificationController extends GetxController {
 
   /// Schedule a notification
   Future<void> scheduleNotification({
+
     required String title,
     required String body,
     required DateTime scheduledTime,
@@ -413,7 +414,7 @@ class NotificationController extends GetxController {
       print('🔄 Token refreshed: ${newToken.substring(0, 20)}...');
     }
     firebaseToken.value = newToken;
-    _storage.write(_tokenKey, newToken);
+    _storage.write('firebase_token', newToken);
     _sendTokenToServer(newToken);
   }
 

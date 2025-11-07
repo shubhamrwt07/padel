@@ -37,7 +37,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
           if (status == "rejected") {
             return const Text(
-              "Booking Cancellation Rejected",
+              "Booking  Rejected",
               style: TextStyle(
                 color: AppColors.appBlue, // 👈 red title for rejected booking
                 fontWeight: FontWeight.w600,

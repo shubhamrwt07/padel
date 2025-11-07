@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,13 +12,11 @@ import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
-
 import '../../data/request_models/home_models/get_club_name_model.dart';
-
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
-
   @override
+
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -630,4 +627,5 @@ class HomeScreen extends GetView<HomeController> {
       ).paddingOnly(bottom: 5),
     );
   }
+
 }

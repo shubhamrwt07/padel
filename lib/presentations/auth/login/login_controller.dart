@@ -7,6 +7,7 @@ import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart
 import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
 
 import '../../../configs/components/snack_bars.dart';
+import '../../notification/notification_controller.dart';
 
 class LoginController extends GetxController {
   //Login Repository
@@ -38,7 +39,6 @@ class LoginController extends GetxController {
       await onLogin();
     }
   }
-
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return AppStrings.emailRequired;
@@ -47,7 +47,6 @@ class LoginController extends GetxController {
     }
     return null;
   }
-
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return AppStrings.passwordRequired;
@@ -56,19 +55,30 @@ class LoginController extends GetxController {
     }
     return null;
   }
-
   Future<void> onLogin() async {
     FocusManager.instance.primaryFocus!.unfocus();
     try {
       if (isLoading.value) return;
-
+      // Try to read FCM token from storage; if empty, proactively fetch via NotificationController
+      String? firebaseToken = storage.read('firebase_token');
+      if (firebaseToken == null || firebaseToken.isEmpty) {
+        final notificationController = NotificationController.instance;
+        // Ensure permissions and try to refresh token
+        await notificationController.requestPermissions();
+        await notificationController.refreshToken();
+        firebaseToken = notificationController.getStoredToken();
+      }
       isLoading.value = true;
-      LoginModel result = await loginRepository.loginUser(
-        body: {
-          "email": emailController.text.trim(),
-          "password": passwordController.text.trim(),
-        },
-      );
+      final Map<String, dynamic> body = {
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim(),
+      };
+      // Only include fcmToken if we have a non-empty value
+      if (firebaseToken != null && firebaseToken.isNotEmpty) {
+        body["fcmToken"] = firebaseToken;
+      }
+
+      LoginModel result = await loginRepository.loginUser(body: body);
       if (result.status == "200") {
         storage.write('token', result.response!.token);
         storage.write('userId', result.response!.user!.id);
