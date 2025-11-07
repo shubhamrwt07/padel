@@ -260,7 +260,6 @@ class TeamB {
     return data;
   }
 }
-
 class UserId {
   Location? location;
   String? sId;

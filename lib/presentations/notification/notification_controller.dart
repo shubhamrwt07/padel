@@ -299,6 +299,7 @@ class NotificationController extends GetxController {
 
   /// Schedule a notification
   Future<void> scheduleNotification({
+
     required String title,
     required String body,
     required DateTime scheduledTime,

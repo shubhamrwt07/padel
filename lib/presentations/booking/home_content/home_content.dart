@@ -79,6 +79,7 @@ class HomeContent extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: 3,
                 itemBuilder: (BuildContext context, index) {
+
                   return facilities(context, index);
                 },
               ),
