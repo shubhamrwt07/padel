@@ -302,7 +302,6 @@ class OpenMatchesScreen extends StatelessWidget {
             );
           }).toList();
         }
-
         // 🔹 Check which list to show
         final slotsToShow = showUnavailable ? unavailable : available;
 

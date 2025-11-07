@@ -144,12 +144,18 @@ class NotificationController extends GetxController {
         firebaseToken.value = token;
         await _storage.write(_tokenKey, token);
         await _sendTokenToServer(token);
-        print('✅ Firebase token retrieved: ${token.substring(0, 20)}...');
+        if (kDebugMode) {
+          print('✅ Firebase token retrieved: ${token.substring(0, 20)}...');
+        }
       } else {
-        print('❌ Failed to get Firebase token');
+        if (kDebugMode) {
+          print('❌ Failed to get Firebase token');
+        }
       }
     } catch (e) {
-      print('❌ Error getting Firebase token: $e');
+      if (kDebugMode) {
+        print('❌ Error getting Firebase token: $e');
+      }
     }
   }
 
@@ -163,7 +169,6 @@ class NotificationController extends GetxController {
       print('❌ Error checking notification permission: $e');
     }
   }
-
   /// Restore topic subscriptions from storage
   Future<void> _restoreTopicSubscriptions() async {
     try {
@@ -176,6 +181,7 @@ class NotificationController extends GetxController {
     } catch (e) {
       print('❌ Error restoring topic subscriptions: $e');
     }
+
   }
 
   /// Send token to server
@@ -187,7 +193,6 @@ class NotificationController extends GetxController {
       print('❌ Error sending token to server: $e');
     }
   }
-
   /// Handle notification tap
   void _handleNotificationTapped(String payload) {
     print('🔔 Notification tapped with payload: $payload');
@@ -206,6 +211,7 @@ class NotificationController extends GetxController {
       print('❌ Error handling notification tap: $e');
     }
   }
+
 
   /// Handle foreground messages
   void _handleForegroundMessage(RemoteMessage message) {
@@ -308,6 +314,7 @@ class NotificationController extends GetxController {
       payload: payload,
     );
   }
+
 
   /// Subscribe to a topic
   Future<bool> subscribeToTopic(String topic) async {

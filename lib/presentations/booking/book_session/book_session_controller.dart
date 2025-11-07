@@ -34,6 +34,7 @@ class BookSessionController extends GetxController {
     final now = DateTime.now();
     final hour = now.hour;
 
+
     if (hour >= 6 && hour <= 11 && morningCount.value > 0) {
       selectedTimeOfDay.value = 0; // Morning
     } else if (hour >= 12 && hour <= 17 && noonCount.value > 0) {
@@ -136,7 +137,6 @@ class BookSessionController extends GetxController {
     super.onInit();
     argument = Get.arguments['data'];
     selectedDate.value = DateTime.now();
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await getAvailableCourtsById(argument.id!);
     });

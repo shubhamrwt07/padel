@@ -74,3 +74,8 @@ class HomeContentController extends GetxController{
     super.onInit();
   }
 }
+
+
+
+
+

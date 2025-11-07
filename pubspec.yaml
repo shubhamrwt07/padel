@@ -40,6 +40,8 @@ dependencies:
   firebase_crashlytics:
   share_plus:
   flutter_zoom_drawer:
+  loading_animation_widget:
+
 
 
 

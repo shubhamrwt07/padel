@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -49,14 +50,18 @@ Future<void> main() async {
 
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    print('✅ Background message handler set');
+    if (kDebugMode) {
+      print('✅ Background message handler set');
+    }
 
     // Initialize core services
     Get.put(DioClient());
 
     // Initialize notification controller (will initialize NotificationService)
     Get.put(NotificationController());
-    print('✅ Controllers initialized');
+    if (kDebugMode) {
+      print('✅ Controllers initialized');
+    }
 
     // Set preferred orientations
     await SystemChrome.setPreferredOrientations([
@@ -68,7 +73,9 @@ Future<void> main() async {
     runApp(const MyApp());
 
   } catch (e) {
-    print('❌ Error during app initialization: $e');
+    if (kDebugMode) {
+      print('❌ Error during app initialization: $e');
+    }
     // You might want to show an error screen or handle this differently
     runApp(ErrorApp(error: e.toString()));
   }
@@ -118,6 +125,7 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
   }
 
   @override
+
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

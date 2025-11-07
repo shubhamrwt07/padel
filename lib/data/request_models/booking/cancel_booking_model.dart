@@ -166,6 +166,7 @@ class SlotTimes {
     data['availabilityStatus'] = this.availabilityStatus;
     return data;
   }
+
 }
 
 class BusinessHours {
