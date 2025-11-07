@@ -95,6 +95,7 @@ class BookingConfirmAndCancelController extends GetxController {
       final body = {
         "id": bookingId,
         "status": "in-progress",
+        "requestType":"user",
         "cancellationReason": otherReasonController.text.trim(),
         if (slotId != null) "slotId": slotId,
       };

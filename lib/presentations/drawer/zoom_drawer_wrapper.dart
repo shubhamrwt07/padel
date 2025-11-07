@@ -10,8 +10,6 @@ class ZoomDrawerWrapper extends StatelessWidget {
   const ZoomDrawerWrapper({
     super.key,
 
-
-
     required this.child,
   });
 
