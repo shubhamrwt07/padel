@@ -36,7 +36,10 @@ class Assets {
   static const String imagesIcSearch = 'assets/images/ic_search.png';
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
   static const String imagesIcTime = 'assets/images/ic_time.png';
+  static const String imagesIcTradingDown = 'assets/images/ic_trading_down.svg';
+  static const String imagesIcTreadingUp = 'assets/images/ic_treading_up.svg';
   static const String imagesIcWallet = 'assets/images/ic_wallet.png';
+  static const String imagesIconLeaderBoard = 'assets/images/icon_leaderBoard.svg';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBackgroundBottomBar = 'assets/images/img_background_bottomBar.png';
   static const String imagesImgBackgroundScoreView = 'assets/images/img_background_score_view.svg';
@@ -44,6 +47,8 @@ class Assets {
   static const String imagesImgBookingConfirm = 'assets/images/img_booking_confirm.svg';
   static const String imagesImgBookingSuccessful = 'assets/images/img_booking_successful.png';
   static const String imagesImgCart = 'assets/images/img_cart.png';
+  static const String imagesImgCrown = 'assets/images/img_crown.png';
+  static const String imagesImgCrownTopPlayer = 'assets/images/img_crown_top_player.svg';
   static const String imagesImgCustomerPicBooking = 'assets/images/img_customerPic_booking.png';
   static const String imagesImgDummy1 = 'assets/images/img_dummy_1.png';
   static const String imagesImgDummy2 = 'assets/images/img_dummy_2.png';

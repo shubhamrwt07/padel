@@ -184,33 +184,44 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
           Obx(
                 () => ProfileRow(
-              icon: SvgPicture.asset(Assets.imagesIcPackages, height: 17, width: 17, color: controller.selectedIndex.value == 6 ? AppColors.primaryColor : AppColors.labelBlackColor),
-              title: "Packages",
+              icon: SvgPicture.asset(Assets.imagesIconLeaderBoard, height: 22, width: 22, color: controller.selectedIndex.value == 6 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              title: "LeaderBoard",
               isSelected: controller.selectedIndex.value == 6,
               onTap: () {
                 controller.selectedIndex.value = 6;
+                Get.toNamed(RoutesName.leaderBoard);
+              },
+            ),
+          ),
+          Obx(
+                () => ProfileRow(
+              icon: SvgPicture.asset(Assets.imagesIcPackages, height: 17, width: 17, color: controller.selectedIndex.value == 7 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              title: "Packages",
+              isSelected: controller.selectedIndex.value == 7,
+              onTap: () {
+                controller.selectedIndex.value = 7;
                 Get.toNamed(RoutesName.packages);
               },
             ),
           ),
           Obx(
                 () => ProfileRow(
-              icon: Icon(Icons.headset_mic_outlined, size: 20, color: controller.selectedIndex.value == 7 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              icon: Icon(Icons.headset_mic_outlined, size: 20, color: controller.selectedIndex.value == 8 ? AppColors.primaryColor : AppColors.labelBlackColor),
               title: AppStrings.helpSupport,
-              isSelected: controller.selectedIndex.value == 7,
+              isSelected: controller.selectedIndex.value == 8,
               onTap: () {
-                controller.selectedIndex.value = 7;
+                controller.selectedIndex.value = 8;
                 Get.toNamed(RoutesName.support);
               },
             ),
           ),
           Obx(
                 () => ProfileRow(
-              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5, color: controller.selectedIndex.value == 8 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5, color: controller.selectedIndex.value == 9 ? AppColors.primaryColor : AppColors.labelBlackColor),
               title: AppStrings.privacy,
-              isSelected: controller.selectedIndex.value == 8,
+              isSelected: controller.selectedIndex.value == 9,
               onTap: () {
-                controller.selectedIndex.value = 8;
+                controller.selectedIndex.value = 9;
               },
             ),
           ),

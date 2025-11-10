@@ -24,6 +24,8 @@ import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/chat/chat_screen.dart';
 import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/leaderBoard/leader_board_binding.dart';
+import 'package:padel_mobile/presentations/leaderBoard/leader_board_screen.dart';
 import 'package:padel_mobile/presentations/notification/notification_binding.dart';
 import 'package:padel_mobile/presentations/notification/notification_ui.dart';
 import 'package:padel_mobile/presentations/packages/packages_binding.dart';
@@ -42,6 +44,8 @@ import 'package:padel_mobile/presentations/payment/payment_method_screen.dart';
 import 'package:padel_mobile/presentations/registration/registration_binding.dart';
 import 'package:padel_mobile/presentations/rounds/rounds_binding.dart';
 import 'package:padel_mobile/presentations/rounds/rounds_screen.dart';
+import 'package:padel_mobile/presentations/score_board/score_board_binding.dart';
+import 'package:padel_mobile/presentations/score_board/score_board_screen.dart';
 import 'package:padel_mobile/presentations/scoreview/score_view_binding.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import 'package:padel_mobile/presentations/support/support_binding.dart';
@@ -276,6 +280,24 @@ class Routes {
       name: RoutesName.matchBooking,
       page: () => OpenMatchBookingScreen(),
       binding: OpenMatchBookingBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+
+    ///LeaderBoard--------------------------------------------------------------
+    GetPage(
+      name: RoutesName.leaderBoard,
+      page: () => LeaderboardScreen(),
+      binding: LeaderboardBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+
+    ///ScoreBoard---------------------------------------------------------------
+    GetPage(
+      name: RoutesName.scoreBoard,
+      page: () => ScoreBoardScreen(),
+      binding: ScoreBoardBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

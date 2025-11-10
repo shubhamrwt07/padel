@@ -447,7 +447,19 @@ class HomeScreen extends GetView<HomeController> {
               ).paddingOnly(left: 5),
           ],
         ),
-        Text("(60m)", style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.blackColor)),
+        GestureDetector(
+          onTap: ()=>Get.toNamed(RoutesName.scoreBoard),
+          child: Container(
+            height: 25,
+            width: 50,
+            alignment: AlignmentGeometry.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: AppColors.secondaryColor,
+            ),
+            child: Text("Play",style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white),),
+          ),
+        )
       ],
     );
   }

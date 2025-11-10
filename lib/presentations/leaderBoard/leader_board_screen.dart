@@ -1,0 +1,727 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:get/get.dart';
+import 'package:padel_mobile/generated/assets.dart';
+
+import 'leader_board_controller.dart';
+class LeaderboardScreen extends StatelessWidget {
+  final LeaderboardController controller = Get.put(LeaderboardController());
+
+  LeaderboardScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.primaryColor,
+      appBar: primaryAppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        leadingButtonColor: AppColors.whiteColor,
+        titleTextColor: AppColors.whiteColor,
+        centerTitle: true,
+        title: const Text("Leaderboard"),
+        context: context,
+      ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              _buildTopTabs(),
+              const SizedBox(height: 16),
+              Obx(() {
+                if (controller.selectedCategory.value == 'Tournaments') {
+                  return _buildTournamentFilters();
+                } else {
+                  return _buildTabBar();
+                }
+              }),
+              const SizedBox(height: 10),
+
+              // ✅ Directly reactive podium
+              Obx(() {
+                final isTeam = controller.selectedCategory.value == 'Team';
+                final top3 = (isTeam
+                    ? controller.clubs
+                    : controller.players)
+                    .take(3)
+                    .toList();
+
+                return _buildPodiumSectionFor(top3);
+              }),
+            ],
+          ),
+
+          // ✅ Directly reactive leaderboard sheet
+          Obx(() {
+            final data = controller.leaderboardData;
+            return _buildLeaderboardSheet(context, data);
+          }),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildTopTabs() {
+    return Obx(() {
+      final selectedIndex = controller.categories.indexOf(controller.selectedCategory.value);
+
+      return DefaultTabController(
+        length: controller.categories.length,
+        initialIndex: selectedIndex,
+        child: TabBar(
+          isScrollable: true, // ✅ Allow long text to fit naturally
+          indicator: const UnderlineTabIndicator(
+            borderSide: BorderSide(width: 2, color: Colors.white),
+          ),
+          indicatorSize: TabBarIndicatorSize.label,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white60,
+          dividerHeight: 0.5,
+          dividerColor: AppColors.whiteColor,
+          labelStyle: Get.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w900),
+          indicatorWeight: 1,
+          labelPadding: const EdgeInsets.only(left: 0, right: 30),
+          unselectedLabelStyle: Get.textTheme.headlineSmall,
+          onTap: (index) {
+            // ✅ Update only this observable
+            controller.selectedCategory.value = controller.categories[index];
+            controller.showStateFilters.value = controller.categories[index] == 'State Level';
+
+          },
+          tabs: controller.categories
+              .map((tab) => Tab(text: tab))
+              .toList(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildTabBar() {
+    return Obx(() {
+      final titles = ['All Time', 'Weekly', 'Monthly'];
+      return Container(
+        width: Get.width,
+        padding: const EdgeInsets.all(4),
+        margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+        decoration: BoxDecoration(
+          // color: const Color(0xFF4F6DF6),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: List.generate(titles.length, (i) {
+            final selected = controller.selectedTab.value == i;
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => controller.selectedTab.value = i,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  decoration: BoxDecoration(
+                    color: selected ? const Color(0xFF0B3BA7) : Colors
+                        .transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    titles[i],
+                    style: Get.textTheme.headlineSmall!.copyWith(
+                      color: selected ? AppColors.whiteColor : AppColors
+                          .primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    });
+  }
+  Widget _buildTournamentFilters() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+      child: Row(
+        children: [
+          // 🔍 Location Search Field
+          Expanded(
+            flex: 3,
+            child: Container(
+              height: 39, // decrease height here
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextField(
+                        cursorHeight: 15,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          hintText: 'Location',
+                          hintStyle: const TextStyle(
+                            color: AppColors.textColor,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding:
+                          const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 24,
+                    width: 1,
+                    color: Colors.grey.shade300,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Icon(
+                      Icons.search,
+                      color: Color(0xFF4F6DF6),
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 🔹 Gender Dropdown
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 39,
+              padding: EdgeInsets.only(left: 10,right: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: controller.selectedGender.value,
+                  items: ['Male', 'Female', 'Mixed']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) {
+                    controller.selectedGender.value = val!;
+                  },
+                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
+                  style: const TextStyle(color: AppColors.textColor, fontSize: 14),
+                  dropdownColor: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 🔹 Year Dropdown
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 39,
+              padding: EdgeInsets.only(left: 10,right: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: controller.selectedYear.value,
+                  items: ['2023', '2024', '2025']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) {
+                    controller.selectedYear.value = val!;
+                  },
+                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
+                  style: const TextStyle(color: AppColors.textColor, fontSize: 14),
+                  dropdownColor: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumSectionFor(List<Player> top3) {
+    if (top3.length < 3) {
+      return const SizedBox(
+        height: 300,
+        child: Center(child: Text('Not enough entries for podium')),
+      );
+    }
+
+    return SizedBox(
+      height: Get.height * 0.47,
+      width: Get.width,
+      child: Stack(
+        children: [
+          Transform.scale(
+            scale: 1.1,
+            child: SvgPicture.asset(
+              Assets.imagesImgBackgroundScoreView,
+              fit: BoxFit.cover,
+            ),
+          ).paddingOnly(left: 10, top: 10),
+          Center(
+            child: Transform.translate(
+              offset: Offset(0, 4),
+              child: SvgPicture.asset(
+                Assets.imagesImgScoreView,
+                height: 250,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ).paddingOnly(left: 30, right: 30),
+          Positioned.fill(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                    margin: EdgeInsets.only(right: Get.width * 0.04),
+                    child: _podiumItem(top3[1], 2)),
+                Container(
+                  margin: EdgeInsets.only(left: Get.width * 0.0),
+                  child: _podiumItem(top3[0], 1),
+                ),
+                Container(
+                  margin:
+                  EdgeInsets.only(bottom: 30, left: Get.width * 0.04),
+                  child: _podiumItem(top3[2], 3),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _podiumItem(Player player, int position) {
+    final heightOffsets = {
+      1: Get.height * 0.018,
+      2: Get.height * 0.068,
+      3: Get.height * 0.098
+    }; // 1st highest, 2nd middle, 3rd lowest
+
+    return Padding(
+      padding: EdgeInsets.only(top: heightOffsets[position]!),
+      child: SizedBox(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                CircleAvatar(
+                  radius: position == 1 ? 37 : 32,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: position == 1 ? 35 : 30,
+                    backgroundImage: NetworkImage(player.imageUrl),
+                  ),
+                ),
+                if (position == 1)
+                  Positioned(
+                    top: -25,
+                    child: Image.asset(
+                      Assets.imagesImgCrown,
+                      height: 35,
+                    ),
+                  ),
+              ],
+            ),
+
+            // 👇 Dynamic name (Player or Club)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Container(
+                width: 100,
+                color: Colors.transparent,
+                child: Text(
+                  player.name, // ✅ dynamically show player or club name
+                  textAlign: TextAlign.center,
+                  style: Get.textTheme.headlineSmall!.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+
+            // Score box
+            Container(
+              height: 16,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.secondaryColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                "${player.points}", // ✅ dynamic score
+                style: Get.textTheme.bodyMedium!.copyWith(
+                  color: Colors.white,
+                  fontSize: 11,
+                ),
+              ),
+            ).paddingOnly(bottom: Get.height * 0.03),
+
+            // Position text (1, 2, 3)
+            Text(
+              '$position',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.whiteColor,
+                fontSize: 40,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildLeaderboardSheet(BuildContext context, List<Map<String, dynamic>> data) {
+    const double minSize = 0.5;
+    const double maxSize = 1.0;
+    const double maxRadius = 24.0;
+
+    return NotificationListener<DraggableScrollableNotification>(
+      onNotification: (notification) {
+        final extent = notification.extent;
+        final t = ((extent - minSize) / (maxSize - minSize)).clamp(0.0, 1.0);
+        // smooth 24 → 0 radius
+        controller.borderRadius.value = maxRadius * (1.0 - t);
+        // hide handle when almost fully expanded
+        controller.isHandleVisible.value = t < 0.98;
+        return true;
+      },
+      child: DraggableScrollableSheet(
+        key: ValueKey(controller.selectedCategory.value),
+        initialChildSize: minSize,
+        minChildSize: minSize,
+        maxChildSize: maxSize,
+        builder: (context, scroll) {
+          return Obx(
+                () => AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(controller.borderRadius.value),
+                ),
+              ),
+              child: SingleChildScrollView(
+                controller: scroll,
+                physics: const ClampingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+                  child: Column(
+                    children: [
+                      // 👇 handle bar — only visible when collapsed
+                      if (controller.isHandleVisible.value)
+                        Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      Obx(() {
+                        if (!controller.showStateFilters.value) return const SizedBox.shrink();
+                        return Column(
+                          children: [
+                            const SizedBox(height: 10),
+                            _buildStateLevelFilters(), // your dropdown + search
+                          ],
+                        );
+                      }),
+                      // const SizedBox(height: 10),
+                      Column(
+                        children: List.generate(
+                          data.length,
+                              (index) => LeaderboardCard(
+                            item: data[index],
+                            index: index,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+  Widget _buildStateLevelFilters() {
+    return Row(
+      children: [
+        // All Location Dropdown
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.only(left: 12, right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F8FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Obx(() {
+              return DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: controller.selectedCity.value,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                  dropdownColor: Colors.white,
+                  items: controller.indianCities
+                      .map((city) => DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(
+                      city,
+                      style: Get.textTheme.headlineSmall!.copyWith(color: AppColors.textColor)
+                    ),
+                  ))
+                      .toList(),
+                  onChanged: (value) {
+                    controller.selectedCity.value = value!;
+                  },
+                ),
+              );
+            }),
+          ),
+        ),
+
+        const SizedBox(width: 10),
+        // Search Field
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F8FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextField(
+                      style: Get.textTheme.headlineSmall!.copyWith(color: AppColors.textColor),
+                      decoration: InputDecoration(
+                        hintText: 'Search',
+                        filled: true,
+                        fillColor: Color(0xFFF7F8FF),
+                        hintStyle: Get.textTheme.headlineSmall!.copyWith(color: AppColors.textColor),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(width: 1, height: 22, color: Colors.grey[300]),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Icon(Icons.search, color: AppColors.textColor),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+}
+class LeaderboardCard extends GetView<LeaderboardController> {
+  final Map<String, dynamic> item;
+  final int index;
+
+  const LeaderboardCard({super.key, required this.item, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isExpanded = controller.expandedIndex.value == index;
+
+      return Column(
+        children: [
+          InkWell(
+            onTap: () => controller.toggleExpand(index),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '#${item['rank']}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  CircleAvatar(
+                    radius: 15,
+                    backgroundImage: NetworkImage(item['image']),
+                  ),
+                  const SizedBox(width: 6),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 130),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            item['name'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.grey[600],
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${item['change'] > 0 ? '+' : ''}${item['change']}',
+                          style: TextStyle(
+                            color: item['change'] > 0
+                                ? Colors.green
+                                : (item['change'] < 0 ? Colors.red : Colors.grey),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        if (item['change'] > 0)
+                          SvgPicture.asset(
+                            Assets.imagesIcTreadingUp,
+                            height: 14,
+                            width: 14,
+                          )
+                        else if (item['change'] < 0)
+                          SvgPicture.asset(
+                            Assets.imagesIcTradingDown,
+                            height: 14,
+                            width: 14,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    height: 25,
+                    width: 55,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${item['score']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+
+          // 👇 Add divider line below the row (always visible)
+          Container(
+            height: 1,
+            color: Colors.grey.withValues(alpha: 0.2),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+          ),
+
+          // 👇 Smooth expand animation
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            child: isExpanded
+                ? Column(
+              children: [
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStat('${item['streak']}', 'Streak'),
+                    _buildStat('${item['matches']}', 'Matches'),
+                    _buildStat('${item['wins']}', 'Wins'),
+                    _buildStat('${item['losses']}', 'Losses'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+            )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildStat(String value, String label) {
+    return Column(
+      children: [
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 2),
+        Text(label,
+            style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    );
+  }
+}

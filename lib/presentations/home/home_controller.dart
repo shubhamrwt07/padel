@@ -275,7 +275,7 @@ class HomeController extends GetxController {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('EEE, dd MMMM').format(date); // e.g., Thu, 27 June
+      return DateFormat('EEE, dd MMM').format(date); // e.g., Thu, 27 June
     } catch (e) {
       return dateStr;
     }

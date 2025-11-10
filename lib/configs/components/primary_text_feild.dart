@@ -31,6 +31,7 @@ class PrimaryTextField extends StatelessWidget {
   final bool? obscureText;
   final TextStyle? hintStyle;
   final EdgeInsetsGeometry? contentPadding;
+  final TextCapitalization? textCapitalization;
   const PrimaryTextField({
     super.key,
     this.action,
@@ -55,7 +56,10 @@ class PrimaryTextField extends StatelessWidget {
     this.keyboardType,
     this.onChanged,
     this.prefixText,
-    this.prefix,this.prefixIcon, this.scrollPadding, this.obscureText, this.hintStyle, this.contentPadding,
+    this.prefix,this.prefixIcon,
+    this.scrollPadding, this.obscureText,
+    this.hintStyle, this.contentPadding,
+    this.textCapitalization
   });
 
   @override
@@ -73,6 +77,7 @@ class PrimaryTextField extends StatelessWidget {
       controller: controller,
       enabled: enabled,
       maxLength: maxLength,
+      textCapitalization: textCapitalization??TextCapitalization.sentences,
       style:style?? Theme.of(context)
           .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
       keyboardType: keyboardType??TextInputType.text,
