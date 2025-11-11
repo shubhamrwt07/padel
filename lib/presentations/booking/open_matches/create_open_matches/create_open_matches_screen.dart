@@ -6,9 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../../configs/components/custom_button.dart';
 import '../../../../handler/text_formatter.dart';
 import 'create_open_matches_controller.dart';
 
@@ -90,9 +88,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +172,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryColor.withOpacity(0.1),
+                            color: AppColors.primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -191,7 +189,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       );
@@ -253,7 +251,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         color: controller.showUnavailableSlots.value
                             ? AppColors.secondaryColor
-                            : AppColors.blackColor.withOpacity(0.3),
+                            : AppColors.blackColor.withValues(alpha: 0.3),
                       ),
                       child: AnimatedAlign(
                         duration: const Duration(milliseconds: 200),
@@ -356,7 +354,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                 color: isSelected
                                     ? Colors.black
                                     : dateSelections.isNotEmpty
-                                    ? AppColors.primaryColor.withOpacity(0.1)
+                                    ? AppColors.primaryColor.withValues(alpha: 0.1)
                                     : AppColors.playerCardBackgroundColor,
                                 border: Border.all(
                                   color: isSelected
@@ -482,7 +480,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryColor.withOpacity(0.1)
+                          ? AppColors.primaryColor.withValues(alpha: 0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -630,7 +628,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -644,7 +642,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.whiteColor.withOpacity(0.1),
+              color: AppColors.whiteColor.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -872,7 +870,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),

@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:dio/dio.dart';
-import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
-
 import '../../../../configs/routes/routes_name.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../../../data/request_models/home_models/get_club_name_model.dart';
@@ -102,10 +100,10 @@ class CreateOpenMatchesController extends GetxController {
     detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName ?? "");
     detailsController.localMatchData.update("clubId", (v) => slots.value!.data![0].registerClubId!.sId ?? "");
     detailsController.localMatchData.update("matchDate", (v) => selectedDate.value ?? "");
-    detailsController.localMatchData.update("matchTime", (v) => selectedSlots.value.first.time ?? "");
-    detailsController.localMatchData.update("price", (v) => totalAmount.toString() ?? "");
+    detailsController.localMatchData.update("matchTime", (v) => selectedSlots.first.time ?? "");
+    detailsController.localMatchData.update("price", (v) => totalAmount.toString());
     detailsController.localMatchData.update("courtType", (v) => slots.value!.data![0].registerClubId!.courtType ?? "");
-    detailsController.localMatchData.update("slot", (v) => selectedSlots.value);
+    detailsController.localMatchData.update("slot", (v) => selectedSlots);
 
     // Use direct assignment for new keys instead of update
     detailsController.localMatchData["courtId"] = primaryCourtId;

@@ -50,13 +50,17 @@ class BookingHistoryRepository {
         );
 
         final model = BookingHistoryModel.fromJson(response.data);
-        print("Parsed model bookings count: ${model.data?.length ?? 0}");
+        if (kDebugMode) {
+          print("Parsed model bookings count: ${model.data?.length ?? 0}");
+        }
         return model;
       } else {
         throw Exception("Failed to fetch booking history. Status: ${response.statusCode}");
       }
     } catch (e) {
-      print("Repository error: $e");
+      if (kDebugMode) {
+        print("Repository error: $e");
+      }
       CustomLogger.logMessage(
         msg: "Error fetching booking history: $e",
         level: LogLevel.error,
@@ -94,7 +98,9 @@ class BookingHistoryRepository {
         );
       }
     } catch (e) {
-      print("Repository error: $e");
+      if (kDebugMode) {
+        print("Repository error: $e");
+      }
       rethrow;
     }
   }

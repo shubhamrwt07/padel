@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/configs/components/success_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
@@ -37,9 +36,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
           if (status == "rejected") {
             return const Text(
-              "Booking  Rejected",
+              "Booking Rejected",
               style: TextStyle(
-                color: AppColors.appBlue, // 👈 red title for rejected booking
                 fontWeight: FontWeight.w600,
               ),
             );
@@ -148,7 +146,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             border: Border.all(color: AppColors.lightGrace),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 6,
                 offset: const Offset(0, 3),
               )
@@ -202,7 +200,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                       const SizedBox(height: 0),
                     ],
                   );
-                }).toList(),
+                }),
 
               // ✅ Show booking status
               bookingDetailRow(
@@ -381,7 +379,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
             decoration: InputDecoration.collapsed(
               hintText: "Write Here",
               hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: AppColors.labelBlackColor.withOpacity(0.5),
+                color: AppColors.labelBlackColor.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -467,7 +465,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
   }
 
   Widget cancelForm(BuildContext context) {
-    final booking = controller.bookingDetails.value?.booking;
+    // final booking = controller.bookingDetails.value?.booking;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

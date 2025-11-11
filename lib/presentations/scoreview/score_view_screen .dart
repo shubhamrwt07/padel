@@ -105,7 +105,7 @@ class ScoreViewScreen extends GetView<ScoreViewController> {
       decoration: BoxDecoration(
         color: Color(0XFFCBD6FF),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -150,7 +150,7 @@ class ScoreViewScreen extends GetView<ScoreViewController> {
       return const SizedBox(height: 300, child: Center(child: Text('Not enough players for podium')));
     }
 
-    return Container(
+    return SizedBox(
         height: Get.height*0.47,
         width: Get.width,
         // color: Colors.grey,
@@ -350,7 +350,7 @@ class ScoreViewScreen extends GetView<ScoreViewController> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
+        SizedBox(
           height: Get.height*0.3,
           child: Stack(
             children: [
@@ -536,7 +536,7 @@ class CurvedTopPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     // Optional: Add shadow effect
-    canvas.drawShadow(path, Colors.black.withOpacity(0.1), 3, false);
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.1), 3, false);
   }
 
   @override

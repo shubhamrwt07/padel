@@ -17,8 +17,8 @@ import 'package:padel_mobile/presentations/booking/open_matches/create_open_matc
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_binding.dart';
-import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_binding.dart';
-import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_screen.dart';
+import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirm_and_cancel_binding.dart';
+import 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirm_and_cancel_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_screen.dart';
 import 'package:padel_mobile/presentations/bottomnav/bottom_nav.dart';
 import 'package:padel_mobile/presentations/chat/chat_screen.dart';
@@ -198,7 +198,7 @@ class Routes {
     ),
     GetPage(
       name: RoutesName.notification,
-      page: () => NotificationSettingsScreen(),
+      page: () => NotificationScreen(),
       binding: NotificationBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,

@@ -1,5 +1,3 @@
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
-import 'package:padel_mobile/configs/components/primary_text_feild.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 
 class AddReviewBottomSheet extends StatelessWidget {

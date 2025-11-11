@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../cart/cart_controller.dart';
 import 'americano/americano_screen.dart';
 import 'open_matches/open_match_screen.dart';
@@ -18,29 +15,29 @@ class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
 
   /// Try getting image file from cache or download if not available
-  Future<File?> _getCachedOrDownloadImage(String imageUrl) async {
-    try {
-      final cacheManager = DefaultCacheManager();
-      final fileInfo = await cacheManager.getFileFromCache(imageUrl);
-
-      if (fileInfo != null && await fileInfo.file.exists()) {
-        return fileInfo.file;
-      }
-
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        final file = await cacheManager.putFile(
-          imageUrl,
-          response.bodyBytes,
-          fileExtension: 'jpg',
-        );
-        return file;
-      }
-    } catch (e) {
-      debugPrint('Error getting cached/downloaded image: $e');
-    }
-    return null;
-  }
+  // Future<File?> _getCachedOrDownloadImage(String imageUrl) async {
+  //   try {
+  //     final cacheManager = DefaultCacheManager();
+  //     final fileInfo = await cacheManager.getFileFromCache(imageUrl);
+  //
+  //     if (fileInfo != null && await fileInfo.file.exists()) {
+  //       return fileInfo.file;
+  //     }
+  //
+  //     final response = await http.get(Uri.parse(imageUrl));
+  //     if (response.statusCode == 200) {
+  //       final file = await cacheManager.putFile(
+  //         imageUrl,
+  //         response.bodyBytes,
+  //         fileExtension: 'jpg',
+  //       );
+  //       return file;
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error getting cached/downloaded image: $e');
+  //   }
+  //   return null;
+  // }
 
   /// Share image with text
   Future<void> _shareWithImage() async {

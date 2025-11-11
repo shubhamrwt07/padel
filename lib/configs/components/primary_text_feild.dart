@@ -77,7 +77,7 @@ class PrimaryTextField extends StatelessWidget {
       controller: controller,
       enabled: enabled,
       maxLength: maxLength,
-      textCapitalization: textCapitalization??TextCapitalization.sentences,
+      textCapitalization: textCapitalization??TextCapitalization.none,
       style:style?? Theme.of(context)
           .textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
       keyboardType: keyboardType??TextInputType.text,

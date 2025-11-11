@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
-import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
 import '../../../generated/assets.dart';
 import 'details_page_controller.dart';

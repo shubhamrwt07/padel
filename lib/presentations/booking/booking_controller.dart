@@ -25,7 +25,7 @@ class BookingController extends GetxController with GetSingleTickerProviderState
       courtsData.value = Get.arguments["data"];
       detailsController.localMatchData.update(
         "address",
-            (v) => "${courtsData.value.city},${courtsData.value.address}" ?? "",
+            (v) => "${courtsData.value.city},${courtsData.value.address}",
       );
 
       log("Data Fetch Successfully -> ${courtsData.value}");

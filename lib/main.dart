@@ -22,6 +22,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
 
   await NotificationService().initialize();
+  await NotificationController().fetchUnreadNotificationCount();
   NotificationService().showNotification(
     id: message.hashCode,
     title: message.notification?.title ?? 'Background Message',
@@ -110,7 +111,7 @@ class MyApp extends StatelessWidget {
 class NotificationWrapper extends StatefulWidget {
   final Widget child;
 
-  const NotificationWrapper({Key? key, required this.child}) : super(key: key);
+  const NotificationWrapper({super.key, required this.child});
 
   @override
   State<NotificationWrapper> createState() => _NotificationWrapperState();
@@ -205,7 +206,7 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
 class ErrorApp extends StatelessWidget {
   final String error;
 
-  const ErrorApp({Key? key, required this.error}) : super(key: key);
+  const ErrorApp({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {

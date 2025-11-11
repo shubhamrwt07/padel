@@ -1,5 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:padel_mobile/presentations/profile/edit_profile/edit_profile_screen.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 
 class ProfileUi extends GetView<ProfileController> {

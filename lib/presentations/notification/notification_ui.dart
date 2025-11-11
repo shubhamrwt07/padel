@@ -1,560 +1,199 @@
-// screens/notification_settings_screen.dart
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'notification_controller.dart';
-
-class NotificationSettingsScreen extends StatelessWidget {
-  const NotificationSettingsScreen({Key? key}) : super(key: key);
+import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/presentations/notification/notification_controller.dart';
+class NotificationScreen extends StatelessWidget {
+  final NotificationController controller = Get.put(NotificationController());
+  NotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final NotificationController notificationController = Get.find();
-
+    controller.fetchNotifications();
     return Scaffold(
-
-      appBar: AppBar(
-
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title:   Text('Notification',style: TextStyle(fontSize: 19),),
-        backgroundColor: Colors.white,
-         elevation: 1,
+      appBar: primaryAppBar(title: Text("Notification"), context: context,centerTitle: true,
+          action: [
+            Obx(() {
+              final hasUnread = controller.notifications
+                  .any((n) => n['isRead'] == false);
+              return hasUnread
+                  ? IconButton(
+                icon: const Icon(Icons.mark_email_read),
+                tooltip: "Mark all as read",
+                onPressed: controller.markAllNotificationsAsRead,
+              )
+                  : const SizedBox.shrink();
+            }),
+          ]
       ),
-      backgroundColor: Colors.grey.shade50,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(child: LoadingWidget(color: AppColors.primaryColor,));
+        }
+        if (controller.notifications.isEmpty) {
+          return  Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.notifications_off_outlined,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "No notification available.",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final grouped = _groupByDate(controller.notifications);
+
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 5),
+          itemCount: grouped.keys.length,
+          itemBuilder: (context, index) {
+            final date = grouped.keys.elementAt(index);
+            final items = grouped[date]!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  date,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ).paddingOnly(left: 20),
+                const SizedBox(height: 8),
+                ...items.map((n) => _NotificationTile(
+                  id: n['id'],
+                  title: n['title'],
+                  message: n['message'],
+                  time: n['time'],
+                  icon: n['icon'],
+                  payload: n['payload'],
+                  bookingId: n['bookingId'],
+                  isRead: n['isRead'] ?? false, bookingStatus: n['bookingStatus'],
+                )),
+                const SizedBox(height: 16),
+              ],
+            );
+          },
+        );
+      }),
+    );
+  }
+
+  Map<String, List<Map<String, dynamic>>> _groupByDate(
+      List<Map<String, dynamic>> notifications) {
+    final now = DateTime.now();
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+
+    for (var n in notifications) {
+      final time = n['time'] as DateTime;
+      String key;
+
+      if (DateUtils.isSameDay(now, time)) {
+        key = 'Today';
+      } else if (DateUtils.isSameDay(now.subtract(const Duration(days: 1)), time)) {
+        key = 'Yesterday';
+      } else {
+        key = DateFormat('MMM dd, yyyy').format(time);
+      }
+
+      grouped.putIfAbsent(key, () => []).add(n);
+    }
+
+    return grouped;
+  }
+}
+
+class _NotificationTile extends StatelessWidget {
+  final String id;
+  final String title;
+  final String message;
+  final DateTime time;
+  final IconData icon;
+  final String payload;
+  final String bookingStatus;
+  final String bookingId;
+  final bool isRead;
+
+  const _NotificationTile({
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.time,
+    required this.icon,
+    required this.payload,
+    required this.bookingId,
+    required this.isRead,
+    required this.bookingStatus
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final NotificationController controller = Get.find();
+
+    return InkWell(
+      onTap: () {
+        controller.markNotificationAsRead(id);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.only(bottom: 0),
+        color: isRead? Colors.transparent:AppColors.primaryColor.withValues(alpha: 0.05),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Card
-            Obx(() => Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          notificationController.areNotificationsEnabled
-                              ? Icons.notifications_active
-                              : Icons.notifications_off,
-                          color: notificationController.areNotificationsEnabled
-                              ? Colors.green
-                              : Colors.red,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Notification Status',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      notificationController.areNotificationsEnabled
-                          ? 'Notifications are enabled'
-                          : 'Notifications are disabled',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    if (!notificationController.areNotificationsEnabled) ...[
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final granted = await notificationController.requestPermissions();
-                            if (granted) {
-                              Get.snackbar(
-                                'Success!',
-                                'Notifications enabled successfully',
-                                snackPosition: SnackPosition.TOP,
-                                backgroundColor: Colors.green,
-                                colorText: Colors.white,
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade600,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text('Enable Notifications'),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            )),
-
-            const SizedBox(height: 20),
-
-            // Firebase Token Card
-            Obx(() => Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.token,
-                          color: Colors.blue,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Firebase Token',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () async {
-                            await notificationController.refreshToken();
-                            Get.snackbar(
-                              'Token Refreshed',
-                              'Firebase token has been refreshed',
-                              snackPosition: SnackPosition.TOP,
-                            );
-                          },
-                          icon: const Icon(Icons.refresh),
-                          tooltip: 'Refresh Token',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SelectableText(
-                        notificationController.firebaseToken.value.isNotEmpty
-                            ? notificationController.firebaseToken.value
-                            : 'Token not available',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontFamily: 'monospace',
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-
-            const SizedBox(height: 20),
-
-            // Test Notifications Section
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.bug_report,
-                          color: Colors.orange,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Test Notifications',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Test buttons
-                    _buildTestButton(
-                      'Test Simple Notification',
-                      Icons.notifications,
-                          () => notificationController.showLocalNotification(
-                        title: 'Test Notification',
-                        body: 'This is a test notification from Matchacha Padel',
-                        payload: '{"type": "test", "timestamp": "${DateTime.now()}"}',
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    _buildTestButton(
-                      'Test High Priority',
-                      Icons.priority_high,
-                          () => notificationController.showLocalNotification(
-                        title: 'High Priority Alert',
-                        body: 'This is a high priority test notification',
-                        highPriority: true,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    _buildTestButton(
-                      'Schedule Test (10s)',
-                      Icons.schedule,
-                          () {
-                        final scheduledTime = DateTime.now().add(const Duration(seconds: 10));
-                        notificationController.scheduleNotification(
-                          title: 'Scheduled Notification',
-                          body: 'This notification was scheduled 10 seconds ago',
-                          scheduledTime: scheduledTime,
-                        );
-                        Get.snackbar(
-                          'Scheduled',
-                          'Notification will appear in 10 seconds',
-                          snackPosition: SnackPosition.TOP,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: isRead
+                  ? Colors.grey.withValues(alpha: 0.1)
+                  : AppColors.primaryColor.withValues(alpha: 0.1),
+              child: Icon(
+                icon,
+                color: isRead ? Colors.grey : AppColors.primaryColor,
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // Topic Subscriptions
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.topic,
-                          color: Colors.green,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Topic Subscriptions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    const SizedBox(height: 16),
-
-                    _buildTopicTile('general', 'General Notifications'),
-                    _buildTopicTile('padel_updates', 'Padel Updates'),
-                    _buildTopicTile('tournaments', 'Tournaments'),
-                    _buildTopicTile('promotions', 'Promotions & Offers'),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    message,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    DateFormat('hh:mm a').format(time),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // Actions
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.settings,
-                          color: Colors.purple,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Actions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          await notificationController.cancelAllNotifications();
-                          Get.snackbar(
-                            'Cleared',
-                            'All notifications have been cancelled',
-                            snackPosition: SnackPosition.TOP,
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Cancel All Notifications'),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _showNotificationHistoryDialog(context);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue,
-                          side: const BorderSide(color: Colors.blue),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('View Notification History'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Debug Information
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          color: Colors.grey,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Debug Information',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Obx(() => _buildDebugInfo('Permissions Granted',
-                        notificationController.areNotificationsEnabled.toString())),
-                    _buildDebugInfo('Platform', Theme.of(context).platform.name),
-                    Obx(() => _buildDebugInfo('Token Length',
-                        notificationController.firebaseToken.value.isNotEmpty
-                            ? notificationController.firebaseToken.value.length.toString()
-                            : '0')),
-                    _buildDebugInfo('App Version', '1.0.0'), // You can make this dynamic
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40), // Extra space at bottom
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTestButton(String title, IconData icon, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        label: Text(title),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange.shade600,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopicTile(String topic, String displayName) {
-    final NotificationController notificationController = Get.find();
-
-    return  ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(
-        _getTopicIcon(topic),
-        color: Colors.green.shade600,
-        size: 20,
-      ),
-      title: Text(
-        displayName,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      trailing: Switch(
-        // value: notificationController.isSubscribedToTopic(topic),
-        value:true,
-        onChanged: (value) async {
-          if (value) {
-            await notificationController.subscribeToTopic(topic);
-            Get.snackbar(
-              'Subscribed',
-              'Subscribed to $displayName',
-              snackPosition: SnackPosition.TOP,
-            );
-          } else {
-            await notificationController.unsubscribeFromTopic(topic);
-            Get.snackbar(
-              'Unsubscribed',
-              'Unsubscribed from $displayName',
-              snackPosition: SnackPosition.TOP,
-            );
-          }
-        },
-        activeColor: Colors.green.shade600,
-      ),
-     );
-  }
-
-  IconData _getTopicIcon(String topic) {
-    switch (topic) {
-      case 'general':
-        return Icons.notifications;
-      case 'padel_updates':
-        return Icons.sports_tennis;
-      case 'tournaments':
-        return Icons.emoji_events;
-      case 'promotions':
-        return Icons.local_offer;
-      default:
-        return Icons.topic;
-    }
-  }
-
-  Widget _buildDebugInfo(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNotificationHistoryDialog(BuildContext context) {
-    final NotificationController notificationController = Get.find();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notification History'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 300,
-          child:  const Center(
-                child: Text('No notification history available'),
-          ),
-
-
-
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // notificationController.clearNotificationHistory();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Clear History'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }

@@ -20,7 +20,7 @@ export 'package:padel_mobile/configs/components/app_bar.dart';
 export 'package:padel_mobile/presentations/booking/filters/filters_controller.dart';
 export 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 export 'package:padel_mobile/configs/components/snack_bars.dart';
-export 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirmAndCancel_controller.dart';
+export 'package:padel_mobile/presentations/booking/booking_confirmation/booking_confirm_and_cancel_controller.dart';
 export 'package:padel_mobile/presentations/booking/successful_screens/confirm_cancellation.dart';
 export 'package:padel_mobile/presentations/booking/book_session/book_session_controller.dart';
 export 'package:padel_mobile/presentations/cart/cart_screen.dart';

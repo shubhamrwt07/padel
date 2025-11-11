@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/open_match_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
@@ -16,7 +15,6 @@ import '../../../configs/components/snack_bars.dart';
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../handler/logger.dart';
 import '../../../services/payment_services/razorpay.dart';
-import '../open_matches/addPlayer/add_player_controller.dart';
 class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
   RxBool isProcessing = false.obs;
@@ -562,7 +560,7 @@ class DetailsController extends GetxController {
                                   hint: Text(
                                     "Select Player Level",
                                     style: Get.textTheme.headlineMedium!.copyWith(
-                                      color: AppColors.textColor.withOpacity(0.6),
+                                      color: AppColors.textColor.withValues(alpha: 0.6),
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),

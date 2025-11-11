@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +8,6 @@ import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
 import '../../configs/routes/routes_name.dart';
-import '../../generated/assets.dart';
 class CartScreen extends StatelessWidget {
   final String buttonType;
   final CartController controller = Get.put(CartController());
@@ -88,7 +86,7 @@ class CartScreen extends StatelessWidget {
               color: AppColors.whiteColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 6,
                   offset: const Offset(0, -2),
                 ),

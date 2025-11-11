@@ -1,11 +1,9 @@
 import 'dart:developer';
-import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import '../../generated/assets.dart';
 import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
-import '../booking/book_session/book_session_controller.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 import '../cart/cart_controller.dart'; // Import CartController
 
@@ -42,12 +40,7 @@ class PaymentMethodController extends GetxController {
 
   void _handlePaymentFailure(PaymentFailureResponse response) {
     isProcessing.value = false;
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Text('Payment Failed: ${response.message}'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    SnackBarUtils.showErrorSnackBar("Payment Failed: ${response.message}");
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
@@ -237,15 +230,10 @@ class PaymentMethodController extends GetxController {
       );
     } catch (e) {
       isProcessing.value = false;
-
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
+      CustomLogger.logMessage(msg: "Error: $e",level: LogLevel.error);
+    }finally{
+      isProcessing.value = false;
     }
-  }
-
-  Future<String> generateOrderId() async {
-    return '';
   }
 
   @override
