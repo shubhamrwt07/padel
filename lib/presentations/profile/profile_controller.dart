@@ -1,15 +1,8 @@
 // ✅ FILE: profile_controller.dart
  import 'dart:developer';
-import 'dart:io';
-
- import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/response_models/home_models/profile_model.dart';
-import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
-import 'package:padel_mobile/repositories/home_repository/profile_repository.dart';
 
 class ProfileController extends GetxController {
   // Repositories

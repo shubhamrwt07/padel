@@ -203,7 +203,7 @@ class CurvedTopPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     // Optional: Add shadow effect
-    canvas.drawShadow(path, Colors.black.withOpacity(0.1), 3, false);
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.1), 3, false);
   }
 
   @override

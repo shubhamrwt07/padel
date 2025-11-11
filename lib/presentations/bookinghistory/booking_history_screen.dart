@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:shimmer/shimmer.dart';
@@ -278,7 +279,9 @@ class BookingHistoryUi extends StatelessWidget {
         ],
       );
     } catch (e) {
-      print("Error building slot info: $e");
+      if (kDebugMode) {
+        print("Error building slot info: $e");
+      }
       return const SizedBox.shrink();
     }
   }
@@ -289,7 +292,9 @@ class BookingHistoryUi extends StatelessWidget {
       final date = DateTime.parse(dateStr);
       return DateFormat('EEE, dd MMMM').format(date);
     } catch (e) {
-      print("Error parsing date: $e");
+      if (kDebugMode) {
+        print("Error parsing date: $e");
+      }
       return dateStr;
     }
   }

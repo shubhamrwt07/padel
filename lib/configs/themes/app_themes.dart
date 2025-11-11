@@ -9,7 +9,7 @@ class AppThemes {
     primaryColor: AppColors.primaryColor,
     canvasColor: AppColors.primaryColor,
     fontFamily: "Lato",
-    appBarTheme: const AppBarTheme(color: AppColors.whiteColor,
+    appBarTheme: const AppBarTheme(backgroundColor: AppColors.whiteColor,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
     ),
 

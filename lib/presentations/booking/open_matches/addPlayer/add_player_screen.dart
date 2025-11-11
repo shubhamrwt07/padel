@@ -84,7 +84,7 @@ class AddPlayerScreen extends StatelessWidget {
                     top: Get.height * 0.02, bottom: Get.height * 0.01),
 
                 Obx(() => DropdownButtonFormField<String>(
-                  value: controller.playerLevel.value.isEmpty
+                  initialValue: controller.playerLevel.value.isEmpty
                       ? null
                       : controller.playerLevel.value,
                   isDense: true,

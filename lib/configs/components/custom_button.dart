@@ -159,7 +159,7 @@ class RPSCustomPainter extends CustomPainter {
     canvas.drawPath(path_0, paint0Fill);
 
     Paint paint1Fill = Paint()..style = PaintingStyle.fill;
-    paint1Fill.color = Color(0xff3DBE64).withOpacity(1.0);
+    paint1Fill.color = Color(0xff3DBE64).withValues(alpha: 1.0);
     canvas.drawCircle(
       Offset(size.width * 0.9251497, size.height * 0.5),
       size.width * 0.06586826,

@@ -13,6 +13,7 @@ import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
+import 'package:padel_mobile/presentations/notification/notification_controller.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -46,9 +47,53 @@ class HomeScreen extends GetView<HomeController> {
               ],
             ),
             action: [
-              InkWell(
-                onTap: () => Get.toNamed(RoutesName.notification),
-                child: const Icon(Icons.notifications),
+              GestureDetector(
+                onTap: () {
+                  Get.toNamed(RoutesName.notification);
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 35,
+                      width: 35,
+                      decoration: BoxDecoration(
+                        color: AppColors.textFieldColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.notifications_none_rounded,
+                        color: AppColors.blackColor,
+                      ),
+                    ),
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Obx(() {
+                        final count = Get.find<NotificationController>().unreadNotificationCount.value;
+                        if (count == 0) return const SizedBox.shrink();
+
+                        return Container(
+                          height: 16,
+                          width: 16,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            count > 99 ? '99+' : '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
               ).paddingOnly(right: 5),
             ],
             context: context,

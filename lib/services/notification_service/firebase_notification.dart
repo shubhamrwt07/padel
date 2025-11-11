@@ -360,7 +360,7 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
     String? payload,
-    bool highPriority = false,
+    bool highPriority = true,
   }) async {
     if (!_isInitialized) {
       log('NotificationService not initialized');
@@ -412,43 +412,6 @@ class NotificationService {
       payload: payload,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
-  }
-
-  /// Show a notification with custom action buttons
-  Future<void> showNotificationWithActions({
-    required int id,
-    required String title,
-    required String body,
-    required List<AndroidNotificationAction> actions,
-    String? payload,
-  }) async {
-    if (!_isInitialized) {
-      log('NotificationService not initialized');
-      return;
-    }
-
-    final AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDescription,
-          importance: Importance.high,
-          priority: Priority.high,
-          actions: actions,
-        );
-
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    NotificationDetails details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _localNotifications.show(id, title, body, details, payload: payload);
   }
 
   /// Get Firebase messaging token with retry logic

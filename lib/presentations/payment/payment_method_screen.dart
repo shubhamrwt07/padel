@@ -1,17 +1,14 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
-import 'package:padel_mobile/services/payment_services/razorpay.dart';
-import '../booking/successful_screens/booking_successful_screen.dart';
 
 class PaymentMethodScreen extends GetView<PaymentMethodController> {
   const PaymentMethodScreen({super.key});
@@ -85,11 +82,10 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               await controller.startPayment();
             },
             child: controller.isProcessing.value || cartController.isBooking.value
-                ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: LoadingWidget(color: Colors.white,)
-            )
+                ? LoadingAnimationWidget.waveDots(
+              color: AppColors.whiteColor,
+              size: 45,
+            ).paddingOnly(right: 30)
                 : Row(
               children: [
                 Text(

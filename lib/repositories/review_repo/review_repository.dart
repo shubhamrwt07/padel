@@ -39,7 +39,7 @@ class ReviewRepository {
     required Map<String, dynamic> data,
   }) async {
     CustomLogger.logMessage(
-      msg: "Review Body: ${data}",
+      msg: "Review Body: $data",
       level: LogLevel.info,
     );
     try {

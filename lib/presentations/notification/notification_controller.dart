@@ -3,9 +3,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:padel_mobile/data/response_models/get_notification_model.dart';
+import 'package:padel_mobile/handler/logger.dart';
+import 'package:padel_mobile/repositories/notification_repo/notification_repository.dart';
 
 import '../../services/notification_service/firebase_notification.dart';
-
+import 'package:flutter/material.dart';
 class NotificationController extends GetxController {
   static NotificationController get instance => Get.find();
 
@@ -27,8 +30,10 @@ class NotificationController extends GetxController {
   static const String _topicsKey = 'topic_subscriptions';
 
   @override
-  void onInit() {
+  void onInit()async {
     super.onInit();
+   await fetchNotifications();
+   await fetchUnreadNotificationCount();
     _loadStoredData();
     _initializeNotifications();
   }
@@ -183,7 +188,9 @@ class NotificationController extends GetxController {
       isNotificationEnabled.value = enabled;
       await _storage.write(_notificationEnabledKey, enabled);
     } catch (e) {
-      print('❌ Error checking notification permission: $e');
+      if (kDebugMode) {
+        print('❌ Error checking notification permission: $e');
+      }
     }
   }
   /// Restore topic subscriptions from storage
@@ -194,9 +201,13 @@ class NotificationController extends GetxController {
           await _notificationService.subscribeToTopic(entry.key);
         }
       }
-      print('✅ Restored topic subscriptions');
+      if (kDebugMode) {
+        print('✅ Restored topic subscriptions');
+      }
     } catch (e) {
-      print('❌ Error restoring topic subscriptions: $e');
+      if (kDebugMode) {
+        print('❌ Error restoring topic subscriptions: $e');
+      }
     }
 
   }
@@ -205,14 +216,20 @@ class NotificationController extends GetxController {
   Future<void> _sendTokenToServer(String token) async {
     try {
       // TODO: Replace with your actual API endpoint
-      print('📤 Token should be sent to server: $token');
+      if (kDebugMode) {
+        print('📤 Token should be sent to server: $token');
+      }
     } catch (e) {
-      print('❌ Error sending token to server: $e');
+      if (kDebugMode) {
+        print('❌ Error sending token to server: $e');
+      }
     }
   }
   /// Handle notification tap
   void _handleNotificationTapped(String payload) {
-    print('🔔 Notification tapped with payload: $payload');
+    if (kDebugMode) {
+      print('🔔 Notification tapped with payload: $payload');
+    }
 
     try {
       if (payload.isNotEmpty) {
@@ -225,19 +242,25 @@ class NotificationController extends GetxController {
         }
       }
     } catch (e) {
-      print('❌ Error handling notification tap: $e');
+      if (kDebugMode) {
+        print('❌ Error handling notification tap: $e');
+      }
     }
   }
 
 
   /// Handle foreground messages
-  void _handleForegroundMessage(RemoteMessage message) {
-    print('🔔 Foreground message: ${message.notification?.title}');
+  void _handleForegroundMessage(RemoteMessage message) async{
+    if (kDebugMode) {
+      print('🔔 Foreground message: ${message.notification?.title}');
+    }
 
     // Add to history
     _addToHistory(message);
 
     if (message.notification != null) {
+      await fetchUnreadNotificationCount();
+      await fetchNotifications();
       Get.snackbar(
         message.notification!.title ?? 'New Message',
         message.notification!.body ?? '',
@@ -249,7 +272,9 @@ class NotificationController extends GetxController {
 
   /// Handle background messages
   void _handleBackgroundMessage(RemoteMessage message) {
-    print('🔔 Background message: ${message.notification?.title}');
+    if (kDebugMode) {
+      print('🔔 Background message: ${message.notification?.title}');
+    }
     _addToHistory(message);
     _processMessageData(message.data);
   }
@@ -283,7 +308,9 @@ class NotificationController extends GetxController {
       case 'payment_success':
         break;
       default:
-        print('Unknown notification type: $type');
+        if (kDebugMode) {
+          print('Unknown notification type: $type');
+        }
     }
   }
 
@@ -292,7 +319,7 @@ class NotificationController extends GetxController {
     required String title,
     required String body,
     String? payload,
-    bool highPriority = false,
+    bool highPriority = true,
   }) async {
     if (!isInitialized.value) return;
 
@@ -423,4 +450,129 @@ class NotificationController extends GetxController {
     _notificationService.dispose();
     super.onClose();
   }
+
+  /// Get Notification Api------------------------------------------------------
+  final RxList<Map<String, dynamic>> notifications =
+      <Map<String, dynamic>>[].obs;
+  var isLoading = true.obs;
+  final NotificationRepository notificationRepository = Get.put(
+    NotificationRepository(),
+  );
+  var notificationList = <GetNotificationResponse>[].obs;
+
+  Future<void> fetchNotifications() async {
+    notifications.clear();
+    isLoading.value = true;
+
+    try {
+      final response = await notificationRepository.getNotification();
+      final apiNotifications = response.notifications ?? [];
+      if (apiNotifications.isNotEmpty) {
+        notifications.assignAll(
+          apiNotifications.map((notif) {
+            IconData icon;
+            final type = (notif.notificationType ?? '').toLowerCase();
+            if (type.contains('booking')) {
+              icon = Icons.check_circle;
+            } else if (type.contains('payment')) {
+              icon = Icons.payment;
+            } else if (type.contains('offer')) {
+              icon = Icons.local_offer;
+            } else {
+              icon = Icons.notifications;
+            }
+
+            final createdAt = notif.createdAt != null
+                ? DateTime.tryParse(notif.createdAt!)
+                : DateTime.now();
+
+            return {
+              'id': notif.id ?? '',
+              'title': notif.title ?? 'No Title',
+              'message': notif.message ?? 'No Message',
+              'time': createdAt,
+              'icon': icon,
+              'payload': notif.notificationUrl ?? '',
+              'bookingId': notif.bookingId?.id ?? '',
+              'isRead': notif.isRead ?? false,
+              'bookingStatus': notif.bookingId?.bookingStatus ?? '',
+            };
+          }).toList(),
+        );
+
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: "Error fetching Notification: $e",
+        level: LogLevel.error,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Mark a single notification as read
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      await notificationRepository.markAsRead(notificationId);
+      // Update local state
+      final index = notifications.indexWhere((n) => n['id'] == notificationId);
+      if (index != -1) {
+        notifications[index]['isRead'] = true;
+        notifications.refresh();
+        fetchUnreadNotificationCount();
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: "❌ Error marking notification as read: $e",
+        level: LogLevel.error,
+      );
+    }
+  }
+
+  /// Mark all as read
+  Future<void> markAllNotificationsAsRead() async {
+    try {
+      await notificationRepository.markAllAsRead();
+      for (var n in notifications) {
+        n['isRead'] = true;
+      }
+      notifications.refresh();
+      fetchUnreadNotificationCount();
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: "❌ Error marking all notifications as read: $e",
+        level: LogLevel.error,
+      );
+    }
+  }
+
+  /// Get Unread Notification Count API ------------------------------------------------------
+  var unreadNotificationCount = 0.obs;
+
+  Future<void> fetchUnreadNotificationCount() async {
+    try {
+      final now = DateTime.now();
+      CustomLogger.logMessage(
+        msg: '📡 Fetching unread count at: $now',
+        level: LogLevel.info,
+      );
+
+      final response = await notificationRepository.notificationCount();
+
+      final count = response['unreadCount'] ?? 0;
+      CustomLogger.logMessage(
+        msg: '✅ API responded with unreadCount=$count at ${DateTime.now()}',
+        level: LogLevel.info,
+      );
+
+      unreadNotificationCount.value = count;
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error fetching unread count: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+
 }

@@ -5,10 +5,6 @@ import 'package:padel_mobile/presentations/booking/details_page/details_page.dar
 import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 
 class CreateQuestionsController extends GetxController {
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   // ✅ Access the existing DetailsController
   DetailsController detailsController = Get.isRegistered<DetailsController>()

@@ -5,7 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import '../../configs/routes/routes_name.dart';
 
 class SessionExpiredPage extends StatelessWidget {
-  const SessionExpiredPage({Key? key}) : super(key: key);
+  const SessionExpiredPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class SessionExpiredPage extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:get/get.dart' hide Response;
 import 'package:padel_mobile/services/network/session_expired_screen.dart';
 import '../../configs/components/snack_bars.dart';
 import '../../presentations/auth/forgot_password/widgets/forgot_password_exports.dart'

@@ -96,7 +96,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         indicatorColor: AppColors.primaryColor,
         indicatorWeight: 2.5,
         labelColor: AppColors.primaryColor,
-        unselectedLabelColor: AppColors.labelBlackColor.withOpacity(0.6),
+        unselectedLabelColor: AppColors.labelBlackColor.withValues(alpha: 0.6),
         labelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -268,7 +268,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: AppColors.playerCardBackgroundColor,
-          border: Border.all(color: AppColors.blackColor.withOpacity(0.1)),
+          border: Border.all(color: AppColors.blackColor.withValues(alpha: 0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,7 +278,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             Divider(
               thickness: 1.5,
               height: 0,
-              color: AppColors.blackColor.withOpacity(0.5),
+              color: AppColors.blackColor.withValues(alpha: 0.5),
             ).paddingOnly(bottom: 3),
             _buildMatchFooter(context, match),
           ],
@@ -530,6 +530,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: IntrinsicHeight(
         child: Row(
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -543,7 +544,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             Container(
               width: 1,
               margin: const EdgeInsets.only(bottom: 19),
-              color: AppColors.blackColor.withOpacity(0.5),
+              color: AppColors.blackColor.withValues(alpha: 0.5),
             ),
 
             // Team B - Player 1
@@ -578,7 +579,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           ),
           child: imageUrl.isEmpty
               ? CircleAvatar(
-            backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+            backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
             child: Text(
               (name.isNotEmpty ? name[0] : "?").toUpperCase(),
               style: TextStyle(
@@ -637,7 +638,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: AppColors.secondaryColor.withOpacity(0.2),
+              color: AppColors.secondaryColor.withValues(alpha: 0.2),
             ),
             child: Text(
               level,

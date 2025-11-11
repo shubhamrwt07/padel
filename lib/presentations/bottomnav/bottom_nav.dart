@@ -20,7 +20,7 @@ class BottomNavUi extends StatelessWidget {
         body: Obx(() => controller.getCurrentPage()),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
           color: Colors.white,
           boxShadow: [
             BoxShadow(
@@ -64,7 +64,9 @@ class BottomNavUi extends StatelessWidget {
                   tab['icon'],
                   width: iconSize,
                   height: iconSize,
-                  color: isSelected ? null : AppColors.labelBlackColor,
+                  colorFilter: isSelected
+                      ? null
+                      : const ColorFilter.mode(AppColors.blackColor, BlendMode.srcIn),
                 )
                     : Icon(
                   tab['icon'],
