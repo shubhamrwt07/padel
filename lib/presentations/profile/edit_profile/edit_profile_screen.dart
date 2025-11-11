@@ -142,11 +142,7 @@ class EditProfileUi extends StatelessWidget {
                     width: Get.width * .24,
                     height: Get.height * .11,
                     placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primaryColor,
-                        ),
-                      ),
+                      child: LoadingWidget(color: AppColors.primaryColor,),
                     ),
                     errorWidget: (context, url, error) => Icon(
                       Icons.person,

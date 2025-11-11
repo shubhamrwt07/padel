@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
 import '../../configs/routes/routes_name.dart';
@@ -113,9 +114,7 @@ class CartScreen extends StatelessWidget {
       child: Obx(() {
         if (controller.isLoading.value) {
           return Center(
-            child: CircularProgressIndicator(
-              color: AppColors.primaryColor,
-            ),
+            child: LoadingWidget(color: AppColors.primaryColor,)
           );
         }
 

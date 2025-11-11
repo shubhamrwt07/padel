@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -25,60 +26,63 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (!controller.isControllerReady.value) {
         return const Scaffold(
           body: Center(
-            child: CircularProgressIndicator(color: AppColors.primaryColor),
+            child: LoadingWidget(color: AppColors.primaryColor,),
           ),
         );
       }
       
-      return Scaffold(
-        appBar: primaryAppBar(
-          centerTitle: true,
-          showLeading: controller.argument.value == "detailPage" || Navigator.canPop(context),
-          leading: GestureDetector(
-            onTap: () {
-              if (backRoute != null && backRoute.isNotEmpty) {
-                Get.toNamed(backRoute);
-                return;
-              }
-              if (controller.argument.value == "detailPage") {
-                Get.toNamed(RoutesName.bottomNav);
-              } else if (controller.argument.value == "profile") {
-                Get.back();
-              } else {
-                Get.toNamed(RoutesName.bottomNav);
-              }
-            },
-            child: Container(
-              color: Colors.transparent,
-              height: 30,
-              width: 40,
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.blackColor,
-                size: 22,
+      return PopScope(
+        canPop: false, // disables both Android and iOS back gestures
+        child: Scaffold(
+          appBar: primaryAppBar(
+            centerTitle: true,
+            showLeading: controller.argument.value == "detailPage" || Navigator.canPop(context),
+            leading: GestureDetector(
+              onTap: () {
+                if (backRoute != null && backRoute.isNotEmpty) {
+                  Get.toNamed(backRoute);
+                  return;
+                }
+                if (controller.argument.value == "detailPage") {
+                  Get.toNamed(RoutesName.bottomNav);
+                } else if (controller.argument.value == "profile") {
+                  Get.back();
+                } else {
+                  Get.toNamed(RoutesName.bottomNav);
+                }
+              },
+              child: Container(
+                color: Colors.transparent,
+                height: 30,
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.blackColor,
+                  size: 22,
+                ),
               ),
             ),
+            title: const Text("Open matches"),
+            context: context,
           ),
-          title: const Text("Open matches"),
-          context: context,
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            tabBar(controller.tabController!),
-            const SizedBox(height: 4),
-            Expanded(
-              child: TabBarView(
-                controller: controller.tabController!,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildMatchesTab(context, completed: false),
-                  _buildMatchesTab(context, completed: true),
-                ],
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              tabBar(controller.tabController!),
+              const SizedBox(height: 4),
+              Expanded(
+                child: TabBarView(
+                  controller: controller.tabController!,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildMatchesTab(context, completed: false),
+                    _buildMatchesTab(context, completed: true),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });
@@ -180,7 +184,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                           return const Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Center(
-                              child: CircularProgressIndicator(),
+                              child: LoadingWidget(color: AppColors.primaryColor,),
                             ),
                           );
                         }
@@ -595,9 +599,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   child: SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: LoadingWidget(color: AppColors.primaryColor,),
                   ),
                 ),
               ),

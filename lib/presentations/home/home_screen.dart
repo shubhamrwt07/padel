@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
@@ -20,106 +21,109 @@ class HomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        appBar: primaryAppBar(
-          showLeading: false,
-          title: Row(
-            children: [
-              // Drawer menu icon
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  final drawerController = Get.find<CustomZoomDrawerController>();
-                  drawerController.toggleDrawer();
-                },
-              ),
-
-
-              // Space between icon and title
-              const SizedBox(width: 0),
-
-              // Existing title widget
-              Expanded(child: _buildAppBarTitle(context)),
-            ],
-          ),
-          action: [
-            InkWell(
-              onTap: () => Get.toNamed(RoutesName.notification),
-              child: const Icon(Icons.notifications),
-            ).paddingOnly(right: 5),
-          ],
-          context: context,
-        ),
-
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              searchField(),
-              Obx(() => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeIn,
-                switchOutCurve: Curves.easeOut,
-                transitionBuilder:
-                    (Widget child, Animation<double> animation) {
-                  return SizeTransition(
-                    sizeFactor: animation,
-                    axisAlignment: -1.0,
-                    child: FadeTransition(opacity: animation, child: child),
-                  );
-                },
-                child: controller.showLocationAndDate.value
-                    ? locationAndDateTime(context)
-                    : const SizedBox.shrink(
-                  key: ValueKey('empty'),
+      child: PopScope(
+        canPop: false,
+        child: Scaffold(
+          appBar: primaryAppBar(
+            showLeading: false,
+            title: Row(
+              children: [
+                // Drawer menu icon
+                IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    final drawerController = Get.find<CustomZoomDrawerController>();
+                    drawerController.toggleDrawer();
+                  },
                 ),
-              )),
-              Expanded(
-                child: Obx(() {
-                  return RefreshIndicator(
-                    color: Colors.white,
-                    onRefresh: controller.retryFetch,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      controller: controller.scrollController,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // --- Bookings Section ---
-                          if (controller.isLoadingBookings.value)
-                            bookingShimmer()
-                          else if ((controller.bookings.value?.data ?? []).isNotEmpty)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppStrings.yourBooking,
-                                  style: Theme.of(context).textTheme.headlineMedium,
-                                ).paddingOnly(bottom: Get.width * 0.02),
-                                clubTicketList(context),
-                              ],
-                            ),
-
-                          // --- Courts Section ---
-                          Text(AppStrings.newBooking,
-                              style: Get.textTheme.headlineMedium)
-                              .paddingOnly(bottom: Get.width * 0.02,),
-                          if (controller.isLoadingClub.value)
-                            Column(
-                              children: List.generate(5, (_) => loadingCard()),
-                            )
-                          else
-                            _buildCourtList(),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
 
 
+                // Space between icon and title
+                const SizedBox(width: 0),
+
+                // Existing title widget
+                Expanded(child: _buildAppBarTitle(context)),
+              ],
+            ),
+            action: [
+              InkWell(
+                onTap: () => Get.toNamed(RoutesName.notification),
+                child: const Icon(Icons.notifications),
+              ).paddingOnly(right: 5),
             ],
+            context: context,
+          ),
+
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                searchField(),
+                Obx(() => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeIn,
+                  switchOutCurve: Curves.easeOut,
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return SizeTransition(
+                      sizeFactor: animation,
+                      axisAlignment: -1.0,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  child: controller.showLocationAndDate.value
+                      ? locationAndDateTime(context)
+                      : const SizedBox.shrink(
+                    key: ValueKey('empty'),
+                  ),
+                )),
+                Expanded(
+                  child: Obx(() {
+                    return RefreshIndicator(
+                      color: Colors.white,
+                      onRefresh: controller.retryFetch,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        controller: controller.scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // --- Bookings Section ---
+                            if (controller.isLoadingBookings.value)
+                              bookingShimmer()
+                            else if ((controller.bookings.value?.data ?? []).isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppStrings.yourBooking,
+                                    style: Theme.of(context).textTheme.headlineMedium,
+                                  ).paddingOnly(bottom: Get.width * 0.02),
+                                  clubTicketList(context),
+                                ],
+                              ),
+
+                            // --- Courts Section ---
+                            Text(AppStrings.newBooking,
+                                style: Get.textTheme.headlineMedium)
+                                .paddingOnly(bottom: Get.width * 0.02,),
+                            if (controller.isLoadingClub.value)
+                              Column(
+                                children: List.generate(5, (_) => loadingCard()),
+                              )
+                            else
+                              _buildCourtList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+
+
+              ],
+            ),
           ),
         ),
       ),
@@ -140,9 +144,9 @@ class HomeScreen extends GetView<HomeController> {
         );
       }
 
-      final name = profile?.response?.name;
+      final name = profile?.response?.name?.capitalizeFirst??"";
       final displayName =
-      (name == null || name.trim().isEmpty) ? 'Guest' : name;
+      (name.trim().isEmpty) ? 'Guest' : name;
 
       return SizedBox(
         width: Get.width * 0.34,
@@ -369,7 +373,7 @@ class HomeScreen extends GetView<HomeController> {
           imageUrl: club.courtImage![0],
           fit: BoxFit.cover,
           placeholder: (_, __) =>
-          const CircularProgressIndicator(strokeWidth: 2),
+          LoadingWidget(color: AppColors.primaryColor,),
           errorWidget: (_, __, ___) =>
               Image.asset(Assets.imagesImgHomeLogo),
         )
@@ -536,7 +540,7 @@ class HomeScreen extends GetView<HomeController> {
           return const Padding(
             padding: EdgeInsets.all(16),
             child: Center(
-              child: CircularProgressIndicator(),
+              child: LoadingWidget(color: AppColors.primaryColor,),
             ),
           );
         }
@@ -577,7 +581,7 @@ class HomeScreen extends GetView<HomeController> {
                     ? CachedNetworkImage(
                   imageUrl: club.courtImage![0],
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  placeholder: (_, __) => const Center(child: LoadingWidget(color: AppColors.primaryColor,)),
                   errorWidget: (_, __, ___) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                 )
                     : const Center(child: Icon(Icons.photo, color: Colors.grey, size: 40)),

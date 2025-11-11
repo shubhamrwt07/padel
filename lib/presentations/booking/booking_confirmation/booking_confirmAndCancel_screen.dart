@@ -56,7 +56,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingWidget(color: AppColors.primaryColor,));
         }
 
         if (controller.error.value.isNotEmpty) {
@@ -169,7 +169,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                           fit: BoxFit.cover,
                           width: 44,
                           height: 44,
-                          placeholder: (context, url) => CircularProgressIndicator(),
+                          placeholder: (context, url) => LoadingWidget(color: AppColors.primaryColor,),
                           errorWidget: (context, url, error) => Icon(Icons.error)
                       ),
                     ),

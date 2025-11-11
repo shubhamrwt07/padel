@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
@@ -87,10 +88,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                 ? const SizedBox(
               height: 24,
               width: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
+              child: LoadingWidget(color: Colors.white,)
             )
                 : Row(
               children: [

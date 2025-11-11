@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../configs/routes/routes_name.dart';
@@ -102,9 +103,7 @@ class BookingHistoryUi extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.all(16),
                     child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryColor,
-                      ),
+                      child: LoadingWidget(color: AppColors.primaryColor,)
                     ),
                   );
                 } else {

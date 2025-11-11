@@ -1,4 +1,8 @@
 
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+
 import '../../presentations/auth/login/widgets/login_exports.dart';
 import 'dart:math' as math;
 class AppLoader extends StatefulWidget {
@@ -207,4 +211,27 @@ class SmoothArcPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class LoadingWidget extends StatelessWidget {
+  final double size;
+  final Color? color;
+  const LoadingWidget({super.key, this.size = 36.0,this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Platform.isIOS
+          ?   CupertinoActivityIndicator(
+        radius:14,
+        color:color?? AppColors.primaryColor,
+      )
+          :   CircularProgressIndicator(
+        strokeWidth: 3.0,
+        color:color?? AppColors.primaryColor,
+      ),
+    );
+  }
 }

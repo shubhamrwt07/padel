@@ -5,6 +5,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/generated/assets.dart';
+import 'package:padel_mobile/presentations/leaderBoard/widgets/top_tab_bar.dart';
 
 import 'leader_board_controller.dart';
 class LeaderboardScreen extends StatelessWidget {
@@ -28,7 +29,7 @@ class LeaderboardScreen extends StatelessWidget {
         children: [
           Column(
             children: [
-              _buildTopTabs(),
+              TopTabBar(),
               const SizedBox(height: 16),
               Obx(() {
                 if (controller.selectedCategory.value == 'Tournaments') {
@@ -64,40 +65,7 @@ class LeaderboardScreen extends StatelessWidget {
   }
 
 
-  Widget _buildTopTabs() {
-    return Obx(() {
-      final selectedIndex = controller.categories.indexOf(controller.selectedCategory.value);
 
-      return DefaultTabController(
-        length: controller.categories.length,
-        initialIndex: selectedIndex,
-        child: TabBar(
-          isScrollable: true, // ✅ Allow long text to fit naturally
-          indicator: const UnderlineTabIndicator(
-            borderSide: BorderSide(width: 2, color: Colors.white),
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          dividerHeight: 0.5,
-          dividerColor: AppColors.whiteColor,
-          labelStyle: Get.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w900),
-          indicatorWeight: 1,
-          labelPadding: const EdgeInsets.only(left: 0, right: 30),
-          unselectedLabelStyle: Get.textTheme.headlineSmall,
-          onTap: (index) {
-            // ✅ Update only this observable
-            controller.selectedCategory.value = controller.categories[index];
-            controller.showStateFilters.value = controller.categories[index] == 'State Level';
-
-          },
-          tabs: controller.categories
-              .map((tab) => Tab(text: tab))
-              .toList(),
-        ),
-      );
-    });
-  }
 
   Widget _buildTabBar() {
     return Obx(() {
@@ -168,7 +136,7 @@ class LeaderboardScreen extends StatelessWidget {
                         decoration: InputDecoration(
                           hintText: 'Location',
                           hintStyle: const TextStyle(
-                            color: AppColors.textColor,
+                            color: AppColors.primaryColor,
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
@@ -207,24 +175,32 @@ class LeaderboardScreen extends StatelessWidget {
             flex: 2,
             child: Container(
               height: 39,
-              padding: EdgeInsets.only(left: 10,right: 5),
+              padding: const EdgeInsets.only(left: 10, right: 5),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: controller.selectedGender.value,
-                  items: ['Male', 'Female', 'Mixed']
+                child: Obx(() => DropdownButton<String>(
+                  value: controller.selectedGender.value.isEmpty
+                      ? null
+                      : controller.selectedGender.value,
+                  hint: const Text(
+                    "Gender",
+                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                  ),
+                  items: ['Male', 'Female', 'Others']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
                   onChanged: (val) {
-                    controller.selectedGender.value = val!;
+                    controller.selectedGender.value = val ?? '';
                   },
-                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
-                  style: const TextStyle(color: AppColors.textColor, fontSize: 14),
+                  icon: const Icon(Icons.arrow_drop_down,
+                      color: AppColors.primaryColor),
+                  style:
+                  const TextStyle(color: AppColors.textColor, fontSize: 14),
                   dropdownColor: Colors.white,
-                ),
+                )),
               ),
             ),
           ),
@@ -235,27 +211,35 @@ class LeaderboardScreen extends StatelessWidget {
             flex: 2,
             child: Container(
               height: 39,
-              padding: EdgeInsets.only(left: 10,right: 5),
+              padding: const EdgeInsets.only(left: 10, right: 5),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: controller.selectedYear.value,
+                child: Obx(() => DropdownButton<String>(
+                  value: controller.selectedYear.value.isEmpty
+                      ? null
+                      : controller.selectedYear.value,
+                  hint: const Text(
+                    "Year",
+                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                  ),
                   items: ['2023', '2024', '2025']
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
                   onChanged: (val) {
-                    controller.selectedYear.value = val!;
+                    controller.selectedYear.value = val ?? '';
                   },
-                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
-                  style: const TextStyle(color: AppColors.textColor, fontSize: 14),
+                  icon: const Icon(Icons.arrow_drop_down,
+                      color: AppColors.primaryColor),
+                  style:
+                  const TextStyle(color: AppColors.textColor, fontSize: 14),
                   dropdownColor: Colors.white,
-                ),
+                )),
               ),
             ),
-          ),
+          )
         ],
       ),
     );

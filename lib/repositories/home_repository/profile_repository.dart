@@ -54,7 +54,7 @@ class ProfileRepository {
     try {
       FormData formData = FormData.fromMap({
         'name': name,
-        'lastname':lastName,
+        'lastName':lastName,
         'gender': gender,
         'dob': dob,
         'city': city,

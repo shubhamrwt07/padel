@@ -4,11 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/app_strings.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
-import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
 
 class CustomDrawerUi extends GetView<ProfileController> {
   const CustomDrawerUi({super.key});
@@ -37,22 +37,15 @@ class CustomDrawerUi extends GetView<ProfileController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // 👈 All children start-aligned
         children: [
-          // Close Button - Top Right
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-            ],
-          ),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 66),
           // Profile Picture - Left-Aligned (No Center wrapper)
           Obx(
                 () => Container(
               alignment: Alignment.centerLeft, // 👈 Optional: ensures image stays left even if container is wide
               padding: const EdgeInsets.only(left: 16), // 👈 Optional: indent from edge like name/email
               child: Container(
-                height: Get.height * 0.1,
-                width: Get.height * 0.1,
+                height: Get.height * 0.08,
+                width: Get.height * 0.08,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.tabSelectedColor,
@@ -63,11 +56,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                     imageUrl: controller.profileModel.value?.response?.profilePic ?? "",
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primaryColor,
-                        ),
-                      ),
+                      child: LoadingWidget(color: AppColors.primaryColor,)
                     ),
                     errorWidget: (context, url, error) => Icon(
                       Icons.person,
@@ -96,7 +85,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                 Obx(() {
                   final profile = controller.profileModel.value?.response;
                   return Text(
-                    "${profile?.name ?? 'Unknown'} ${profile?.lastName ?? ""}",
+                    "${profile?.name?.capitalizeFirst ?? 'Guest'} ${profile?.lastName?.capitalizeFirst ?? ""}",
                     style: Get.textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
@@ -104,7 +93,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                     ),
                   );
                 }),
-                const SizedBox(height: 5),
+                const SizedBox(height: 0),
                 Obx(() {
                   final profile = controller.profileModel.value?.response;
                   return Text(
@@ -112,6 +101,7 @@ class CustomDrawerUi extends GetView<ProfileController> {
                     style: Get.textTheme.headlineSmall!.copyWith(
                       fontWeight: FontWeight.w500,
                       color: AppColors.labelBlackColor,
+                      fontSize: 12
                     ),
                   );
                 }),
@@ -152,7 +142,8 @@ class CustomDrawerUi extends GetView<ProfileController> {
         ],
       ),
     ).paddingOnly(top: 30);
-  }  Widget _buildMenuItems() {
+  }
+  Widget _buildMenuItems() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -263,17 +254,26 @@ class ProfileRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 50,
+        height: 48,
         color: Colors.transparent,
         child: Row(
           children: [
-            icon,
-            const SizedBox(width: 40),
-            Text(
-              title,
-              style: Get.textTheme.headlineSmall!.copyWith(
-                color: isSelected ? highlightColor : (textColor ?? defaultColor),
-                fontWeight: FontWeight.w600,
+            // 👇 Wrap all icons in a fixed-size box for alignment
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Center(
+                child: icon,
+              ),
+            ),
+            const SizedBox(width: 16), // consistent spacing between icon and text
+            Expanded(
+              child: Text(
+                title,
+                style: Get.textTheme.headlineSmall!.copyWith(
+                  color: isSelected ? highlightColor : (textColor ?? defaultColor),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

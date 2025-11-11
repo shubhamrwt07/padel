@@ -42,8 +42,8 @@ class LeaderboardController extends GetxController {
 
   var expandedIndex = (-1).obs;
   RxBool isHandleVisible = true.obs;
-  var selectedGender = 'Male'.obs;
-  var selectedYear = '2025'.obs;
+  var selectedGender = ''.obs;
+  var selectedYear = ''.obs;
   var showStateFilters = false.obs;
   var selectedCity = 'All Location'.obs;
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../configs/components/loader_widgets.dart';
@@ -669,7 +670,10 @@ class DetailsScreen extends StatelessWidget {
               // Show Book Now + Price
               text: "Pay & Book Now ${data['price'] ?? '₹0'}",
               child: (controller.isLoading.value || controller.isProcessing.value)
-                  ? AppLoader(size: 25, strokeWidth: 3)
+                  ? LoadingAnimationWidget.waveDots(
+                color: AppColors.whiteColor,
+                size: 45,
+              ).paddingOnly(right: 0)
                   : null,
             ),
           ),

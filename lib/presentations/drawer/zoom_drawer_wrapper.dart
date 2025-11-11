@@ -9,7 +9,6 @@ class ZoomDrawerWrapper extends StatelessWidget {
 
   const ZoomDrawerWrapper({
     super.key,
-
     required this.child,
   });
 
@@ -23,11 +22,16 @@ class ZoomDrawerWrapper extends StatelessWidget {
       mainScreen: child,
       borderRadius: 20.0,
       showShadow: true,
-      angle: 0.0,
-      slideWidth: MediaQuery.of(context).size.width * 0.65,
+      shadowLayer1Color: Colors.black.withValues(alpha: 0.03),
+      shadowLayer2Color: Colors.black.withValues(alpha: 0.03),
+      angle: 2.0,
+      slideWidth: MediaQuery.of(context).size.width * 0.6,
       menuBackgroundColor: Colors.white,
       openCurve: Curves.easeInOut,
       closeCurve: Curves.easeInOut,
+      // Optional: Add more shadow customization
+      mainScreenTapClose: true,
+      moveMenuScreen: true,
     );
   }
 }

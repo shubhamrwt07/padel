@@ -19,18 +19,17 @@ class BookSession extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 5), // Add top spacing
               _buildDatePicker(),
               Transform.translate(
-                  offset: Offset(0, -Get.height * 0.03),
+                  offset: Offset(0, -Get.height * 0.05),
                   child: _buildTimeOfDayTabs()),  // <-- Added here
               Transform.translate(
-                  offset: Offset(0, -Get.height * 0.02),
+                  offset: Offset(0, -Get.height * 0.04),
                   child: _buildMultiDateSummary()),
               Obx((){
                 final totalSelections = controller.getTotalSelectionsCount();
                 return Transform.translate(
-                    offset: Offset(0,totalSelections == 0? -Get.height * 0.03:-Get.height*0.02),
+                    offset: Offset(0,totalSelections == 0? -Get.height * 0.05:-Get.height*0.04),
                     child: _buildAllCourtsWithSlots());
               })
 
@@ -136,7 +135,7 @@ class BookSession extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryColor.withOpacity(0.1),
+                            color: AppColors.primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -153,7 +152,7 @@ class BookSession extends StatelessWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       );
@@ -165,28 +164,19 @@ class BookSession extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         /// Top Row with only title
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              "Select Date",
-              style: Get.textTheme.labelLarge!.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        Text(
+          "Select Date",
+          style: Get.textTheme.labelLarge!.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ).paddingOnly(top: 10),
-
-        const SizedBox(height: 8),
-
-        /// Date picker wrapped separately with Obx
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -Get.height * 0.026),
+              offset: Offset(0, -28),
               child: Container(
                 width: 30,
-                height: Get.height * 0.063,
+                height: Get.height * 0.061,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -216,7 +206,8 @@ class BookSession extends StatelessWidget {
                       .toList(),
                 ),
               ),
-            ),            Expanded(
+            ),
+            Expanded(
               child: EasyDateTimeLinePicker.itemBuilder(
                 headerOptions: HeaderOptions(
                   headerBuilder: (_, context, date) => const SizedBox.shrink(),
@@ -247,7 +238,6 @@ class BookSession extends StatelessWidget {
                         clipBehavior: Clip.none,
                         children: [
                           Container(
-                            margin: const EdgeInsets.only(top: 6),
                             height: Get.height * 0.06,
                             width: Get.width * 0.11,
                             alignment: Alignment.center,
@@ -336,22 +326,19 @@ class BookSession extends StatelessWidget {
               ),
             )
           ],
-        )),
+        ).paddingOnly(top: 10)),
 
 
         /// Toggle row moved here below date picker
         Obx(() => Transform.translate(
-          offset: Offset(0, -Get.height * .05),
+          offset: Offset(0, -Get.height * .06),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// Left text — indicates current view
               Text(
                  "Available Slots",
-                style: Get.textTheme.titleSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.blackColor,
-                ),
+                style: Get.textTheme.labelLarge
               ),
 
               /// Right toggle + label
@@ -431,7 +418,7 @@ class BookSession extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryColor.withOpacity(0.1)
+                          ? AppColors.primaryColor.withValues(alpha: 0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -487,8 +474,9 @@ class BookSession extends StatelessWidget {
       return Column(
         children: [
           // PageView for courts
-          SizedBox(
-            height: Get.height * 0.45,
+          Container(
+            color: Colors.white,
+            height: Get.height * 0.35,
             child: PageView.builder(
               controller: controller.pageController,
               onPageChanged: (index) {
@@ -501,7 +489,7 @@ class BookSession extends StatelessWidget {
                 final courtsSlice = courts.sublist(start, end);
 
                 return Column(
-                  children: courtsSlice.map((court) => _buildCourtSection(court)).toList(),
+                  children: courtsSlice.map((court) => _buildCourtSection(court,pageIndex)).toList(),
                 );
               },
             ),
@@ -534,17 +522,15 @@ class BookSession extends StatelessWidget {
   }
   /// Build all courts with their slots
   /// Build individual court section with its slots
-  Widget _buildCourtSection(dynamic courtData) {
+  Widget _buildCourtSection(dynamic courtData,int index) {
     final courtName = courtData.courtName ?? 'Unknown Court';
     final slotTimes = courtData.slots ?? [];
 
-    final courtType = courtData.registerClubId?.courtType ??
-        courtData.register_club_id?.courtType ??
-        'Standard court';
+    final courtTypes = courtData.registerClubId?.courtType;
 
-    final String featureText = courtType is List
-        ? (courtType as List).whereType<String>().join(', ')
-        : (courtType?.toString() ?? 'Standard court');
+    final featureText = (courtTypes is List && index < courtTypes.length)
+        ? courtTypes[index].toString()
+        : 'Standard court';
 
     log("Building court section for: $courtName with ${slotTimes.length} slots");
 
@@ -556,7 +542,7 @@ class BookSession extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -570,7 +556,7 @@ class BookSession extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.only(left: 12,right: 12,top: 10), // Increased padding
             decoration: BoxDecoration(
-              color: AppColors.whiteColor.withOpacity(0.1),
+              color: AppColors.whiteColor.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -616,6 +602,7 @@ class BookSession extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   featureText,
+                  overflow: TextOverflow.ellipsis,
                   style: Get.textTheme.bodySmall!.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -638,7 +625,7 @@ class BookSession extends StatelessWidget {
     if (slotTimes.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.only(top: 15),
           child: Column(
             children: [
               Icon(
@@ -772,7 +759,7 @@ class BookSession extends StatelessWidget {
           formatTimeSlot(slot.time??""),
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w500,
             color: textColor,
           ),
@@ -854,24 +841,13 @@ class BookSession extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          /// Dot indicator OUTSIDE button
-
-          /// Book Now button
           Obx(
                 () => CustomButton(
               width: Get.width * 0.9,
               onTap: () {
                 if (controller.multiDateSelections.isEmpty) {
-                  Get.snackbar(
-                    "Select Slots",
-                    "Please select at least one slot before booking.",
-                    backgroundColor: Colors.redAccent,
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.TOP,
-                    margin: const EdgeInsets.all(12),
-                    duration: const Duration(seconds: 2),
-                    icon: const Icon(Icons.info, color: Colors.white),
-                  );
+                  SnackBarUtils.showInfoSnackBar(
+                      "Please select at least one slot before booking.");
                   return;
                 }
                 controller.addToCart();
@@ -880,11 +856,12 @@ class BookSession extends StatelessWidget {
                   ? LoadingAnimationWidget.waveDots(
                 color: AppColors.whiteColor,
                 size: 45,
-              )
+              ).paddingOnly(right: 40)
                   : Row(
+                mainAxisAlignment:controller.multiDateSelections.isNotEmpty? MainAxisAlignment.start:MainAxisAlignment.center,
                 children: [
-                  Obx(
-                        () => RichText(
+                  if (controller.multiDateSelections.isNotEmpty)
+                    RichText(
                       text: TextSpan(
                         children: [
                           TextSpan(
@@ -907,16 +884,16 @@ class BookSession extends StatelessWidget {
                       right: Get.width * 0.3,
                       left: Get.width * 0.05,
                     ),
-                  ),
                   Text(
                     "Book Now",
-                    style: Get.textTheme.headlineMedium!
-                        .copyWith(color: AppColors.whiteColor),
-                  ),
+                    style: Get.textTheme.headlineMedium!.copyWith(
+                      color: AppColors.whiteColor,
+                    ),
+                  ).paddingOnly(right: controller.multiDateSelections.isNotEmpty?0:40),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -39,11 +39,7 @@ class ProfileUi extends GetView<ProfileController> {
                       imageUrl: controller.profileModel.value?.response?.profilePic ?? "",
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryColor,
-                          ),
-                        ),
+                        child: LoadingWidget(color: AppColors.primaryColor,)
                       ),
                       errorWidget: (context, url, error) => Icon(
                         Icons.person,

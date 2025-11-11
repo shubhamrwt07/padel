@@ -25,7 +25,7 @@ class AllOpenMatchScreen extends StatelessWidget {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Text(
                 //   // "For your level",
@@ -540,9 +540,7 @@ class AllOpenMatchScreen extends StatelessWidget {
               width: 48,
               height: 48,
               placeholder: (context, url) =>
-              const CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
+              LoadingWidget(color: AppColors.primaryColor,),
               errorWidget: (context, url, error) => Text(
                 firstLetter,
                 style: const TextStyle(

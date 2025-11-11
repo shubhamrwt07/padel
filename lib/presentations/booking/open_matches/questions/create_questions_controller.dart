@@ -114,6 +114,13 @@ class CreateQuestionsController extends GetxController {
   /// Final Submission
   /// ============================
   void onSubmit() {
+    if (selectedReboundSkill.value.isEmpty) {
+      SnackBarUtils.showWarningSnackBar(
+          "Required\nPlease select wall rebound before submitting"
+      );
+      return;
+    }
+
     // ✅ Store each selected answer as a separate key in the local match data
     detailsController.localMatchData.update("customerScale", (v) => selectedLevel.value, ifAbsent: () => selectedLevel.value);
     detailsController.localMatchData.update("customerRacketSport", (v) => selectedSports.join(', '), ifAbsent: () => selectedSports.join(', '));

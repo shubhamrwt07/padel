@@ -237,14 +237,7 @@ class BookSessionController extends GetxController {
   bool _canAddSlot() {
     final currentCount = multiDateSelections.length;
     if (currentCount >= MAX_SLOTS) {
-      Get.snackbar(
-        "Booking Limit Reached",
-        "You can select a maximum of $MAX_SLOTS slots.",
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 3),
-      );
+      SnackBarUtils.showErrorSnackBar("Booking Limit Reached\nYou can select a maximum of $MAX_SLOTS slots.");
       return false;
     }
 

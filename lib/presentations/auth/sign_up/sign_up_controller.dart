@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
+import 'package:padel_mobile/presentations/notification/notification_controller.dart';
 
 class SignUpController extends GetxController {
   SignUpRepository signUpRepository = SignUpRepository();
@@ -153,10 +154,20 @@ class SignUpController extends GetxController {
     SignUpModel result = await signUpRepository.createAccount(body: body);
 
     if (result.status == "200") {
+      // Try to read FCM token from storage; if empty, proactively fetch via NotificationController
+      String? firebaseToken = storage.read('firebase_token');
+      if (firebaseToken == null || firebaseToken.isEmpty) {
+        final notificationController = NotificationController.instance;
+        // Ensure permissions and try to refresh token
+        await notificationController.requestPermissions();
+        await notificationController.refreshToken();
+        firebaseToken = notificationController.getStoredToken();
+      }
       LoginModel result = await loginRepository.loginUser(
         body: {
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
+          "fcmToken":firebaseToken??""
         },
       );
       if (result.status == "200") {

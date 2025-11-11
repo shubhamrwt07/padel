@@ -334,7 +334,7 @@ class HomeContent extends StatelessWidget {
     final reviews = reviewData?.reviews ?? [];
 
     if (controller.isLoading.value) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingWidget(color: AppColors.primaryColor,));
     }
 
     if (reviews.isEmpty) {
