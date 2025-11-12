@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
@@ -83,10 +84,16 @@ class LoginController extends GetxController {
         storage.write('token', result.response!.token);
         storage.write('userId', result.response!.user!.id);
         Get.offAllNamed(RoutesName.bottomNav);
-      } else {
-        SnackBarUtils.showErrorSnackBar(result.message!);
       }
-    } catch (e) {
+    }on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final message = e.response?.data?['message'] ?? 'Login failed';
+
+      if (code == 404) {
+        // ✅ Show snackbar only here for login 404
+        SnackBarUtils.showErrorSnackBar(message);
+      }
+    }  catch (e) {
       log(e.toString());
     } finally {
       isLoading.value = false;
@@ -95,19 +102,11 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
+    // emailController.dispose();
+    // passwordController.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
     super.onClose();
   }
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    emailFocusNode.dispose();
-    passwordFocusNode.dispose();
-    super.dispose();
-  }
 }

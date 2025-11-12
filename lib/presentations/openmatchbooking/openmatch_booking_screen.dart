@@ -11,10 +11,10 @@ import '../../data/response_models/openmatch_model/open_match_booking_model.dart
 import '../../generated/assets.dart';
 import '../../handler/logger.dart';
 import 'openmatch_booking_controller.dart';
+
 class OpenMatchBookingScreen extends StatelessWidget {
   final OpenMatchBookingController controller = Get.put(OpenMatchBookingController());
-  OpenMatchBookingScreen({super.key,});
-
+  OpenMatchBookingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +23,16 @@ class OpenMatchBookingScreen extends StatelessWidget {
     (args is Map) ? args['backRoute'] as String? : null;
 
     return Obx(() {
-      if (!controller.isControllerReady.value) {
+      if (!controller.isControllerReady.value || controller.tabController == null) {
         return const Scaffold(
           body: Center(
-            child: LoadingWidget(color: AppColors.primaryColor,),
+            child: LoadingWidget(color: AppColors.primaryColor),
           ),
         );
       }
-      
+
       return PopScope(
-        canPop: false, // disables both Android and iOS back gestures
+        canPop: false,
         child: Scaffold(
           appBar: primaryAppBar(
             centerTitle: true,
@@ -86,7 +86,9 @@ class OpenMatchBookingScreen extends StatelessWidget {
         ),
       );
     });
-  }  Widget tabBar(TabController tabCtrl) {
+  }
+
+  Widget tabBar(TabController tabCtrl) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -96,6 +98,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         indicatorColor: AppColors.primaryColor,
         indicatorWeight: 2.5,
         labelColor: AppColors.primaryColor,
+        dividerColor: AppColors.tabColor,
         unselectedLabelColor: AppColors.labelBlackColor.withValues(alpha: 0.6),
         labelStyle: const TextStyle(
           fontSize: 13,
@@ -112,14 +115,21 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildMatchesTab(BuildContext context, {required bool completed}) {
+    // Determine which list to use based on completed flag instead of tab controller
+    final matchesList = completed ? controller.completedMatchesList : controller.upcomingMatchesList;
+    final isLoadingState = completed ? controller.isLoadingCompleted : controller.isLoadingUpcoming;
+    final isLoadingMoreState = completed ? controller.isLoadingMoreCompleted : controller.isLoadingMoreUpcoming;
+    final hasMoreDataState = completed ? controller.completedHasMoreData : controller.upcomingHasMoreData;
+
     return RefreshIndicator(
       edgeOffset: 1,
       displacement: Get.width * .2,
-      color: AppColors.primaryColor,
+      color: AppColors.whiteColor,
       onRefresh: () async {
-        controller.resetPagination();
-        String type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
+        String type = completed ? 'completed' : 'upcoming';
+        controller.resetPagination(type: type);
         await controller.fetchOpenMatchesBooking(type: type);
       },
       child: Column(
@@ -128,7 +138,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           Expanded(
             child: Obx(() {
               // Show loading
-              if (controller.isLoading.value) {
+              if (isLoadingState.value) {
                 return ListView.builder(
                   itemCount: 6,
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -137,7 +147,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               }
 
               // Show empty state
-              if (controller.openMatchesList.isEmpty) {
+              if (matchesList.isEmpty) {
                 return ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
@@ -149,7 +159,9 @@ class OpenMatchBookingScreen extends StatelessWidget {
                           Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
                           const SizedBox(height: 16),
                           Text(
-                            "No Open Matches available.",
+                            completed
+                                ? "No Completed Matches available."
+                                : "No Upcoming Matches available.",
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 16,
@@ -166,25 +178,25 @@ class OpenMatchBookingScreen extends StatelessWidget {
               return NotificationListener<ScrollNotification>(
                 onNotification: (ScrollNotification scrollInfo) {
                   if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-                      controller.hasMoreData.value &&
-                      !controller.isLoadingMore.value) {
+                      hasMoreDataState.value &&
+                      !isLoadingMoreState.value) {
                     controller.loadMoreData();
                   }
                   return false;
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: controller.openMatchesList.length + (controller.hasMoreData.value ? 1 : 0),
+                  itemCount: matchesList.length + (hasMoreDataState.value ? 1 : 0),
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     // Show loading indicator at the end
-                    if (index == controller.openMatchesList.length) {
+                    if (index == matchesList.length) {
                       return Obx(() {
-                        if (controller.isLoadingMore.value) {
+                        if (isLoadingMoreState.value) {
                           return const Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Center(
-                              child: LoadingWidget(color: AppColors.primaryColor,),
+                              child: LoadingWidget(color: AppColors.primaryColor),
                             ),
                           );
                         }
@@ -192,7 +204,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                       });
                     }
 
-                    final matches = controller.openMatchesList[index];
+                    final matches = matchesList[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       child: _buildMatchCard(
@@ -210,11 +222,13 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ).paddingOnly(left: Get.width * 0.03, right: Get.width * 0.03),
     );
   }
+
   Widget _buildAllMatchesAndFilter(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text("All Matches", style: Get.textTheme.headlineMedium),
+        // Uncomment to enable filter
         // GestureDetector(
         //   onTap: () {
         //     Get.bottomSheet(
@@ -251,9 +265,9 @@ class OpenMatchBookingScreen extends StatelessWidget {
       onTap: () {
         final id = match?.sId;
         // Get.to(
-        //       () => DetailsScreen(
-        //     // buttonType: completed ? "completed" : "upcoming",
-        //     // matchId: id,
+        //   () => DetailsScreen(
+        //     buttonType: completed ? "completed" : "upcoming",
+        //     matchId: id,
         //   ),
         //   transition: Transition.rightToLeft,
         // );
@@ -287,8 +301,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match)
-  {
+  Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match) {
     final slots = match?.slot ?? [];
     final times = slots
         .expand((slot) => slot.slotTimes ?? [])
@@ -311,8 +324,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text:
-                  "${formatDateOnly(match?.matchDate ?? "")} | $times",
+                  text: "${formatDateOnly(match?.matchDate ?? "")} | $times",
                   style: Get.textTheme.headlineSmall,
                 ),
               ],
@@ -346,9 +358,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
   Widget _buildPlayerRow({
     required bool completed,
     required OpenMatchBookingData? match,
-  })
-
-  {
+  }) {
     final teamAPlayers = match?.teamA ?? [];
     final teamBPlayers = match?.teamB ?? [];
 
@@ -360,14 +370,15 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final user = player.userId;
 
         if (!completed && user == null) {
-          // For the first Team A slot, show level badge using model getter with robust fallbacks
           if (i == 0) {
             final String inferredLevel = extractLevelCode(
-              (
-                (match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
-                    ? match!.firstPlayerLevelCode
-                    : (match?.createdBy?.level ?? match?.playerLevel ?? match?.skillLevel ?? '')
-              ).trim(),
+              ((match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
+                  ? match!.firstPlayerLevelCode
+                  : (match?.createdBy?.level ??
+                  match?.playerLevel ??
+                  match?.skillLevel ??
+                  ''))
+                  .trim(),
             );
             teamAWidgets.add(
               _buildPlayerSlot(
@@ -385,10 +396,16 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   final id = match?.sId;
                   final result = await Get.toNamed(
                     RoutesName.addPlayer,
-                    arguments: {"matchId": id, "team": "teamA", "needOpenMatches": true},
+                    arguments: {
+                      "matchId": id,
+                      "team": "teamA",
+                      "needOpenMatches": true
+                    },
                   );
                   if (result == true) {
-                    final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
+                    final type = controller.tabController?.index == 0
+                        ? 'upcoming'
+                        : 'completed';
                     await controller.fetchOpenMatchesBooking(type: type);
                   }
                 },
@@ -407,7 +424,6 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               name: user?.name ?? '',
-              // Show level badge for any filled player slot
               category: true,
               completed: completed,
               level: levelCode,
@@ -415,15 +431,15 @@ class OpenMatchBookingScreen extends StatelessWidget {
           );
         }
       } else {
-        // Empty slot
         if (!completed && i == 0) {
-          // Show inferred level for first Team A slot even when empty
           final String inferredLevel = extractLevelCode(
-            (
-              (match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
-                  ? match!.firstPlayerLevelCode
-                  : (match?.createdBy?.level ?? match?.playerLevel ?? match?.skillLevel ?? '')
-            ).trim(),
+            ((match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
+                ? match!.firstPlayerLevelCode
+                : (match?.createdBy?.level ??
+                match?.playerLevel ??
+                match?.skillLevel ??
+                ''))
+                .trim(),
           );
           teamAWidgets.add(
             _buildPlayerSlot(
@@ -439,7 +455,6 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: '',
               name: '',
-              // Do not show badge on empty slots
               category: false,
               completed: completed,
               level: "-",
@@ -475,10 +490,16 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 final id = match?.sId;
                 final result = await Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamB", "needOpenMatches": true},
+                  arguments: {
+                    "matchId": id,
+                    "team": "teamB",
+                    "needOpenMatches": true
+                  },
                 );
                 if (result == true) {
-                  final type = controller.tabController?.index == 0 ? 'upcoming' : 'completed';
+                  final type = controller.tabController?.index == 0
+                      ? 'upcoming'
+                      : 'completed';
                   await controller.fetchOpenMatchesBooking(type: type);
                 }
               },
@@ -489,22 +510,18 @@ class OpenMatchBookingScreen extends StatelessWidget {
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               name: user?.name ?? '',
-              // Show level badge for any filled player slot
               category: true,
               completed: completed,
-              // Use player's own level, showing only the code (e.g., "B2")
               level: extractLevelCode(user?.level ?? ''),
             ),
           );
         }
       } else {
-        // Empty slot
         if (completed) {
           teamBWidgets.add(
             _buildPlayerSlot(
               imageUrl: '',
               name: '',
-              // Do not show badge on empty slots
               category: false,
               completed: completed,
               level: "-",
@@ -534,29 +551,21 @@ class OpenMatchBookingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Team A - Player 1
             teamAWidgets[0],
-
-            // Team A - Player 2
             teamAWidgets[1],
-
-            // Divider
             Container(
               width: 1,
               margin: const EdgeInsets.only(bottom: 19),
               color: AppColors.blackColor.withValues(alpha: 0.5),
             ),
-
-            // Team B - Player 1
             teamBWidgets[0],
-
-            // Team B - Player 2
             teamBWidgets[1],
           ],
         ),
       ),
     );
   }
+
   Widget _buildPlayerSlot({
     required String imageUrl,
     required String name,
@@ -574,15 +583,18 @@ class OpenMatchBookingScreen extends StatelessWidget {
             shape: BoxShape.circle,
             color: AppColors.whiteColor,
             border: Border.all(
-              color: imageUrl.isEmpty ? AppColors.primaryColor : Colors.transparent,
+              color: imageUrl.isEmpty
+                  ? AppColors.primaryColor
+                  : Colors.transparent,
             ),
           ),
           child: imageUrl.isEmpty
               ? CircleAvatar(
-            backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+            backgroundColor:
+            AppColors.primaryColor.withValues(alpha: 0.1),
             child: Text(
               (name.isNotEmpty ? name[0] : "?").toUpperCase(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
               ),
@@ -596,11 +608,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: const BoxDecoration(shape: BoxShape.circle),
-                child: Center(
+                child: const Center(
                   child: SizedBox(
                     width: 20,
                     height: 20,
-                    child: LoadingWidget(color: AppColors.primaryColor,),
+                    child: LoadingWidget(color: AppColors.primaryColor),
                   ),
                 ),
               ),
@@ -625,7 +637,9 @@ class OpenMatchBookingScreen extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             name.isNotEmpty ? name : 'Unknown',
             style: Get.textTheme.bodySmall!.copyWith(
-              color: name.isNotEmpty ? AppColors.darkGreyColor : AppColors.primaryColor,
+              color: name.isNotEmpty
+                  ? AppColors.darkGreyColor
+                  : AppColors.primaryColor,
               fontSize: 11,
             ),
           ),
@@ -653,6 +667,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildMatchFooter(BuildContext context, OpenMatchBookingData? match) {
     final slots = match?.slot ?? [];
     final totalAmount = slots.isNotEmpty
@@ -684,7 +699,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         ),
         Row(
           children: [
-            Icon(Icons.currency_rupee,
+            const Icon(Icons.currency_rupee,
                 size: 18, color: AppColors.primaryColor)
                 .paddingOnly(top: 2),
             Text(
@@ -699,6 +714,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildAddPlayerSlot({required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -731,6 +747,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       ),
     );
   }
+
   // Helper functions
   String formatDayOnly(String dateStr) {
     if (dateStr.isEmpty) return '';
@@ -741,6 +758,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       return '';
     }
   }
+
   String formatDateOnly(String dateStr) {
     if (dateStr.isEmpty) return '';
     try {
@@ -750,10 +768,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
       return '';
     }
   }
+
   String formatAmount(int amount) => amount.toString();
+
   String extractLevelCode(String value) {
     if (value.isEmpty) return '-';
-    // Handles formats like "B2 – Advanced Player" or "B2 - Advanced Player"
     final parts = value.split(RegExp(r"\s*[–-]\s*"));
     final code = parts.isNotEmpty ? parts.first.trim() : '';
     return code.isNotEmpty ? code : '-';

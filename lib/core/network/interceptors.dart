@@ -11,7 +11,7 @@ import 'dio_client.dart';
 
 class LoggerInterceptor extends Interceptor {
   Logger logger = Logger(
-    printer: PrettyPrinter(methodCount: 0, colors: false, printEmojis: true,),
+    printer: PrettyPrinter(methodCount: 0, colors: false, printEmojis: true),
   );
 
   final ConnectivityService _connectivityService = ConnectivityService();
@@ -29,8 +29,14 @@ class LoggerInterceptor extends Interceptor {
 
     // Handle 401 Unauthorized (Token expired)
     if (err.response?.statusCode == 401) {
-      log("Token expired - redirecting to session expired page");
-      await _handleTokenExpiration();
+      final token = storage.read('token');
+      if (token != null && token.isNotEmpty) {
+        log("Token expired - redirecting to session expired page");
+        await _handleTokenExpiration();
+      } else {
+        log("No token found, user hasn't logged in yet");
+        // Do nothing, let user continue to login/registration flow
+      }
       return handler.next(err);
     }
     // Check if it's a connectivity error
@@ -41,10 +47,10 @@ class LoggerInterceptor extends Interceptor {
       await _connectivityService.checkConnectivity();
     } else if (err.response != null) {
       if (err.response?.statusCode != 404) {
-   SnackBarUtils.showErrorSnackBar(
-  err.response?.data?['message'] ?? 'An error occurred',
-);
-    }
+        SnackBarUtils.showErrorSnackBar(
+          err.response?.data?['message'] ?? 'An error occurred',
+        );
+      }
     } else {
       SnackBarUtils.showErrorSnackBar(
         err.response?.data?['message'] ?? 'An error occurred',
@@ -61,18 +67,15 @@ class LoggerInterceptor extends Interceptor {
     });
   }
 
-
   /// Navigate to session expired page
   void _navigateToSessionExpired() {
     try {
       if (Get.context != null) {
-       Get.to(()=>SessionExpiredPage());
+        Get.to(() => SessionExpiredPage());
       }
-
     } catch (e) {
       log("Error navigating to session expired page: $e");
-      Get.to(()=>SessionExpiredPage());
-
+      Get.to(() => SessionExpiredPage());
     }
   }
 

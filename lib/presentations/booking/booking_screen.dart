@@ -115,45 +115,57 @@ class BookingScreen extends GetView<BookingController> {
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
-              SliverAppBar(
-                expandedHeight: Get.height * 0.2, // Increased for better visibility
-                pinned: true,
-                floating: false,
-                systemOverlayStyle: SystemUiOverlayStyle.light, // ✅ Add this line
-                backgroundColor: AppColors.redColor,
-                automaticallyImplyLeading: false,
-                title: LayoutBuilder(
+            SliverAppBar(
+              expandedHeight: Get.height * 0.2,
+              pinned: true,
+              floating: false,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Obx(() {
+                final clubName = controller.courtsData.value.clubName ?? '';
+                return LayoutBuilder(
                   builder: (context, constraints) {
-                    var top = constraints.biggest.height;
-                    final isCollapsed = top <= kToolbarHeight + 50;
-                    return Obx(() {
-                      final clubName = controller.courtsData.value.clubName ?? '';
-                      return isCollapsed && clubName.isNotEmpty
-                          ? Text(
+                    final settings =
+                    context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+                    final collapsed = (settings?.currentExtent ?? 0) <=
+                        (settings?.minExtent ?? kToolbarHeight) + 10;
+
+                    return AnimatedOpacity(
+                      opacity: collapsed && clubName.isNotEmpty ? 1 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
                         clubName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: AppColors.whiteColor,
+                          color: AppColors.blackColor,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
-                      )
-                          : const SizedBox.shrink();
-                    });
+                      ).paddingOnly(left: 50),
+                    );
                   },
-                ),
-                flexibleSpace: LayoutBuilder(
-                  builder: (context, constraints) {
-                    var top = constraints.biggest.height;
-                    final isCollapsed = top <= kToolbarHeight + 50;
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        /// Background image
+                );
+              }),
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final top = constraints.biggest.height;
+                  final isCollapsed = top <= kToolbarHeight + 50;
+
+                  final iconColor =
+                  isCollapsed ? AppColors.blackColor : AppColors.blackColor;
+                  final bgColor =
+                  isCollapsed ? AppColors.whiteColor : Colors.transparent;
+
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      /// Background image (only when expanded)
+                      if (!isCollapsed)
                         Obx(() {
-                          final imageUrl =
-                          controller.courtsData.value.courtImage?.isNotEmpty == true
+                          final imageUrl = controller.courtsData.value.courtImage?.isNotEmpty == true
                               ? controller.courtsData.value.courtImage!.first
                               : '';
                           return imageUrl.isNotEmpty
@@ -162,24 +174,30 @@ class BookingScreen extends GetView<BookingController> {
                             fit: BoxFit.cover,
                             width: Get.width,
                             height: double.infinity,
-                            errorWidget: (context, url, error) =>
-                                Container(
-                                  color: AppColors.redColor,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: AppColors.whiteColor,
-                                      size: 50,
-                                    ),
-                                  ),
+                            errorWidget: (context, url, error) => Container(
+                              color: AppColors.redColor,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  color: AppColors.whiteColor,
+                                  size: 50,
                                 ),
+                              ),
+                            ),
                           )
-                              : Container(
-                            color: AppColors.redColor,
-                          );
+                              : Container(color: AppColors.redColor);
                         }),
 
-                        /// Gradient overlay for better text visibility
+                      /// Dynamic background when collapsed
+                      if (isCollapsed)
+                        Container(
+                          color: bgColor,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+
+                      /// Gradient overlay (only when expanded)
+                      if (!isCollapsed)
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -195,204 +213,204 @@ class BookingScreen extends GetView<BookingController> {
                           ),
                         ),
 
-                        /// Center club name & address (only when expanded)
-                        if (!isCollapsed)
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 30,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Obx(() {
-                                  final clubName = controller
-                                      .courtsData.value.clubName ??
-                                      'Unknown Club';
-                                  return Text(
-                                    clubName,
-                                    style: const TextStyle(
-                                      color: AppColors.whiteColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24,
-                                      letterSpacing: 0.5,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black45,
-                                          offset: Offset(1, 1),
-                                          blurRadius: 3,
-                                        ),
-                                      ],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                }),
-                                const SizedBox(height: 8),
-                                Obx(() {
-                                  final address = controller
-                                      .courtsData.value.address ??
-                                      'Address not available';
-                                  final city =
-                                      controller.courtsData.value.city ??
-                                          '';
-                                  final fullAddress = city.isNotEmpty
-                                      ? "$address, $city"
-                                      : address;
-                                  return Text(
-                                    fullAddress,
-                                    style: const TextStyle(
-                                      color: AppColors.whiteColor,
-                                      fontSize: 16,
-                                      letterSpacing: 0.3,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black45,
-                                          offset: Offset(1, 1),
-                                          blurRadius: 3,
-                                        ),
-                                      ],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                }),
-                              ],
-                            ).paddingOnly(left: 32.0,right: 32.0,),
-                          ),
-
-                        /// Top bar with back button and actions
+                      /// Club name & address (only when expanded)
+                      if (!isCollapsed)
                         Positioned(
-                          top: 0,
                           left: 0,
                           right: 0,
-                          child: SafeArea(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Get.width * 0.04,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Back button
-                                  GestureDetector(
-                                    onTap: () => Get.back(),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.3),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_back,
-                                        color: AppColors.whiteColor,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  ),
-                                  // Share and Cart buttons
-                                  Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: _shareWithImage,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.whiteColor,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: SvgPicture.asset(
-                                            Assets.imagesIcShareBooking,
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      GestureDetector(
-                                        onTap: () => Get.to(
-                                              () => CartScreen(buttonType: "true"),
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.whiteColor,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              const Icon(
-                                                Icons.shopping_cart_outlined,
-                                                color: AppColors.blackColor,
-                                                size: 22,
-                                              ),
-                                              Positioned(
-                                                right: -6,
-                                                top: -6,
-                                                child: Obx(() {
-                                                  final slotCount =
-                                                      Get.find<CartController>()
-                                                          .totalSlot
-                                                          .value;
-                                                  return slotCount > 0
-                                                      ? Container(
-                                                    padding: const EdgeInsets.all(4),
-                                                    decoration: const BoxDecoration(
-                                                      color: Colors.red,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    constraints: const BoxConstraints(
-                                                      minWidth: 18,
-                                                      minHeight: 18,
-                                                    ),
-                                                    child: Text(
-                                                      '$slotCount',
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 10,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                      textAlign: TextAlign.center,
-                                                    ),
-                                                  )
-                                                      : const SizedBox.shrink();
-                                                }),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                          bottom: 30,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Obx(() {
+                                final clubName =
+                                    controller.courtsData.value.clubName ?? 'Unknown Club';
+                                return Text(
+                                  clubName,
+                                  style: const TextStyle(
+                                    color: AppColors.whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    letterSpacing: 0.5,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black45,
+                                        offset: Offset(1, 1),
+                                        blurRadius: 3,
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                  textAlign: TextAlign.center,
+                                );
+                              }),
+                              const SizedBox(height: 8),
+                              Obx(() {
+                                final address =
+                                    controller.courtsData.value.address ?? 'Address not available';
+                                final city = controller.courtsData.value.city ?? '';
+                                final fullAddress =
+                                city.isNotEmpty ? "$address, $city" : address;
+                                return Text(
+                                  fullAddress,
+                                  style: const TextStyle(
+                                    color: AppColors.whiteColor,
+                                    fontSize: 16,
+                                    letterSpacing: 0.3,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black45,
+                                        offset: Offset(1, 1),
+                                        blurRadius: 3,
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                );
+                              }),
+                            ],
+                          ).paddingSymmetric(horizontal: 32),
+                        ),
+
+                      /// Top Bar (Back, Share, Cart)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: SafeArea(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Get.width * 0.04,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Back button
+                                GestureDetector(
+                                  onTap: () => Get.back(),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isCollapsed
+                                          ? Colors.transparent
+                                          : Colors.black.withValues(alpha: 0.3),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.arrow_back,
+                                      color: isCollapsed?Colors.black:Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                                // Share + Cart
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: _shareWithImage,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: isCollapsed
+                                              ? Colors.grey.withValues(alpha: 0.1)
+                                              : AppColors.whiteColor,
+                                          shape: BoxShape.circle,
+                                          boxShadow: isCollapsed
+                                              ? []
+                                              : [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.1),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: SvgPicture.asset(
+                                          Assets.imagesIcShareBooking,
+                                          width: 20,
+                                          height: 20,
+                                          colorFilter: ColorFilter.mode(
+                                            iconColor,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    GestureDetector(
+                                      onTap: () => Get.to(() => CartScreen(buttonType: "true")),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: isCollapsed
+                                              ? Colors.grey.withValues(alpha: 0.1)
+                                              : AppColors.whiteColor,
+                                          shape: BoxShape.circle,
+                                          boxShadow: isCollapsed
+                                              ? []
+                                              : [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.1),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Icon(
+                                              Icons.shopping_cart_outlined,
+                                              color: iconColor,
+                                              size: 22,
+                                            ),
+                                            Positioned(
+                                              right: -6,
+                                              top: -6,
+                                              child: Obx(() {
+                                                final slotCount = Get.find<CartController>()
+                                                    .totalSlot
+                                                    .value;
+                                                return slotCount > 0
+                                                    ? Container(
+                                                  padding: const EdgeInsets.all(4),
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.red,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  constraints: const BoxConstraints(
+                                                    minWidth: 18,
+                                                    minHeight: 18,
+                                                  ),
+                                                  child: Text(
+                                                    '$slotCount',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                )
+                                                    : const SizedBox.shrink();
+                                              }),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    ],
+                  );
+                },
               ),
+            ),
               // Pinned TabBar
               SliverPersistentHeader(
                 pinned: true,
