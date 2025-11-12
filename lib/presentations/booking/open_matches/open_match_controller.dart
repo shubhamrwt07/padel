@@ -2,9 +2,11 @@ import 'package:intl/intl.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../data/response_models/openmatch_model/open_match_model.dart';
 import '../../../presentations/booking/widgets/booking_exports.dart';
+
 class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedSlots = <String>[].obs;
+  RxString selectedTimeFilter = 'morning'.obs; // New: for tab selection
 
   String? selectedTime;
   Rx<DateTime> selectedDate = DateTime.now().obs;
@@ -36,7 +38,7 @@ class OpenMatchesController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('EEEE').format(parsed); // e.g. Monday
+      return DateFormat('EEEE').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -46,7 +48,7 @@ class OpenMatchesController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('dd MMMM').format(parsed); // e.g. 16 September
+      return DateFormat('dd MMMM').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -57,7 +59,7 @@ class OpenMatchesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    argument =Get.arguments["data"];
+    argument = Get.arguments["data"];
     if (timeSlots.isNotEmpty) {
       final firstAvail = firstAvailableSlot();
       if (firstAvail != null) {
@@ -73,6 +75,56 @@ class OpenMatchesController extends GetxController {
     }
   }
 
+  /// Get time period (morning, noon, night) for a given time slot
+  String getTimePeriod(String timeSlot) {
+    try {
+      final cleaned = timeSlot.replaceAll(' ', '').toUpperCase();
+      DateTime? parsed;
+
+      try {
+        parsed = DateFormat('h:mma').parse(cleaned);
+      } catch (_) {
+        try {
+          parsed = DateFormat('hha').parse(cleaned);
+        } catch (_) {
+          try {
+            parsed = DateFormat('ha').parse(cleaned);
+          } catch (_) {
+            return 'morning'; // default fallback
+          }
+        }
+      }
+
+      final hour = parsed.hour;
+
+      if (hour >= 6 && hour < 12) {
+        return 'morning'; // 6 AM - 11:59 AM
+      } else if (hour >= 12 && hour < 18) {
+        return 'noon'; // 12 PM - 5:59 PM
+      } else {
+        return 'night'; // 6 PM - 5:59 AM
+      }
+    } catch (_) {
+      return 'morning';
+    }
+  }
+
+  /// Filter slots by selected time period
+  List<String> filterSlotsByPeriod(List<String> slots) {
+    final filter = selectedTimeFilter.value;
+    return slots.where((slot) => getTimePeriod(slot) == filter).toList();
+  }
+
+  /// Filtered available slots based on tab selection
+  List<String> get filteredAvailableSlots {
+    return filterSlotsByPeriod(availableSlots);
+  }
+
+  /// Filtered unavailable slots based on tab selection
+  List<String> get filteredUnavailableSlots {
+    return filterSlotsByPeriod(unavailableSlots);
+  }
+
   /// Function to create match
   Future<void> createOpenMatch() async {
     try {
@@ -83,17 +135,15 @@ class OpenMatchesController extends GetxController {
         return;
       }
 
-      // Format date
       String formattedDate = DateFormat("yyyy-MM-dd").format(selectedDate.value);
 
-      // Prepare request data (adjust keys as per your API requirement)
       final data = {
         "matchDate": formattedDate,
         "matchTime": selectedTime,
-        "slots": selectedSlots, // optional, if required
+        "slots": selectedSlots,
       };
 
-      final repo = OpenMatchRepository(); // your repo class instance
+      final repo = OpenMatchRepository();
       final response = await repo.createMatch(data: data);
 
       createdMatch.value = response;
@@ -119,14 +169,13 @@ class OpenMatchesController extends GetxController {
       }
       final formattedDate = DateFormat("yyyy-MM-dd").format(selectedDate.value);
 
-      // keep raw formatted time like "7 pm"
       final formattedTime = _formatTimeForApi(selectedTime!);
 
       final repo = OpenMatchRepository();
       final response = await repo.getMatchesByDateTime(
         matchDate: formattedDate,
         matchTime: formattedTime,
-        cubId: argument.id??"",
+        cubId: argument.id ?? "",
       );
       matchesBySelection.value = response;
     } catch (e) {
@@ -138,46 +187,44 @@ class OpenMatchesController extends GetxController {
   }
 
   String _formatTimeForApi(String raw) {
-    // Normalize input like "7:00pm" or "7 pm" to a consistent DateTime
-    final cleaned = raw.replaceAll(' ', '').toUpperCase(); // e.g., 7:00PM
+    final cleaned = raw.replaceAll(' ', '').toUpperCase();
     DateTime? parsed;
     try {
       parsed = DateFormat('h:mma').parse(cleaned);
     } catch (_) {
       try {
-        parsed = DateFormat('hha').parse(cleaned); // e.g., 07PM
+        parsed = DateFormat('hha').parse(cleaned);
       } catch (_) {
         try {
-          parsed = DateFormat('ha').parse(cleaned); // e.g., 7PM
+          parsed = DateFormat('ha').parse(cleaned);
         } catch (_) {
           parsed = null;
         }
       }
     }
     if (parsed == null) {
-      return raw; // fallback
+      return raw;
     }
     return DateFormat('h a').format(parsed).toLowerCase();
   }
 
-  // Returns true if the provided slot (e.g., "7 pm") is in the past for the selected date
   bool isPastTime(String slotLabel) {
     try {
       final targetDate = selectedDate.value;
       final now = DateTime.now();
-      // If selected date is after today, nothing is past
+
       if (DateTime(targetDate.year, targetDate.month, targetDate.day)
           .isAfter(DateTime(now.year, now.month, now.day))) {
         return false;
       }
-      // If selected date is before today, everything is past (but our picker doesn't allow that)
+
       if (DateTime(targetDate.year, targetDate.month, targetDate.day)
           .isBefore(DateTime(now.year, now.month, now.day))) {
         return true;
       }
 
       final cleaned = slotLabel.replaceAll(' ', '').toUpperCase();
-      final parsed = DateFormat('ha').parse(cleaned); // hour only
+      final parsed = DateFormat('ha').parse(cleaned);
       final slotDateTime = DateTime(targetDate.year, targetDate.month, targetDate.day, parsed.hour, 0);
       return slotDateTime.isBefore(now);
     } catch (_) {
@@ -185,7 +232,6 @@ class OpenMatchesController extends GetxController {
     }
   }
 
-  // First future or current time slot for the selected date
   String? firstAvailableSlot() {
     for (final t in timeSlots) {
       if (!isPastTime(t)) return t;
@@ -193,13 +239,10 @@ class OpenMatchesController extends GetxController {
     return null;
   }
 
-  // Expose filtered slots
   List<String> get availableSlots => timeSlots.where((t) => !isPastTime(t)).toList();
   List<String> get unavailableSlots => timeSlots.where((t) => isPastTime(t)).toList();
 
-  // Keep selection valid whenever called
   void _ensureValidSelection() {
-    // If current selection is past or null, choose first available
     if (selectedTime == null || isPastTime(selectedTime!)) {
       final nextSlot = firstAvailableSlot();
       if (nextSlot != null) {
@@ -213,5 +256,4 @@ class OpenMatchesController extends GetxController {
       }
     }
   }
-
 }

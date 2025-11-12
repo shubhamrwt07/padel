@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../widgets/booking_exports.dart';
+
 class OpenMatchesScreen extends StatelessWidget {
   final OpenMatchesController controller = Get.put(OpenMatchesController());
   OpenMatchesScreen({super.key});
@@ -26,19 +27,17 @@ class OpenMatchesScreen extends StatelessWidget {
           width: Get.width * 0.9,
           child: Text(
             "Create an Open Match",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
           ).paddingOnly(right: Get.width * 0.14),
           onTap: () {
-           final booking = Get.put(BookSessionController());
-            Get.toNamed(RoutesName.createOpenMatch, arguments: {"id":booking.argument});
+            final booking = Get.put(BookSessionController());
+            Get.toNamed(RoutesName.createOpenMatch, arguments: {"id": booking.argument});
           },
         ).paddingOnly(bottom: 0),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 16,right: 16,bottom: 0),
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -48,21 +47,27 @@ class OpenMatchesScreen extends StatelessWidget {
                 child: _buildSlotHeader(context),
               ),
               Transform.translate(
-                  offset: Offset(0, -Get.height * 0.05),
-                  child: _buildTimeSlots()),
+                offset: Offset(0, -Get.height * 0.05),
+                child: _buildTimeTabs(),
+              ),
+              Transform.translate(
+                offset: Offset(0, -Get.height * 0.04),
+                child: _buildTimeSlots(),
+              ),
               Transform.translate(
                 offset: Offset(0, -Get.height * 0.04),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Open matches",style: Get.textTheme.headlineMedium,),
+                    Text("Available Matches", style: Get.textTheme.headlineMedium),
                     GestureDetector(
-                      onTap: ()=>Get.toNamed(RoutesName.allOpenMatch,arguments: {"club":controller.argument}),
+                      onTap: () => Get.toNamed(RoutesName.allOpenMatch, arguments: {"club": controller.argument}),
                       child: Container(
-                          color: Colors.transparent,
-                          padding: EdgeInsets.symmetric(vertical: 5,horizontal: 8),
-                          alignment: Alignment.center,
-                          child: Text("View all",style: Get.textTheme.labelMedium!.copyWith(color: AppColors.primaryColor),)),
+                        color: Colors.transparent,
+                        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                        alignment: Alignment.center,
+                        child: Text("View all", style: Get.textTheme.labelMedium!.copyWith(color: AppColors.primaryColor)),
+                      ),
                     ),
                   ],
                 ).paddingOnly(bottom: 10),
@@ -78,20 +83,18 @@ class OpenMatchesScreen extends StatelessWidget {
                     return Center(
                       child: Column(
                         children: [
-                          Icon(Icons.event_busy_outlined,size: 50,color: AppColors.darkGrey,),
+                          Icon(Icons.event_busy_outlined, size: 50, color: AppColors.darkGrey),
                           Text(
                             'No matches available for this time',
                             style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
                             textAlign: TextAlign.center,
                           ),
                         ],
-                      ).paddingOnly(top: Get.height*0.1),
+                      ).paddingOnly(top: Get.height * 0.1),
                     );
                   }
                   return Column(
-                    children: matches.data!
-                        .map((m) => _buildMatchCardFromData(context, m))
-                        .toList(),
+                    children: matches.data!.map((m) => _buildMatchCardFromData(context, m)).toList(),
                   );
                 }),
               ),
@@ -109,118 +112,103 @@ class OpenMatchesScreen extends StatelessWidget {
       children: [
         Text(
           "Select Date",
-          style: Get.textTheme.labelLarge!.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
         ).paddingOnly(top: 10),
         Obx(
               () => Transform.translate(
-                offset: Offset(0, -Get.height * .02),
-                child: Row(
-                  children: [
-                      Container(
-                        width: 30,
-                        height: Get.height * 0.061,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.textFieldColor,
-                          border: Border.all(
-                            color: AppColors.blackColor.withAlpha(10),
-                          ),
-                        ),
-                        // Display month vertically (O C T)
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min, // Prevents unnecessary extra spacing
-                          children: DateFormat('MMM')
-                              .format(controller.selectedDate.value ?? DateTime.now())
-                              .toUpperCase()
-                              .split('')
-                              .map(
-                                (char) => Text(
-                              char,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                height: 1.0, // Reduces space between letters
-                                color: Colors.black,
+            offset: Offset(0, -Get.height * .02),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: Get.height * 0.061,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.textFieldColor,
+                    border: Border.all(color: AppColors.blackColor.withAlpha(10)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: DateFormat('MMM')
+                        .format(controller.selectedDate.value ?? DateTime.now())
+                        .toUpperCase()
+                        .split('')
+                        .map((char) => Text(
+                      char,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0,
+                        color: Colors.black,
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                ),
+                Expanded(
+                  child: EasyDateTimeLinePicker.itemBuilder(
+                    headerOptions: HeaderOptions(
+                      headerBuilder: (_, context, date) => const SizedBox.shrink(),
+                    ),
+                    selectionMode: SelectionMode.alwaysFirst(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2030, 3, 18),
+                    focusedDate: controller.selectedDate.value,
+                    itemExtent: 46,
+                    itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+                      final dayName = DateFormat('E').format(date);
+                      return GestureDetector(
+                        onTap: onTap,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: Container(
+                            height: Get.height * 0.06,
+                            width: Get.width * 0.11,
+                            key: ValueKey(isSelected),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
+                              border: Border.all(
+                                color: isSelected ? Colors.transparent : AppColors.blackColor.withAlpha(10),
+                                width: 1,
                               ),
                             ),
-                          )
-                              .toList(),
-                        ),
-                    ),
-                    Expanded(
-                      child: EasyDateTimeLinePicker.itemBuilder(
-                        headerOptions: HeaderOptions(
-                          headerBuilder: (_, context, date) => const SizedBox.shrink(),
-                        ),
-                        selectionMode: SelectionMode.alwaysFirst(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2030, 3, 18),
-                        focusedDate: controller.selectedDate.value,
-                        itemExtent: 46,
-                        itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                          final dayName = DateFormat('E').format(date);
-
-                          return GestureDetector(
-                            onTap: onTap,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: Container(
-                                height: Get.height * 0.06,
-                                width: Get.width * 0.11,
-                                key: ValueKey(isSelected),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: isSelected
-                                      ? Colors.black
-                                      : AppColors.playerCardBackgroundColor,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Colors.transparent
-                                        : AppColors.blackColor.withAlpha(10),
-                                    width: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  date.day.toString(),
+                                  style: Get.textTheme.titleMedium!.copyWith(
+                                    fontSize: 18,
+                                    color: isSelected ? Colors.white : AppColors.textColor,
                                   ),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      date.day.toString(),
-                                      style: Get.textTheme.titleMedium!.copyWith(
-                                        fontSize: 18,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppColors.textColor,
-                                      ),
-                                    ),
-                                    Text(
-                                      dayName,
-                                      style: Get.textTheme.bodySmall!.copyWith(
-                                        fontSize: 11,
-                                        color: isSelected ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  dayName,
+                                  style: Get.textTheme.bodySmall!.copyWith(
+                                    fontSize: 11,
+                                    color: isSelected ? Colors.white : Colors.black,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ).paddingSymmetric(vertical: 6);
-                        },
-                        onDateChange: (date) {
-                          controller.selectedDate.value = date;
-                          // ensure slot lists and selection are updated with new date
-                          controller.selectedTime = null;
-                          controller.selectedSlots.clear();
-                          controller.fetchMatchesForSelection();
-                        },
-                      ),
-                    ),
-                  ],
+                          ),
+                        ),
+                      ).paddingSymmetric(vertical: 6);
+                    },
+                    onDateChange: (date) {
+                      controller.selectedDate.value = date;
+                      controller.selectedTime = null;
+                      controller.selectedSlots.clear();
+                      controller.fetchMatchesForSelection();
+                    },
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -236,10 +224,7 @@ class OpenMatchesScreen extends StatelessWidget {
           children: [
             Text(
               'Show Unavailable Slots',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall
-                  ?.copyWith(color: AppColors.darkGrey),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.darkGrey),
             ),
             SizedBox(width: Get.width * .01),
             Transform.scale(
@@ -262,14 +247,83 @@ class OpenMatchesScreen extends StatelessWidget {
     );
   }
 
+  /// ---------------- TIME TABS ----------------
+  Widget _buildTimeTabs() {
+    return Obx(() {
+      final selectedFilter = controller.selectedTimeFilter.value;
+      final tabs = [
+        {"label": "Morning", "icon": Icons.wb_twilight_sharp, "value": "morning"},
+        {"label": "Noon", "icon": Icons.wb_sunny, "value": "noon"},
+        {"label": "Night", "icon": Icons.nightlight_round, "value": "night"},
+      ];
+
+      return Container(
+        margin: EdgeInsets.only(bottom: Get.height * 0.015),
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: AppColors.lightBlueColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(tabs.length, (index) {
+            final tab = tabs[index];
+            final isSelected = selectedFilter == tab["value"];
+
+            return Flexible(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(25),
+                  onTap: () {
+                    controller.selectedTimeFilter.value = tab["value"] as String;
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 3),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryColor.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          tab["icon"] as IconData,
+                          size: 14,
+                          color: isSelected ? AppColors.primaryColor : Colors.black87,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          tab["label"] as String,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected ? AppColors.primaryColor : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    });
+  }
+
   /// ---------------- TIME SLOTS ----------------
   Widget _buildTimeSlots() {
     return Obx(() {
-      double spacing = Get.width * .015; // smaller spacing
-      final double tileWidth = (Get.width - spacing * 5 - 32) / 4; // fit 5 per row
+      double spacing = Get.width * .015;
+      final double tileWidth = (Get.width - spacing * 5 - 32) / 4;
 
-      final available = controller.availableSlots;
-      final unavailable = controller.unavailableSlots;
+      final available = controller.filteredAvailableSlots;
+      final unavailable = controller.filteredUnavailableSlots;
       final showUnavailable = controller.viewUnavailableSlots.value;
 
       List<Widget> buildSlotTiles(List<String> slots, {required bool disabled}) {
@@ -318,7 +372,7 @@ class OpenMatchesScreen extends StatelessWidget {
           );
         }).toList();
       }
-      // 🔹 Check which list to show
+
       final slotsToShow = showUnavailable ? unavailable : available;
 
       return Column(
@@ -351,58 +405,40 @@ class OpenMatchesScreen extends StatelessWidget {
     final dateOnlyStr = controller.getDate(data.matchDate);
     final timeStr = (data.matchTime ?? '').toLowerCase();
     final clubName = data.clubId?.clubName ?? '-';
-    // final address = data.clubId?.city != null && data.clubId?.zipCode != null
-    //     ? '${data.clubId?.city} ${data.clubId?.zipCode}'
-    //     : (data.clubId?.address ?? '-');
-    final address = data.clubId?.address??"N/A";
-    final price = (data.slot?.isNotEmpty == true &&
-        data.slot!.first.slotTimes?.isNotEmpty == true)
+    final address = data.clubId?.address ?? "N/A";
+    final price = (data.slot?.isNotEmpty == true && data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '₹${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '₹-';
 
-    // ---------------- Build players list ----------------
-
-    // Team A (max 2 players)
-    final teamAPlayers = (data.teamA ?? [])
-        .take(2)
-        .map((p) {
+    final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
-      // final name = p.userId?.name?.capitalizeFirst ?? '';
-      final level = p.userId?.level?.split(' ').first??"-";
+      final level = p.userId?.level?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
-        return _buildFilledPlayer(pic, name,level);
+        return _buildFilledPlayer(pic, name, level);
       } else {
-        // show player with no pic (fallback circle + initials maybe)
-        return _buildFilledPlayer("", name,level);
+        return _buildFilledPlayer("", name, level);
       }
-    })
-        .toList();
+    }).toList();
 
     while (teamAPlayers.length < 2) {
       teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
     }
 
-    // Team B (max 2 players)
-    final teamBPlayers = (data.teamB ?? [])
-        .take(2)
-        .map((p) {
+    final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
-      // final name = p.userId?.name?.capitalizeFirst ?? '';
-      final level = p.userId?.level?.split(' ').first??"-";
+      final level = p.userId?.level?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
-        return _buildFilledPlayer(pic, name,level);
+        return _buildFilledPlayer(pic, name, level);
       } else {
-        return _buildFilledPlayer("", name,level);
+        return _buildFilledPlayer("", name, level);
       }
-    })
-        .toList();
+    }).toList();
 
     while (teamBPlayers.length < 2) {
       teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
     }
-
 
     return Container(
       width: double.infinity,
@@ -414,7 +450,6 @@ class OpenMatchesScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ---------------- Header ----------------
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -423,10 +458,7 @@ class OpenMatchesScreen extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '$dayStr ',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall!
-                          .copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w900),
                     ),
                     TextSpan(
                       text: '$dateOnlyStr | $timeStr',
@@ -458,52 +490,38 @@ class OpenMatchesScreen extends StatelessWidget {
               )
             ],
           ).paddingOnly(top: 15, bottom: 10, left: 15),
-
-          // ---------------- Players Row ----------------
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: IntrinsicHeight(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // Team A slots
                   ...teamAPlayers,
-
-                  // Divider
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0), // decrease bottom height
+                    padding: const EdgeInsets.only(bottom: 20.0),
                     child: VerticalDivider(
                       color: AppColors.greyColor,
                       thickness: 1.5,
                       width: 0,
                     ),
                   ),
-
-                  // Team B slots
                   ...teamBPlayers,
                 ],
               ),
             ),
           ),
-
           Divider(thickness: 1.5, height: 0, color: AppColors.greyColor),
-
-          // ---------------- Footer ----------------
           Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      clubName,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
+                    Text(clubName, style: Theme.of(context).textTheme.labelLarge),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.location_on,
-                            size: 14, color: AppColors.darkGrey),
+                        Icon(Icons.location_on, size: 14, color: AppColors.darkGrey),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -523,9 +541,7 @@ class OpenMatchesScreen extends StatelessWidget {
                 color: AppColors.playerCardBackgroundColor,
                 child: Text(
                   price,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: AppColors.primaryColor,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primaryColor),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -536,7 +552,7 @@ class OpenMatchesScreen extends StatelessWidget {
     ).paddingOnly(bottom: 12);
   }
 
-  Widget _buildFilledPlayer(String? imageUrl, String name,String level) {
+  Widget _buildFilledPlayer(String? imageUrl, String name, String level) {
     final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return Column(
@@ -551,7 +567,7 @@ class OpenMatchesScreen extends StatelessWidget {
               fit: BoxFit.cover,
               width: 48,
               height: 48,
-              placeholder: (context, url) => LoadingWidget(color: AppColors.primaryColor,),
+              placeholder: (context, url) => LoadingWidget(color: AppColors.primaryColor),
               errorWidget: (context, url, error) => Text(
                 firstLetter,
                 style: const TextStyle(
@@ -591,29 +607,23 @@ class OpenMatchesScreen extends StatelessWidget {
           ),
           child: Text(
             level,
-            style: Get.textTheme.labelMedium!.copyWith(
-              color: AppColors.secondaryColor,
-            ),
+            style: Get.textTheme.labelMedium!.copyWith(color: AppColors.secondaryColor),
           ),
         ).paddingOnly(top: 4)
       ],
     );
   }
 
-  Widget _buildAvailableCircle(String team,String matchId) {
+  Widget _buildAvailableCircle(String team, String matchId) {
     return Column(
       children: [
         GestureDetector(
-          onTap: (){
-      Get.toNamed(
-        RoutesName.addPlayer,
-        arguments: {
-          "team": team,
-          "matchId": matchId,
-          "needOpenMatches":true
-        },
-      );
-      },
+          onTap: () {
+            Get.toNamed(
+              RoutesName.addPlayer,
+              arguments: {"team": team, "matchId": matchId, "needOpenMatches": true},
+            );
+          },
           child: Container(
             height: 48,
             width: 48,
@@ -634,5 +644,4 @@ class OpenMatchesScreen extends StatelessWidget {
       ],
     );
   }
-
 }

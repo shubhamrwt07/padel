@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
+import '../../../../configs/components/snack_bars.dart';
 import '../../../../configs/routes/routes_name.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../../../data/request_models/home_models/get_club_name_model.dart';
@@ -265,13 +266,8 @@ class CreateOpenMatchesController extends GetxController {
         dateString,
       );
       if (!isAllowed) {
-        Get.snackbar(
-          "Please Select Consecutive Slots",
-          "",
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-        );
+        SnackBarUtils.showErrorSnackBar("Please Select Consecutive Slots");
+
         return;
       }
 

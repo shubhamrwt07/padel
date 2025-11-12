@@ -116,6 +116,7 @@ class BookingScreen extends GetView<BookingController> {
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
             SliverAppBar(
+              centerTitle: true,
               expandedHeight: Get.height * 0.2,
               pinned: true,
               floating: false,
@@ -144,7 +145,7 @@ class BookingScreen extends GetView<BookingController> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
-                      ).paddingOnly(left: 50),
+                      )
                     );
                   },
                 );
