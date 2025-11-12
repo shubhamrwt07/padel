@@ -13,7 +13,7 @@ class BottomNavigationController extends GetxController {
   final List<Map<String, dynamic>> tabs = [
     {'icon': Assets.imagesIcHomeBottomBar, 'label': 'Home','isSvg': true, 'size': 18.0},
     {'icon': Assets.imagesIcBookings, 'label': 'Bookings','isSvg': true, 'size': 22.0},
-    {'icon':  Assets.imagesIcProfile, 'label': 'Open Matches', 'isSvg': true, 'size': 22.0},
+    {'icon':  Assets.imagesIcProfile, 'label': 'Open Matches', 'isSvg': true, 'size': 18.0},
     {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 18.0},
 
   ];

@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.matchacha.app"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -27,7 +27,7 @@ android {
     defaultConfig {
         applicationId = "com.matchacha.app"
         minSdk = flutter.minSdkVersion
-        targetSdk = 35
+        targetSdk = 36
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName
