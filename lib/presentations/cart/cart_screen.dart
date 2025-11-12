@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
-
 import '../../configs/routes/routes_name.dart';
+
 class CartScreen extends StatelessWidget {
   final String buttonType;
   final CartController controller = Get.put(CartController());
@@ -26,52 +27,6 @@ class CartScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Obx(() {
-            if (controller.cartItems.isEmpty) return const SizedBox.shrink();
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (controller.selectedClubIds.length ==
-                        controller.cartItems.length) {
-                      controller.unselectAll();
-                    } else {
-                      controller.selectAll();
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Checkbox(
-                          activeColor: AppColors.secondaryColor,
-                          value: controller.selectedClubIds.length ==
-                              controller.cartItems.length,
-                          onChanged: (val) {
-                            if (val == true) {
-                              controller.selectAll();
-                            } else {
-                              controller.unselectAll();
-                            }
-                          },
-                        ),
-                      ),
-                      Text("Select All",
-                          style: Get.textTheme.labelMedium!.copyWith(
-                              fontSize: 12)),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () async {
-                    await controller.deleteSelectedClubs();
-                  },
-                )
-              ],
-            ).paddingSymmetric(vertical: 10);
-          }),
           Expanded(child: cartList(controller)),
         ],
       ).paddingSymmetric(horizontal: Get.width * 0.05),
@@ -110,12 +65,6 @@ class CartScreen extends StatelessWidget {
     return SizedBox(
       height: buttonType == "true" ? Get.height * 0.65 : Get.height * 0.56,
       child: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: LoadingWidget(color: AppColors.primaryColor,)
-          );
-        }
-
         if (controller.cartItems.isEmpty) {
           return emptyState();
         }
@@ -142,137 +91,173 @@ class CartScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Club Name + Select Checkbox
+                  // Club Name
                   Row(
                     children: [
-                      Obx(() => Transform.scale(
-                        scale: 0.8,
-                        child: Checkbox(
-                          activeColor: AppColors.secondaryColor,
-                          value: controller.selectedClubIds
-                              .contains(item.registerClubId?.sId ?? ""),
-                          onChanged: (val) {
-                            controller.toggleSelectClub(
-                                item.registerClubId?.sId ?? "");
-                          },
-                        ),
-                      )),
                       Expanded(
                         child: Text(
                           item.registerClubId?.clubName ?? "Unknown Club",
-                          style: Theme.of(context)
+                          style: Get
                               .textTheme
                               .headlineSmall!
                               .copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
-                  ),
+                  ).paddingOnly(top: 10),
 
-                  // 🔹 Loop through ALL slots + slotTimes
+                  // 🔹 Loop through ALL slots + slotTimes with Slidable
                   Column(
                     children: item.slot!.map((slotGroup) {
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: slotGroup.slotTimes!.length,
-                        itemBuilder: (context, int childIndex) {
-                          final slot = slotGroup.slotTimes![childIndex];
-
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Date + Time + Duration
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Text(
-
-
-                                      formatCreatedAt(slot.bookingDate ?? ""),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .copyWith(
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      "${slot.time ?? 'N/A'} ",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .copyWith(
-                                        color: AppColors.labelBlackColor,
-                                        fontWeight: FontWeight.w500,
+                      return SlidableAutoCloseBehavior(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: slotGroup.slotTimes!.length,
+                          itemBuilder: (context, int childIndex) {
+                            final slot = slotGroup.slotTimes![childIndex];
+                        
+                            return Slidable(
+                              key: ValueKey(slot.slotId ?? childIndex),
+                              endActionPane: ActionPane(
+                                motion: const DrawerMotion(),
+                                // adjust extentRatio to fit your action width (0.22 - 0.32 typical)
+                                extentRatio: 0.28,
+                                children: [
+                                  CustomSlidableAction(
+                                    onPressed: (context) async {
+                                      final slotTimeId = slot.slotId;
+                                      if (slotTimeId == null || slotTimeId.isEmpty) {
+                                        Get.snackbar("Error", "Invalid slot ID");
+                                        return;
+                                      }
+                                      await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
+                                    },
+                                    backgroundColor: Colors.red.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                        
+                                    // Make sure the action has a fixed internal height that matches the row
+                                    child: Center(
+                                      child: SizedBox(
+                                        height: 56, // <- match this to your row minHeight (tweak if needed)
+                                        width: double.infinity,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min, // don't expand beyond content
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(Icons.delete, color: Colors.red, size: 20),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Delete',
+                                              style: Get.textTheme.bodySmall!.copyWith(
+                                                color: Colors.red,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      "(60m)",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .copyWith(
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Price + Remove
-                              GestureDetector(
-                                onTap: () async {
-                                  final slotTimeId = slot.slotId;
-
-                                  if (slotTimeId == null ||
-                                      slotTimeId.isEmpty) {
-                                    Get.snackbar(
-                                        "Error", "Invalid slot ID");
-                                    return;
-                                  }
-
-                                  await controller.removeCartItemsFromCart(
-                                      slotIds: [slotTimeId]);
-                                },
-                                child: Container(
-                                  height: 40,
-                                  color: Colors.transparent,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "₹ ${slot.amount ?? '0'}",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall!
-                                            .copyWith(
-                                            fontWeight: FontWeight.w500),
-                                      ).paddingOnly(right: 10),
-                                      Container(
-                                        alignment: Alignment.center,
-                                        height: 15,
-                                        width: 15,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.remove,
-                                          size: 12,
-                                          color: Colors.red,
-                                        ),
-                                      )
-                                    ],
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ).paddingOnly(bottom: Get.height * 0.01);
-                        },
+                        
+                              // --- Slidable child: ensure min height & proper padding so no overflow or left overflow ---
+                              child: Builder(
+                                builder: (context) {
+                                  final animation = Slidable.of(context)?.animation;
+                                  return AnimatedBuilder(
+                                    animation: animation ?? const AlwaysStoppedAnimation(0),
+                                    builder: (context, _) {
+                                      final isSliding = (animation?.value ?? 0) > 0.01;
+                        
+                                      return Container(
+                                        // IMPORTANT: give a minHeight so text/icon won't overflow by a couple pixels
+                                        constraints: const BoxConstraints(minHeight: 56),
+                                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center, // vertical centering
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // Left content
+                                            Expanded(
+                                              child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    formatCreatedAt(slot.bookingDate ?? ""),
+                                                    style: Get.textTheme.bodyLarge!.copyWith(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    "${formatTimeSlot(slot.time ?? 'N/A')} ",
+                                                    style: Get.textTheme.bodyLarge!.copyWith(
+                                                      color: AppColors.labelBlackColor,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    "(${slot.courtName ?? ""})",
+                                                    style: Get.textTheme.bodyLarge!.copyWith(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                        
+                                            // Right content (price + remove)
+                                            GestureDetector(
+                                              onTap: () async {
+                                                final slotTimeId = slot.slotId;
+                                                if (slotTimeId == null || slotTimeId.isEmpty) {
+                                                  Get.snackbar("Error", "Invalid slot ID");
+                                                  return;
+                                                }
+                                                await controller.removeCartItemsFromCart(slotIds: [slotTimeId]);
+                                              },
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "₹ ${slot.amount ?? '0'}",
+                                                    style: Get.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500),
+                                                  ).paddingOnly(right: 10),
+                        
+                                                  if (!isSliding)
+                                                    Container(
+                                                      alignment: Alignment.center,
+                                                      height: 18,
+                                                      width: 18,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        border: Border.all(color: Colors.red),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.remove,
+                                                        size: 12,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       );
                     }).toList(),
                   ),
@@ -309,13 +294,13 @@ class CartScreen extends StatelessWidget {
               children: [
                 Text(
                   "Total Slots (${cartController.totalSlot.value})",
-                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  style: Get.textTheme.bodyLarge!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   "${cartController.totalSlot.value} (${cartController.totalSlot.value}h)",
-                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                  style: Get.textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -328,7 +313,7 @@ class CartScreen extends StatelessWidget {
               children: [
                 Text(
                   "Total Price",
-                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  style: Get.textTheme.bodyLarge!.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -344,7 +329,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     Text(
                       "${cartController.totalPrice.value}",
-                      style: Theme.of(context)
+                      style: Get
                           .textTheme
                           .headlineMedium!
                           .copyWith(fontWeight: FontWeight.w500),
@@ -376,7 +361,7 @@ class CartScreen extends StatelessWidget {
           children: [
             Text(
               "₹ ",
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              style: Get.textTheme.titleMedium!.copyWith(
                 fontWeight: FontWeight.w600,
                 fontFamily: "Roboto",
                 color: AppColors.whiteColor,
@@ -384,14 +369,14 @@ class CartScreen extends StatelessWidget {
             ).paddingOnly(left: 30),
             Text(
               cartController.totalPrice.value.toString(),
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              style: Get.textTheme.titleMedium!.copyWith(
                 color: AppColors.whiteColor,
                 fontWeight: FontWeight.w600,
               ),
             ).paddingOnly(right: Get.width * 0.1),
             Text(
               "Proceed to Payment",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              style: Get.textTheme.headlineMedium!.copyWith(
                 color: AppColors.whiteColor,
               ),
             ),
@@ -438,7 +423,7 @@ class CartScreen extends StatelessWidget {
       final date = DateTime.parse(dateStr);
       final day = date.day;
       final suffix = getDaySuffix(day);
-      final month = DateFormat("MMMM").format(date);
+      final month = DateFormat("MMM").format(date);
       final year = date.year;
       return "$day$suffix $month $year";
     } catch (e) {
