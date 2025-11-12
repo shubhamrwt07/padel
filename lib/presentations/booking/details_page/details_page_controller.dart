@@ -137,6 +137,7 @@ class DetailsController extends GetxController {
               "amount": slot.amount ?? 0,
             }
           ],
+          "macthType":"openMatch",
           "courtName": courtName,
           "courtId": slotCourtId, // ✅ Court ID inside slot
           "bookingDate": formattedBookingDate, // ✅ selected match date

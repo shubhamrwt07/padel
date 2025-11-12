@@ -12,6 +12,7 @@ class BookSessionController extends GetxController {
   // Booking limits
   static const int MAX_SLOTS = 24;
   static const int MAX_DAYS = 5;
+  final focusedMonth = DateTime.now().obs;
 
   // Date formatter for consistency
   static final _dateFormatter = DateFormat('yyyy-MM-dd');

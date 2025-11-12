@@ -281,7 +281,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -29),
+              offset: Offset(0, -3),
               child: Container(
                 width: 30,
                 height: Get.height * 0.061,
@@ -447,7 +447,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   Widget _buildTimeOfDayTabs() {
     return Obx(() {
       final selectedTab = controller.selectedTimeOfDay.value;
-
       final tabs = [
         {"label": "Morning", "icon": Icons.wb_twilight_sharp},
         {"label": "Noon", "icon": Icons.wb_sunny},
