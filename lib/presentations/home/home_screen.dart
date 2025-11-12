@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
@@ -238,21 +239,15 @@ class HomeScreen extends GetView<HomeController> {
         ),
         GestureDetector(
           onTap: () => controller.showLocationAndDate.toggle(),
-          child: Obx(
-                () => Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: AppColors.searchBarColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                controller.showLocationAndDate.value
-                    ? Icons.arrow_drop_up
-                    : Icons.arrow_drop_down_sharp,
-              ),
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: AppColors.searchBarColor,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ),
+            child: Image.asset(Assets.imagesIcFilter,color: Colors.black,scale: 4.5,),
+          )
         ),
       ],
     ).paddingOnly(
@@ -387,6 +382,7 @@ class HomeScreen extends GetView<HomeController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
+            SizedBox(height: 1,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -470,47 +466,53 @@ class HomeScreen extends GetView<HomeController> {
             const Icon(Icons.star, color: AppColors.secondaryColor, size: 13),
             Text("4.9", style: Theme.of(context).textTheme.bodySmall),
           ],
-        ).paddingOnly(bottom: 10),
-        const Icon(Icons.directions, color: AppColors.secondaryColor, size: 15),
+        ).paddingOnly(bottom: 20),
+        // const Icon(Icons.directions, color: AppColors.secondaryColor, size: 15),
       ],
     );
   }
 
   Widget _bookingTimeInfo(BuildContext context, dynamic b) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              controller.formatDate(b.bookingDate),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppColors.blackColor,
-              ),
-            ),
-            if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
+    return Container(
+      color: Colors.transparent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
               Text(
-                b.slot!.first.slotTimes!.first.time ?? "",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
-              ).paddingOnly(left: 5),
-          ],
-        ),
-        GestureDetector(
-          onTap: ()=>Get.toNamed(RoutesName.scoreBoard),
-          child: Container(
-            height: 25,
-            width: 50,
-            alignment: AlignmentGeometry.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: AppColors.secondaryColor,
-            ),
-            child: Text("Play",style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white),),
+                controller.formatDate(b.bookingDate),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.blackColor,
+                ),
+              ),
+              if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
+                Text(
+                  b.slot!.first.slotTimes!.first.time ?? "",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
+                ).paddingOnly(left: 5),
+            ],
           ),
-        )
-      ],
-    );
+          Transform.translate(
+            offset: Offset(0, -3),
+            child: GestureDetector(
+                onTap: ()=>Get.toNamed(RoutesName.scoreBoard),
+                child: Container(
+                  height: 23,
+                  width: 55,
+                  alignment: AlignmentGeometry.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.secondaryColor,
+                  ),
+                  child: Text("Play Now",style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white,fontSize: 10),),
+                ),
+            ),
+          )
+        ],
+      ),
+    ).paddingOnly(bottom: 2);
   }
 
   Widget _buildCourtList() {

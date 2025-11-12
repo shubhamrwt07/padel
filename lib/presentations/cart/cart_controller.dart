@@ -26,9 +26,9 @@ class CartController extends GetxController {
   RxInt totalSlot = 0.obs; // 🔹 Tracks total number of slots
 
   @override
-  void onInit() {
+  void onInit() async{
     super.onInit();
-    getCartItems();
+    await getCartItems();
   }
 
   // 🔹 Fetch Cart Items
@@ -156,13 +156,13 @@ class CartController extends GetxController {
         totalPrice.value = result.newTotalAmount!;
       }
 
-      Get.snackbar(
-        "Success",
-        result.message ?? "Selected items removed from cart.",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   "Success",
+      //   result.message ?? "Selected items removed from cart.",
+      //   snackPosition: SnackPosition.TOP,
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
 
       log("Items removed successfully");
     } catch (e) {
