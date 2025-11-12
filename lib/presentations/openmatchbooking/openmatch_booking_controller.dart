@@ -25,20 +25,53 @@ class OpenMatchBookingController extends GetxController
 
   final GlobalKey dropdownKey = GlobalKey();
 
-  // Loading and data state
-  RxBool isLoading = false.obs;
-  RxBool isLoadingMore = false.obs;
-  RxBool showNoInternetScreen = false.obs;
-  RxList<OpenMatchBookingData> openMatchesList = <OpenMatchBookingData>[].obs;
+  // Separate lists for upcoming and completed matches
+  RxList<OpenMatchBookingData> upcomingMatchesList = <OpenMatchBookingData>[].obs;
+  RxList<OpenMatchBookingData> completedMatchesList = <OpenMatchBookingData>[].obs;
 
-  // Pagination
-  RxInt currentPage = 1.obs;
-  RxBool hasMoreData = true.obs;
+  // Loading states for each tab
+  RxBool isLoadingUpcoming = false.obs;
+  RxBool isLoadingCompleted = false.obs;
+  RxBool isLoadingMoreUpcoming = false.obs;
+  RxBool isLoadingMoreCompleted = false.obs;
+  RxBool showNoInternetScreen = false.obs;
+
+  // Separate pagination for each tab
+  RxInt upcomingCurrentPage = 1.obs;
+  RxInt completedCurrentPage = 1.obs;
+  RxBool upcomingHasMoreData = true.obs;
+  RxBool completedHasMoreData = true.obs;
   final int pageSize = 10;
 
   // Misc
   final OpenMatchRepository repository = Get.put(OpenMatchRepository());
   RxString argument = "".obs;
+
+  // Helper getters for current tab with null safety
+  RxList<OpenMatchBookingData> get currentList {
+    if (_tabController == null) return upcomingMatchesList;
+    return _tabController!.index == 0 ? upcomingMatchesList : completedMatchesList;
+  }
+
+  RxBool get isLoading {
+    if (_tabController == null) return isLoadingUpcoming;
+    return _tabController!.index == 0 ? isLoadingUpcoming : isLoadingCompleted;
+  }
+
+  RxBool get isLoadingMore {
+    if (_tabController == null) return isLoadingMoreUpcoming;
+    return _tabController!.index == 0 ? isLoadingMoreUpcoming : isLoadingMoreCompleted;
+  }
+
+  RxBool get hasMoreData {
+    if (_tabController == null) return upcomingHasMoreData;
+    return _tabController!.index == 0 ? upcomingHasMoreData : completedHasMoreData;
+  }
+
+  RxInt get currentPage {
+    if (_tabController == null) return upcomingCurrentPage;
+    return _tabController!.index == 0 ? upcomingCurrentPage : completedCurrentPage;
+  }
 
   @override
   void onInit() {
@@ -57,8 +90,8 @@ class OpenMatchBookingController extends GetxController
       _tabController = TabController(length: 2, vsync: this);
       _tabController!.addListener(_handleTabChange);
       isControllerReady.value = true;
-      
-      // Initial data load
+
+      // Initial data load for upcoming
       fetchOpenMatchesBooking(type: 'upcoming');
     });
   }
@@ -66,7 +99,6 @@ class OpenMatchBookingController extends GetxController
   void _handleTabChange() {
     // When tab index changes (and animation finishes)
     if (_tabController != null && !_tabController!.indexIsChanging) {
-      resetPagination();
       String type = _tabController!.index == 0 ? 'upcoming' : 'completed';
 
       CustomLogger.logMessage(
@@ -74,18 +106,33 @@ class OpenMatchBookingController extends GetxController
         level: LogLevel.debug,
       );
 
-      fetchOpenMatchesBooking(type: type);
+      // Only fetch if the list is empty (first time loading this tab)
+      if (type == 'upcoming' && upcomingMatchesList.isEmpty) {
+        fetchOpenMatchesBooking(type: 'upcoming');
+      } else if (type == 'completed' && completedMatchesList.isEmpty) {
+        fetchOpenMatchesBooking(type: 'completed');
+      }
     }
   }
 
-  // Reset pagination and clear list
-  void resetPagination() {
-    currentPage.value = 1;
-    hasMoreData.value = true;
-    openMatchesList.clear();
+  // Reset pagination for specific type
+  void resetPagination({String? type}) {
+    if (type == null) {
+      type = _tabController?.index == 0 ? 'upcoming' : 'completed';
+    }
+
+    if (type == 'upcoming') {
+      upcomingCurrentPage.value = 1;
+      upcomingHasMoreData.value = true;
+      upcomingMatchesList.clear();
+    } else {
+      completedCurrentPage.value = 1;
+      completedHasMoreData.value = true;
+      completedMatchesList.clear();
+    }
 
     CustomLogger.logMessage(
-      msg: "Pagination reset",
+      msg: "Pagination reset for $type",
       level: LogLevel.debug,
     );
   }
@@ -135,41 +182,73 @@ class OpenMatchBookingController extends GetxController
     bool isLoadMore = false,
   }) async {
     try {
-      if (isLoadMore) {
-        isLoadingMore.value = true;
+      // Set loading state based on type
+      if (type == 'upcoming') {
+        if (isLoadMore) {
+          isLoadingMoreUpcoming.value = true;
+        } else {
+          isLoadingUpcoming.value = true;
+        }
       } else {
-        isLoading.value = true;
+        if (isLoadMore) {
+          isLoadingMoreCompleted.value = true;
+        } else {
+          isLoadingCompleted.value = true;
+        }
       }
 
+      final page = type == 'upcoming' ? upcomingCurrentPage.value : completedCurrentPage.value;
+
       CustomLogger.logMessage(
-        msg: "Fetching $type matches - Page: ${currentPage.value}, IsLoadMore: $isLoadMore",
+        msg: "Fetching $type matches - Page: $page, IsLoadMore: $isLoadMore",
         level: LogLevel.info,
       );
 
       final response = await repository.getOpenMatchBookings(
         type: type,
-        page: currentPage.value,
+        page: page,
         limit: pageSize,
       );
 
       if (response != null && response.data != null && response.data!.isNotEmpty) {
         final newData = response.data!;
 
-        if (isLoadMore) {
-          openMatchesList.addAll(newData);
+        if (type == 'upcoming') {
+          if (isLoadMore) {
+            upcomingMatchesList.addAll(newData);
+          } else {
+            upcomingMatchesList.value = newData;
+          }
+          upcomingHasMoreData.value = newData.length >= pageSize;
         } else {
-          openMatchesList.value = newData;
+          if (isLoadMore) {
+            completedMatchesList.addAll(newData);
+          } else {
+            completedMatchesList.value = newData;
+          }
+          completedHasMoreData.value = newData.length >= pageSize;
         }
 
-        hasMoreData.value = newData.length >= pageSize;
-
         CustomLogger.logMessage(
-          msg: "Successfully fetched ${newData.length} matches. Total: ${openMatchesList.length}",
+          msg: "Successfully fetched ${newData.length} $type matches. Total: ${type == 'upcoming' ? upcomingMatchesList.length : completedMatchesList.length}",
           level: LogLevel.info,
         );
       } else {
-        if (!isLoadMore) openMatchesList.clear();
-        hasMoreData.value = false;
+        if (!isLoadMore) {
+          if (type == 'upcoming') {
+            upcomingMatchesList.clear();
+            upcomingHasMoreData.value = false;
+          } else {
+            completedMatchesList.clear();
+            completedHasMoreData.value = false;
+          }
+        } else {
+          if (type == 'upcoming') {
+            upcomingHasMoreData.value = false;
+          } else {
+            completedHasMoreData.value = false;
+          }
+        }
 
         CustomLogger.logMessage(
           msg: "No matches found for $type",
@@ -182,28 +261,48 @@ class OpenMatchBookingController extends GetxController
         level: LogLevel.error,
       );
 
-      if (!isLoadMore) openMatchesList.clear();
-      hasMoreData.value = false;
+      if (!isLoadMore) {
+        if (type == 'upcoming') {
+          upcomingMatchesList.clear();
+          upcomingHasMoreData.value = false;
+        } else {
+          completedMatchesList.clear();
+          completedHasMoreData.value = false;
+        }
+      }
     } finally {
-      isLoading.value = false;
-      isLoadingMore.value = false;
+      if (type == 'upcoming') {
+        isLoadingUpcoming.value = false;
+        isLoadingMoreUpcoming.value = false;
+      } else {
+        isLoadingCompleted.value = false;
+        isLoadingMoreCompleted.value = false;
+      }
     }
   }
 
   Future<void> loadMoreData() async {
-    if (!hasMoreData.value || isLoadingMore.value) {
+    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
+    final hasMore = type == 'upcoming' ? upcomingHasMoreData.value : completedHasMoreData.value;
+    final loading = type == 'upcoming' ? isLoadingMoreUpcoming.value : isLoadingMoreCompleted.value;
+
+    if (!hasMore || loading) {
       CustomLogger.logMessage(
-        msg: "LoadMore skipped - hasMoreData: ${hasMoreData.value}, isLoadingMore: ${isLoadingMore.value}",
+        msg: "LoadMore skipped - hasMoreData: $hasMore, isLoadingMore: $loading",
         level: LogLevel.debug,
       );
       return;
     }
 
-    currentPage.value++;
-    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
+    // Increment the appropriate page counter
+    if (type == 'upcoming') {
+      upcomingCurrentPage.value++;
+    } else {
+      completedCurrentPage.value++;
+    }
 
     CustomLogger.logMessage(
-      msg: "Loading more data for $type - Page: ${currentPage.value}",
+      msg: "Loading more data for $type - Page: ${type == 'upcoming' ? upcomingCurrentPage.value : completedCurrentPage.value}",
       level: LogLevel.info,
     );
 
@@ -212,8 +311,8 @@ class OpenMatchBookingController extends GetxController
 
   Future<void> retryFetch() async {
     showNoInternetScreen.value = false;
-    resetPagination();
     final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
+    resetPagination(type: type);
 
     CustomLogger.logMessage(
       msg: "Retrying fetch for $type",

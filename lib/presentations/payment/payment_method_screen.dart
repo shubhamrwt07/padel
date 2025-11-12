@@ -23,18 +23,18 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
       appBar: primaryAppBar(
         centerTitle: true,
         title: Text("Payment Method"),
-        action: [
-          Container(
-            alignment: Alignment.center,
-            height: 24,
-            width: 24,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: AppColors.blackColor, width: 2),
-            ),
-            child: Icon(Icons.add, size: 20),
-          ).paddingOnly(right: 10),
-        ],
+        // action: [
+        //   Container(
+        //     alignment: Alignment.center,
+        //     height: 24,
+        //     width: 24,
+        //     decoration: BoxDecoration(
+        //       borderRadius: BorderRadius.circular(4),
+        //       border: Border.all(color: AppColors.blackColor, width: 2),
+        //     ),
+        //     child: Icon(Icons.add, size: 20),
+        //   ).paddingOnly(right: 10),
+        // ],
         context: context,
       ),
       body: Column(

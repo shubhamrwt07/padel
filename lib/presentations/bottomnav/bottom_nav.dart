@@ -97,7 +97,7 @@ class BottomNavUi extends StatelessWidget {
                   gap: 10,
                   borderRadius: BorderRadius.circular(30),
 
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
                   icon: isSvg ? Icons.circle : tab['icon'],
                   text: tab['label'],
                   iconColor: Colors.black,

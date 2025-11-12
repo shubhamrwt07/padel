@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
+import 'package:padel_mobile/presentations/booking/book_session/widgets/court_slots_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../handler/text_formatter.dart';
 import 'create_open_matches_controller.dart';
@@ -280,10 +281,10 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         Obx(() => Row(
           children: [
             Transform.translate(
-              offset: Offset(0, -Get.height * 0.003),
+              offset: Offset(0, -29),
               child: Container(
                 width: 30,
-                height: Get.height * 0.063,
+                height: Get.height * 0.061,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -331,7 +332,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                   final dayName = DateFormat('E').format(date);
-                  final monthName = DateFormat('MMM').format(date);
                   final dateString =
                       "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
                   final dateSelections =
@@ -346,7 +346,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                           clipBehavior: Clip.none,
                           children: [
                             Container(
-                              height: Get.height * 0.06,
+                              height: 53,
                               width: Get.width * 0.11,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
@@ -521,7 +521,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
       if (controller.isLoadingCourts.value) {
-        return _buildLoadingShimmer();
+        return CourtSlotsShimmer();
       }
 
       final slotsData = controller.slots.value;
@@ -537,7 +537,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         children: [
           // PageView for courts
           SizedBox(
-            height: Get.height * 0.47,
+            height: Get.height * 0.46,
             child: PageView.builder(
               controller: controller.pageController,
               onPageChanged: (index) {
@@ -711,7 +711,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     if (slotTimes.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.only(top: 10,bottom: 10),
           child: Column(
             children: [
               Icon(
