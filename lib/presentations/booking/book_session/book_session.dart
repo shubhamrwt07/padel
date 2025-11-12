@@ -163,17 +163,18 @@ class BookSession extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Top Row with only title
         Text(
           "Select Date",
           style: Get.textTheme.labelLarge!.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ).paddingOnly(top: 10),
+
         Obx(() => Row(
           children: [
+            /// Month container (vertical text)
             Transform.translate(
-              offset: Offset(0, -25),
+              offset: const Offset(0, -25),
               child: Container(
                 width: 30,
                 height: Get.height * 0.068,
@@ -181,16 +182,14 @@ class BookSession extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: AppColors.textFieldColor,
-
                   border: Border.all(
                     color: AppColors.blackColor.withAlpha(10),
                   ),
                 ),
-                // Display month vertically (O C T)
                 child: Column(
-                  mainAxisSize: MainAxisSize.min, // Prevents unnecessary extra spacing
+                  mainAxisSize: MainAxisSize.min,
                   children: DateFormat('MMM')
-                      .format(controller.selectedDate.value ?? DateTime.now())
+                      .format(controller.focusedMonth.value)
                       .toUpperCase()
                       .split('')
                       .map(
@@ -199,7 +198,7 @@ class BookSession extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        height: 1.0, // Reduces space between letters
+                        height: 1.0,
                         color: Colors.black,
                       ),
                     ),
@@ -208,141 +207,146 @@ class BookSession extends StatelessWidget {
                 ),
               ),
             ),
+
+            /// Date timeline
             Expanded(
               child: EasyDateTimeLinePicker.itemBuilder(
                 headerOptions: HeaderOptions(
-                  headerBuilder: (_, context, date) => const SizedBox.shrink(),
+                  headerBuilder: (_, context, date) =>
+                  const SizedBox.shrink(),
                 ),
                 selectionMode: SelectionMode.alwaysFirst(),
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030, 3, 18),
                 focusedDate: controller.selectedDate.value,
                 itemExtent: 46,
+
                 itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                  return Obx(() {
-                    final now = DateTime.now();
-                    final today = DateTime(now.year, now.month, now.day);
-                    final currentDate = DateTime(date.year, date.month, date.day);
-                    if (currentDate.isBefore(today)) {
-                      return const SizedBox.shrink();
-                    }
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final currentDate = DateTime(date.year, date.month, date.day);
+                  if (currentDate.isBefore(today)) return const SizedBox.shrink();
 
-                    final dayName = DateFormat('E').format(date);
-                    final dateString =
-                        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                    final dateSelections =
-                        controller.getSelectionsByDate()[dateString] ?? [];
+                  final dayName = DateFormat('E').format(date);
+                  final dateString =
+                      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  final dateSelections =
+                      controller.getSelectionsByDate()[dateString] ?? [];
 
-                    return GestureDetector(
-                      onTap: onTap,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            height: 60,
-                            width: Get.width * 0.11,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
+                  return GestureDetector(
+                    onTap: () {
+                      onTap();
+                      // 👇 Update both selectedDate and focusedMonth here
+                      controller.selectedDate.value = date;
+                      controller.focusedMonth.value =
+                          DateTime(date.year, date.month, 1);
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 60,
+                          width: Get.width * 0.11,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: isSelected
+                                ? Colors.black
+                                : dateSelections.isNotEmpty
+                                ? AppColors.primaryColor
+                                .withValues(alpha: 0.1)
+                                : AppColors.playerCardBackgroundColor,
+                            border: Border.all(
                               color: isSelected
-                                  ? Colors.black
+                                  ? Colors.transparent
                                   : dateSelections.isNotEmpty
-                                  ? AppColors.primaryColor.withValues(alpha: 0.1)
-                                  : AppColors.playerCardBackgroundColor,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.transparent
-                                    : dateSelections.isNotEmpty
-                                    ? AppColors.primaryColor
-                                    : AppColors.blackColor.withAlpha(10),
-                              ),
+                                  ? AppColors.primaryColor
+                                  : AppColors.blackColor.withAlpha(10),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "${date.day}",
-                                  style: Get.textTheme.titleMedium!.copyWith(
-                                    fontSize: 20,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${date.day}",
+                                style: Get.textTheme.titleMedium!.copyWith(
+                                  fontSize: 20,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : dateSelections.isNotEmpty
+                                      ? AppColors.primaryColor
+                                      : AppColors.textColor,
+                                ),
+                              ),
+                              Transform.translate(
+                                offset: const Offset(0, -2),
+                                child: Text(
+                                  dayName,
+                                  style: Get.textTheme.bodySmall!.copyWith(
+                                    fontSize: 11,
                                     color: isSelected
                                         ? Colors.white
                                         : dateSelections.isNotEmpty
                                         ? AppColors.primaryColor
-                                        : AppColors.textColor,
-                                  ),
-                                ),
-                                Transform.translate(offset: Offset(0, -2),
-                                  child: Text(
-                                    dayName,
-                                    style: Get.textTheme.bodySmall!.copyWith(
-                                      fontSize: 11,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (dateSelections.isNotEmpty)
-                            Positioned(
-                              top: 1,
-                              right: -3,
-                              child: Container(
-                                height: 16,
-                                width: 16,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                child: Text(
-                                  "${dateSelections.length}",
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                        : Colors.black,
                                   ),
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
+                        if (dateSelections.isNotEmpty)
+                          Positioned(
+                            top: 1,
+                            right: -3,
+                            child: Container(
+                              height: 16,
+                              width: 16,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.secondaryColor,
+                              ),
+                              child: Text(
+                                "${dateSelections.length}",
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                        ],
-                      ),
-                    );
-                  });
+                          ),
+                      ],
+                    ),
+                  );
                 },
+
                 onDateChange: (date) async {
                   controller.selectedDate.value = date;
+                  controller.focusedMonth.value =
+                      DateTime(date.year, date.month, 1); // 👈 Update month
                   controller.isLoadingCourts.value = true;
                   await controller.getAvailableCourtsById(
                     controller.argument.id!,
-                    showUnavailable: controller.showUnavailableSlots.value,
+                    showUnavailable:
+                    controller.showUnavailableSlots.value,
                   );
                   controller.slots.refresh();
                   controller.isLoadingCourts.value = false;
                 },
               ),
-            )
+            ),
           ],
         ).paddingOnly(top: 10)),
 
-
-        /// Toggle row moved here below date picker
+        /// Toggle Row
         Obx(() => Transform.translate(
           offset: Offset(0, -Get.height * .06),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              /// Left text — indicates current view
-              Text(
-                 "Available Slots",
-                style: Get.textTheme.labelLarge
-              ),
-
-              /// Right toggle + label
+              Text("Available Slots", style: Get.textTheme.labelLarge),
               Row(
                 children: [
                   Text(
@@ -362,12 +366,11 @@ class BookSession extends StatelessWidget {
                       onChanged: (val) async {
                         controller.showUnavailableSlots.value = val;
                         controller.isLoadingCourts.value = true;
-
                         await controller.getAvailableCourtsById(
                           controller.argument.id!,
-                          showUnavailable: controller.showUnavailableSlots.value,
+                          showUnavailable:
+                          controller.showUnavailableSlots.value,
                         );
-
                         controller.slots.refresh();
                         controller.isLoadingCourts.value = false;
                       },
@@ -378,7 +381,6 @@ class BookSession extends StatelessWidget {
             ],
           ),
         )),
-
       ],
     );
   }
