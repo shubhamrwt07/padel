@@ -80,6 +80,7 @@ Widget bookingShimmer() {
                       width: 80,
                       color: Colors.white,
                     ),
+
                     Container(
                       height: 10,
                       width: 40,

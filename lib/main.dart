@@ -21,15 +21,36 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await NotificationService().initialize();
-  await NotificationController().fetchUnreadNotificationCount();
-  NotificationService().showNotification(
-    id: message.hashCode,
-    title: message.notification?.title ?? 'Background Message',
-    body: message.notification?.body ?? '',
-    payload: message.data.toString(),
-    highPriority: true,
-  );
+  // Log the message for debugging
+  if (kDebugMode) {
+    print('📱 Background message received: ${message.messageId}');
+    print('📱 Notification title: ${message.notification?.title}');
+    print('📱 Notification body: ${message.notification?.body}');
+    print('📱 Data: ${message.data}');
+  }
+
+  // For iOS, if the message has a notification payload, it will be shown automatically
+  // by the system. We only need to show a local notification if:
+  // 1. It's a data-only message (no notification payload), OR
+  // 2. We want to ensure it's shown even if system fails
+
+  try {
+    await NotificationService().initialize();
+
+    if (message.notification != null || message.data.isNotEmpty) {
+      await NotificationService().showNotification(
+        id: message.hashCode.abs(),
+        title: message.notification?.title ?? 'New Notification',
+        body: message.notification?.body ?? 'You have a new message',
+        payload: message.data.toString(),
+        highPriority: true,
+      );
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('❌ Error in background handler: ${e}');
+    }
+  }
 }
 
 Future<void> main() async {

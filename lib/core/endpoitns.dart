@@ -31,7 +31,6 @@ class AppEndpoints {
   static const String createUserForOpenMatch = "${BASE_URL}customerSignupWithOutPassword";
   static const String addUserForOpenMatch = "${BASE_URL}court/openmatch/addPlayerToMatch";
   static const String openMatchBooking = "${BASE_URL}court/openmatch/getAllOpenMatches";
-
   ///Notification---------------------------------------------------------------
   static const String getNotification = "${BASE_URL}court/userNotification/readNotification";
   static const String getNotificationMarkAsRead = "${BASE_URL}court/userNotification/markAsRead";
