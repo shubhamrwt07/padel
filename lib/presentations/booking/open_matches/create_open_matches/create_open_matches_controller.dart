@@ -100,8 +100,10 @@ class CreateOpenMatchesController extends GetxController {
     detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName ?? "");
     detailsController.localMatchData.update("clubId", (v) => slots.value!.data![0].registerClubId!.sId ?? "");
     detailsController.localMatchData.update("matchDate", (v) => selectedDate.value ?? "");
-    detailsController.localMatchData.update("matchTime", (v) => selectedSlots.first.time ?? "");
-    detailsController.localMatchData.update("price", (v) => totalAmount.toString());
+    detailsController.localMatchData.update(
+      "matchTime",
+          (v) => selectedSlots.map((s) => s.time).toList(),
+    );    detailsController.localMatchData.update("price", (v) => totalAmount.toString());
     detailsController.localMatchData.update("courtType", (v) => slots.value!.data![0].registerClubId!.courtType ?? "");
     detailsController.localMatchData.update("slot", (v) => selectedSlots);
 

@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:padel_mobile/configs/components/custom_button.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../configs/components/primary_button.dart';
@@ -114,14 +116,12 @@ class DetailsScreen extends StatelessWidget {
                             ),
                       ),
                       subtitle: Text(
-                        "${formatMatchDateAt(data['matchDate'] ?? "")} | ${data['matchTime'] ?? ""}",
+                        "${formatMatchDateAt(data['matchDate'] ?? "")} | ${_formatMatchTime(data['matchTime'])}",
                         style: Get.textTheme.displaySmall?.copyWith(
                           fontSize: 11,
                           color: AppColors.darkGreyColor,
-                        ) ??
-                            const TextStyle(fontSize: 11),
+                        ) ?? const TextStyle(fontSize: 11),
                       ),
-
                     ),
                     Center(
                       child: Container(
@@ -134,8 +134,8 @@ class DetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         gameDetails(
-                          "Gender",
-                          'male',
+                          "Game Type",
+                          'Male only',
                           AppColors.blackColor,
                           13,
                         ),
@@ -147,7 +147,7 @@ class DetailsScreen extends StatelessWidget {
                         ),
                         gameDetails(
                           "Price",
-                          data['price'],
+                          "₹ ${data['price']}",
                           AppColors.primaryColor,
                           16,
                         ),
@@ -207,9 +207,19 @@ class DetailsScreen extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          Assets.imagesImgDummy2,
+                        child: CachedNetworkImage(
+                          imageUrl: "",
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            Assets.imagesImgDummy2,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -236,10 +246,12 @@ class DetailsScreen extends StatelessWidget {
                               Icon(
                                 Icons.directions,
                                 color: AppColors.secondaryColor,
+                                size: 30,
                               ),
                             ],
                           ).paddingOnly(bottom: 5),
                           Text(
+                            maxLines: 3,
                             data['address'] ?? "Unknown address, please update",
                             overflow: TextOverflow.ellipsis,
                             style:
@@ -249,17 +261,6 @@ class DetailsScreen extends StatelessWidget {
                                 ) ??
                                 const TextStyle(fontSize: 11),
                           ).paddingOnly(bottom: 10),
-                          Text(
-                            "More Info",
-                            style:
-                                Get.textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.primaryColor,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primaryColor,
-                                ) ??
-                                const TextStyle(fontWeight: FontWeight.w500),
-                          ),
                         ],
                       ),
                     ),
@@ -334,51 +335,97 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget playerCard(String name, bool showSubtitle, String image, String? skillLevel) {
-    log("Image: $image, Skill Level: $skillLevel");
+  Widget playerCard(String name, bool showSubtitle, String image, String? skillLevel, {String? lastName}) {
+    // Extract initials (first letter of name + first letter of lastName if available)
+    String getInitials(String fullName, String? lastN) {
+      if (fullName.trim().isEmpty) {
+        // If name is empty, just use the first letter of lastName if available
+        return (lastN != null && lastN.trim().isNotEmpty) ? lastN.trim()[0].toUpperCase() : "";
+      }
+
+      // Get first letter of the name (handle multi-word names by taking the first part)
+      String firstInitial = fullName.trim().split(" ").first[0].toUpperCase();
+
+      // Get first letter of the lastName if provided and not empty
+      String lastInitial = "";
+      if (lastN != null && lastN.trim().isNotEmpty) {
+        lastInitial = lastN.trim().split(" ").first[0].toUpperCase();
+      }
+
+      return firstInitial + lastInitial;
+    }
+
+    // Calculate initials using both name and lastName
+    final initials = image.isEmpty ? getInitials(name, lastName) : "";
+
+    // Get first word of name and lastName for display
+    String getFirstWord(String text) {
+      if (text.trim().isEmpty) return "";
+      return text.trim().split(" ").first;
+    }
+
+    String displayName = getFirstWord(name);
+    if (lastName != null && lastName.trim().isNotEmpty) {
+      String lastNameFirst = getFirstWord(lastName);
+      displayName = "$displayName $lastNameFirst";
+    }
+
+    // Capitalize display name
+    displayName = displayName.split(' ')
+        .map((word) => word.isNotEmpty
+        ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
+        : '')
+        .join(' ');
+
     return GestureDetector(
       onTap: () {},
       child: Column(
         children: [
-        Container(
-        height: 50,
-        width: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: image.isNotEmpty
-                ? AppColors.whiteColor
-                : AppColors.primaryColor,
-          ),
-        ),
-        child: image.isEmpty
-            ? const Icon(
-          CupertinoIcons.profile_circled,
-          size: 20,
-          color: AppColors.primaryColor,
-        )
-            : ClipOval(
-          child: CachedNetworkImage(
-            imageUrl: image,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => const Center(
-              child: CupertinoActivityIndicator(),
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: image.isEmpty ? AppColors.primaryColor.withOpacity(0.1) : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primaryColor),
             ),
-            errorWidget: (context, url, error) => const Icon(
-              CupertinoIcons.profile_circled,
-              size: 20,
-              color: AppColors.primaryColor,
+            child: image.isNotEmpty
+                ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: image,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                  child: CupertinoActivityIndicator(),
+                ),
+                errorWidget: (context, url, error) => Center(
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            )
+                : Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  color: AppColors.primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
           const SizedBox(height: 5),
           Text(
             name,
             style: Get.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w500,
-            ) ?? const TextStyle(fontWeight: FontWeight.w500),
+            ) ??
+                const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 0),
           showSubtitle && skillLevel != null && skillLevel.isNotEmpty
@@ -388,14 +435,15 @@ class DetailsScreen extends StatelessWidget {
               color: Colors.green.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             height: 16,
             child: Text(
               skillLevel,
               style: Get.textTheme.bodyLarge?.copyWith(
                 color: Colors.green,
                 fontSize: 10,
-              ) ?? const TextStyle(color: Colors.green),
+              ) ??
+                  const TextStyle(color: Colors.green),
             ),
           )
               : const SizedBox(height: 20),
@@ -403,7 +451,6 @@ class DetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget gameCard({required RxList<Map<String, dynamic>> teamA, required RxList<Map<String, dynamic>> teamB}) {
     return GetBuilder<DetailsController>(
       builder: (controller) => Container(
@@ -437,11 +484,9 @@ class DetailsScreen extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         itemCount: 2,
                         itemBuilder: (BuildContext context, int index) {
-                          bool hasPlayer =
-                              index < controller.teamA.length &&
-                                  controller.teamA[index].isNotEmpty &&
-                                  controller.teamA[index]['name'] != null &&
-                                  controller.teamA[index]['name'].toString().isNotEmpty;
+                          bool hasPlayer = index < controller.teamA.length &&
+                              controller.teamA[index].isNotEmpty &&
+                              (controller.teamA[index]['name'] != null && controller.teamA[index]['name'].toString().isNotEmpty);
 
                           return Padding(
                             padding: const EdgeInsets.only(right: 30),
@@ -451,6 +496,7 @@ class DetailsScreen extends StatelessWidget {
                               true,
                               controller.teamA[index]['image'] ?? "",
                               controller.teamA[index]['level'] ?? controller.teamA[index]['levelLabel'] ?? "",
+                              lastName: controller.teamA[index]['lastName'], // Pass lastName here
                             )
                                 : GestureDetector(
                               onTap: () {
@@ -492,14 +538,12 @@ class DetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   // Divider
                   Container(
                     height: Get.height * 0.1,
                     width: 1,
                     color: AppColors.blackColor.withAlpha(30),
                   ),
-
                   // Team B Players
                   Expanded(
                     child: SizedBox(
@@ -509,11 +553,9 @@ class DetailsScreen extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         itemCount: 2,
                         itemBuilder: (BuildContext context, int index) {
-                          bool hasPlayer =
-                              index < controller.teamB.length &&
-                                  controller.teamB[index].isNotEmpty &&
-                                  controller.teamB[index]['name'] != null &&
-                                  controller.teamB[index]['name'].toString().isNotEmpty;
+                          bool hasPlayer = index < controller.teamB.length &&
+                              controller.teamB[index].isNotEmpty &&
+                              (controller.teamB[index]['name'] != null && controller.teamB[index]['name'].toString().isNotEmpty);
 
                           return Padding(
                             padding: const EdgeInsets.only(right: 30),
@@ -523,6 +565,7 @@ class DetailsScreen extends StatelessWidget {
                               true,
                               controller.teamB[index]['image'] ?? "",
                               controller.teamB[index]['level'] ?? controller.teamB[index]['levelLabel'] ?? "",
+                              lastName: controller.teamB[index]['lastName'], // Pass lastName here
                             )
                                 : GestureDetector(
                               onTap: () {
@@ -631,8 +674,8 @@ class DetailsScreen extends StatelessWidget {
     final data = controller.localMatchData;
 
     return Container(
+      alignment: Alignment.center,
       height: Get.height * .12,
-      padding: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -641,43 +684,56 @@ class DetailsScreen extends StatelessWidget {
             color: Colors.black12,
             blurRadius: 10,
             offset: Offset(0, -2),
-          ),
+          )
         ],
       ),
-      child: Center(
-        child: Container(
-          height: 55,
-          width: Get.width * 0.9,
-          decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Obx(
-                () => PrimaryButton(
-              height: 50,
-              onTap: () {
-                // Call the new payment method instead of directly creating match
-                controller.initiatePaymentAndCreateMatch();
-              },
-              // Show Book Now + Price
-              text: "Pay & Book Now ${data['price'] ?? '₹0'}",
-              child: (controller.isLoading.value || controller.isProcessing.value)
-                  ? LoadingAnimationWidget.waveDots(
-                color: AppColors.whiteColor,
-                size: 45,
-              ).paddingOnly(right: 0)
-                  : null,
-            ),
-          ),
-        ).paddingOnly(bottom: Get.height * 0.03),
-      ),
+      child: Obx(
+            () => CustomButton(
+              width: Get.width*0.9,
+                child: controller.isProcessing.value?
+                LoadingAnimationWidget.waveDots(
+                  color: AppColors.whiteColor,
+                  size: 45,
+                ).paddingOnly(right: 40):
+                Row(
+                  mainAxisAlignment:MainAxisAlignment.center,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "₹ ",
+                            style: Get.textTheme.titleMedium!.copyWith(
+                              color: AppColors.whiteColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "${data['price'] ?? '₹0'}",
+                            style: Get.textTheme.titleMedium!.copyWith(
+                              color: AppColors.whiteColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).paddingOnly(
+                      right: Get.width * 0.3,
+                      left: Get.width * 0.05,
+                    ),
+                    Text(
+                      "Book Now",
+                      style: Get.textTheme.headlineMedium!.copyWith(
+                        color: AppColors.whiteColor,
+                      ),
+                    ).paddingOnly(right:70),
+                  ],
+                ),
+                  onTap: () {
+                          // Call the new payment method instead of directly creating match
+                          controller.initiatePaymentAndCreateMatch();
+                    },),
+      ).paddingOnly(bottom: Get.height * 0.03),
     );
   }}
 
@@ -753,5 +809,14 @@ String getDaySuffix(int day) {
     default:
       return "th";
   }
+}
+String _formatMatchTime(dynamic matchTime) {
+  if (matchTime is List && matchTime.isNotEmpty) {
+    if (matchTime.length == 1) return matchTime.first.toString();
+    if (matchTime.length == 2) return "${matchTime.first} - ${matchTime.last}";
+    return "${matchTime.first} - ${matchTime.last}";
+  }
+  if (matchTime is String && matchTime.isNotEmpty) return matchTime;
+  return "";
 }
 
