@@ -27,10 +27,10 @@ class AllOpenMatchScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Text(
-                //   // "For your level",
-                //   style: Get.textTheme.headlineLarge,
-                // ),
+                Text(
+                  "For your level",
+                  style: Get.textTheme.headlineLarge,
+                ),
                 GestureDetector(
                   onTap: () {
                     Get.bottomSheet(

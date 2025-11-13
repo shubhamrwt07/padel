@@ -21,33 +21,61 @@ class OpenMatchBookingModel {
 
   OpenMatchBookingModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
-    if (json['data'] != null) {
+
+    final dynamic dataJson = json['data'];
+    if (dataJson is List) {
+      data = dataJson
+          .map((dynamic item) => OpenMatchBookingData.fromJson(
+              Map<String, dynamic>.from(item as Map)))
+          .toList();
+
+      currentPage = json['currentPage'];
+      totalPages = json['totalPages'];
+      totalItems = json['totalItems'];
+      itemsPerPage = json['itemsPerPage'];
+      hasNextPage = json['hasNextPage'];
+      hasPrevPage = json['hasPrevPage'];
+    } else if (dataJson is Map<String, dynamic>) {
+      final docs = dataJson['docs'];
+      if (docs is List) {
+        data = docs
+            .map((dynamic item) => OpenMatchBookingData.fromJson(
+                Map<String, dynamic>.from(item as Map)))
+            .toList();
+      } else {
+        data = <OpenMatchBookingData>[];
+      }
+
+      currentPage = dataJson['currentPage'] ?? json['currentPage'];
+      totalPages = dataJson['totalPages'] ?? json['totalPages'];
+      totalItems = dataJson['totalItems'] ?? json['totalItems'];
+      itemsPerPage = dataJson['itemsPerPage'] ?? json['itemsPerPage'];
+      hasNextPage = dataJson['hasNextPage'] ?? json['hasNextPage'];
+      hasPrevPage = dataJson['hasPrevPage'] ?? json['hasPrevPage'];
+    } else {
       data = <OpenMatchBookingData>[];
-      json['data'].forEach((v) {
-        data!.add(new OpenMatchBookingData.fromJson(v));
-      });
+      currentPage = json['currentPage'];
+      totalPages = json['totalPages'];
+      totalItems = json['totalItems'];
+      itemsPerPage = json['itemsPerPage'];
+      hasNextPage = json['hasNextPage'];
+      hasPrevPage = json['hasPrevPage'];
     }
-    currentPage = json['currentPage'];
-    totalPages = json['totalPages'];
-    totalItems = json['totalItems'];
-    itemsPerPage = json['itemsPerPage'];
-    hasNextPage = json['hasNextPage'];
-    hasPrevPage = json['hasPrevPage'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> map = <String, dynamic>{};
+    map['success'] = success;
+    if (data != null) {
+      map['data'] = data!.map((v) => v.toJson()).toList();
     }
-    data['currentPage'] = this.currentPage;
-    data['totalPages'] = this.totalPages;
-    data['totalItems'] = this.totalItems;
-    data['itemsPerPage'] = this.itemsPerPage;
-    data['hasNextPage'] = this.hasNextPage;
-    data['hasPrevPage'] = this.hasPrevPage;
-    return data;
+    map['currentPage'] = currentPage;
+    map['totalPages'] = totalPages;
+    map['totalItems'] = totalItems;
+    map['itemsPerPage'] = itemsPerPage;
+    map['hasNextPage'] = hasNextPage;
+    map['hasPrevPage'] = hasPrevPage;
+    return map;
   }
 }
 
@@ -97,6 +125,15 @@ class OpenMatchBookingData {
         this.updatedAt,
         this.iV});
 
+  static String? _asJoinedString(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is List) {
+      return value.whereType<String>().join(', ').toString();
+    }
+    return value.toString();
+  }
+
   OpenMatchBookingData.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubId =
@@ -107,13 +144,15 @@ class OpenMatchBookingData {
         slot!.add(new Slot.fromJson(v));
       });
     }
-    matchType = json['matchType'];
-    skillLevel = json['skillLevel'];
-    playerLevel = json['playerLevel'];
-    skillDetails = json['skillDetails'].cast<String>();
-    matchDate = json['matchDate'];
-    matchTime = json['matchTime'];
-    matchStatus = json['matchStatus'];
+    matchType = _asJoinedString(json['matchType']);
+    skillLevel = _asJoinedString(json['skillLevel']);
+    playerLevel = _asJoinedString(json['playerLevel']);
+    skillDetails = json['skillDetails'] != null
+        ? List<String>.from(json['skillDetails'])
+        : null;
+    matchDate = _asJoinedString(json['matchDate']);
+    matchTime = _asJoinedString(json['matchTime']);
+    matchStatus = _asJoinedString(json['matchStatus']);
     if (json['teamA'] != null) {
       teamA = <TeamA>[];
       json['teamA'].forEach((v) {
@@ -129,13 +168,13 @@ class OpenMatchBookingData {
     createdBy = json['createdBy'] != null
         ? new CreatedBy.fromJson(json['createdBy'])
         : null;
-    gender = json['gender'];
+    gender = _asJoinedString(json['gender']);
     status = json['status'];
     adminStatus = json['adminStatus'];
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+    createdAt = _asJoinedString(json['createdAt']);
+    updatedAt = _asJoinedString(json['updatedAt']);
     iV = json['__v'];
   }
 
@@ -291,30 +330,38 @@ class ClubId {
         : null;
     sId = json['_id'];
     ownerId = json['ownerId'];
-    clubName = json['clubName'];
+    clubName = OpenMatchBookingData._asJoinedString(json['clubName']);
     iV = json['__v'];
-    address = json['address'];
+    address = OpenMatchBookingData._asJoinedString(json['address']);
     if (json['businessHours'] != null) {
       businessHours = <BusinessHours>[];
       json['businessHours'].forEach((v) {
         businessHours!.add(new BusinessHours.fromJson(v));
       });
     }
-    city = json['city'];
+    city = OpenMatchBookingData._asJoinedString(json['city']);
     courtCount = json['courtCount'];
-    courtImage = json['courtImage'].cast<String>();
-    courtName = json['courtName'].cast<String>();
-    courtType = json['courtType'].cast<String>();
-    createdAt = json['createdAt'];
-    features = json['features'].cast<String>();
+    courtImage = json['courtImage'] != null
+        ? List<String>.from(json['courtImage'])
+        : null;
+    courtName = json['courtName'] != null
+        ? List<String>.from(json['courtName'])
+        : null;
+    courtType = json['courtType'] != null
+        ? List<String>.from(json['courtType'])
+        : null;
+    createdAt = OpenMatchBookingData._asJoinedString(json['createdAt']);
+    features = json['features'] != null
+        ? List<String>.from(json['features'])
+        : null;
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
     isFeatured = json['isFeatured'];
     isVerified = json['isVerified'];
-    state = json['state'];
-    updatedAt = json['updatedAt'];
-    zipCode = json['zipCode'];
-    description = json['description'];
+    state = OpenMatchBookingData._asJoinedString(json['state']);
+    updatedAt = OpenMatchBookingData._asJoinedString(json['updatedAt']);
+    zipCode = OpenMatchBookingData._asJoinedString(json['zipCode']);
+    description = OpenMatchBookingData._asJoinedString(json['description']);
   }
 
   Map<String, dynamic> toJson() {
@@ -358,7 +405,13 @@ class Location {
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    if (json['coordinates'] != null) {
+      coordinates = (json['coordinates'] as List)
+          .map((value) => (value as num).toDouble())
+          .toList();
+    } else {
+      coordinates = null;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -400,7 +453,15 @@ class Slot {
 
   Slot.fromJson(Map<String, dynamic> json) {
     slotId = json['slotId'];
-    courtName = json['courtName'];
+    final dynamic courtNameJson = json['courtName'];
+    if (courtNameJson is String) {
+      courtName = courtNameJson;
+    } else if (courtNameJson is List) {
+      // If backend sends an array of names, join them for display
+      courtName = courtNameJson.whereType<String>().join(', ');
+    } else {
+      courtName = null;
+    }
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
@@ -429,10 +490,26 @@ class SlotTimes {
   SlotTimes({this.time, this.amount, this.status, this.availabilityStatus});
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
-    amount = json['amount'];
-    status = json['status'];
-    availabilityStatus = json['availabilityStatus'];
+    final dynamic timeJson = json['time'];
+    if (timeJson is String) {
+      time = timeJson;
+    } else if (timeJson is List) {
+      time = timeJson.whereType<String>().join(', ');
+    } else {
+      time = timeJson?.toString();
+    }
+    final dynamic amountJson = json['amount'];
+    if (amountJson is int) {
+      amount = amountJson;
+    } else if (amountJson is num) {
+      amount = amountJson.toInt();
+    } else if (amountJson is String) {
+      amount = int.tryParse(amountJson);
+    } else {
+      amount = null;
+    }
+    status = OpenMatchBookingData._asJoinedString(json['status']);
+    availabilityStatus = OpenMatchBookingData._asJoinedString(json['availabilityStatus']);
   }
 
   Map<String, dynamic> toJson() {

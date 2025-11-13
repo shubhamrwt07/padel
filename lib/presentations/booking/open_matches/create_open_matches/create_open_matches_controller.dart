@@ -44,6 +44,7 @@ class CreateOpenMatchesController extends GetxController {
 
   // Keep existing for backward compatibility
   RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
+  RxBool isBottomSheetOpen = false.obs;
   DetailsController detailsController=Get.put(DetailsController());
   @override
   void onInit() {

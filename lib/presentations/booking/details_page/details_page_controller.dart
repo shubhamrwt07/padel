@@ -150,7 +150,6 @@ class DetailsController extends GetxController {
         "clubId": localMatchData["clubId"] ?? "",
         "matchDate": formattedMatchDate, // ✅ selected match date
         "skillLevel": localMatchData["skillLevel"] ?? "",
-
         // 👇 Skill details
         "skillDetails": localMatchData["skillDetails"] ?? [],
         "customerScale": localMatchData["customerScale"] ?? "",

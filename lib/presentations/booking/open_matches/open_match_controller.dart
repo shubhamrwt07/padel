@@ -16,6 +16,8 @@ class OpenMatchesController extends GetxController {
   RxString errorMessage = ''.obs;
 
   final List<String> timeSlots = [
+    "6:00 am",
+    "7:00 am",
     "8:00 am",
     "9:00 am",
     "10:00 am",
