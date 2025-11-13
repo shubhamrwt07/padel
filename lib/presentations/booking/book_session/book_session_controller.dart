@@ -132,6 +132,7 @@ class BookSessionController extends GetxController {
   CartRepository cartRepository = CartRepository();
 
   RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
+  RxBool isBottomSheetOpen = false.obs;
 
   @override
   void onInit() {

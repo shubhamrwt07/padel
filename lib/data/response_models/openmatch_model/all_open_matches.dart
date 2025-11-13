@@ -69,6 +69,21 @@ class MatchData {
     this.iV,
   });
 
+  static String? _asJoinedString(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is List) {
+      final parts = value
+          .where((element) => element != null)
+          .map((element) => element.toString())
+          .where((element) => element.trim().isNotEmpty)
+          .toList();
+      if (parts.isEmpty) return null;
+      return parts.join(', ');
+    }
+    return value.toString();
+  }
+
   MatchData.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubId = json['clubId'] != null ? ClubId.fromJson(json['clubId']) : null;
@@ -78,12 +93,12 @@ class MatchData {
         slot!.add(Slot.fromJson(v));
       });
     }
-    matchType = json['matchType'];
-    skillLevel = json['skillLevel'];
+    matchType = _asJoinedString(json['matchType']);
+    skillLevel = _asJoinedString(json['skillLevel']);
     skillDetails = json['skillDetails']?.cast<String>();
-    matchDate = json['matchDate'];
-    matchTime = json['matchTime'];
-    matchStatus = json['matchStatus'];
+    matchDate = _asJoinedString(json['matchDate']);
+    matchTime = _asJoinedString(json['matchTime']);
+    matchStatus = _asJoinedString(json['matchStatus']);
     if (json['teamA'] != null) {
       teamA = <TeamA>[];
       json['teamA'].forEach((v) {
@@ -96,14 +111,14 @@ class MatchData {
         teamB!.add(TeamB.fromJson(v));
       });
     }
-    createdBy = json['createdBy'];
-    gender = json['gender'];
+    createdBy = _asJoinedString(json['createdBy']);
+    gender = _asJoinedString(json['gender']);
     status = json['status'];
     adminStatus = json['adminStatus'];
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+    createdAt = _asJoinedString(json['createdAt']);
+    updatedAt = _asJoinedString(json['updatedAt']);
     iV = json['__v'];
   }
 
@@ -150,8 +165,8 @@ class ClubId {
 
   ClubId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
-    clubName = json['clubName'];
-    address = json['address'];
+    clubName = MatchData._asJoinedString(json['clubName']);
+    address = MatchData._asJoinedString(json['address']);
   }
 
   Map<String, dynamic> toJson() {
@@ -172,7 +187,7 @@ class Slot {
 
   Slot.fromJson(Map<String, dynamic> json) {
     slotId = json['slotId'];
-    courtName = json['courtName'];
+    courtName = MatchData._asJoinedString(json['courtName']);
     if (json['slotTimes'] != null) {
       slotTimes = <SlotTimes>[];
       json['slotTimes'].forEach((v) {
@@ -201,10 +216,10 @@ class SlotTimes {
   SlotTimes({this.time, this.amount, this.status, this.availabilityStatus});
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
+    time = MatchData._asJoinedString(json['time']);
     amount = json['amount'];
-    status = json['status'];
-    availabilityStatus = json['availabilityStatus'];
+    status = MatchData._asJoinedString(json['status']);
+    availabilityStatus = MatchData._asJoinedString(json['availabilityStatus']);
   }
 
   Map<String, dynamic> toJson() {
@@ -226,7 +241,7 @@ class TeamA {
 
   TeamA.fromJson(Map<String, dynamic> json) {
     userId = json['userId'] != null ? UserId.fromJson(json['userId']) : null;
-    joinedAt = json['joinedAt'];
+    joinedAt = MatchData._asJoinedString(json['joinedAt']);
     sId = json['_id'];
   }
 
@@ -250,7 +265,7 @@ class TeamB {
 
   TeamB.fromJson(Map<String, dynamic> json) {
     userId = json['userId'] != null ? UserId.fromJson(json['userId']) : null;
-    joinedAt = json['joinedAt'];
+    joinedAt = MatchData._asJoinedString(json['joinedAt']);
     sId = json['_id'];
   }
 
@@ -309,22 +324,22 @@ class UserId {
   UserId.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null ? Location.fromJson(json['location']) : null;
     sId = json['_id'];
-    email = json['email'];
-    countryCode = json['countryCode'];
+    email = MatchData._asJoinedString(json['email']);
+    countryCode = MatchData._asJoinedString(json['countryCode']);
     phoneNumber = json['phoneNumber'];
-    name = json['name'];
-    lastname = json['lastname'];
-    category = json['category'];
+    name = MatchData._asJoinedString(json['name']);
+    lastname = MatchData._asJoinedString(json['lastname']);
+    category = MatchData._asJoinedString(json['category']);
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
-    role = json['role'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+    role = MatchData._asJoinedString(json['role']);
+    createdAt = MatchData._asJoinedString(json['createdAt']);
+    updatedAt = MatchData._asJoinedString(json['updatedAt']);
     iV = json['__v'];
-    dob = json['dob'];
-    gender = json['gender'];
-    profilePic = json['profilePic'];
-    level = json['level'];
+    dob = MatchData._asJoinedString(json['dob']);
+    gender = MatchData._asJoinedString(json['gender']);
+    profilePic = MatchData._asJoinedString(json['profilePic']);
+    level = MatchData._asJoinedString(json['level']);
   }
 
   Map<String, dynamic> toJson() {
@@ -360,7 +375,7 @@ class Location {
   Location({this.type, this.coordinates});
 
   Location.fromJson(Map<String, dynamic> json) {
-    type = json['type'];
+    type = MatchData._asJoinedString(json['type']);
     coordinates = json['coordinates']?.cast<double>();
   }
 

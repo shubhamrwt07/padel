@@ -70,7 +70,7 @@ class OpenMatchesScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                ).paddingOnly(bottom: 10),
+                ).paddingOnly(bottom: 10,top: 15),
               ),
               Transform.translate(
                 offset: Offset(0, -Get.height * 0.04),
@@ -104,7 +104,6 @@ class OpenMatchesScreen extends StatelessWidget {
       ),
     );
   }
-
   /// --------------- DATE PICKER ---------------
   Widget _buildDatePicker() {
     return Column(
@@ -213,7 +212,6 @@ class OpenMatchesScreen extends StatelessWidget {
       ],
     );
   }
-
   /// ---------------- SLOT HEADER ----------------
   Widget _buildSlotHeader(BuildContext context) {
     return Row(
@@ -246,7 +244,6 @@ class OpenMatchesScreen extends StatelessWidget {
       ],
     );
   }
-
   /// ---------------- TIME TABS ----------------
   Widget _buildTimeTabs() {
     return Obx(() {
@@ -315,7 +312,6 @@ class OpenMatchesScreen extends StatelessWidget {
       );
     });
   }
-
   /// ---------------- TIME SLOTS ----------------
   Widget _buildTimeSlots() {
     return Obx(() {
@@ -398,7 +394,6 @@ class OpenMatchesScreen extends StatelessWidget {
       );
     });
   }
-
   // Rich card from API data
   Widget _buildMatchCardFromData(BuildContext context, MatchData data) {
     final dayStr = controller.getDay(data.matchDate);
@@ -551,7 +546,6 @@ class OpenMatchesScreen extends StatelessWidget {
       ),
     ).paddingOnly(bottom: 12);
   }
-
   Widget _buildFilledPlayer(String? imageUrl, String name, String level) {
     final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
@@ -613,7 +607,6 @@ class OpenMatchesScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildAvailableCircle(String team, String matchId) {
     return Column(
       children: [
