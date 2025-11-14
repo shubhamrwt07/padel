@@ -105,6 +105,7 @@ class OpenMatchesScreen extends StatelessWidget {
     );
   }
   /// --------------- DATE PICKER ---------------
+  /// --------------- DATE PICKER ---------------
   Widget _buildDatePicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,22 +116,22 @@ class OpenMatchesScreen extends StatelessWidget {
         ).paddingOnly(top: 10),
         Obx(
               () => Transform.translate(
-            offset: Offset(0, -Get.height * .02),
+            offset: Offset(0, -19),
             child: Row(
               children: [
                 Container(
                   width: 30,
-                  height: Get.height * 0.061,
+                  height: Get.height * 0.068,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     color: AppColors.textFieldColor,
                     border: Border.all(color: AppColors.blackColor.withAlpha(10)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: DateFormat('MMM')
-                        .format(controller.selectedDate.value ?? DateTime.now())
+                        .format(controller.focusedDate.value ?? DateTime.now())
                         .toUpperCase()
                         .split('')
                         .map((char) => Text(
@@ -144,65 +145,80 @@ class OpenMatchesScreen extends StatelessWidget {
                     ))
                         .toList(),
                   ),
-                ),
+                ).paddingOnly(right: 5),
                 Expanded(
-                  child: EasyDateTimeLinePicker.itemBuilder(
-                    headerOptions: HeaderOptions(
-                      headerBuilder: (_, context, date) => const SizedBox.shrink(),
-                    ),
-                    selectionMode: SelectionMode.alwaysFirst(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2030, 3, 18),
-                    focusedDate: controller.selectedDate.value,
-                    itemExtent: 46,
-                    itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                      final dayName = DateFormat('E').format(date);
-                      return GestureDetector(
-                        onTap: onTap,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Container(
-                            height: Get.height * 0.06,
-                            width: Get.width * 0.11,
-                            key: ValueKey(isSelected),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
-                              border: Border.all(
-                                color: isSelected ? Colors.transparent : AppColors.blackColor.withAlpha(10),
-                                width: 1,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification is ScrollUpdateNotification) {
+                        final scrollOffset = scrollNotification.metrics.pixels;
+                        final itemExtent = 46.0;
+                        final itemsScrolled = (scrollOffset / itemExtent).round();
+                        final estimatedDate = DateTime.now().add(Duration(days: itemsScrolled));
+
+                        // Only update focusedDate for month display, not selectedDate
+                        controller.focusedDate.value = estimatedDate;
+                      }
+                      return false;
+                    },
+                    child: EasyDateTimeLinePicker.itemBuilder(
+                      headerOptions: HeaderOptions(
+                        headerBuilder: (_, context, date) => const SizedBox.shrink(),
+                      ),
+                      selectionMode: SelectionMode.alwaysFirst(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2030, 3, 18),
+                      focusedDate: controller.selectedDate.value,
+                      itemExtent: 46,
+                      itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+                        final dayName = DateFormat('E').format(date);
+                        return GestureDetector(
+                          onTap: onTap,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Container(
+                              height: 60,
+                              width: Get.width * 0.11,
+                              key: ValueKey(isSelected),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: isSelected ? Colors.black : AppColors.playerCardBackgroundColor,
+                                border: Border.all(
+                                  color: isSelected ? Colors.transparent : AppColors.blackColor.withAlpha(10),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    date.day.toString(),
+                                    style: Get.textTheme.titleMedium!.copyWith(
+                                      fontSize: 20,
+                                      color: isSelected ? Colors.white : AppColors.textColor,
+                                    ),
+                                  ),
+                                  Text(
+                                    dayName,
+                                    style: Get.textTheme.bodySmall!.copyWith(
+                                      fontSize: 11,
+                                      color: isSelected ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  date.day.toString(),
-                                  style: Get.textTheme.titleMedium!.copyWith(
-                                    fontSize: 18,
-                                    color: isSelected ? Colors.white : AppColors.textColor,
-                                  ),
-                                ),
-                                Text(
-                                  dayName,
-                                  style: Get.textTheme.bodySmall!.copyWith(
-                                    fontSize: 11,
-                                    color: isSelected ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ).paddingSymmetric(vertical: 6);
-                    },
-                    onDateChange: (date) {
-                      controller.selectedDate.value = date;
-                      controller.selectedTime = null;
-                      controller.selectedSlots.clear();
-                      controller.fetchMatchesForSelection();
-                    },
+                        ).paddingSymmetric(vertical: 6);
+                      },
+                      onDateChange: (date) {
+                        controller.selectedDate.value = date;
+                        controller.focusedDate.value = date; // Sync on selection
+                        controller.selectedTime = null;
+                        controller.selectedSlots.clear();
+                        controller.fetchMatchesForSelection();
+                      },
+                    ),
                   ),
                 ),
               ],

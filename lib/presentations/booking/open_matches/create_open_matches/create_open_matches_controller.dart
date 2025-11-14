@@ -16,6 +16,8 @@ import '../../../cart/cart_screen.dart';
 
 class CreateOpenMatchesController extends GetxController {
   final selectedDate = Rxn<DateTime>();
+  Rx<DateTime> focusedMonth = DateTime.now().obs;
+
   Courts argument = Courts();
   RxBool showUnavailableSlots = false.obs;
   RxInt currentPage = 0.obs;
@@ -72,13 +74,7 @@ class CreateOpenMatchesController extends GetxController {
     log("Slots -> $selectedSlots");
 
     if (multiDateSelections.isEmpty) {
-      Get.snackbar(
-        "No Slots Selected",
-        "Please select at least one slot before proceeding.",
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
+      SnackBarUtils.showInfoSnackBar("Please select at least one slot to continue.");
       return;
     }
 
@@ -253,7 +249,7 @@ class CreateOpenMatchesController extends GetxController {
           Get.snackbar(
             "Single Date Selection Only",
             "Please select slots from only one date. Clear current selections to choose a different date.",
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Colors.blue,
             colorText: Colors.white,
             snackPosition: SnackPosition.TOP,
             duration: const Duration(seconds: 3),

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/court_slots_shimmer.dart';
+import 'package:padel_mobile/presentations/booking/book_session/widgets/upword_arrow_animation.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../handler/text_formatter.dart';
@@ -57,7 +58,7 @@ class BookSession extends StatelessWidget {
                 height: Get.height * 0.068,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                   color: AppColors.textFieldColor,
                   border: Border.all(
                     color: AppColors.blackColor.withAlpha(10),
@@ -82,136 +83,153 @@ class BookSession extends StatelessWidget {
                   )
                       .toList(),
                 ),
-              ),
+              ).paddingOnly(right: 5),
             ),
 
-            /// Date timeline
+            /// Date timeline with scroll listener
             Expanded(
-              child: EasyDateTimeLinePicker.itemBuilder(
-                headerOptions: HeaderOptions(
-                  headerBuilder: (_, context, date) =>
-                  const SizedBox.shrink(),
-                ),
-                selectionMode: SelectionMode.alwaysFirst(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2030, 3, 18),
-                focusedDate: controller.selectedDate.value,
-                itemExtent: 46,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (scrollNotification) {
+                  if (scrollNotification is ScrollUpdateNotification) {
+                    final scrollOffset = scrollNotification.metrics.pixels;
+                    final itemExtent = 46.0;
+                    final itemsScrolled = (scrollOffset / itemExtent).round();
+                    final estimatedDate = DateTime.now().add(Duration(days: itemsScrolled));
 
-                itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final currentDate = DateTime(date.year, date.month, date.day);
-                  if (currentDate.isBefore(today)) return const SizedBox.shrink();
+                    // Update focusedMonth based on scroll position
+                    final newMonth = DateTime(estimatedDate.year, estimatedDate.month, 1);
+                    if (controller.focusedMonth.value.month != newMonth.month ||
+                        controller.focusedMonth.value.year != newMonth.year) {
+                      controller.focusedMonth.value = newMonth;
+                    }
+                  }
+                  return false;
+                },
+                child: EasyDateTimeLinePicker.itemBuilder(
+                  headerOptions: HeaderOptions(
+                    headerBuilder: (_, context, date) =>
+                    const SizedBox.shrink(),
+                  ),
+                  selectionMode: SelectionMode.alwaysFirst(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2030, 3, 18),
+                  focusedDate: controller.selectedDate.value,
+                  itemExtent: 46,
+                  itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    final currentDate = DateTime(date.year, date.month, date.day);
+                    if (currentDate.isBefore(today)) return const SizedBox.shrink();
 
-                  final dayName = DateFormat('E').format(date);
-                  final dateString =
-                      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                  final dateSelections =
-                      controller.getSelectionsByDate()[dateString] ?? [];
+                    final dayName = DateFormat('E').format(date);
+                    final dateString =
+                        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                    final dateSelections =
+                        controller.getSelectionsByDate()[dateString] ?? [];
 
-                  return GestureDetector(
-                    onTap: () {
-                      onTap();
-                      // 👇 Update both selectedDate and focusedMonth here
-                      controller.selectedDate.value = date;
-                      controller.focusedMonth.value =
-                          DateTime(date.year, date.month, 1);
-                    },
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          height: 60,
-                          width: Get.width * 0.11,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: isSelected
-                                ? Colors.black
-                                : dateSelections.isNotEmpty
-                                ? AppColors.primaryColor
-                                .withValues(alpha: 0.1)
-                                : AppColors.playerCardBackgroundColor,
-                            border: Border.all(
+                    return GestureDetector(
+                      onTap: () {
+                        onTap();
+                        // Update both selectedDate and focusedMonth here
+                        controller.selectedDate.value = date;
+                        controller.focusedMonth.value =
+                            DateTime(date.year, date.month, 1);
+                      },
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            height: 60,
+                            width: Get.width * 0.11,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
                               color: isSelected
-                                  ? Colors.transparent
+                                  ? Colors.black
                                   : dateSelections.isNotEmpty
                                   ? AppColors.primaryColor
-                                  : AppColors.blackColor.withAlpha(10),
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "${date.day}",
-                                style: Get.textTheme.titleMedium!.copyWith(
-                                  fontSize: 20,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : dateSelections.isNotEmpty
-                                      ? AppColors.primaryColor
-                                      : AppColors.textColor,
-                                ),
+                                  .withValues(alpha: 0.1)
+                                  : AppColors.playerCardBackgroundColor,
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.transparent
+                                    : dateSelections.isNotEmpty
+                                    ? AppColors.primaryColor
+                                    : AppColors.blackColor.withAlpha(10),
                               ),
-                              Transform.translate(
-                                offset: const Offset(0, -2),
-                                child: Text(
-                                  dayName,
-                                  style: Get.textTheme.bodySmall!.copyWith(
-                                    fontSize: 11,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "${date.day}",
+                                  style: Get.textTheme.titleMedium!.copyWith(
+                                    fontSize: 20,
                                     color: isSelected
                                         ? Colors.white
                                         : dateSelections.isNotEmpty
                                         ? AppColors.primaryColor
-                                        : Colors.black,
+                                        : AppColors.textColor,
+                                  ),
+                                ),
+                                Transform.translate(
+                                  offset: const Offset(0, -2),
+                                  child: Text(
+                                    dayName,
+                                    style: Get.textTheme.bodySmall!.copyWith(
+                                      fontSize: 11,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : dateSelections.isNotEmpty
+                                          ? AppColors.primaryColor
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (dateSelections.isNotEmpty)
+                            Positioned(
+                              top: 0,
+                              right: -3,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                child: Text(
+                                  "${dateSelections.length}",
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        if (dateSelections.isNotEmpty)
-                          Positioned(
-                            top: 1,
-                            right: -3,
-                            child: Container(
-                              height: 16,
-                              width: 16,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.secondaryColor,
-                              ),
-                              child: Text(
-                                "${dateSelections.length}",
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
+                        ],
+                      ),
+                    );
+                  },
 
-                onDateChange: (date) async {
-                  controller.selectedDate.value = date;
-                  controller.focusedMonth.value =
-                      DateTime(date.year, date.month, 1); // 👈 Update month
-                  controller.isLoadingCourts.value = true;
-                  await controller.getAvailableCourtsById(
-                    controller.argument.id!,
-                    showUnavailable:
-                    controller.showUnavailableSlots.value,
-                  );
-                  controller.slots.refresh();
-                  controller.isLoadingCourts.value = false;
-                },
+                  onDateChange: (date) async {
+                    controller.selectedDate.value = date;
+                    controller.focusedMonth.value =
+                        DateTime(date.year, date.month, 1);
+                    controller.isLoadingCourts.value = true;
+                    await controller.getAvailableCourtsById(
+                      controller.argument.id!,
+                      showUnavailable:
+                      controller.showUnavailableSlots.value,
+                    );
+                    controller.slots.refresh();
+                    controller.isLoadingCourts.value = false;
+                  },
+                ),
               ),
             ),
           ],
@@ -336,8 +354,6 @@ class BookSession extends StatelessWidget {
   }
 
   /// Build all courts with their slots
-// In _buildAllCourtsWithSlots method, remove the swipe hint section
-// Updated _buildAllCourtsWithSlots method to show all courts in a scrollable list
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
       if (controller.isLoadingCourts.value) {
@@ -352,24 +368,43 @@ class BookSession extends StatelessWidget {
 
       final courts = slotsData.data!;
 
-      return Column(
-        children: [
-          // Show all courts in a list
-          ...courts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final court = entry.value;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildCourtSection(court, index),
-            );
-          }).toList(),
+      return GestureDetector(
+        onHorizontalDragEnd: (details) {
+          // Swipe left (negative velocity) = next tab
+          if (details.primaryVelocity! < -300) {
+            // Move to next tab
+            int nextTab = (controller.selectedTimeOfDay.value + 1) % 3;
+            controller.selectedTimeOfDay.value = nextTab;
+            controller.filterSlotsByTimeOfDay();
+          }
+          // Swipe right (positive velocity) = previous tab
+          else if (details.primaryVelocity! > 300) {
+            // Move to previous tab
+            int prevTab = (controller.selectedTimeOfDay.value - 1) % 3;
+            if (prevTab < 0) prevTab = 2; // Wrap around to Night
+            controller.selectedTimeOfDay.value = prevTab;
+            controller.filterSlotsByTimeOfDay();
+          }
+        },
+        child: Column(
+          children: [
+            // Show all courts in a list
+            ...courts.asMap().entries.map((entry) {
+              final index = entry.key;
+              final court = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildCourtSection(court, index),
+              );
+            }),
 
-          const SizedBox(height: 26),
-        ],
+            const SizedBox(height: 26),
+          ],
+        ),
       );
     });
   }
-  /// Build individual court section with its slots
+
   Widget _buildCourtSection(dynamic courtData, int index) {
     final courtName = courtData.courtName ?? 'Unknown Court';
     final slotTimes = courtData.slots ?? [];
@@ -620,326 +655,7 @@ class BookSession extends StatelessWidget {
     );
   }
 
-  void _openSelectedSlotsBottomSheet(BuildContext context) {
-    if (controller.multiDateSelections.isEmpty) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.45,
-          minChildSize: 0.3,
-          maxChildSize: 0.85,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Obx(() {
-                final selectionsByDate = controller.getSelectionsByDate();
-                final totalSelections = controller.getTotalSelectionsCount();
-
-                if (totalSelections == 0) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (Navigator.of(sheetContext).canPop()) {
-                      Navigator.of(sheetContext).pop();
-                    }
-                  });
-                  return const SizedBox.shrink();
-                }
-
-                final totalAmount = controller.totalAmount.value;
-                final entries = selectionsByDate.entries.toList()
-                  ..sort((a, b) => a.key.compareTo(b.key));
-
-                return SafeArea(
-                  top: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                    const SizedBox(height: 10),
-                    Center(
-                      child: Container(
-                        height: 4,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Selected Slots Summary',
-                            style: Get.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          IconButton(
-                            splashRadius: 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () => Navigator.of(sheetContext).pop(),
-                            icon: const Icon(Icons.close_rounded, size: 22),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Summary',
-                                  style: Get.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '$totalSelections slot${totalSelections > 1 ? 's' : ''} selected',
-                                  style: Get.textTheme.bodySmall?.copyWith(
-                                    color: AppColors.darkGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Text(
-                              '₹ $totalAmount',
-                              style: Get.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                      child: Text(
-                        'Date-wise Breakdown',
-                        style: Get.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.darkGrey,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: entries.length,
-                        itemBuilder: (context, index) {
-                          final entry = entries[index];
-                          final date = DateTime.parse(entry.key);
-                          final formattedDate = DateFormat('MMM dd, yyyy').format(date);
-                          final dayName = DateFormat('EEEE').format(date);
-                          final selections = entry.value;
-                          final selectionsByCourt = <String, List<Map<String, dynamic>>>{};
-
-                          for (final selection in selections) {
-                            final courtId = selection['courtId'] as String? ?? '';
-                            selectionsByCourt.putIfAbsent(courtId, () => []).add(selection);
-                          }
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.grey.shade200,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      height: 32,
-                                      width: 32,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primaryColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.calendar_month,
-                                        color: AppColors.primaryColor,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '$formattedDate ($dayName)',
-                                            style: Get.textTheme.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.secondaryColor,
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Text(
-                                        '${selections.length}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                ...selectionsByCourt.entries.map((courtEntry) {
-                                  final courtSelections = courtEntry.value;
-                                  final courtName =
-                                      (courtSelections.first['courtName'] as String?)?.isNotEmpty == true
-                                          ? courtSelections.first['courtName'] as String
-                                          : 'Court';
-
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 14),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.playerCardBackgroundColor,
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.sports_tennis,
-                                              size: 18,
-                                              color: AppColors.primaryColor,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                courtName,
-                                                style: Get.textTheme.bodyMedium?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                            Text(
-                                              courtSelections.length == 1
-                                                  ? '1 slot'
-                                                  : '${courtSelections.length} slots',
-                                              style: Get.textTheme.bodySmall?.copyWith(
-                                                color: AppColors.darkGrey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Wrap(
-                                          spacing: 10,
-                                          runSpacing: 8,
-                                          children: courtSelections.map((selection) {
-                                            final slot = selection['slot'] as Slots;
-                                            final formattedTime = formatTimeSlot(slot.time ?? '');
-                                            return Chip(
-                                              label: Text(
-                                                formattedTime,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              backgroundColor: Colors.black,
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: CustomButton(
-                          width: double.infinity,
-                          onTap: () {
-                            Navigator.of(sheetContext).pop();
-                            controller.addToCart();
-                          },
-                          child: controller.cartLoader.value
-                              ? LoadingAnimationWidget.waveDots(
-                                  color: AppColors.whiteColor,
-                                  size: 40,
-                                )
-                              : Text(
-                                  'Proceed to Book',
-                                  style: Get.textTheme.titleMedium?.copyWith(
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ],
-                  ),
-                );
-              }),
-            );
-          },
-        );
-      },
-    );
-  }
   /// Bottom bar with total & book button
   Widget _bottomButton(BuildContext context) {
     return Obx(() {
@@ -947,8 +663,345 @@ class BookSession extends StatelessWidget {
       final totalSelections = controller.getTotalSelectionsCount();
 
       final double collapsedHeight = Get.height * .11;
-      final double expandedHeight = Get.height * .18;
+      final double expandedHeight = Get.height * .13;
+      void openSelectedSlotsBottomSheet(BuildContext context) {
+        if (controller.multiDateSelections.isEmpty) return;
 
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (sheetContext) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.65,
+              minChildSize: 0.3,
+              maxChildSize: 0.85,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      Obx(() {
+                        final selectionsByDate = controller.getSelectionsByDate();
+                        final totalSelections = controller.getTotalSelectionsCount();
+
+                        if (totalSelections == 0) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (Navigator.of(sheetContext).canPop()) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          });
+                          return const SizedBox.shrink();
+                        }
+
+                        final totalAmount = controller.totalAmount.value;
+                        final entries = selectionsByDate.entries.toList()
+                          ..sort((a, b) => a.key.compareTo(b.key));
+
+                        return SafeArea(
+                          top: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 30),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Selected Slots Summary',
+                                      style: Get.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,fontSize: 16
+                                      ),
+                                    ),
+                                    // IconButton(
+                                    //   splashRadius: 20,
+                                    //   padding: EdgeInsets.zero,
+                                    //   constraints: const BoxConstraints(),
+                                    //   onPressed: () => Navigator.of(sheetContext).pop(),
+                                    //   icon: const Icon(Icons.close_rounded, size: 22),
+                                    // ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryColor.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Total Summary',
+                                            style: Get.textTheme.titleSmall?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '$totalSelections slot${totalSelections > 1 ? 's' : ''} selected',
+                                            style: Get.textTheme.bodySmall?.copyWith(
+                                              color: AppColors.darkGrey,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        '₹ $totalAmount',
+                                        style: Get.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.primaryColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                child: Text(
+                                  'Date-wise Breakdown',
+                                  style: Get.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.labelBlackColor,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  controller: scrollController,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  itemCount: entries.length,
+                                  itemBuilder: (context, index) {
+                                    final entry = entries[index];
+                                    final date = DateTime.parse(entry.key);
+                                    final formattedDate = DateFormat('MMM dd, yyyy').format(date);
+                                    final dayName = DateFormat('EEEE').format(date);
+                                    final selections = entry.value;
+                                    final selectionsByCourt = <String, List<Map<String, dynamic>>>{};
+
+                                    for (final selection in selections) {
+                                      final courtId = selection['courtId'] as String? ?? '';
+                                      selectionsByCourt.putIfAbsent(courtId, () => []).add(selection);
+                                    }
+
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        /// ---- OUTSIDE ROW ---- ///
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 32,
+                                              width: 32,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primaryColor.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Icon(
+                                                Icons.calendar_month,
+                                                color: AppColors.primaryColor,
+                                                size: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                '$formattedDate ($dayName)',
+                                                style: Get.textTheme.bodyMedium?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.secondaryColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                '${selections.length}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(height: 6),
+
+                                        /// ---- CONTAINER BELOW ---- ///
+                                        Container(
+                                          margin: const EdgeInsets.only(bottom: 14),
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(color: Colors.grey.shade200),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(alpha: 0.04),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              ...selectionsByCourt.entries.map((courtEntry) {
+                                                final courtSelections = courtEntry.value;
+                                                final courtName =
+                                                (courtSelections.first['courtName'] ?? 'Court');
+
+                                                return Container(
+                                                  margin: const EdgeInsets.only(bottom: 0),
+                                                  padding: const EdgeInsets.all(3),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.sports_tennis,
+                                                              size: 14, color: AppColors.primaryColor),
+                                                          const SizedBox(width: 6),
+                                                          Expanded(
+                                                            child: Text(
+                                                              courtName,
+                                                              style: Get.textTheme.bodyMedium?.copyWith(
+                                                                fontWeight: FontWeight.w600,
+                                                                fontSize: 13,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            courtSelections.length == 1
+                                                                ? '1 slot'
+                                                                : '${courtSelections.length} slots',
+                                                            style: Get.textTheme.bodySmall?.copyWith(
+                                                              color: AppColors.darkGrey,
+                                                              fontSize: 11,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Wrap(
+                                                        spacing: 6,
+                                                        runSpacing: 6,
+                                                        children: courtSelections.map((selection) {
+                                                          final formattedTime =
+                                                          formatTimeSlot(selection['slot'].time);
+
+                                                          return Container(
+                                                            width: 60,
+                                                            alignment: Alignment.center,
+                                                            padding: const EdgeInsets.symmetric(vertical: 4),
+                                                            decoration: BoxDecoration(
+                                                              color: AppColors.blackColor,
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                            child: Text(
+                                                              formattedTime,
+                                                              style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 11,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      Positioned(
+                        top: -10,
+                        child: TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.elasticOut,
+                          builder: (context, double value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () => Get.back(),
+                                child: ClipRect(
+                                  child: Align(
+                                    alignment: Alignment.topCenter,        // show only top part
+                                    heightFactor: 0.6,
+                                    child: Transform.translate(
+                                      offset: Offset(0,4),
+                                      child: Container(
+                                        height: 60,
+                                        width: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withValues(alpha: 0.1),
+                                              blurRadius: 1,
+                                              spreadRadius: -2,
+                                              offset: Offset(0, -5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Transform.translate(offset: Offset(0, -10),child: ArrowAnimation(isUpward: false,)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      }
       return AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
@@ -970,7 +1023,7 @@ class BookSession extends StatelessWidget {
           onVerticalDragEnd: hasSelections
               ? (details) {
                   if ((details.primaryVelocity ?? 0) < -300) {
-                    _openSelectedSlotsBottomSheet(context);
+                    openSelectedSlotsBottomSheet(context);
                   }
                 }
               : null,
@@ -979,19 +1032,19 @@ class BookSession extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (hasSelections)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Row(
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    GestureDetector(
+                      onTap: ()=>openSelectedSlotsBottomSheet(context),
+                      child: Row(
                         children: [
                           Text(
                             "$totalSelections slot${totalSelections > 1 ? 's' : ''} selected",
                             style: Get.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.darkGrey,
+                              color: AppColors.blackColor,
                             ),
                           ),
                           const Spacer(),
@@ -1003,39 +1056,39 @@ class BookSession extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ).paddingOnly(left: 18,right: 18),
-                      Positioned(
-                        top: -48,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _openSelectedSlotsBottomSheet(context),
-                            customBorder: const CircleBorder(),
+                      ).paddingOnly(left: 18,right: 18,),
+                    ),
+                    Positioned(
+                      top: -20,
+                      child: InkWell(
+                        onTap: () => openSelectedSlotsBottomSheet(context),
+                        customBorder: const CircleBorder(),
+                        child: ClipRect(
+                          child: Align(
+                            alignment: Alignment.topCenter,        // show only top part
+                            heightFactor: 0.7,
                             child: Container(
-                              height: 44,
-                              width: 44,
+                              height: 55,
+                              width: 55,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
+                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    blurRadius: 1,
+                                    spreadRadius: -2,
+                                    offset: Offset(0, -5),
                                   ),
                                 ],
                               ),
-                              child: Icon(
-                                Icons.keyboard_double_arrow_up_rounded,
-                                color: AppColors.primaryColor,
-                                size: 22,
-                              ),
+                              child: Transform.translate(offset: Offset(0, -5),child: ArrowAnimation(isUpward: true,)),
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               CustomButton(
                 width: Get.width * 0.9,

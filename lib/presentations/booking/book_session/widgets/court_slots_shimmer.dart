@@ -9,7 +9,7 @@ class CourtSlotsShimmer extends StatelessWidget {
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Column(
-        children: List.generate(2, (courtIndex) {
+        children: List.generate(4, (courtIndex) {
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: EdgeInsets.zero,
