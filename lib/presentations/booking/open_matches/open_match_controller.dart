@@ -57,10 +57,12 @@ class OpenMatchesController extends GetxController {
   }
 
   Courts argument = Courts();
+  Rx<DateTime> focusedDate = DateTime.now().obs; // Add this new line
 
   @override
   void onInit() {
     super.onInit();
+    focusedDate.value = selectedDate.value; // Add this line
     argument = Get.arguments["data"];
     if (timeSlots.isNotEmpty) {
       final firstAvail = firstAvailableSlot();
