@@ -124,32 +124,32 @@ class BookingScreen extends GetView<BookingController> {
               automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               elevation: 0,
-              title: Obx(() {
-                final clubName = controller.courtsData.value.clubName ?? '';
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final settings =
-                    context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-                    final collapsed = (settings?.currentExtent ?? 0) <=
-                        (settings?.minExtent ?? kToolbarHeight) + 10;
-
-                    return AnimatedOpacity(
-                      opacity: collapsed && clubName.isNotEmpty ? 1 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Text(
-                        clubName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    );
-                  },
-                );
-              }),
+              // title: Obx(() {
+              //   final clubName = controller.courtsData.value.clubName ?? '';
+              //   return LayoutBuilder(
+              //     builder: (context, constraints) {
+              //       final settings =
+              //       context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+              //       final collapsed = (settings?.currentExtent ?? 0) <=
+              //           (settings?.minExtent ?? kToolbarHeight) + 10;
+              //
+              //       return AnimatedOpacity(
+              //         opacity: collapsed && clubName.isNotEmpty ? 1 : 0,
+              //         duration: const Duration(milliseconds: 200),
+              //         child: Text(
+              //           clubName,
+              //           maxLines: 1,
+              //           overflow: TextOverflow.ellipsis,
+              //           style: const TextStyle(
+              //             color: AppColors.blackColor,
+              //             fontSize: 18,
+              //             fontWeight: FontWeight.bold,
+              //           ),
+              //         )
+              //       );
+              //     },
+              //   );
+              // }),
               flexibleSpace: LayoutBuilder(
                 builder: (context, constraints) {
                   final top = constraints.biggest.height;

@@ -23,6 +23,7 @@ class AddPlayerScreen extends StatelessWidget {
               children: [
                 textFieldWithLabel(
                   "First Name",
+                  textCapitalization: TextCapitalization.words,
                   controller.fullNameController,
                   context,
                   action: TextInputAction.next,
@@ -112,11 +113,7 @@ class AddPlayerScreen extends StatelessWidget {
                     return controller.playerLevels.map((level) {
                       return Text(
                         level["label"] ?? "",
-                        style: Get.textTheme.headlineSmall!.copyWith(
-                          color: AppColors.textColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12, // 👈 same smaller text here
-                        ),
+                        style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       );
@@ -126,11 +123,7 @@ class AddPlayerScreen extends StatelessWidget {
                   // 🔹 Hint text
                   hint: Text(
                     "Select Player Level",
-                    style: Get.textTheme.headlineSmall!.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12, // 👈 hint size also consistent
-                    ),
+                    style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
                   ),
 
                   onChanged: (value) => controller.playerLevel.value = value!,
@@ -210,6 +203,7 @@ class AddPlayerScreen extends StatelessWidget {
         TextInputType? keyboardType,
         TextInputAction? action,
         int? maxLength,
+        TextCapitalization? textCapitalization
       }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,6 +221,7 @@ class AddPlayerScreen extends StatelessWidget {
           readOnly: readOnly,
           keyboardType: keyboardType,
           action: action,
+          textCapitalization: textCapitalization,
           maxLength: maxLength,
         ).paddingOnly(top: 10),
       ],

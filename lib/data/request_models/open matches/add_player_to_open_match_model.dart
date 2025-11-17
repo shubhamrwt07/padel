@@ -23,7 +23,7 @@ class Match {
   String? skillLevel;
   List<String>? skillDetails;
   String? matchDate;
-  String? matchTime;
+  List<String>? matchTime;
   String? matchStatus;
   List<TeamA>? teamA;
   List<TeamB>? teamB;
@@ -68,7 +68,7 @@ class Match {
     skillLevel = json['skillLevel'];
     skillDetails = (json['skillDetails'] as List?)?.cast<String>();
     matchDate = json['matchDate'];
-    matchTime = json['matchTime'];
+    matchTime = (json['matchTime'] as List?)?.cast<String>();
     matchStatus = json['matchStatus'];
     teamA = (json['teamA'] as List?)?.map((e) => TeamA.fromJson(e)).toList();
     teamB = (json['teamB'] as List?)?.map((e) => TeamB.fromJson(e)).toList();

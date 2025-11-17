@@ -399,7 +399,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     arguments: {
                       "matchId": id,
                       "team": "teamA",
-                      "needOpenMatches": true
+                      "needBottomAllOpenMatches": true
                     },
                   );
                   if (result == true) {
@@ -467,7 +467,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 final id = match?.sId;
                 Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamA"},
+                  arguments: {"matchId": id, "team": "teamA","needBottomAllOpenMatches": true},
                 );
               },
             ),
@@ -493,7 +493,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   arguments: {
                     "matchId": id,
                     "team": "teamB",
-                    "needOpenMatches": true
+                    "needBottomAllOpenMatches": true
                   },
                 );
                 if (result == true) {
@@ -534,7 +534,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 final id = match?.sId;
                 Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamB"},
+                  arguments: {"matchId": id, "team": "teamB","needBottomAllOpenMatches": true},
                 );
               },
             ),

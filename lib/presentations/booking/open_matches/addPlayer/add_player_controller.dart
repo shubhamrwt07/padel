@@ -1,9 +1,14 @@
 import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_controller.dart';
+import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
+import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
+import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import '../../widgets/booking_exports.dart';
 
 class AddPlayerController extends GetxController {
   OpenMatchesController? openMatchesController;
   AllOpenMatchController? allOpenMatchController;
+  OpenMatchBookingController? openMatchBookingController;
+  ScoreBoardController? scoreBoardController;
 
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -64,17 +69,46 @@ class AddPlayerController extends GetxController {
 
       if (response?.status == "200" && response?.response?.sId != null) {
         playerId.value = response!.response!.sId!;
-        final added = await addPlayer();
 
-        if (added) {
-          CustomLogger.logMessage(
-            msg: "User Created & Player Added $body",
-            level: LogLevel.info,
-          );
+        // ---------- Add Player For Open Matches ----------
+        if (allOpenMatchController != null) {
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "User Created & Player Added $body",
+              level: LogLevel.info,
+            );
+          }
+        }else if (openMatchesController != null){
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "User Created & Player Added $body",
+              level: LogLevel.info,
+            );
+          }
+        }else if (openMatchBookingController != null){
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "User Created & Player Added $body",
+              level: LogLevel.info,
+            );
+          }
         }
-      } else {
-        SnackBarUtils.showInfoSnackBar(
-            response?.message ?? "Failed to create user");
+
+        // ---------- Add Player As Guest ----------
+        else if (scoreBoardController != null) {
+          final added = await addGuestPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "Guest User Created & Added $body",
+              level: LogLevel.info,
+            );
+          }
+        }
+
+        return;
       }
     } catch (e) {
       CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
@@ -83,6 +117,7 @@ class AddPlayerController extends GetxController {
     }
   }
 
+  ///Add Player In Open Match Api-----------------------------------------------
   Future<bool> addPlayer() async {
     try {
       final body = {
@@ -90,12 +125,12 @@ class AddPlayerController extends GetxController {
         "playerId": playerId.value,
         "team": selectedTeam.value
       };
-
       final response = await repository.addPlayerForOpenMatch(body: body);
 
       if (response?.match != null) {
         await openMatchesController?.fetchMatchesForSelection();
         await allOpenMatchController?.fetchOpenMatches();
+        await openMatchBookingController?.fetchOpenMatchesBooking(type: "upcoming");
         // Return success to caller so it can refresh immediately
         Get.back(result: true);
         SnackBarUtils.showSuccessSnackBar(
@@ -116,27 +151,75 @@ class AddPlayerController extends GetxController {
     }
   }
 
+  ///Add Guest Player in the Simple Match---------------------------------------
+  ScoreBoardRepository scoreBoardRepository = Get.put(ScoreBoardRepository());
+  var scoreboardId = ''.obs;
+  Future<bool> addGuestPlayer() async {
+    try {
+      final body = {
+        "scoreboardId": scoreboardId.value,
+        "teams": [
+          {
+            "name": selectedTeam.value,
+            "players": [
+              {
+                "playerId": playerId.value
+              }
+            ]
+          }
+        ]
+      };
+      final response = await scoreBoardRepository.addGuestPlayer(body: body);
+
+      if (response?.data != null) {
+        await scoreBoardController?.fetchScoreBoard();
+        Get.back(result: true);
+        Get.back();
+        SnackBarUtils.showSuccessSnackBar(
+            response?.message ?? "Player added successfully");
+        CustomLogger.logMessage(
+          msg: "Player Added To the Match $body",
+          level: LogLevel.info,
+        );
+        return true;
+      } else {
+        SnackBarUtils.showInfoSnackBar(
+            response?.message ?? "Failed to add player");
+        return false;
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
+      return false;
+    }
+  }
+  @override
   @override
   void onInit() {
     final args = Get.arguments;
+
     matchId.value = args["matchId"] ?? "";
     selectedTeam.value = args["team"] ?? "";
+    scoreboardId.value = args["scoreBoardId"] ?? "";
 
-    if (args["needAllOpenMatches"] == true) {
-      allOpenMatchController = Get.isRegistered<AllOpenMatchController>()
-          ? Get.find<AllOpenMatchController>()
-          : Get.put(AllOpenMatchController());
+    if (args["needAllOpenMatches"] == true &&
+        Get.isRegistered<AllOpenMatchController>()) {
+      allOpenMatchController = Get.find<AllOpenMatchController>();
+    }
+    if (args["needBottomAllOpenMatches"] == true &&
+        Get.isRegistered<OpenMatchBookingController>()) {
+      openMatchBookingController = Get.find<OpenMatchBookingController>();
     }
 
-    if (args["needOpenMatches"] == true) {
-      openMatchesController = Get.isRegistered<OpenMatchesController>()
-          ? Get.find<OpenMatchesController>()
-          : Get.put(OpenMatchesController());
+    if (args["needOpenMatches"] == true &&
+        Get.isRegistered<OpenMatchesController>()) {
+      openMatchesController = Get.find<OpenMatchesController>();
     }
 
-    CustomLogger.logMessage(
-        msg: "Match Id-> ${matchId.value}\nSelected Team-> ${selectedTeam.value}",
-        level: LogLevel.info);
+    if (args["needAsGuest"] == true &&
+        Get.isRegistered<ScoreBoardController>()) {
+      scoreBoardController = Get.find<ScoreBoardController>();
+    }
+
     super.onInit();
   }
 }
