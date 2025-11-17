@@ -1,0 +1,136 @@
+import 'package:padel_mobile/data/request_models/score_board_models/add_guest_player_model.dart';
+import 'package:padel_mobile/data/request_models/score_board_models/scoreboard_model.dart';
+import 'package:padel_mobile/data/response_models/score_board_models/get_score_board_model.dart';
+
+import '../../core/endpoitns.dart';
+import '../../core/network/dio_client.dart';
+import '../../data/response_models/openmatch_model/open_match_model.dart';
+import '../../handler/logger.dart';
+class ScoreBoardRepository {
+  static final ScoreBoardRepository _instance = ScoreBoardRepository._internal();
+  final DioClient dioClient = DioClient();
+
+  factory ScoreBoardRepository() {
+    return _instance;
+  }
+
+  ScoreBoardRepository._internal();
+
+  /// Create Score Board--------------------------------------------------------
+  Future<CreateScoreBoardModel> createScoreBoard({
+    required dynamic data,
+  }) async {
+    CustomLogger.logMessage(
+      msg: "Create Score Board Body-> $data",
+      level: LogLevel.info,
+    );
+    try {
+      final response = await dioClient.post(
+        AppEndpoints.createScoreBoard,
+        data: data,
+      );
+      if (response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "created ScoreBoard successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+
+        return CreateScoreBoardModel.fromJson(response.data);
+      } else {
+        throw Exception("created ScoreBoard failed. Status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "created ScoreBoard failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Get Score Board------------------------------------------------------------
+  Future<GetScoreBoardModel> getScoreBoard({required String bookingId}) async {
+    try {
+      final response = await dioClient.get(
+        "${AppEndpoints.getScoreBoard}/$bookingId",
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Log the raw JSON to see what we're actually getting
+        CustomLogger.logMessage(
+          msg: "=== RAW API RESPONSE ===",
+          level: LogLevel.info,
+        );
+
+        if (response.data['data'] != null && (response.data['data'] as List).isNotEmpty) {
+          final firstItem = (response.data['data'] as List)[0];
+          CustomLogger.logMessage(
+            msg: "First scoreboard ID: ${firstItem['_id']}",
+            level: LogLevel.info,
+          );
+          CustomLogger.logMessage(
+            msg: "Teams array length: ${(firstItem['teams'] as List?)?.length ?? 0}",
+            level: LogLevel.info,
+          );
+
+          if (firstItem['teams'] != null) {
+            final teamsArray = firstItem['teams'] as List;
+            for (int i = 0; i < teamsArray.length; i++) {
+              CustomLogger.logMessage(
+                msg: "Team $i: ${teamsArray[i]['name']}, players: ${(teamsArray[i]['players'] as List?)?.length ?? 0}",
+                level: LogLevel.info,
+              );
+            }
+          }
+        }
+
+        return GetScoreBoardModel.fromJson(response.data);
+      } else {
+        throw Exception("Get-Score-Board failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Get-Score-Board failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  //Add Guest Player------------------------------------------------------------
+  Future<AddGuestPlayerModel?> addGuestPlayer({
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      CustomLogger.logMessage(
+        msg: "Add Guest Player Request Body: $body",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.put(
+        AppEndpoints.addGuestPlayer,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Add Guest Player Success: ${response.data}",
+          level: LogLevel.info,
+        );
+        return AddGuestPlayerModel.fromJson(response.data);
+      } else {
+        throw Exception("Add Guest Player Failed with status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Add Guest Player failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+}

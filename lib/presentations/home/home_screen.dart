@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
@@ -497,7 +496,13 @@ class HomeScreen extends GetView<HomeController> {
           Transform.translate(
             offset: Offset(0, -3),
             child: GestureDetector(
-                onTap: ()=>Get.toNamed(RoutesName.scoreBoard),
+                onTap: (){
+                  if (b.sId != null && b.sId!.isNotEmpty) {
+                    controller.createScoreBoard(bookingId: b.sId!);
+                    // Get.toNamed(RoutesName.bookingConfirmAndCancel, arguments: {"id": b.sId!});
+                  } else {
+                    Get.snackbar("Error", "Booking ID not available");
+                }},
                 child: Container(
                   height: 23,
                   width: 55,

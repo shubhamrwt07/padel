@@ -11,7 +11,6 @@ class AppEndpoints {
   static const String getClub ="${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getAllActiveCourtsForSlotWise = "${BASE_URL}court/saveCourt/getAllActiveCourtsForSlotWise?";
   static const String getLocations = "${BASE_URL}court/state/getStates";
-  // Cart Urls -----------------------------------------------------------------
   ///Cart Urls------------------------------------------------------------------
   static const String getCartItems = "${BASE_URL}court/cart/getCartForUser";
   static const String addCartItems = "${BASE_URL}court/cart/createCarts";
@@ -36,4 +35,8 @@ class AppEndpoints {
   static const String getNotificationMarkAsRead = "${BASE_URL}court/userNotification/markAsRead";
   static const String getNotificationMarkAsReadALl = "${BASE_URL}court/userNotification/markAsAllAsRead";
   static const String getNotificationCount = "${BASE_URL}court/userNotification/ureadCountData";
+  ///ScoreBoard-----------------------------------------------------------------
+  static const String createScoreBoard = "${BASE_URL}court/scoreboard/createScoreboard";
+  static const String getScoreBoard = "${BASE_URL}court/scoreboard/getScoreboards";
+  static const String addGuestPlayer = "${BASE_URL}court/scoreboard/updateScoreboard";
 }

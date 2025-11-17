@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 
-class AddPlayerController extends GetxController {
+class AddGuestPlayersController extends GetxController {
   RxInt pageIndex = 0.obs;
 
   void goTo(int index) => pageIndex.value = index;
@@ -11,9 +12,11 @@ class AddPlayerController extends GetxController {
 }
 
 class AddPlayerBottomSheet extends StatelessWidget {
-  final AddPlayerController controller = Get.put(AddPlayerController());
+  final String teamName;
+  final String scoreBoardId;
+  final AddGuestPlayersController controller = Get.put(AddGuestPlayersController());
 
-  AddPlayerBottomSheet({super.key});
+  AddPlayerBottomSheet({super.key,required this.teamName,required this.scoreBoardId});
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +32,14 @@ class AddPlayerBottomSheet extends StatelessWidget {
           case 1:
             return _searchPlayer(controller);
           default:
-            return _addPlayerMain(controller);
+            return _addPlayerMain(controller,teamName,scoreBoardId);
         }
       }),
     );
   }
 }
 
-Widget _buildHeader(String title, AddPlayerController controller, {bool showBack = false}) {
+Widget _buildHeader(String title, AddGuestPlayersController controller, {bool showBack = false}) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -54,7 +57,7 @@ Widget _buildHeader(String title, AddPlayerController controller, {bool showBack
 }
 
 /// --- 1️⃣ Main Add Player Screen ---
-Widget _addPlayerMain(AddPlayerController controller) {
+Widget _addPlayerMain(AddGuestPlayersController controller,String teamName,String scoreBoardId) {
   return Container(
     padding: const EdgeInsets.all(16),
     decoration: const BoxDecoration(
@@ -69,7 +72,17 @@ Widget _addPlayerMain(AddPlayerController controller) {
         const SizedBox(height: 10),
         _addOption(Icons.search, "Search Registered Player", "Find someone already on the app", () => controller.goTo(1)),
         _addOption(Icons.person_add_alt_1, "Invite Player", "Send Whatsapp or SMS Invite", () {}),
-        _addOption(Icons.person_outline, "Add Guest", "Add name only, no account required", () {}),
+        _addOption(Icons.person_outline, "Add Guest", "Add name only, no account required", () {
+          Get.toNamed(
+          RoutesName.addPlayer,
+          arguments: {
+            "matchId": "123",
+            "team": teamName,
+            "needAsGuest": true,
+            "scoreBoardId":scoreBoardId
+          },
+        );
+        }),
       ],
     ),
   );
@@ -107,8 +120,12 @@ Widget _addOption(IconData icon, String title, String subtitle, VoidCallback onT
 }
 
 /// --- 2️⃣ Search Player Screen ---
-Widget _searchPlayer(AddPlayerController controller) {
+Widget _searchPlayer(AddGuestPlayersController controller) {
   final players = [
+    {"name": "Dianne Smith", "location": "London", "image": "https://i.pravatar.cc/150?img=1"},
+    {"name": "Jane Cooper", "location": "New York", "image": "https://i.pravatar.cc/150?img=2"},
+    {"name": "Lily Johnson", "location": "London", "image": "https://i.pravatar.cc/150?img=3"},
+    {"name": "Sophia Brown", "location": "New York", "image": "https://i.pravatar.cc/150?img=4"},
     {"name": "Dianne Smith", "location": "London", "image": "https://i.pravatar.cc/150?img=1"},
     {"name": "Jane Cooper", "location": "New York", "image": "https://i.pravatar.cc/150?img=2"},
     {"name": "Lily Johnson", "location": "London", "image": "https://i.pravatar.cc/150?img=3"},

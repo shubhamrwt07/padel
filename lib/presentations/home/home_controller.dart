@@ -2,16 +2,19 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/request_models/booking/boking_history_model.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/bookinghisory/booking_history_repository.dart';
+import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import '../../repositories/home_repository/home_repository.dart';
 
 class HomeController extends GetxController {
   ProfileController profileController = Get.put(ProfileController());
-
   // LOCATION ------------------------------------------------------------------
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
@@ -328,4 +331,87 @@ class HomeController extends GetxController {
     scrollController.dispose();
     super.onClose();
   }
-}
+    ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
+
+  Future<void> createScoreBoard({required String bookingId}) async {
+    try {
+      // First, check if scoreboard already exists for this booking
+      final checkResponse = await repository.getScoreBoard(bookingId: bookingId);
+
+      // Only check data - ignore success field
+      bool scoreboardExists = false;
+
+      if (checkResponse.data != null) {
+        // Check if data is a list and not empty
+        if (checkResponse.data is List) {
+          scoreboardExists = (checkResponse.data as List).isNotEmpty;
+        }
+        // Check if data is an object (not a list)
+        else {
+          scoreboardExists = true;
+        }
+      }
+
+      // If scoreboard exists, just navigate - DON'T create
+      if (scoreboardExists) {
+        Get.toNamed(RoutesName.scoreBoard, arguments: {"bookingId": bookingId});
+        CustomLogger.logMessage(
+            msg: "ScoreBoard already exists - Navigating without creating - BOOKING ID -> $bookingId",
+            level: LogLevel.debug
+        );
+        return; // Exit early - DON'T hit create API
+      }
+
+      // If data is empty array or null, proceed to create
+      CustomLogger.logMessage(
+          msg: "ScoreBoard doesn't exist (empty data) - Proceeding to create - BOOKING ID -> $bookingId",
+          level: LogLevel.debug
+      );
+
+      // If we reach here, scoreboard doesn't exist - proceed with creation
+      final bookingList = bookings.value?.data ?? [];
+
+      if (bookingList.isEmpty) {
+        SnackBarUtils.showInfoSnackBar("No booking data found");
+        return;
+      }
+
+      // Take first upcoming booking
+      final booking = bookingList.first;
+
+      // Create new scoreboard only if it doesn't exist
+      final body = {
+        "bookingId": bookingId,
+        "matchDate": booking.bookingDate ?? "",
+        "matchTime": booking.slot?[0].slotTimes?[0].time ?? "",
+        "userId": storage.read("userId") ?? "",
+        "courtName": booking.slot?[0].courtName ?? "",
+        "clubName": booking.registerClubId?.clubName ?? "",
+        "teams": [
+          {
+            "name": "Team A",
+            "players": [
+              {
+                "name": "Team A",
+                "playerId": storage.read("userId") ?? "",
+              }
+            ]
+          }
+        ]
+      };
+
+      final response = await repository.createScoreBoard(data: body);
+
+      if (response.success == true) {
+        Get.toNamed(RoutesName.scoreBoard, arguments: {"bookingId": bookingId});
+        CustomLogger.logMessage(
+            msg: "ScoreBoard Created Successfully - BOOKING ID -> $bookingId",
+            level: LogLevel.debug
+        );
+      }
+
+    } catch (e) {
+      CustomLogger.logMessage(msg: "ERROR -> $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to load or create scoreboard");
+    }
+  }}
