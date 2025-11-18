@@ -202,6 +202,9 @@ class ScoreBoardScreen extends StatelessWidget {
   Widget _buildSetSectionShimmer() {
     return Card(
       child: Container(
+        constraints: const BoxConstraints(
+          minHeight: 500,   // 👈 Start with 500
+        ),
         width: Get.width,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -212,95 +215,106 @@ class ScoreBoardScreen extends StatelessWidget {
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Set items shimmer
-              ...List.generate(2, (index) {
-                return Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 14,
-                          width: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        Container(
-                          height: 16,
-                          width: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-                  ],
-                );
-              }),
-
-              const SizedBox(height: 10),
-
-              // Add Set button shimmer
-              Container(
-                height: 32,
-                width: 120,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              Divider(color: AppColors.greyColor, height: 0.1),
-
-              // Match Summary shimmer
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              ...List.generate(5, (index) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      height: 16,
-                      width: 120,
+                      height: 10,
+                      width: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5)
+                        // shape: BoxShape.circle,
+                      ),
+                    ),
+                    Container(
+                      height: 14,
+                      width: 60,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ...List.generate(3, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              height: 12,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            Container(
-                              height: 12,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                    Container(
+                      height: 10,
+                      width: 36,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5)
+                        // shape: BoxShape.circle,
+                      ),
+                    ),
                   ],
-                ),
+                );
+              }),
+
+              Column(
+                children: [
+                   SizedBox(height: Get.height*0.15),
+
+                  // Add Set button shimmer
+                  Container(
+                    height: 32,
+                    width: 220,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Divider(color: AppColors.greyColor, height: 0.1),
+
+                  // Match Summary shimmer
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 16,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...List.generate(3, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  height: 12,
+                                  width: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                Container(
+                                  height: 12,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -575,6 +589,9 @@ class ScoreBoardScreen extends StatelessWidget {
     return Obx(() {
       return Card(
         child: Container(
+          constraints: const BoxConstraints(
+            minHeight: 500,
+          ),
           width: Get.width,
           margin: const EdgeInsets.symmetric(horizontal: 0),
           padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -583,76 +600,100 @@ class ScoreBoardScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Column(
                   children: [
-                    ...controller.sets.map((set) {
-                      // final int index = controller.sets.indexOf(set);
+                    ...controller.sets.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final set = entry.value;
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-                        decoration: BoxDecoration(
-                          // border: Border.all(color: Colors.black12),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
+                      return Dismissible(
+                        key: ValueKey("set_${set["set"]}"),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (_) async {
+                          // Ensure UI waits before removing -> prevents the error
+                          await Future.delayed(Duration(milliseconds: 10));
+                          controller.removeSet(index);
+                          return true;
+                        },
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.delete, color: Colors.white, size: 22),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Icon(Icons.remove, color: Colors.black54, size: 16),
-
-                            Text(
-                              "Set ${set["set"]}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                                fontSize: 15,
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Icon(Icons.remove, color: Colors.black54, size: 16),
+                              Text(
+                                "Set ${set["set"]}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                  fontSize: 15,
+                                ),
                               ),
-                            ),
-
-                            const Icon(Icons.remove, color: Colors.black54, size: 16),
-                          ],
+                              const Icon(Icons.remove, color: Colors.black54, size: 16),
+                            ],
+                          ),
                         ),
                       );
                     }),
-                    const SizedBox(height: 10),
-                    // Show only if less than 8 sets
-                    if (controller.sets.length < 10)
-                      GestureDetector(
-                        onTap: (){
-                          controller.addSet();
-                        },
-                        child: Container(
-                          alignment: AlignmentGeometry.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
-                          decoration: BoxDecoration(
-                              color: AppColors.whiteColor,
-                              border: Border.all(color: AppColors.textColor),
-                              borderRadius: BorderRadius.circular(5),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: AppColors.greyColor,
-                                    blurRadius: 0.5,
-                                    spreadRadius: 0.6,
-                                    offset: Offset(0, 2)
-                                )
-                              ]
-                          ),
-                          child: const Text(
-                            "+ Add Set",
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                        ).paddingOnly(left: 10,right: 10),
-                      ),
-                    const SizedBox(height: 20),
+
                   ],
                 ),
               ),
-              Divider(color: AppColors.greyColor,height: 0.1,),
-              _buildMatchSummary()
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  // Show only if less than 8 sets
+                  if (controller.sets.length < 10)
+                    GestureDetector(
+                      onTap: (){
+                        controller.addSet();
+                      },
+                      child: Container(
+                        alignment: AlignmentGeometry.center,
+                        padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
+                        decoration: BoxDecoration(
+                            color: AppColors.whiteColor,
+                            border: Border.all(color: AppColors.textColor),
+                            borderRadius: BorderRadius.circular(5),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: AppColors.greyColor,
+                                  blurRadius: 0.5,
+                                  spreadRadius: 0.6,
+                                  offset: Offset(0, 2)
+                              )
+                            ]
+                        ),
+                        child: const Text(
+                          "+ Add Set",
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ).paddingOnly(left: 10,right: 10),
+                    ),
+                  const SizedBox(height: 20),
+                  Divider(color: AppColors.greyColor,height: 0.1,),
+                  _buildMatchSummary(),
+                ],
+              )
             ],
           ),
         ),
