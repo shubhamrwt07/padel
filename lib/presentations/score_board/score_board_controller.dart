@@ -33,7 +33,9 @@ class ScoreBoardController extends GetxController {
       SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 8 sets only",);
     }
   }
-
+  void removeSet(int index) {
+    sets.removeAt(index);
+  }
   void toggleSetExpansion(int index) {
     expandedSetIndex.value =
     (expandedSetIndex.value == index) ? -1 : index;
