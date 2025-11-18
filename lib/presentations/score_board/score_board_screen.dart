@@ -533,7 +533,7 @@ class ScoreBoardScreen extends StatelessWidget {
             )
                 : Center(
               child: Text(
-                _getInitials(players[index]["name"]),
+                controller.getNameInitials(players[index]["name"]),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -550,7 +550,7 @@ class ScoreBoardScreen extends StatelessWidget {
           SizedBox(
             width: Get.width * 0.13,
             child: Text(
-              _capitalizeWords(hasPlayer ? players[index]["name"] : "Available"),
+              controller.capitalizeWords(hasPlayer ? players[index]["name"] : "Available"),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: Get.textTheme.bodySmall!.copyWith(
@@ -559,6 +559,20 @@ class ScoreBoardScreen extends StatelessWidget {
               ),
             ).paddingOnly(top: Get.height * 0.003),
           ),
+          hasPlayer?
+          Container(
+            height: 17,
+            width: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: AppColors.secondaryColor.withAlpha(20),
+            ),
+            child: Text(
+              players[index]["level"] ?? "-",
+              style: Get.textTheme.labelMedium!.copyWith(color: AppColors.secondaryColor),
+            ),
+          ).paddingOnly(top: 4):SizedBox.shrink()
         ],
       ),
     );
@@ -589,8 +603,8 @@ class ScoreBoardScreen extends StatelessWidget {
     return Obx(() {
       return Card(
         child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 500,
+          constraints:  BoxConstraints(
+            minHeight: Get.height*0.5,
           ),
           width: Get.width,
           margin: const EdgeInsets.symmetric(horizontal: 0),
@@ -856,25 +870,4 @@ class ScoreBoardScreen extends StatelessWidget {
       );
     });
   }
-  String _getInitials(String name) {
-    if (name.trim().isEmpty) return "?";
-
-    List<String> parts = name.trim().split(" ");
-
-    if (parts.length == 1) {
-      return parts[0][0].toUpperCase();
-    } else {
-      return (parts.first[0] + parts.last[0]).toUpperCase();
-    }
-  }
-  String _capitalizeWords(String name) {
-    if (name.trim().isEmpty) return "";
-
-    return name
-        .split(" ")
-        .map((word) =>
-    word.isEmpty ? "" : "${word[0].toUpperCase()}${word.substring(1).toLowerCase()}")
-        .join(" ");
-  }
-
 }
