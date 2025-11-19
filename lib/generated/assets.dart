@@ -28,6 +28,7 @@ class Assets {
   static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
   static const String imagesIcPackages = 'assets/images/ic_packages.svg';
+  static const String imagesIcPadelIconBottomNav = 'assets/images/ic_padel_icon_bottomNav.svg';
   static const String imagesIcPaypal = 'assets/images/ic_paypal.svg';
   static const String imagesIcPerson = 'assets/images/ic_person.png';
   static const String imagesIcPrivacy = 'assets/images/ic_privacy.png';
