@@ -2,8 +2,6 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-
 import '../../data/response_models/cart/cart_items_model.dart';
 import '../../data/response_models/cart/carte_booking_model.dart';
 import '../../data/response_models/cart/romove_cart_product_model.dart';
@@ -183,7 +181,7 @@ class CartController extends GetxController {
   }
 
   // 🔹 Book Cart
-  Future<void> bookCart({required List<Map<String, dynamic>> data}) async {
+  Future<bool> bookCart({required List<Map<String, dynamic>> data}) async {
     try {
       isBooking.value = true;
 
@@ -192,7 +190,6 @@ class CartController extends GetxController {
 
       log("Booking successful: ${bookingResult.toJson()}");
 
-      Get.toNamed(RoutesName.paymentMethod);
       Get.snackbar(
         "Success",
         "Booking completed successfully",
@@ -201,21 +198,25 @@ class CartController extends GetxController {
         colorText: Colors.white,
       );
 
-      // Refresh cart after booking
       await getCartItems();
+
+      return true;   // ⬅️ SUCCESS
     } catch (e) {
       log("Booking error: $e");
-      Get.snackbar(
-        "Error",
-        "Booking failed: ${e.toString()}",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   "Error",
+      //   "Booking failed: ${e.toString()}",
+      //   snackPosition: SnackPosition.TOP,
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
+
+      return false;  // ⬅️ FAILURE
     } finally {
       isBooking.value = false;
     }
   }
+
 }
 
 extension CartControllerBooking on CartController {

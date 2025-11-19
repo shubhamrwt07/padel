@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../services/payment_services/razorpay.dart';
@@ -27,19 +29,45 @@ class PaymentMethodController extends GetxController {
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     isProcessing.value = false;
 
-    // ScaffoldMessenger.of(Get.context!).showSnackBar(
-    //   SnackBar(
-    //     content: Text('Payment Successful! Processing booking...'),
-    //     backgroundColor: Colors.green,
-    //   ),
-    // );
+    Get.generalDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white, // full white background
+      pageBuilder: (_, __, ___) {
+        return Scaffold(
+          backgroundColor: Colors.white, // again ensure full white
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LoadingWidget(color: AppColors.primaryColor, size: 30),
+                const SizedBox(height: 20),
+                const Text(
+                  "Booking in progress...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Please wait while we confirm your booking.",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
 
-    // Call booking API after successful payment
+
     await _processBookingAfterPayment();
   }
 
+
   void _handlePaymentFailure(PaymentFailureResponse response) {
     isProcessing.value = false;
+    Get.back();
     SnackBarUtils.showErrorSnackBar("Payment Failed: ${response.message}");
   }
 
@@ -171,31 +199,161 @@ class PaymentMethodController extends GetxController {
 //   }
   Future<void> _processBookingAfterPayment() async {
     try {
-      // ✅ Get payload directly from CartController
       final bookingPayload = cartController.buildBookingPayload();
 
       if (bookingPayload == null) {
+        Get.back();
         Get.snackbar("Error", "No selected items available for booking");
         return;
       }
 
       log("Booking payload after payment: $bookingPayload");
 
-      await cartController.bookCart(data: bookingPayload);
+      // ⬅️ Get true/false from bookCart()
+      bool success = await cartController.bookCart(data: bookingPayload);
 
-      Get.to(() => BookingSuccessfulScreen());
+      if (success) {
+        // 👍 Booking success
+        Get.to(() => BookingSuccessfulScreen());
+      } else {
+        // ❌ API returned error
+        Get.close(2);  // close "booking in progress"
+        showBookingErrorDialog();
+
+      }
     } catch (e) {
       log("Error processing booking after payment: $e");
-      Get.snackbar(
-        "Booking Error",
-        "Payment successful but booking failed: ${e.toString()}",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
+
+      Get.close(2); // ⬅️ close dialog
+      showBookingErrorDialog();
+
+      // Get.snackbar(
+      //   "Booking Error",
+      //   "Payment successful but booking failed: ${e.toString()}",
+      //   snackPosition: SnackPosition.TOP,
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
     }
   }
+
+  void showBookingErrorDialog() {
+    Get.generalDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white,
+      pageBuilder: (_, __, ___) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 80,
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Booking Failed",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "Your booking could not be completed right now.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Your payment has been received successfully, "
+                        "but we couldn't confirm your booking at this moment.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Please contact support for assistance or a refund.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Go Home button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.offAllNamed(RoutesName.bottomNav);
+                      },
+                      child: const Text(
+                        "Go to Home",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Help & Support button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.toNamed(RoutesName.support);
+                      },
+                      child: Text(
+                        "Help & Support",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
   Future<void> verifyPayment(
       String paymentId,
