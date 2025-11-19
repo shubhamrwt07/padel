@@ -35,7 +35,9 @@ var profileModel = Rxn<ProfileModel>();
     } catch (e, st) {
       CustomLogger.logMessage(msg: e.toString(), level: LogLevel.error, st: st);
     } finally {
-      isLoading.value = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        isLoading.value = false;
+      });
     }
   }
 

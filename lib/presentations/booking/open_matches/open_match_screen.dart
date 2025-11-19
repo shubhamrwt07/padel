@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import '../widgets/booking_exports.dart';
 
 class OpenMatchesScreen extends StatelessWidget {
@@ -423,7 +424,7 @@ class OpenMatchesScreen extends StatelessWidget {
 
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
-      final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
+      final name = (p.userId?.name ?? "").trim();
       final level = p.userId?.level?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
         return _buildFilledPlayer(pic, name, level);
@@ -438,7 +439,7 @@ class OpenMatchesScreen extends StatelessWidget {
 
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
-      final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
+      final name = (p.userId?.name ?? "").trim();
       final level = p.userId?.level?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
         return _buildFilledPlayer(pic, name, level);
@@ -485,16 +486,9 @@ class OpenMatchesScreen extends StatelessWidget {
                     "${data.skillLevel?.capitalizeFirst ?? 'Professional'} |",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  Icon(
-                    data.gender == "female"
-                        ? Icons.female
-                        : data.gender == "male"
-                        ? Icons.male
-                        : Icons.wc,
-                    size: 14,
-                  ).paddingOnly(right: 5, left: 5),
+                  genderIcon(data.gender).paddingOnly(right: 5, left: 5),
                   Text(
-                    data.matchType?.capitalizeFirst ?? 'Mixed',
+                    data.gender?.capitalizeFirst ?? 'Mixed Doubles',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ],
@@ -529,7 +523,6 @@ class OpenMatchesScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(clubName, style: Theme.of(context).textTheme.labelLarge),
-                    const SizedBox(height: 6),
                     Row(
                       children: [
                         Icon(Icons.location_on, size: 14, color: AppColors.darkGrey),
@@ -563,13 +556,15 @@ class OpenMatchesScreen extends StatelessWidget {
     ).paddingOnly(bottom: 12);
   }
   Widget _buildFilledPlayer(String? imageUrl, String name, String level) {
-    final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
+    // final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
+final firstLetter = name.trim().isNotEmpty
+    ? name.trim().split(" ").map((e) => e[0]).take(2).join().toUpperCase()
+    : '?';
     return Column(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: Colors.grey.shade400,
+          backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
           child: (imageUrl != null && imageUrl.isNotEmpty)
               ? ClipOval(
             child: CachedNetworkImage(
@@ -592,7 +587,7 @@ class OpenMatchesScreen extends StatelessWidget {
             firstLetter,
             style: const TextStyle(
               fontSize: 20,
-              color: Colors.white,
+              color: AppColors.primaryColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -601,7 +596,7 @@ class OpenMatchesScreen extends StatelessWidget {
         SizedBox(
           width: 50,
           child: Text(
-            name,
+            name.split(" ").first.capitalizeFirst!,
             style: Get.textTheme.labelSmall,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,

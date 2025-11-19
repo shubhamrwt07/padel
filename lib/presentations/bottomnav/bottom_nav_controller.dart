@@ -24,8 +24,8 @@ class BottomNavigationController extends GetxController {
 
   // List of pages (you can expand this as needed)
   final List<Widget> pages = [
-HomeScreen(),
-BookingHistoryUi(),
+    HomeScreen(),
+    BookingHistoryUi(),
     OpenMatchBookingScreen(),
     SizedBox(
       height: Get.height,
@@ -42,10 +42,5 @@ BookingHistoryUi(),
   // Get current page based on selected index
   Widget getCurrentPage() {
     return pages[selectedIndex.value];
-  }
-  @override
-  void onInit() {
-    // TODO: implement onInit
-    super.onInit();
   }
 }

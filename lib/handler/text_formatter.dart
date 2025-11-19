@@ -66,3 +66,27 @@ extension StringExtension on String {
       return raw; // fallback if parsing fails
     }
   }
+
+  ///Capitalize name first character---------------------------
+   String capitalizeBothFIrstLastWords(String name) {
+    if (name.trim().isEmpty) return "";
+
+    return name
+        .split(" ")
+        .map((word) =>
+    word.isEmpty ? "" : "${word[0].toUpperCase()}${word.substring(1).toLowerCase()}")
+        .join(" ");
+  }
+
+  ///Get First Initials--------------------------------------------------
+    String getNameInitials(String name) {
+    if (name.trim().isEmpty) return "?";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    } else {
+      return (parts.first[0] + parts.last[0]).toUpperCase();
+    }
+  }

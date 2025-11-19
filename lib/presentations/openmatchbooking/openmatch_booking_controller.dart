@@ -329,11 +329,11 @@ class OpenMatchBookingController extends GetxController
       level: LogLevel.info,
     );
 
-    if (_tabController != null) {
-      _tabController!.removeListener(_handleTabChange);
-      _tabController!.dispose();
-      _tabController = null;
-    }
+    // if (_tabController != null) {
+    //   _tabController!.removeListener(_handleTabChange);
+    //   _tabController!.dispose();
+    //   _tabController = null;
+    // }
     super.onClose();
   }
 }

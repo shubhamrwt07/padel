@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'all_open_match_controller.dart';
 
@@ -25,7 +26,7 @@ class AllOpenMatchScreen extends StatelessWidget {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "For your level",
@@ -360,7 +361,7 @@ class AllOpenMatchScreen extends StatelessWidget {
 
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
-      final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
+      final name = (p.userId?.name ?? "").trim();
       final level = p.userId?.level?.split(' ').first ?? "-";
       return _buildFilledPlayer(pic ?? "", name, level);
     }).toList();
@@ -371,7 +372,7 @@ class AllOpenMatchScreen extends StatelessWidget {
 
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
-      final name = (p.userId?.name?.split(' ').first ?? '').capitalizeFirst!;
+      final name = (p.userId?.name ?? "").trim();
       final level = p.userId?.level?.split(' ').first ?? "-";
       return _buildFilledPlayer(pic ?? "", name, level);
     }).toList();
@@ -435,16 +436,9 @@ class AllOpenMatchScreen extends StatelessWidget {
                     "${data.skillLevel?.capitalizeFirst ?? 'Professional'} |",
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  Icon(
-                    data.gender == "female"
-                        ? Icons.female
-                        : data.gender == "male"
-                        ? Icons.male
-                        : Icons.wc,
-                    size: 14,
-                  ).paddingOnly(right: 5, left: 5),
+                  genderIcon(data.gender).paddingOnly(right: 5, left: 5),
                   Text(
-                    data.matchType?.capitalizeFirst ?? 'Mixed',
+                    data.gender?.capitalizeFirst ?? 'Mixed Doubles',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ],
@@ -487,7 +481,6 @@ class AllOpenMatchScreen extends StatelessWidget {
                       clubName,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
-                    const SizedBox(height: 6),
                     Row(
                       children: [
                         Icon(Icons.location_on,
@@ -525,13 +518,15 @@ class AllOpenMatchScreen extends StatelessWidget {
   }
 
   Widget _buildFilledPlayer(String? imageUrl, String name, String level) {
-    final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
+    // final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
+final firstLetter = name.trim().isNotEmpty
+    ? name.trim().split(" ").map((e) => e[0]).take(2).join().toUpperCase()
+    : '?';
     return Column(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: Colors.grey.shade400,
+          backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
           child: (imageUrl != null && imageUrl.isNotEmpty)
               ? ClipOval(
             child: CachedNetworkImage(
@@ -555,16 +550,18 @@ class AllOpenMatchScreen extends StatelessWidget {
             firstLetter,
             style: const TextStyle(
               fontSize: 20,
-              color: Colors.white,
+              color: AppColors.primaryColor,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         const SizedBox(height: 6),
-        SizedBox(
-          width: 50,
+        Container(
+          color: Colors.transparent,
+          // height: 40,
+          width: Get.width*0.2,
           child: Text(
-            name,
+            name.split(' ').first.capitalizeFirst!,
             style: Get.textTheme.labelSmall,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
