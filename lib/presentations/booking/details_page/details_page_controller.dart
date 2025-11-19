@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/open_match_controller.dart';
+import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -59,11 +60,43 @@ class DetailsController extends GetxController {
 
     try {
       // Show payment success message first
-      SnackBarUtils.showSuccessSnackBar("Payment successful! Creating match...");
+      // SnackBarUtils.showSuccessSnackBar("Payment successful! Creating match...");
 
       // Keep processing true while creating match
       isProcessing.value = true;
+      Get.generalDialog(
+        barrierDismissible: false,
+        barrierColor: Colors.white,
+        pageBuilder: (_, __, ___) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoadingWidget(color: AppColors.primaryColor, size: 30),
+                  const SizedBox(height: 20),
 
+                  const Text(
+                    "Creating your open match...",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Please wait while we set up your match.",
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
       // Now create the match after successful payment
       await createMatchAfterPayment();
 
@@ -182,17 +215,139 @@ class DetailsController extends GetxController {
 
       // ✅ Call API
       final response = await repository.createMatch(data: body);
-
       log("🎯 Match Created -> ${response.toJson()}");
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
 
       // ✅ Navigate to match booking page
-      Get.toNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
+      // openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
+      // Get.toNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
+      Get.offAllNamed(RoutesName.bottomNav);
+      openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
     } catch (e, st) {
       log("❌ Match creation error: $e\n$st");
-      SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
+      Get.close(2);
+      showBookingErrorDialog();
+      // SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
     }
-  }  // Main method that immediately shows payment sheet when book button is pressed
+  }
+  void showBookingErrorDialog() {
+    Get.generalDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white,
+      pageBuilder: (_, __, ___) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 80,
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Booking Failed",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "Your booking could not be completed right now.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Your payment has been received successfully, "
+                        "but we couldn't confirm your booking at this moment.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Please contact support for assistance or a refund.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Go Home button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.offAllNamed(RoutesName.bottomNav);
+                      },
+                      child: const Text(
+                        "Go to Home",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Help & Support button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.toNamed(RoutesName.support);
+                      },
+                      child: Text(
+                        "Help & Support",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Main method that immediately shows payment sheet when book button is pressed
   Future<void> initiatePaymentAndCreateMatch() async {
     // Validate that teams have at least minimum required players
     if (!validateTeams()) {
@@ -258,9 +413,9 @@ class DetailsController extends GetxController {
 
   // Legacy method - kept for backward compatibility but now redirects to payment
   @Deprecated('Use initiatePaymentAndCreateMatch instead')
-  Future<void> startPayment() async {
-    await initiatePaymentAndCreateMatch();
-  }
+  // Future<void> startPayment() async {
+  //   await initiatePaymentAndCreateMatch();
+  // }
 
   ///show Cancel Match Dialog Box-----------------------------------------------
   void showCancelMatchDialog(BuildContext context) {
@@ -294,7 +449,7 @@ class DetailsController extends GetxController {
     );
   }
 
-  OpenMatchesController openMatchesController = Get.put(OpenMatchesController());
+  OpenMatchBookingController openMatchBookingController = Get.put(OpenMatchBookingController());
   ProfileController profileController = Get.put(ProfileController());
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
