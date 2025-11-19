@@ -20,6 +20,7 @@ class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
   RxBool isProcessing = false.obs;
   var option = ''.obs;
+  RxString gameType = 'Male only'.obs;
   late RazorpayPaymentService _paymentService;
 
   RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{

@@ -133,12 +133,7 @@ class DetailsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        gameDetails(
-                          "Game Type",
-                          'Male only',
-                          AppColors.blackColor,
-                          13,
-                        ),
+                        gameTypeSelector(),
                         gameDetails(
                           "Game Level",
                           data['skillLevel'] ?? "-",
@@ -298,6 +293,58 @@ class DetailsScreen extends StatelessWidget {
         radius: 18,
         backgroundColor: backgroundColor,
         child: child,
+      ),
+    );
+  }
+
+  Widget gameTypeSelector() {
+    return Container(
+      alignment: Alignment.center,
+      color: Colors.transparent,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Game Type", style: Get.textTheme.bodyLarge),
+          SizedBox(height: Get.height * .01),
+          Obx(() => PopupMenuButton<String>(
+            offset: Offset(0, 30),
+            onSelected: (value) {
+              controller.gameType.value = value;
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Male only',
+                child: Text('Male only'),
+              ),
+              const PopupMenuItem(
+                value: 'Female only',
+                child: Text('Female only'),
+              ),
+              const PopupMenuItem(
+                value: 'Mixed doubles',
+                child: Text('Mixed doubles'),
+              ),
+            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  controller.gameType.value,
+                  style: Get.textTheme.headlineMedium?.copyWith(
+                    color: AppColors.blackColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ) ?? const TextStyle(
+                    color: AppColors.blackColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                Icon(Icons.arrow_drop_down, color: AppColors.blackColor, size: 18),
+              ],
+            ),
+          )),
+        ],
       ),
     );
   }

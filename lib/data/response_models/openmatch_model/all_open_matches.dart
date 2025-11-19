@@ -287,7 +287,7 @@ class UserId {
   String? countryCode;
   int? phoneNumber;
   String? name;
-  String? lastname;
+  String? lastName;
   String? category;
   bool? isActive;
   bool? isDeleted;
@@ -307,7 +307,7 @@ class UserId {
     this.countryCode,
     this.phoneNumber,
     this.name,
-    this.lastname,
+    this.lastName,
     this.category,
     this.isActive,
     this.isDeleted,
@@ -328,7 +328,7 @@ class UserId {
     countryCode = MatchData._asJoinedString(json['countryCode']);
     phoneNumber = json['phoneNumber'];
     name = MatchData._asJoinedString(json['name']);
-    lastname = MatchData._asJoinedString(json['lastname']);
+    lastName = MatchData._asJoinedString(json['lastName']);
     category = MatchData._asJoinedString(json['category']);
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
@@ -352,7 +352,7 @@ class UserId {
     map['countryCode'] = countryCode;
     map['phoneNumber'] = phoneNumber;
     map['name'] = name;
-    map['lastname'] = lastname;
+    map['lastName'] = lastName;
     map['category'] = category;
     map['isActive'] = isActive;
     map['isDeleted'] = isDeleted;

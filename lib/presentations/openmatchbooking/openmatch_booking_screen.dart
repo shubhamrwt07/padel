@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
@@ -206,7 +209,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
 
                     final matches = matchesList[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: _buildMatchCard(
                         context,
                         match: matches,
@@ -282,7 +285,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: AppColors.playerCardBackgroundColor,
-          border: Border.all(color: AppColors.blackColor.withValues(alpha: 0.1)),
+          border: Border.all(color: AppColors.blackColor.withValues(alpha: 0.05)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,14 +340,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               "${match?.skillLevel ?? "N/A"} | ",
               style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
             ),
-            Icon(
-              match?.gender == "female"
-                  ? Icons.female
-                  : match?.gender == "male"
-                  ? Icons.male
-                  : Icons.wc,
-              size: 14,
-            ),
+            genderIcon(match?.gender),
             Text(
               match?.gender?.capitalizeFirst ?? "",
               style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
@@ -387,6 +383,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 category: true,
                 completed: completed,
                 level: inferredLevel,
+                playerIndex: i + 1
               ),
             );
           } else {
@@ -423,10 +420,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
           teamAWidgets.add(
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
-              name: user?.name ?? '',
+              name: (user?.name ?? '').trim(),
               category: true,
               completed: completed,
               level: levelCode,
+              playerIndex: i + 1
             ),
           );
         }
@@ -448,6 +446,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: true,
               completed: completed,
               level: inferredLevel,
+              playerIndex: i + 1
             ),
           );
         } else if (completed) {
@@ -458,6 +457,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
+              playerIndex: i + 1
             ),
           );
         } else {
@@ -509,10 +509,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
           teamBWidgets.add(
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
-              name: user?.name ?? '',
+              name: (user?.name ?? '').trim(),
               category: true,
               completed: completed,
               level: extractLevelCode(user?.level ?? ''),
+              playerIndex: i + 3
             ),
           );
         }
@@ -525,6 +526,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
+              playerIndex: i + 3
             ),
           );
         } else {
@@ -572,7 +574,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
     required bool category,
     required bool completed,
     required String level,
+    required int playerIndex
   }) {
+  final firstLetter = name.trim().isNotEmpty
+      ? name.trim().split(" ").map((e) => e[0]).take(2).join().toUpperCase()
+      : 'P$playerIndex';
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -581,19 +587,14 @@ class OpenMatchBookingScreen extends StatelessWidget {
           width: 50,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.whiteColor,
-            border: Border.all(
-              color: imageUrl.isEmpty
-                  ? AppColors.primaryColor
-                  : Colors.transparent,
-            ),
+            color: AppColors.whiteColor
           ),
           child: imageUrl.isEmpty
               ? CircleAvatar(
             backgroundColor:
             AppColors.primaryColor.withValues(alpha: 0.1),
             child: Text(
-              (name.isNotEmpty ? name[0] : "?").toUpperCase(),
+              firstLetter,
               style: const TextStyle(
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
@@ -619,7 +620,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               errorWidget: (context, url, error) => CircleAvatar(
                 backgroundColor: Colors.grey.shade300,
                 child: Text(
-                  (name.isNotEmpty ? name[0] : "?").toUpperCase(),
+                  firstLetter,
                   style: TextStyle(
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.bold,
@@ -630,12 +631,13 @@ class OpenMatchBookingScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        SizedBox(
+        Container(
+          color: Colors.transparent,
           width: Get.width * 0.18,
           child: Text(
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
-            name.isNotEmpty ? name : 'Unknown',
+            name.isNotEmpty? name.split(' ').first.capitalizeFirst!:"Player $playerIndex",
             style: Get.textTheme.bodySmall!.copyWith(
               color: name.isNotEmpty
                   ? AppColors.darkGreyColor
@@ -732,7 +734,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 size: 24, color: AppColors.primaryColor),
           ),
           SizedBox(
-            width: Get.width * 0.13,
+            width: Get.width * 0.18,
             child: Text(
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
@@ -777,4 +779,5 @@ class OpenMatchBookingScreen extends StatelessWidget {
     final code = parts.isNotEmpty ? parts.first.trim() : '';
     return code.isNotEmpty ? code : '-';
   }
+ 
 }
