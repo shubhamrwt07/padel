@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:padel_mobile/presentations/booking/details_page/details_model.dart';
+import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/open matches/add_player_to_open_match_model.dart';

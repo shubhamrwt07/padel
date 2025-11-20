@@ -4,7 +4,6 @@ import 'package:padel_mobile/data/response_models/score_board_models/get_score_b
 
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
-import '../../data/response_models/openmatch_model/open_match_model.dart';
 import '../../handler/logger.dart';
 class ScoreBoardRepository {
   static final ScoreBoardRepository _instance = ScoreBoardRepository._internal();

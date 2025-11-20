@@ -132,7 +132,7 @@ class OpenMatchesScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: DateFormat('MMM')
-                        .format(controller.focusedDate.value ?? DateTime.now())
+                        .format(controller.focusedDate.value)
                         .toUpperCase()
                         .split('')
                         .map((char) => Text(
@@ -425,7 +425,7 @@ class OpenMatchesScreen extends StatelessWidget {
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name ?? "").trim();
-      final level = p.userId?.level?.split(' ').first ?? "-";
+      final level = p.userId?.playerLevel?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
         return _buildFilledPlayer(pic, name, level);
       } else {
@@ -440,7 +440,7 @@ class OpenMatchesScreen extends StatelessWidget {
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name ?? "").trim();
-      final level = p.userId?.level?.split(' ').first ?? "-";
+      final level = p.userId?.playerLevel?.split(' ').first ?? "-";
       if (pic != null && pic.isNotEmpty) {
         return _buildFilledPlayer(pic, name, level);
       } else {

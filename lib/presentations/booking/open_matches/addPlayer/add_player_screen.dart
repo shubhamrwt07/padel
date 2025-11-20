@@ -22,9 +22,17 @@ class AddPlayerScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 textFieldWithLabel(
-                  "Full Name",
+                  "First Name",
                   textCapitalization: TextCapitalization.words,
-                  controller.fullNameController,
+                  controller.firstNameController,
+                  context,
+                  action: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                ),
+                 textFieldWithLabel(
+                  "Last Name",
+                  textCapitalization: TextCapitalization.words,
+                  controller.lastNameController,
                   context,
                   action: TextInputAction.next,
                   keyboardType: TextInputType.text,

@@ -125,9 +125,7 @@ class PaymentFilterUi extends GetView<PaymentFilterController> {
                       final date = controller.selectedDate.value;
 
                       // Format the date for display
-                      final formattedDate = date != null
-                          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
-                          : "Select Date";
+                      final formattedDate = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
                       return TextFormField(
                         onTap: () async {

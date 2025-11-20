@@ -6,10 +6,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
-import '../../../configs/components/primary_button.dart';
 import '../../../generated/assets.dart';
 import 'details_page_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -432,7 +430,7 @@ class DetailsScreen extends StatelessWidget {
             height: 50,
             width: 50,
             decoration: BoxDecoration(
-              color: image.isEmpty ? AppColors.primaryColor.withOpacity(0.1) : Colors.white,
+              color: image.isEmpty ? AppColors.primaryColor.withValues(alpha: .1) : Colors.white,
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.primaryColor),
             ),

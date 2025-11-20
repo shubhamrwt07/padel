@@ -444,18 +444,16 @@ class CreateOpenMatchesController extends GetxController {
           date: selectedDate.value.toString()
       );
 
-      if (result != null) {
-        // Apply filtering based on toggle first
-        for (var court in result.data ?? []) {
-          final base = court.slots ?? [];
-          if (showUnavailable) {
-            court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
-          } else {
-            court.slots = base.where((s) => _isAvailableSlot(s)).toList();
-          }
+      // Apply filtering based on toggle first
+      for (var court in result.data ?? []) {
+        final base = court.slots ?? [];
+        if (showUnavailable) {
+          court.slots = base.where((s) => _isUnavailableSlot(s)).toList();
+        } else {
+          court.slots = base.where((s) => _isAvailableSlot(s)).toList();
         }
       }
-
+    
       slots.value = result;
 
       // Build base cache and counts, then apply current time-of-day filter

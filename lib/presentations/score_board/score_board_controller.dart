@@ -91,15 +91,20 @@ class ScoreBoardController extends GetxController {
 
             if (t.players != null) {
               for (var p in t.players!) {
+                String fullLevel = p.playerId?.level ?? p.playerId?.playerLevel ?? "";
+                String levelCode = fullLevel.contains(' – ') ? fullLevel.split(' – ')[0] : fullLevel;
+                
                 final playerData = {
                   "name": p.playerId?.name ?? "Unknown",
+                  "lastName": p.playerId?.lastName?? "",
                   "pic": p.playerId?.profilePic ?? "",
+                  "level": levelCode,
                 };
 
                 playersList.add(playerData);
 
                 CustomLogger.logMessage(
-                    msg: "  Player: ${playerData['name']}",
+                    msg: "  Player: ${playerData['name']}, Level: ${playerData['level']}",
                     level: LogLevel.info
                 );
               }
@@ -132,7 +137,6 @@ class ScoreBoardController extends GetxController {
               "set": s.setNumber,
               "teamA": s.teamAScore,
               "teamB": s.teamBScore,
-              "rounds": s.rounds
             });
           }
         }
