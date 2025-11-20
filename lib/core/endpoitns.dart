@@ -3,7 +3,7 @@ class AppEndpoints {
   static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
 
   ///Local URL----------------------------------------------------------
-static const String LOCAL_URL = "http://192.168.0.129:5070/api/customer/";
+// static const String BASE_URL = "http://192.168.0.129:5070/api/customer/";
 
 
   static const String login = "${BASE_URL}customerLogin";
@@ -31,7 +31,6 @@ static const String LOCAL_URL = "http://192.168.0.129:5070/api/customer/";
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
   ///Open Matches---------------------------------------------------------------
   static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
-  static const String getAllMatches = "${BASE_URL}court/openmatch/getAllOpenMatches";
   static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68d2300a723257df65e574ab";
   static const String getOpenMatches = "${BASE_URL}court/openmatch/getOpenMatches";
   static const String createUserForOpenMatch = "${BASE_URL}customerSignupWithOutPassword";
@@ -43,7 +42,7 @@ static const String LOCAL_URL = "http://192.168.0.129:5070/api/customer/";
   static const String getNotificationMarkAsReadALl = "${BASE_URL}court/userNotification/markAsAllAsRead";
   static const String getNotificationCount = "${BASE_URL}court/userNotification/ureadCountData";
   ///ScoreBoard-----------------------------------------------------------------
-  static const String createScoreBoard = "${LOCAL_URL}court/scoreboard/createScoreboard";
-  static const String getScoreBoard = "${LOCAL_URL}court/scoreboard/getScoreboards";
+  static const String createScoreBoard = "${BASE_URL}court/scoreboard/createScoreboard";
+  static const String getScoreBoard = "${BASE_URL}court/scoreboard/getScoreboards";
   static const String addGuestPlayer = "${BASE_URL}court/scoreboard/updateScoreboard";
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:logger/web.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
@@ -362,25 +363,16 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamAPlayers.length) {
         final player = teamAPlayers[i];
         final user = player.userId;
-
+        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
         if (!completed && user == null) {
           if (i == 0) {
-            final String inferredLevel = extractLevelCode(
-              ((match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
-                  ? match!.firstPlayerLevelCode
-                  : (match?.createdBy?.level ??
-                  match?.playerLevel ??
-                  match?.skillLevel ??
-                  ''))
-                  .trim(),
-            );
             teamAWidgets.add(
               _buildPlayerSlot(
                 imageUrl: '',
                 name: '',
                 category: true,
                 completed: completed,
-                level: inferredLevel,
+                level: level,
                 playerIndex: i + 1
               ),
             );
@@ -408,46 +400,21 @@ class OpenMatchBookingScreen extends StatelessWidget {
             );
           }
         } else {
-          final userCode = extractLevelCode(user?.level ?? '');
-          final String fallbackFromMatch = extractLevelCode(
-            (match?.firstPlayerLevelCode ?? '').trim(),
-          );
-          final levelCode = (i == 0 && (userCode == '-' || userCode.isEmpty))
-              ? (fallbackFromMatch.isNotEmpty ? fallbackFromMatch : '-')
-              : userCode;
+      
           teamAWidgets.add(
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
+              // imageUrl: '',
               name: (user?.name ?? '').trim(),
               category: true,
               completed: completed,
-              level: levelCode,
+              level: level,
               playerIndex: i + 1
             ),
           );
         }
       } else {
-        if (!completed && i == 0) {
-          final String inferredLevel = extractLevelCode(
-            ((match?.firstPlayerLevelCode ?? '').trim().isNotEmpty
-                ? match!.firstPlayerLevelCode
-                : (match?.createdBy?.level ??
-                match?.playerLevel ??
-                match?.skillLevel ??
-                ''))
-                .trim(),
-          );
-          teamAWidgets.add(
-            _buildPlayerSlot(
-              imageUrl: '',
-              name: '',
-              category: true,
-              completed: completed,
-              level: inferredLevel,
-              playerIndex: i + 1
-            ),
-          );
-        } else if (completed) {
+        if (completed) {
           teamAWidgets.add(
             _buildPlayerSlot(
               imageUrl: '',
@@ -480,6 +447,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamBPlayers.length) {
         final player = teamBPlayers[i];
         final user = player.userId;
+        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
 
         if (!completed && user == null) {
           teamBWidgets.add(
@@ -507,10 +475,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
           teamBWidgets.add(
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
+              // imageUrl: '',
               name: (user?.name ?? '').trim(),
               category: true,
               completed: completed,
-              level: extractLevelCode(user?.level ?? ''),
+              level: level,
               playerIndex: i + 3
             ),
           );
@@ -771,7 +740,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
 
   String formatAmount(int amount) => amount.toString();
 
-  String extractLevelCode(String value) {
+  String _extractLevelCode(String value) {
     if (value.isEmpty) return '-';
     final parts = value.split(RegExp(r"\s*[–-]\s*"));
     final code = parts.isNotEmpty ? parts.first.trim() : '';
