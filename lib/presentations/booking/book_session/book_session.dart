@@ -5,7 +5,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/court_slots_shimmer.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/upword_arrow_animation.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../handler/text_formatter.dart';
 class BookSession extends StatelessWidget {
   BookSession({super.key});

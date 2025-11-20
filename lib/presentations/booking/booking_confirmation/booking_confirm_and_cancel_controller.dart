@@ -36,12 +36,15 @@ class BookingConfirmAndCancelController extends GetxController {
 
   final BookingHistoryRepository _bookingRepo = BookingHistoryRepository();
   final ReviewRepository _reviewRepo = ReviewRepository(); // ✅ Add review repository
-
+final fromBooking  = ''.obs;
+final fromCancelled = ''.obs;
   @override
   void onInit() async {
     super.onInit();
 
     final String? bookingId = Get.arguments?['id'];
+  fromBooking.value = Get.arguments?['fromCompleted']?.toString() ?? '';
+  fromCancelled.value = Get.arguments?['fromCancelled']?.toString() ?? '';
     if (bookingId != null && bookingId.isNotEmpty) {
       await fetchBookingDetails(bookingId);
     } else {
@@ -156,7 +159,7 @@ class BookingConfirmAndCancelController extends GetxController {
 
     try {
       final booking = bookingDetails.value!.booking!;
-      final String? clubId = booking.registerClubId;
+      final String? clubId = booking.registerClubId?.sId;
 
       if (clubId == null || clubId.isEmpty) {
         SnackBarUtils.showErrorSnackBar("Club ID not found");

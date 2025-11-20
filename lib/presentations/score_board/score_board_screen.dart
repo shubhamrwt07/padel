@@ -533,7 +533,7 @@ class ScoreBoardScreen extends StatelessWidget {
             )
                 : Center(
               child: Text(
-                getNameInitials(players[index]["name"]),
+                getNameInitials(players[index]["name"], players[index]["lastName"]),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -550,7 +550,7 @@ class ScoreBoardScreen extends StatelessWidget {
           SizedBox(
             width: Get.width * 0.13,
             child: Text(
-              capitalizeBothFIrstLastWords(hasPlayer ? players[index]["name"] : "Available"),
+              hasPlayer ? players[index]["name"].toString().split(' ').first.trim() : "Available",
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: Get.textTheme.bodySmall!.copyWith(

@@ -298,7 +298,7 @@ class UserId {
   String? dob;
   String? gender;
   String? profilePic;
-  String? level;
+  String? playerLevel;
 
   UserId({
     this.location,
@@ -318,7 +318,7 @@ class UserId {
     this.dob,
     this.gender,
     this.profilePic,
-    this.level,
+    this.playerLevel,
   });
 
   UserId.fromJson(Map<String, dynamic> json) {
@@ -339,7 +339,7 @@ class UserId {
     dob = MatchData._asJoinedString(json['dob']);
     gender = MatchData._asJoinedString(json['gender']);
     profilePic = MatchData._asJoinedString(json['profilePic']);
-    level = MatchData._asJoinedString(json['level']);
+    playerLevel = MatchData._asJoinedString(json['playerLevel']);
   }
 
   Map<String, dynamic> toJson() {
@@ -363,7 +363,7 @@ class UserId {
     map['dob'] = dob;
     map['gender'] = gender;
     map['profilePic'] = profilePic;
-    map['level'] = level;
+    map['playerLevel'] = playerLevel;
     return map;
   }
 }

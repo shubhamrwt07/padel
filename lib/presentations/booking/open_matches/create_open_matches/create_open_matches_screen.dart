@@ -905,7 +905,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         child: Column(
           children: [
             // Display all courts in a vertical list
-            ...courts.map((court) => _buildCourtSection(court)).toList(),
+            ...courts.map((court) => _buildCourtSection(court)),
 
             const SizedBox(height: 26),
           ],

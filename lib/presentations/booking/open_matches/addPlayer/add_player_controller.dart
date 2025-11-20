@@ -10,7 +10,8 @@ class AddPlayerController extends GetxController {
   OpenMatchBookingController? openMatchBookingController;
   ScoreBoardController? scoreBoardController;
 
-  final fullNameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
 
@@ -36,7 +37,7 @@ class AddPlayerController extends GetxController {
   Future<void> createUser() async {
     if (isLoading.value || Get.isSnackbarOpen) return;
 
-    if (fullNameController.text.isEmpty) {
+    if (firstNameController.text.isEmpty) {
       return SnackBarUtils.showWarningSnackBar("Please Enter Full Name");
     } else if (emailController.text.isEmpty) {
       return SnackBarUtils.showWarningSnackBar("Please Enter Email Address");
@@ -54,15 +55,13 @@ class AddPlayerController extends GetxController {
 
     isLoading.value = true;
     try {
-      // Send exact selected level code (e.g., A, B1, B2, C1...)
-      final apiLevel = playerLevel.value;
-
       final body = {
-        "name": fullNameController.text.trim(),
+        "name": firstNameController.text.trim(),
+        "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "phoneNumber": phoneController.text.trim(),
         "gender": gender.value,
-        "level": apiLevel,
+        "level": playerLevel.value,
       };
 
       final response = await repository.createUserForOpenMatch(body: body);

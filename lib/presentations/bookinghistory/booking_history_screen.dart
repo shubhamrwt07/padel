@@ -125,6 +125,7 @@ class BookingHistoryUi extends StatelessWidget {
                     arguments: {
                       "id": bookingId,
                       "fromCompleted": type == "completed",
+                      "fromCancelled": type == "cancelled",
                     },
                   );
                 } else {
@@ -200,6 +201,7 @@ class BookingHistoryUi extends StatelessWidget {
     try {
       // Check if booking has slot data
       if (booking.slot == null) return const SizedBox.shrink();
+      final courtName = booking.slot[0].courtName??"";
 
       // Ensure slot is a list
       final slotList = booking.slot;
@@ -223,7 +225,7 @@ class BookingHistoryUi extends StatelessWidget {
               ),
             ).paddingOnly(left: 5),
             Text(
-              "(60m)",
+              "($courtName)",
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                 color: AppColors.labelBlackColor,
               ),
@@ -243,7 +245,7 @@ class BookingHistoryUi extends StatelessWidget {
               ),
             ).paddingOnly(left: 5),
             Text(
-              "(60m)",
+              "($courtName)",
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                 color: AppColors.labelBlackColor,
               ),
@@ -271,7 +273,7 @@ class BookingHistoryUi extends StatelessWidget {
               ),
             ).paddingOnly(left: 5),
           Text(
-            "(60m)",
+            "($courtName)",
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
               color: AppColors.labelBlackColor,
             ),
@@ -290,7 +292,7 @@ class BookingHistoryUi extends StatelessWidget {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('EEE, dd MMMM').format(date);
+      return DateFormat('EEE, dd MMM').format(date);
     } catch (e) {
       if (kDebugMode) {
         print("Error parsing date: $e");

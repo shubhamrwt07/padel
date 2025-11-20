@@ -362,7 +362,7 @@ class AllOpenMatchScreen extends StatelessWidget {
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name ?? "").trim();
-      final level = p.userId?.level?.split(' ').first ?? "-";
+      final level = p.userId?.playerLevel?.split(' ').first ?? "-";
       return _buildFilledPlayer(pic ?? "", name, level);
     }).toList();
 
@@ -373,7 +373,7 @@ class AllOpenMatchScreen extends StatelessWidget {
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name ?? "").trim();
-      final level = p.userId?.level?.split(' ').first ?? "-";
+      final level = p.userId?.playerLevel?.split(' ').first ?? "-";
       return _buildFilledPlayer(pic ?? "", name, level);
     }).toList();
 

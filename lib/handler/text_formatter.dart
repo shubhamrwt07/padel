@@ -79,14 +79,11 @@ extension StringExtension on String {
   }
 
   ///Get First Initials--------------------------------------------------
-    String getNameInitials(String name) {
-    if (name.trim().isEmpty) return "?";
+   String getNameInitials(String firstName, String lastName) {
+  if (firstName.trim().isEmpty && lastName.trim().isEmpty) return "?";
 
-    List<String> parts = name.trim().split(" ");
+  String f = firstName.trim().isNotEmpty ? firstName.trim()[0].toUpperCase() : "";
+  String l = lastName.trim().isNotEmpty ? lastName.trim()[0].toUpperCase() : "";
 
-    if (parts.length == 1) {
-      return parts[0][0].toUpperCase();
-    } else {
-      return (parts.first[0] + parts.last[0]).toUpperCase();
-    }
-  }
+  return "$f$l";
+}

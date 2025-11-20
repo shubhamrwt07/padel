@@ -1,3 +1,4 @@
+
 import 'package:padel_mobile/configs/components/success_image.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
@@ -7,22 +8,23 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: primaryAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (controller.cancelBooking.value) {
-              controller.cancelBooking.value = false;
-              controller.slotToCancel.value = null; // reset slot selection
-            } else {
-              Get.back();
-            }
-          },
-        ),
-        centerTitle: true,
-        title: Obx(() {
-          // 🧭 If cancelling a slot, show proper title
+    return GestureDetector(
+      onTap: ()=>FocusManager.instance.primaryFocus!.unfocus(),
+      child: Scaffold(
+        appBar: primaryAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (controller.cancelBooking.value) {
+                controller.cancelBooking.value = false;
+                controller.slotToCancel.value = null; // reset slot selection
+              } else {
+                Get.back();
+              }
+            },
+          ),
+          centerTitle: true,
+          title: Obx(() {
           if (controller.cancelBooking.value) {
             return Text(
               controller.slotToCancel.value != null
@@ -30,83 +32,96 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                   : AppStrings.bookingCancellation,
             );
           }
-
-          // 🧩 Determine title from booking status
+      
           final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
-
-          if (status == "rejected") {
+          
+          // ✅ Check where user came from
+          final bool fromCompleted = Get.arguments?['fromCompleted'] ?? false;
+          final bool fromCancelled = Get.arguments?['fromCancelled'] ?? false;
+          
+          // ✅ Show title based on source or status
+          if (fromCompleted || status == "completed") {
+            return const Text(
+              "Booking Completed",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            );
+          }
+          
+          if (status == "cancelled" || status == "in-progress" || status == "refunded") {
+            return const Text(
+              "Booking Cancellation",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            );
+          }
+      
+          if (fromCancelled || status == "rejected") {
             return const Text(
               "Booking Rejected",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600),
             );
-          } else if (status == "in-progress" ||
-              status == "refunded" ||
-              status == "cancelled") {
-            return const Text("Booking Cancellation");
           }
-
+      
           return Text(AppStrings.bookingConfirmation);
         }),
-        context: context,
-      ),
-
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: LoadingWidget(color: AppColors.primaryColor,));
-        }
-
-        if (controller.error.value.isNotEmpty) {
-          return Center(
+          context: context,
+        ),
+      
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: LoadingWidget(color: AppColors.primaryColor,));
+          }
+      
+          if (controller.error.value.isNotEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Error: ${controller.error.value}',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      final String? bookingId = Get.arguments?['id'];
+                      if (bookingId != null) {
+                        controller.fetchBookingDetails(bookingId);
+                      }
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+      
+          if (controller.bookingDetails.value == null ||
+              controller.bookingDetails.value!.booking == null) {
+            return const Center(child: Text('No booking details found'));
+          }
+      
+          return SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Error: ${controller.error.value}',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final String? bookingId = Get.arguments?['id'];
-                    if (bookingId != null) {
-                      controller.fetchBookingDetails(bookingId);
-                    }
-                  },
-                  child: const Text('Retry'),
-                ),
+                if (!controller.cancelBooking.value)
+                  Obx(() {
+                    final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
+                    final isCancelled = status == "in-progress" || status == "refunded" || status == "cancelled";
+                    return SuccessImage(isCancelled: isCancelled)
+                        .paddingOnly(top: Get.height*0.03, bottom: Get.height*0.03);
+                  }),
+                bookingDetailsCard(context),
+                paymentDetailsCard(context),
+                if (!controller.cancelBooking.value) _showRatingSection(context),
+                if (!controller.cancelBooking.value) _showCancelButtonIfAllowed(),
+                if (controller.cancelBooking.value) cancelForm(context),
               ],
-            ),
+            ).paddingSymmetric(horizontal: Get.width * 0.05),
           );
-        }
-
-        if (controller.bookingDetails.value == null ||
-            controller.bookingDetails.value!.booking == null) {
-          return const Center(child: Text('No booking details found'));
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!controller.cancelBooking.value)
-                Obx(() {
-                  final status = controller.bookingDetails.value?.booking?.bookingStatus?.toLowerCase();
-                  final isCancelled = status == "in-progress" || status == "refunded" || status == "cancelled";
-                  return SuccessImage(isCancelled: isCancelled)
-                      .paddingOnly(top: Get.height*0.03, bottom: Get.height*0.03);
-                }),
-              bookingDetailsCard(context),
-              paymentDetailsCard(context),
-              if (!controller.cancelBooking.value) _showRatingSection(context),
-              if (!controller.cancelBooking.value) _showCancelButtonIfAllowed(),
-              if (controller.cancelBooking.value) cancelForm(context),
-            ],
-          ).paddingSymmetric(horizontal: Get.width * 0.05),
-        );
-      }),
+        }),
+      ),
     );
   }
 
@@ -163,7 +178,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
                     backgroundColor: Colors.grey.shade200,
                     child: ClipOval(
                       child: CachedNetworkImage(
-                          imageUrl: booking.userId?.profilePic ?? "",
+                          imageUrl: booking.registerClubId?.courtImage?[0] ?? "",
                           fit: BoxFit.cover,
                           width: 44,
                           height: 44,
@@ -191,12 +206,12 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
               if (slotTimes.isNotEmpty)
                 ...slotTimes.map((st) {
-                  final amount = st.amount != null ? "₹${st.amount}" : "₹0";
+                  // final amount = st.amount != null ? "₹${st.amount}" : "₹0";
 
                   return Column(
                     children: [
                       bookingDetailRow(context, "Time", st.time ?? "N/A"),
-                      bookingDetailRow(context, "Amount", amount),
+                      // bookingDetailRow(context, "Amount", amount),
                       const SizedBox(height: 0),
                     ],
                   );
@@ -220,7 +235,8 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
   Widget paymentDetailsCard(BuildContext context) {
     final booking = controller.bookingDetails.value!.booking!;
     final status = booking.bookingStatus?.toLowerCase();
-
+    final displayBookingType = 
+    (booking.bookingType == "normal") ? "Online" : booking.bookingType;
     return Container(
       padding: const EdgeInsets.only(left: 10,right: 10,bottom: 5,top: 5),
       decoration: BoxDecoration(
@@ -231,9 +247,14 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Payment Details", style: Theme.of(context).textTheme.titleMedium),
+          Text("Payment Details", style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 0),
           bookingDetailRow(
+            context,
+            "Payment Method",
+            displayBookingType.toString(),
+          ),
+           bookingDetailRow(
             context,
             "Total Payment",
             "₹ ${(booking.totalAmount ?? 0).toStringAsFixed(2)}",
@@ -300,7 +321,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
         // 🟡 Title
         Text(
           "Rate this court (Padel Haus)",
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(
             fontWeight: FontWeight.w600,
             color: AppColors.labelBlackColor,
           ),
@@ -357,6 +378,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           "Write a message",
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             color: AppColors.labelBlackColor,
+            fontSize: 13
           ),
         ),
         const SizedBox(height: 8),
@@ -387,44 +409,15 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
         const SizedBox(height: 16),
 
-        // ✅ Submit button
-        SizedBox(
-          width: double.infinity,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1DB954), Color(0xFF1E88E5)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: ElevatedButton(
-              onPressed: () {
-                if (controller.selectedRating.value == 0) {
+        PrimaryButton(
+          onTap: (){
+                  if (controller.selectedRating.value == 0) {
                   SnackBarUtils.showWarningSnackBar("Please select a rating");
                   return;
                 }
                 controller.submitRating();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-              child: Text(
-                "Submit",
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ).paddingOnly(bottom: 30),
-        ),
+          }, text:
+                "Submit"),
       ],
     );
   }
