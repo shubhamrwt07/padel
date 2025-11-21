@@ -371,53 +371,62 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
           ],
         )),
 
-        const SizedBox(height: 16),
+        controller.selectedRating.value > 0
+        ? Column(crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
 
-        // 💬 Message input
-        Text(
-          "Write a message",
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: AppColors.labelBlackColor,
-            fontSize: 13
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlueColor.withAlpha(50),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: AppColors.blackColor.withAlpha(10),
-            ),
-          ),
-          child: TextFormField(
-            controller: controller.ratingMessageController,
-            maxLines: 3,
-            style: Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: AppColors.labelBlackColor,
-            ),
-            decoration: InputDecoration.collapsed(
-              hintText: "Write Here",
-              hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: AppColors.labelBlackColor.withValues(alpha: 0.5),
+            // 💬 Message input
+            Text(
+              "Write a message",
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: AppColors.labelBlackColor,
+                  fontSize: 13
               ),
             ),
-          ),
-        ),
+            const SizedBox(height: 8),
 
-        const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.lightBlueColor.withAlpha(50),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.blackColor.withAlpha(10),
+                ),
+              ),
+              child: TextFormField(
+                controller: controller.ratingMessageController,
+                scrollPadding: EdgeInsets.only(bottom: Get.height*0.2),
+                maxLines: 3,
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  color: AppColors.labelBlackColor,
+                ),
+                decoration: InputDecoration.collapsed(
+                  hintText: "Write Here",
+                  hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    color: AppColors.labelBlackColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ),
 
-        PrimaryButton(
-          onTap: (){
+            const SizedBox(height: 16),
+
+            PrimaryButton(
+                onTap: (){
                   if (controller.selectedRating.value == 0) {
-                  SnackBarUtils.showWarningSnackBar("Please select a rating");
-                  return;
-                }
-                controller.submitRating();
-          }, text:
-                "Submit"),
+                    SnackBarUtils.showWarningSnackBar("Please select a rating");
+                    return;
+                  }
+                  controller.submitRating();
+                }, text:
+            "Submit"),
+            const SizedBox(height: 20),
+
+          ],
+        ):SizedBox.shrink()
+
       ],
     );
   }
