@@ -131,15 +131,15 @@ class ScoreBoardController extends GetxController {
 
         /// Update Sets
         // sets.clear();
-        if (item.sets != null && item.sets!.isNotEmpty) {
-          for (var s in item.sets!) {
-            sets.add({
-              "set": s.setNumber,
-              "teamA": s.teamAScore,
-              "teamB": s.teamBScore,
-            });
-          }
-        }
+        // if (item.sets != null && item.sets!.isNotEmpty) {
+        //   for (var s in item.sets!) {
+        //     sets.add({
+        //       "set": s.setNumber,
+        //       "teamA": s.teamAScore,
+        //       "teamB": s.teamBScore,
+        //     });
+        //   }
+        // }
 
         /// Summary
         teamAWins.value = item.totalScore?.teamA ?? 0;

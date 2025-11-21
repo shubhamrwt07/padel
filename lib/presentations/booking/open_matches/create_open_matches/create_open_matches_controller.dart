@@ -4,7 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import '../../../../configs/components/snack_bars.dart';
 import '../../../../configs/routes/routes_name.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
@@ -115,9 +117,14 @@ class CreateOpenMatchesController extends GetxController {
     log("Selected Courts: ${courtIds.length}");
     log("Court IDs: $courtIds");
     log("Court Names: $courtNames");
-
-    Get.toNamed(RoutesName.createQuestions);
-  }  void _autoSelectTab() {
+      final exists = storage.read('existsOpenMatchData') ?? false;
+      if (exists == false) {
+       Get.toNamed(RoutesName.createQuestions);
+      } else {
+        Get.to(() => DetailsScreen()); // change to your route
+      }
+  } 
+   void _autoSelectTab() {
     final now = DateTime.now();
     final hour = now.hour;
 

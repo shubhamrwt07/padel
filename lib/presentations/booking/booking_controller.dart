@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'package:padel_mobile/data/request_models/home_models/get_club_name_model.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 
 class BookingController extends GetxController with GetSingleTickerProviderStateMixin {
   DetailsController detailsController = Get.put(DetailsController());
+  ProfileController profileController = Get.put(ProfileController());
   late TabController tabController;
 
   Rx<Courts> courtsData = Courts().obs;
@@ -29,21 +31,22 @@ class BookingController extends GetxController with GetSingleTickerProviderState
       );
 
       log("Data Fetch Successfully -> ${courtsData.value}");
+      profileController.fetchUserProfile();
     });
   }
 
-  /// Optional helper methods to modify cart count
-  void addToCart() {
-    cartCount.value++;
-  }
+  // /// Optional helper methods to modify cart count
+  // void addToCart() {
+  //   cartCount.value++;
+  // }
 
-  void removeFromCart() {
-    if (cartCount.value > 0) cartCount.value--;
-  }
+  // void removeFromCart() {
+  //   if (cartCount.value > 0) cartCount.value--;
+  // }
 
-  void setCartCount(int count) {
-    cartCount.value = count;
-  }
+  // void setCartCount(int count) {
+  //   cartCount.value = count;
+  // }
 
   @override
   void onClose() {

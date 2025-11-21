@@ -2,8 +2,9 @@ class ProfileModel {
   String? status;
   String? message;
   Response? response;
+  bool? existsOpenMatchData;
 
-  ProfileModel({this.status, this.message, this.response});
+  ProfileModel({this.status, this.message, this.response,this.existsOpenMatchData});
 
   ProfileModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -11,6 +12,8 @@ class ProfileModel {
     response = json['response'] != null
         ? new Response.fromJson(json['response'])
         : null;
+    existsOpenMatchData = json['existsOpenMatchData'];
+
   }
 
   Map<String, dynamic> toJson() {
@@ -20,6 +23,7 @@ class ProfileModel {
     if (this.response != null) {
       data['response'] = this.response!.toJson();
     }
+    data['existsOpenMatchData'] = this.existsOpenMatchData;
     return data;
   }
 }

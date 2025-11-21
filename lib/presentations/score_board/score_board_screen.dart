@@ -550,7 +550,9 @@ class ScoreBoardScreen extends StatelessWidget {
           SizedBox(
             width: Get.width * 0.13,
             child: Text(
-              hasPlayer ? players[index]["name"].toString().split(' ').first.trim() : "Available",
+              hasPlayer
+                  ? capitalizeFirstWord(players[index]["name"].toString().split(' ').first.trim())
+                  : "Available",
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: Get.textTheme.bodySmall!.copyWith(
@@ -577,7 +579,12 @@ class ScoreBoardScreen extends StatelessWidget {
       ),
     );
   }
-
+  String capitalizeFirstWord(String text) {
+    if (text.isEmpty) return text;
+    List<String> words = text.split(" ");
+    String first = words.first;
+    return first[0].toUpperCase() + first.substring(1).toLowerCase();
+  }
   Widget _buildAddScoreButton() {
     return Container(
       width: double.infinity,

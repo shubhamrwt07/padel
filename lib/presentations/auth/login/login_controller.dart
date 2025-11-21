@@ -83,6 +83,7 @@ class LoginController extends GetxController {
       if (result.status == "200") {
         storage.write('token', result.response!.token);
         storage.write('userId', result.response!.user!.id);
+        // storage.write('existsOpenMatchData', result.response!.existsOpenMatchData);
         Get.offAllNamed(RoutesName.bottomNav);
       }
     }on DioException catch (e) {
