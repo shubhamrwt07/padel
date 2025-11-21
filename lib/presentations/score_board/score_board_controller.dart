@@ -1,5 +1,7 @@
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
+import 'package:uuid/uuid.dart';
+
 class ScoreBoardController extends GetxController {
   RxList<Map<String, dynamic>> sets = <Map<String, dynamic>>[].obs;
   RxInt expandedSetIndex = (-1).obs;
@@ -12,91 +14,97 @@ class ScoreBoardController extends GetxController {
   RxString clubName = "".obs;
   RxString courtName = "".obs;
 
+  final _uuid = Uuid();
+
+  // 🔥 NEW: Track the highest set number ever created
+  int _maxSetNumberEverCreated = 0;
+
   @override
-  void onInit()async {
+  void onInit() async {
     super.onInit();
     bookingId.value = Get.arguments["bookingId"];
     CustomLogger.logMessage(msg: "BOOKING ID-> ${bookingId.value}", level: LogLevel.info);
     await fetchScoreBoard();
-    sets.addAll([
-      {"set": 1, "scores": []},
-      {"set": 2, "scores": []},
-    ]);
 
-    expandedSetIndex.value = -1; // keep collapsed by default
+    expandedSetIndex.value = -1;
   }
 
-  void addSet() {
+  Future<void> addSet() async {
     if (sets.length < 10) {
-      sets.add({"set": sets.length + 1, "teamA": "Team A", "teamB": "Team B"});
+      // 🔥 FIXED: Use the next number after the highest ever created
+      int nextSetNumber = _maxSetNumberEverCreated + 1;
+      await createSets(nextSetNumber);
     } else {
-      SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 8 sets only",);
+      SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 10 sets only");
     }
   }
-  void removeSet(int index) {
-    sets.removeAt(index);
+  String capitalizeFirstWord(String text) {
+    if (text.isEmpty) return text;
+    List<String> words = text.split(" ");
+    String first = words.first;
+    return first[0].toUpperCase() + first.substring(1).toLowerCase();
   }
   void toggleSetExpansion(int index) {
-    expandedSetIndex.value =
-    (expandedSetIndex.value == index) ? -1 : index;
+    expandedSetIndex.value = (expandedSetIndex.value == index) ? -1 : index;
   }
+
   RxList<Map<String, dynamic>> teams = <Map<String, dynamic>>[].obs;
   var bookingId = ''.obs;
   var scoreboardId = ''.obs;
   ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
   final isLoading = true.obs;
+  final isAddingSet = false.obs;
 
-  Future<void> fetchScoreBoard() async {
-    isLoading.value = true;
+  Future<void> fetchScoreBoard({bool showLoader = true}) async {
+    if (showLoader) {
+      isLoading.value = true;
+    }
+
     try {
       final response = await repository.getScoreBoard(bookingId: bookingId.value);
 
       if (response.status == 200 && response.data!.isNotEmpty) {
-        // Just use the first scoreboard
         final item = response.data!.first;
-        scoreboardId.value = item.sId??"";
+        scoreboardId.value = item.sId ?? "";
         CustomLogger.logMessage(
-            msg: "Using scoreboard ID: ${item.sId}",
-            level: LogLevel.info
-        );
+            msg: "Using scoreboard ID: ${item.sId}", level: LogLevel.info);
         CustomLogger.logMessage(
             msg: "Teams count in response: ${item.teams?.length ?? 0}",
-            level: LogLevel.info
-        );
+            level: LogLevel.info);
 
-        /// Update Match Info
         matchDate.value = item.matchDate ?? "";
         matchTime.value = item.matchTime ?? "";
         clubName.value = item.clubName ?? "";
         courtName.value = item.courtName ?? "";
 
-        // Clear and rebuild teams
         teams.clear();
 
         if (item.teams != null && item.teams!.isNotEmpty) {
           CustomLogger.logMessage(
               msg: "Processing ${item.teams!.length} teams",
-              level: LogLevel.info
-          );
+              level: LogLevel.info);
 
           for (int teamIndex = 0; teamIndex < item.teams!.length; teamIndex++) {
             var t = item.teams![teamIndex];
 
             CustomLogger.logMessage(
-                msg: "Team ${teamIndex + 1}: ${t.name}, players: ${t.players?.length ?? 0}",
-                level: LogLevel.info
-            );
+                msg:
+                "Team ${teamIndex + 1}: ${t.name}, players: ${t.players?.length ?? 0}",
+                level: LogLevel.info);
 
             final playersList = <Map<String, dynamic>>[];
 
             if (t.players != null) {
               for (var p in t.players!) {
-                String fullLevel = p.playerId?.level ?? p.playerId?.playerLevel ?? "";
-                String levelCode = fullLevel.contains(' – ') ? fullLevel.split(' – ')[0] : fullLevel;
-                
+                String fullLevel =
+                    p.playerId?.level ?? p.playerId?.playerLevel ?? "";
+                String levelCode = fullLevel.contains(' – ')
+                    ? fullLevel.split(' – ')[0]
+                    : fullLevel;
+
                 final playerData = {
                   "name": p.playerId?.name ?? "Unknown",
-                  "lastName": p.playerId?.lastName?? "",
+                  "lastName": p.playerId?.lastName ?? "",
                   "pic": p.playerId?.profilePic ?? "",
                   "level": levelCode,
                 };
@@ -104,9 +112,9 @@ class ScoreBoardController extends GetxController {
                 playersList.add(playerData);
 
                 CustomLogger.logMessage(
-                    msg: "  Player: ${playerData['name']}, Level: ${playerData['level']}",
-                    level: LogLevel.info
-                );
+                    msg:
+                    "  Player: ${playerData['name']}, Level: ${playerData['level']}",
+                    level: LogLevel.info);
               }
             }
 
@@ -117,59 +125,157 @@ class ScoreBoardController extends GetxController {
           }
         }
 
-        // Ensure we always have 2 teams
         if (teams.length < 2) {
           CustomLogger.logMessage(
-              msg: "Only ${teams.length} team(s) in response, adding empty Team B",
-              level: LogLevel.warning
-          );
+              msg:
+              "Only ${teams.length} team(s) in response, adding empty Team B",
+              level: LogLevel.warning);
           teams.add({
             "name": "Team B",
             "players": [],
           });
         }
 
-        /// Update Sets
-        // sets.clear();
-        // if (item.sets != null && item.sets!.isNotEmpty) {
-        //   for (var s in item.sets!) {
-        //     sets.add({
-        //       "set": s.setNumber,
-        //       "teamA": s.teamAScore,
-        //       "teamB": s.teamBScore,
-        //     });
-        //   }
-        // }
+        sets.clear();
 
-        /// Summary
+        if (item.sets != null && item.sets!.isNotEmpty) {
+          // 🔥 FIXED: Find the maximum set number from existing sets
+          int maxSetNumber = 0;
+
+          for (var s in item.sets!) {
+            int setNum = s.setNumber ?? 0;
+            if (setNum > maxSetNumber) {
+              maxSetNumber = setNum;
+            }
+
+            sets.add({
+              "uniqueId": _uuid.v4(),
+              "setNumber": setNum,
+              "teamAScore": s.teamAScore ?? 0,
+              "teamBScore": s.teamBScore ?? 0,
+              "winner": s.winner ?? null,
+            });
+          }
+
+          // Update the max tracker
+          _maxSetNumberEverCreated = maxSetNumber;
+        } else {
+          sets.add({
+            "uniqueId": _uuid.v4(),
+            "setNumber": 1,
+            "teamAScore": 0,
+            "teamBScore": 0,
+            "winner": null,
+          });
+          _maxSetNumberEverCreated = 1;
+        }
+
+        sets.refresh();
+
         teamAWins.value = item.totalScore?.teamA ?? 0;
         teamBWins.value = item.totalScore?.teamB ?? 0;
         winner.value = item.winner?.toString() ?? "None";
 
-        // Final verification
-        CustomLogger.logMessage(
-            msg: "=== FINAL TEAMS ===",
-            level: LogLevel.info
-        );
+        CustomLogger.logMessage(msg: "=== FINAL TEAMS ===", level: LogLevel.info);
         for (int i = 0; i < teams.length; i++) {
           final team = teams[i];
           final players = team['players'] as List;
           CustomLogger.logMessage(
               msg: "Team ${i + 1}: ${team['name']}, ${players.length} player(s)",
-              level: LogLevel.info
-          );
+              level: LogLevel.info);
         }
 
         teams.refresh();
       }
     } catch (e, stackTrace) {
       CustomLogger.logMessage(msg: "ERROR-> $e", level: LogLevel.error);
-      CustomLogger.logMessage(msg: "Stack: $stackTrace", level: LogLevel.error);
-    }finally{
-      isLoading.value = false;
-
+      CustomLogger.logMessage(
+          msg: "Stack: $stackTrace", level: LogLevel.error);
+    } finally {
+      if (showLoader) {
+        isLoading.value = false;
+      }
     }
   }
 
+  Future<void> createSets(int setNumber) async {
+    isAddingSet.value = true;
+    try {
+      final body = {
+        "scoreboardId": scoreboardId.value,
+        "sets": [
+          {"setNumber": setNumber}
+        ]
+      };
 
+      final response = await repository.updateScoreBoard(data: body);
+
+      if (response.success == true) {
+        sets.add({
+          "uniqueId": _uuid.v4(),
+          "setNumber": setNumber,
+          "teamAScore": 0,
+          "teamBScore": 0,
+          "winner": null,
+        });
+
+        // 🔥 FIXED: Update the max tracker
+        if (setNumber > _maxSetNumberEverCreated) {
+          _maxSetNumberEverCreated = setNumber;
+        }
+
+        sets.refresh();
+
+        CustomLogger.logMessage(msg: "Set $setNumber added successfully", level: LogLevel.debug);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "ERROR-> $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to add set. Please try again.");
+    } finally {
+      isAddingSet.value = false;
+    }
+  }
+
+  Future<void> removeSetsFromAPI(int setNumber) async {
+    // 🔥 FIXED: Store the removed set data for potential rollback
+    final removedSet = sets.firstWhere(
+          (s) => s["setNumber"] == setNumber,
+      orElse: () => {},
+    );
+    final removedIndex = sets.indexWhere((s) => s["setNumber"] == setNumber);
+
+    try {
+      final body = {
+        "scoreboardId": scoreboardId.value,
+        "setNumber": setNumber,
+      };
+
+      final response = await repository.updateScoreBoard(data: body, type: "remove");
+
+      if (response.success == true) {
+        CustomLogger.logMessage(
+          msg: "Set $setNumber removed successfully from backend",
+          level: LogLevel.info,
+        );
+
+        // ✅ Don't fetch - set is already removed from UI
+      } else {
+        // ❌ API failed - restore the set
+        SnackBarUtils.showErrorSnackBar("Failed to remove set from server");
+        if (removedSet.isNotEmpty && removedIndex != -1) {
+          sets.insert(removedIndex, removedSet);
+          sets.refresh();
+        }
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "ERROR-> $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to remove set from server");
+
+      // ❌ API error - restore the set
+      if (removedSet.isNotEmpty && removedIndex != -1) {
+        sets.insert(removedIndex, removedSet);
+        sets.refresh();
+      }
+    }
+  }
 }

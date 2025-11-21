@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:logger/web.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
@@ -476,7 +475,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 category: true,
                 completed: completed,
                 level: level,
-                playerIndex: i + 1
+                playerIndex: i + 1, lastName: ''
               ),
             );
           } else {
@@ -512,7 +511,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: true,
               completed: completed,
               level: level,
-              playerIndex: i + 1
+              playerIndex: i + 1, lastName: (user?.lastName??'').trim()
             ),
           );
         }
@@ -525,7 +524,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
-              playerIndex: i + 1
+              playerIndex: i + 1, lastName: ''
             ),
           );
         } else {
@@ -588,7 +587,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: true,
               completed: completed,
               level: level,
-              playerIndex: i + 3
+              playerIndex: i + 3, lastName: (user?.lastName??'').trim()
             ),
           );
         }
@@ -601,7 +600,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
-              playerIndex: i + 3
+              playerIndex: i + 3, lastName: ''
             ),
           );
         } else {
@@ -646,14 +645,15 @@ class OpenMatchBookingScreen extends StatelessWidget {
   Widget _buildPlayerSlot({
     required String imageUrl,
     required String name,
+    required String lastName,
     required bool category,
     required bool completed,
     required String level,
     required int playerIndex
   }) {
-  final firstLetter = name.trim().isNotEmpty
-      ? name.trim().split(" ").map((e) => e[0]).take(2).join().toUpperCase()
-      : 'P$playerIndex';
+    final initials = name.trim().isNotEmpty
+        ? "${name.trim()[0]}${lastName.trim().isNotEmpty ? lastName.trim()[0] : ''}".toUpperCase()
+        : "P$playerIndex";
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -669,7 +669,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             backgroundColor:
             AppColors.primaryColor.withValues(alpha: 0.1),
             child: Text(
-              firstLetter,
+              initials,
               style: const TextStyle(
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
@@ -695,7 +695,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               errorWidget: (context, url, error) => CircleAvatar(
                 backgroundColor: Colors.grey.shade300,
                 child: Text(
-                  firstLetter,
+                  initials,
                   style: TextStyle(
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.bold,
