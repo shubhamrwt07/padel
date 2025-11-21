@@ -17,12 +17,14 @@ class LoginModel {
 class LoginResponse {
   String? token;
   User? user;
+  bool? existsOpenMatchData;
 
-  LoginResponse({this.token, this.user});
+  LoginResponse({this.token, this.user,this.existsOpenMatchData});
 
   LoginResponse.fromJson(Map<String, dynamic> json) {
     token = json['token'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
+    existsOpenMatchData = json['existsOpenMatchData'];
   }
 }
 

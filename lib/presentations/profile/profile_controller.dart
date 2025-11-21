@@ -25,6 +25,7 @@ var profileModel = Rxn<ProfileModel>();
       ProfileModel result = await profileRepository.fetchUserProfile();
       if (result.status == "200") {
         profileModel.value = result;
+        storage.write('existsOpenMatchData', result.existsOpenMatchData);
         log("PROFILE MODEL => ${profileModel.value}");
         update();
       } else {

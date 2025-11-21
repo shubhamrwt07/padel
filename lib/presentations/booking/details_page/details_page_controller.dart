@@ -36,7 +36,7 @@ class DetailsController extends GetxController {
     "clubId": "clubid",
     "matchDate": "Unknown date",
     "matchTime": "Unknown time",
-    "skillLevel": "A",
+    "skillLevel": "Beginner",
     "skillDetails":[],
     "playerLevel":"",
     "price": "Unknown price",
@@ -212,9 +212,11 @@ class DetailsController extends GetxController {
       };
 
       log("✅ Final Match Request Body: ${body.toString()}");
+      final cleanedBody = removeEmpty(body);
+      log("📦 Final Cleaned Body: $cleanedBody");
 
       // ✅ Call API
-      final response = await repository.createMatch(data: body);
+      final response = await repository.createMatch(data: cleanedBody);
       log("🎯 Match Created -> ${response.toJson()}");
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
 
@@ -229,6 +231,14 @@ class DetailsController extends GetxController {
       showBookingErrorDialog();
       // SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
     }
+  }
+  Map<String, dynamic> removeEmpty(Map<String, dynamic> json) {
+    json.removeWhere((key, value) =>
+    value == null ||
+        value == "" ||
+        (value is List && value.isEmpty));
+
+    return json;
   }
   void showBookingErrorDialog() {
     Get.generalDialog(
