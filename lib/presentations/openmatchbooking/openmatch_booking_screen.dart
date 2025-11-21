@@ -12,6 +12,8 @@ import '../../configs/routes/routes_name.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../generated/assets.dart';
 import '../../handler/logger.dart';
+import '../booking/details_page/details_page.dart';
+import '../booking/details_page/details_page_controller.dart';
 import 'openmatch_booking_controller.dart';
 
 class OpenMatchBookingScreen extends StatelessWidget {
@@ -265,18 +267,115 @@ class OpenMatchBookingScreen extends StatelessWidget {
       }) {
     return GestureDetector(
       onTap: () {
-        final id = match?.sId;
-        // Get.to(
-        //   () => DetailsScreen(
-        //     buttonType: completed ? "completed" : "upcoming",
-        //     matchId: id,
-        //   ),
-        //   transition: Transition.rightToLeft,
-        // );
-        CustomLogger.logMessage(
-          msg: "Selected Match Id -> $id",
-          level: LogLevel.debug,
-        );
+        if (match == null) return;
+
+        // Prepare data for details page
+        try {
+          // Safely get or create controller
+          final detailsController = Get.isRegistered<DetailsController>()
+              ? Get.find<DetailsController>()
+              : Get.put(DetailsController());
+
+          // Calculate total amount (same logic as footer)
+          final slots = match.slot ?? [];
+          final totalAmount = slots.isNotEmpty
+              ? slots
+                  .expand((slot) => slot.slotTimes ?? [])
+                  .map((st) => (st.amount ?? 0) as int)
+                  .fold(0, (a, b) => a + b)
+              : 0;
+
+          // Map basic match data
+          detailsController.localMatchData = {
+            "clubName": match.clubId?.clubName ?? "Unknown club",
+            "courtName": (match.slot?.isNotEmpty == true
+                    ? match.slot!.first.courtName
+                    : null) ??
+                "Court 1",
+            "clubId": match.clubId?.sId ?? "",
+            "matchDate": match.matchDate ?? "",
+            "matchTime": match.matchTime ?? [],
+            "skillLevel": match.skillLevel ?? "",
+            "skillDetails": match.skillDetails ?? [],
+            "playerLevel": match.playerLevel ?? "",
+            "price": totalAmount.toString(),
+            "address": match.clubId?.address ?? "",
+            "gender": match.gender ?? "",
+            "matchStatus": match.matchStatus ?? "",
+            "slot": match.slot ?? [],
+            "teamA": match.teamA ?? [],
+            "teamB": match.teamB ?? [],
+            "courtType": (match.clubId?.courtType ?? []).join(", "),
+            "court": {
+              "type": (match.clubId?.courtType?.isNotEmpty == true
+                      ? match.clubId!.courtType!.first
+                      : "") ??
+                  "",
+              "endRegistration": "Today at 10:00 PM"
+            }
+          };
+
+          // Map players to details controller format (exactly 2 slots each side)
+          List<Map<String, dynamic>> teamAList = List.generate(2, (index) {
+            if (index < (match.teamA?.length ?? 0)) {
+              final player = match.teamA![index];
+              final user = player.userId;
+              if (user != null) {
+                return <String, dynamic>{
+                  "name": (user.name ?? "").trim(),
+                  "lastName": (user.lastName ?? "").trim(),
+                  "image": user.profilePic ?? "",
+                  "userId": user.sId ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? ""),
+                  "levelLabel": user.playerLevel ?? "",
+                };
+              }
+            }
+            return <String, dynamic>{};
+          });
+
+          List<Map<String, dynamic>> teamBList = List.generate(2, (index) {
+            if (index < (match.teamB?.length ?? 0)) {
+              final player = match.teamB![index];
+              final user = player.userId;
+              if (user != null) {
+                return <String, dynamic>{
+                  "name": (user.name ?? "").trim(),
+                  "lastName": (user.lastName ?? "").trim(),
+                  "image": user.profilePic ?? "",
+                  "userId": user.sId ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? ""),
+                  "levelLabel": user.playerLevel ?? "",
+                };
+              }
+            }
+            return <String, dynamic>{};
+          });
+
+          detailsController.teamA.value = teamAList;
+          detailsController.teamB.value = teamBList;
+          detailsController.update();
+
+          final id = match.sId;
+          CustomLogger.logMessage(
+            msg: "Selected Match Id -> $id",
+            level: LogLevel.debug,
+          );
+
+          Get.to(
+            () => DetailsScreen(),
+            arguments: {
+              "fromOpenMatch": true,
+              "matchId": id,
+              "completed": completed,
+            },
+          );
+        } catch (e) {
+          CustomLogger.logMessage(
+            msg: "Error navigating to DetailsScreen from OpenMatch: $e",
+            level: LogLevel.error,
+          );
+        }
       },
       child: Container(
         width: double.infinity,
@@ -363,7 +462,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamAPlayers.length) {
         final player = teamAPlayers[i];
         final user = player.userId;
-        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
+        final level = _extractLevelCode(
+          (player.userId?.playerLevel?.isNotEmpty == true)
+              ? player.userId!.playerLevel!
+              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+        );
         if (!completed && user == null) {
           if (i == 0) {
             teamAWidgets.add(
@@ -447,7 +550,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamBPlayers.length) {
         final player = teamBPlayers[i];
         final user = player.userId;
-        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
+        final level = _extractLevelCode(
+          (player.userId?.playerLevel?.isNotEmpty == true)
+              ? player.userId!.playerLevel!
+              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+        );
 
         if (!completed && user == null) {
           teamBWidgets.add(
@@ -473,6 +580,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           );
         } else {
           teamBWidgets.add(
+
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               // imageUrl: '',
