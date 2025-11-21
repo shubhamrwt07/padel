@@ -462,6 +462,7 @@ class DetailsController extends GetxController {
   OpenMatchBookingController openMatchBookingController = Get.put(OpenMatchBookingController());
   ProfileController profileController = Get.put(ProfileController());
   final fullNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   RxBool isLoading = false.obs;
@@ -529,6 +530,7 @@ class DetailsController extends GetxController {
     try {
       final body = {
         "name": fullNameController.text.trim(),
+        "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "phoneNumber": phoneController.text.trim(),
         "gender": gender.value,
@@ -639,6 +641,13 @@ class DetailsController extends GetxController {
                             action: TextInputAction.next,
                             keyboardType: TextInputType.text,
                             fullNameController,
+                            context,
+                          ),
+                          _textFieldWithLabel(
+                            "Last Name",
+                            action: TextInputAction.next,
+                            keyboardType: TextInputType.text,
+                            lastNameController,
                             context,
                           ),
 
@@ -897,8 +906,8 @@ class DetailsController extends GetxController {
       "userId": profileController.profileModel.value?.response!.sId ?? "",
       // Store both label and short code where possible
       "levelLabel": skillLevel,
-      "level": skillLevel.toString().split(' ').first,
-    };
+      "level": profileController.profileModel.value?.response!.playerLevel?.split(' ').first??"",
+   };
 
     teamA.first.addAll(profileData);
 
