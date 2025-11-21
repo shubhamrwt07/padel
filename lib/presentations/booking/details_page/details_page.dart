@@ -175,6 +175,7 @@ class DetailsScreen extends StatelessWidget {
 
               // game card
               gameCard(
+                context: context,
                 teamA: controller.teamA,
                 teamB: controller.teamB,
               ),
@@ -385,7 +386,8 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget playerCard(String name, bool showSubtitle, String image, String? skillLevel, {String? lastName}) {
+  Widget playerCard(String name, bool showSubtitle, String image, String? skillLevel,
+      {String? lastName}) {
     // Extract initials (first letter of name + first letter of lastName if available)
     String getInitials(String fullName, String? lastN) {
       if (fullName.trim().isEmpty) {
@@ -406,7 +408,7 @@ class DetailsScreen extends StatelessWidget {
     }
 
     // Calculate initials using both name and lastName
-    final initials = image.isEmpty ? getInitials(name, lastName) : "";
+    final initials = getInitials(name, lastName);
 
     // Get first word of name and lastName for display
     String getFirstWord(String text) {
@@ -470,12 +472,18 @@ class DetailsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            name,
-            style: Get.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ) ??
-                const TextStyle(fontWeight: FontWeight.w500),
+          SizedBox(
+            width: 90,
+            child: Text(
+              displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Get.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ) ??
+                  const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           const SizedBox(height: 0),
           showSubtitle && skillLevel != null && skillLevel.isNotEmpty
@@ -501,7 +509,11 @@ class DetailsScreen extends StatelessWidget {
       ),
     );
   }
-  Widget gameCard({required RxList<Map<String, dynamic>> teamA, required RxList<Map<String, dynamic>> teamB}) {
+  Widget gameCard({
+    required BuildContext context,
+    required RxList<Map<String, dynamic>> teamA,
+    required RxList<Map<String, dynamic>> teamB,
+  }) {
     return GetBuilder<DetailsController>(
       builder: (controller) => Container(
         height: Get.height * .20,
@@ -529,62 +541,65 @@ class DetailsScreen extends StatelessWidget {
                   Expanded(
                     child: SizedBox(
                       height: 100,
-                      child: ListView.builder(
-                        padding: EdgeInsets.only(left: 10),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 2,
-                        itemBuilder: (BuildContext context, int index) {
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(2, (index) {
                           bool hasPlayer = index < controller.teamA.length &&
                               controller.teamA[index].isNotEmpty &&
-                              (controller.teamA[index]['name'] != null && controller.teamA[index]['name'].toString().isNotEmpty);
+                              (controller.teamA[index]['name'] != null &&
+                                  controller.teamA[index]['name'].toString().isNotEmpty);
 
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 30),
-                            child: hasPlayer
-                                ? playerCard(
-                              controller.teamA[index]['name'] ?? "Unknown",
-                              true,
-                              controller.teamA[index]['image'] ?? "",
-                              controller.teamA[index]['level'] ?? controller.teamA[index]['levelLabel'] ?? "",
-                              lastName: controller.teamA[index]['lastName'], // Pass lastName here
-                            )
-                                : GestureDetector(
-                              onTap: () {
-                                controller.showDailogue(
-                                  context,
-                                  index: index,
-                                  team: "teamA",
-                                );
-                              },
-                              child: Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: AppColors.primaryColor,
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: index == 0 ? 16 : 0),
+                              child: hasPlayer
+                                  ? playerCard(
+                                      controller.teamA[index]['name'] ?? "Unknown",
+                                      true,
+                                      controller.teamA[index]['image'] ?? "",
+                                      controller.teamA[index]['level'] ??
+                                          controller.teamA[index]['levelLabel'] ??
+                                          "",
+                                      lastName: controller.teamA[index]['lastName'],
+                                    )
+                                  : GestureDetector(
+                                      onTap: () {
+                                        controller.showDailogue(
+                                          context,
+                                          index: index,
+                                          team: "teamA",
+                                        );
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                color: AppColors.primaryColor,
+                                              ),
+                                            ),
+                                            height: 50,
+                                            width: 50,
+                                            child: Icon(
+                                              CupertinoIcons.add,
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "Available",
+                                            style: Get.textTheme.bodyLarge?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    height: 50,
-                                    width: 50,
-                                    child: Icon(
-                                      CupertinoIcons.add,
-                                      color: AppColors.primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "Available",
-                                    style: Get.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           );
-                        },
+                        }),
                       ),
                     ),
                   ),
@@ -598,62 +613,65 @@ class DetailsScreen extends StatelessWidget {
                   Expanded(
                     child: SizedBox(
                       height: 100,
-                      child: ListView.builder(
-                        padding: EdgeInsets.only(left: 20),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 2,
-                        itemBuilder: (BuildContext context, int index) {
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(2, (index) {
                           bool hasPlayer = index < controller.teamB.length &&
                               controller.teamB[index].isNotEmpty &&
-                              (controller.teamB[index]['name'] != null && controller.teamB[index]['name'].toString().isNotEmpty);
+                              (controller.teamB[index]['name'] != null &&
+                                  controller.teamB[index]['name'].toString().isNotEmpty);
 
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 30),
-                            child: hasPlayer
-                                ? playerCard(
-                              controller.teamB[index]['name'] ?? "Unknown",
-                              true,
-                              controller.teamB[index]['image'] ?? "",
-                              controller.teamB[index]['level'] ?? controller.teamB[index]['levelLabel'] ?? "",
-                              lastName: controller.teamB[index]['lastName'], // Pass lastName here
-                            )
-                                : GestureDetector(
-                              onTap: () {
-                                controller.showDailogue(
-                                  context,
-                                  index: index,
-                                  team: "teamB",
-                                );
-                              },
-                              child: Column(
-                                children: [
-                                  Container(
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: AppColors.primaryColor,
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: index == 0 ? 16 : 0),
+                              child: hasPlayer
+                                  ? playerCard(
+                                      controller.teamB[index]['name'] ?? "Unknown",
+                                      true,
+                                      controller.teamB[index]['image'] ?? "",
+                                      controller.teamB[index]['level'] ??
+                                          controller.teamB[index]['levelLabel'] ??
+                                          "",
+                                      lastName: controller.teamB[index]['lastName'],
+                                    )
+                                  : GestureDetector(
+                                      onTap: () {
+                                        controller.showDailogue(
+                                          context,
+                                          index: index,
+                                          team: "teamB",
+                                        );
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            height: 50,
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                color: AppColors.primaryColor,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              CupertinoIcons.add,
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "Available",
+                                            style: Get.textTheme.bodyLarge?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Icon(
-                                      CupertinoIcons.add,
-                                      color: AppColors.primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "Available",
-                                    style: Get.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           );
-                        },
+                        }),
                       ),
                     ),
                   ),
