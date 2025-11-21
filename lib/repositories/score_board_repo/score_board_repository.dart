@@ -1,5 +1,6 @@
 import 'package:padel_mobile/data/request_models/score_board_models/add_guest_player_model.dart';
 import 'package:padel_mobile/data/request_models/score_board_models/scoreboard_model.dart';
+import 'package:padel_mobile/data/request_models/score_board_models/update_scoreboard_model.dart';
 import 'package:padel_mobile/data/response_models/score_board_models/get_score_board_model.dart';
 
 import '../../core/endpoitns.dart';
@@ -41,6 +42,43 @@ class ScoreBoardRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "created ScoreBoard failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+
+  /// Update Score Board--------------------------------------------------------
+  Future<UpdateScoreBoardModel> updateScoreBoard({
+    required dynamic data,
+    String? type
+
+  }) async {
+    CustomLogger.logMessage(
+      msg: "Update Score Board Body-> $data",
+      level: LogLevel.info,
+    );
+    try {
+        final removeSet = (type != null && type.isNotEmpty) ? "?type=$type" : "";
+        final response = await dioClient.put(
+        "${AppEndpoints.updateScoreBoard}$removeSet",
+        data: data,
+      );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Update ScoreBoard successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+
+        return UpdateScoreBoardModel.fromJson(response.data);
+      } else {
+        throw Exception("Update ScoreBoard failed. Status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Update ScoreBoard failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );

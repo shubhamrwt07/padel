@@ -44,5 +44,6 @@ class AppEndpoints {
   ///ScoreBoard-----------------------------------------------------------------
   static const String createScoreBoard = "${BASE_URL}court/scoreboard/createScoreboard";
   static const String getScoreBoard = "${BASE_URL}court/scoreboard/getScoreboards";
+  static const String updateScoreBoard = "${BASE_URL}court/scoreboard/updateScoreboard";
   static const String addGuestPlayer = "${BASE_URL}court/scoreboard/updateScoreboard";
 }

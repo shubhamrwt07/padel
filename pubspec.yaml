@@ -13,6 +13,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   get:
+  uuid:
   get_storage:
   connectivity_plus:
   dio:

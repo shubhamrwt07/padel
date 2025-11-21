@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
@@ -10,6 +11,7 @@ import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
@@ -494,25 +496,39 @@ class HomeScreen extends GetView<HomeController> {
             ],
           ),
           Transform.translate(
-            offset: Offset(0, -3),
+            offset: const Offset(0, -3),
             child: GestureDetector(
-                onTap: (){
+              onTap: () {
+                if (!controller.isCheckingScoreboard.value) {  // ❗ Disable double tap
                   if (b.sId != null && b.sId!.isNotEmpty) {
                     controller.createScoreBoard(bookingId: b.sId!);
-                    // Get.toNamed(RoutesName.bookingConfirmAndCancel, arguments: {"id": b.sId!});
                   } else {
-                    Get.snackbar("Error", "Booking ID not available");
-                }},
-                child: Container(
+                    CustomLogger.logMessage(msg: "Error Booking ID not available",level: LogLevel.debug);
+                  }
+                }
+              },
+              child: Obx(() {
+                final isLoading = controller.loadingBookingId.value == b.sId;
+                return Container(
                   height: 23,
                   width: 55,
-                  alignment: AlignmentGeometry.center,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: AppColors.secondaryColor,
                   ),
-                  child: Text("Play Now",style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white,fontSize: 10),),
-                ),
+                  child: isLoading
+                      ? LoadingAnimationWidget.waveDots(
+                    color: AppColors.whiteColor,
+                    size: 20,
+                  )
+                      : Text(
+                    "Play Now",
+                    style: Get.textTheme.headlineSmall!
+                        .copyWith(color: Colors.white, fontSize: 10),
+                  ),
+                );
+              }),
             ),
           )
         ],

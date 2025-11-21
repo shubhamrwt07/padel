@@ -348,19 +348,29 @@ class ScoreBoardScreen extends StatelessWidget {
               _buildMatchHeader(context,),
               _buildPlayerRow(),
               const SizedBox(height: 10),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryColor,
-                    borderRadius: BorderRadius.circular(6),
+              Obx(() {
+                final teamAPlayers = controller.teams.isNotEmpty
+                    ? controller.teams[0]["players"] as List
+                    : [];
+                final teamBPlayers = controller.teams.length > 1
+                    ? controller.teams[1]["players"] as List
+                    : [];
+                bool allPlayersAdded = teamAPlayers.length == 2 && teamBPlayers.length == 2;
+
+                return Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      allPlayersAdded ? "▶ Start Game" : "🕒 Waiting",
+                      style: Get.textTheme.labelSmall!.copyWith(color: Colors.white),
+                    ),
                   ),
-                  child:  Text(
-                    "🕒 Waiting",
-                    style: Get.textTheme.labelSmall!.copyWith(color: Colors.white),
-                  ),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         ),
@@ -460,6 +470,13 @@ class ScoreBoardScreen extends StatelessWidget {
         log("  Team B Player $i: ${teamBPlayers[i]['name']}");
       }
 
+      // Check if all 4 players are added
+      bool allPlayersAdded = teamAPlayers.length == 2 && teamBPlayers.length == 2;
+
+      if (allPlayersAdded) {
+        return _buildAllPlayersView(teamAPlayers, teamBPlayers);
+      }
+
       return IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -488,6 +505,175 @@ class ScoreBoardScreen extends StatelessWidget {
     });
   }
 
+  Widget _buildAllPlayersView(List teamAPlayers, List teamBPlayers) {
+    return Column(
+      children: [
+        // Overlapping avatars and score display
+        Container(
+      width: Get.width,
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // LEFT side (fixed width)
+          SizedBox(
+            width: 100, // adjust depending on avatar size
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildOverlappingAvatar(teamAPlayers[0], 0),
+                Positioned(
+                  left: 35,
+                  child: _buildOverlappingAvatar(teamAPlayers[1], 1),
+                ),
+              ],
+            ),
+          ).paddingOnly(left: 10),
+
+          // Score (always centered)
+          Text(
+            "0:0",
+            style: Get.textTheme.displaySmall!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textColor,
+              fontSize: 24
+            ),
+          ).paddingOnly(left: 30),
+
+          // RIGHT side (same fixed width)
+          SizedBox(
+            width: 100, // MUST MATCH LEFT WIDTH
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildOverlappingAvatar(teamBPlayers[0], 0),
+                Positioned(
+                  left: 35,
+                  child: _buildOverlappingAvatar(teamBPlayers[1], 1),
+                ),
+              ],
+            ),
+          ).paddingOnly(left: 40),
+        ],
+      ),
+    ),
+        const SizedBox(height: 12),
+
+        // Team names and player names
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Team A info
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    "Team A",
+                    style: Get.textTheme.headlineLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  Text(
+                    controller.capitalizeFirstWord(teamAPlayers[0]["name"].toString().split(' ').first.trim()),
+                    textAlign: TextAlign.center,
+                    style: Get.textTheme.bodySmall!.copyWith(
+                      color: AppColors.textColor,
+                    ),
+                  ),
+                  Text(
+                    controller.capitalizeFirstWord(teamAPlayers[1]["name"].toString().split(' ').first.trim()),
+                    textAlign: TextAlign.center,
+                    style: Get.textTheme.bodySmall!.copyWith(
+                      color: AppColors.textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 50),
+            // Team B info
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    "Team B",
+                    style: Get.textTheme.headlineLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  Text(
+                    controller.capitalizeFirstWord(teamBPlayers[0]["name"].toString().split(' ').first.trim()),
+                    textAlign: TextAlign.center,
+                    style: Get.textTheme.bodySmall!.copyWith(
+                      color: AppColors.textColor,
+                    ),
+                  ),
+                  Text(
+                    controller.capitalizeFirstWord(teamBPlayers[1]["name"].toString().split(' ').first.trim()),
+                    textAlign: TextAlign.center,
+                    style: Get.textTheme.bodySmall!.copyWith(
+                      color: AppColors.textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOverlappingAvatar(Map<String, dynamic> player, int index) {
+    return Container(
+      height: 55,
+      width: 55,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.textFieldColor,
+        border: Border.all(color: AppColors.whiteColor, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: (player["pic"] != null && player["pic"].toString().isNotEmpty)
+          ? ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: player["pic"],
+          fit: BoxFit.cover,
+          placeholder: (context, url) => const Center(
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: LoadingWidget(color: AppColors.primaryColor),
+            ),
+          ),
+          errorWidget: (context, url, error) => const Icon(
+            Icons.person,
+            color: AppColors.primaryColor,
+            size: 30,
+          ),
+        ),
+      )
+          : Center(
+        child: Text(
+          getNameInitials(player["name"], player["lastName"]),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPlayerSlot(List players, int index, String teamName) {
     bool hasPlayer = index < players.length;
 
@@ -508,8 +694,8 @@ class ScoreBoardScreen extends StatelessWidget {
             width: 50,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: AppColors.primaryColor),
+              color:hasPlayer? AppColors.primaryColor.withValues(alpha: 0.1):Colors.white,
+              border: Border.all(color:hasPlayer?Colors.transparent: AppColors.primaryColor),
             ),
             child: hasPlayer
                 ? (players[index]["pic"] != null && players[index]["pic"].toString().isNotEmpty)
@@ -551,7 +737,7 @@ class ScoreBoardScreen extends StatelessWidget {
             width: Get.width * 0.13,
             child: Text(
               hasPlayer
-                  ? capitalizeFirstWord(players[index]["name"].toString().split(' ').first.trim())
+                  ? controller.capitalizeFirstWord(players[index]["name"].toString().split(' ').first.trim())
                   : "Available",
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
@@ -579,12 +765,9 @@ class ScoreBoardScreen extends StatelessWidget {
       ),
     );
   }
-  String capitalizeFirstWord(String text) {
-    if (text.isEmpty) return text;
-    List<String> words = text.split(" ");
-    String first = words.first;
-    return first[0].toUpperCase() + first.substring(1).toLowerCase();
-  }
+
+
+
   Widget _buildAddScoreButton() {
     return Container(
       width: double.infinity,
@@ -631,15 +814,18 @@ class ScoreBoardScreen extends StatelessWidget {
                     ...controller.sets.asMap().entries.map((entry) {
                       final index = entry.key;
                       final set = entry.value;
+                      final int setNumber = set["setNumber"];
+                      final String uniqueId = set["uniqueId"] ?? "${setNumber}_$index"; // ✅ Use uniqueId
 
                       return Dismissible(
-                        key: ValueKey("set_${set["set"]}"),
+                        key: ValueKey(uniqueId),  // ✅ Changed from setNumber to uniqueId
                         direction: DismissDirection.endToStart,
-                        confirmDismiss: (_) async {
-                          // Ensure UI waits before removing -> prevents the error
-                          await Future.delayed(Duration(milliseconds: 10));
-                          controller.removeSet(index);
-                          return true;
+                        onDismissed: (_) {
+                          final int originalSetNumber = setNumber;
+
+                          controller.sets.removeWhere((s) => s["setNumber"] == originalSetNumber);
+                          controller.sets.refresh();
+                          controller.removeSetsFromAPI(originalSetNumber);
                         },
                         background: Container(
                           alignment: Alignment.centerRight,
@@ -662,7 +848,7 @@ class ScoreBoardScreen extends StatelessWidget {
                             children: [
                               const Icon(Icons.remove, color: Colors.black54, size: 16),
                               Text(
-                                "Set ${set["set"]}",
+                                "Set ${set["setNumber"] ?? index + 1}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
@@ -675,7 +861,6 @@ class ScoreBoardScreen extends StatelessWidget {
                         ),
                       );
                     }),
-
                   ],
                 ),
               ),
@@ -683,33 +868,42 @@ class ScoreBoardScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 10),
                   // Show only if less than 8 sets
-                  if (controller.sets.length < 10)
-                    GestureDetector(
-                      onTap: (){
-                        controller.addSet();
-                      },
-                      child: Container(
-                        alignment: AlignmentGeometry.center,
-                        padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
-                        decoration: BoxDecoration(
-                            color: AppColors.whiteColor,
-                            border: Border.all(color: AppColors.textColor),
-                            borderRadius: BorderRadius.circular(5),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: AppColors.greyColor,
-                                  blurRadius: 0.5,
-                                  spreadRadius: 0.6,
-                                  offset: Offset(0, 2)
-                              )
-                            ]
-                        ),
-                        child: const Text(
-                          "+ Add Set",
-                          style: TextStyle(color: Colors.black87),
-                        ),
-                      ).paddingOnly(left: 10,right: 10),
-                    ),
+                // In _buildSetSection(), update the "+ Add Set" button:
+                if (controller.sets.length < 10)
+                  Obx(() => GestureDetector(
+                    onTap: controller.isAddingSet.value ? null : () {
+                      controller.addSet();
+                    },
+                    child: Container(
+                      alignment: AlignmentGeometry.center,
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: controller.isAddingSet.value 
+                            ? AppColors.greyColor.withValues(alpha:0.5)
+                            : AppColors.whiteColor,
+                        border: Border.all(color: AppColors.textColor),
+                        borderRadius: BorderRadius.circular(5),
+                        boxShadow: controller.isAddingSet.value ? [] : [
+                          BoxShadow(
+                            color: AppColors.greyColor,
+                            blurRadius: 0.5,
+                            spreadRadius: 0.6,
+                            offset: Offset(0, 2)
+                          )
+                        ]
+                      ),
+                      child: controller.isAddingSet.value
+                          ? SizedBox(
+                              height: 25,
+                              width: 15,
+                              child: LoadingWidget(color: AppColors.primaryColor,)
+                            )
+                          : const Text(
+                              "+ Add Set",
+                              style: TextStyle(color: Colors.black87),
+                            ),
+                    ).paddingOnly(left: 10, right: 10),
+                  )),
                   const SizedBox(height: 20),
                   Divider(color: AppColors.greyColor,height: 0.1,),
                   _buildMatchSummary(),
@@ -721,119 +915,6 @@ class ScoreBoardScreen extends StatelessWidget {
       );
     });
   }
-
-  // Widget _buildScoreTable(Map<String, dynamic> set) {
-  //   return Column(
-  //     children: [
-  //       const SizedBox(height: 8),
-  //       Table(
-  //         border: TableBorder.all(color: Colors.grey.shade300),
-  //         columnWidths: const {
-  //           0: FixedColumnWidth(70),
-  //           1: FlexColumnWidth(),
-  //           2: FlexColumnWidth(),
-  //           3: FlexColumnWidth(),
-  //           4: FlexColumnWidth(),
-  //           5: FlexColumnWidth(),
-  //           6: FlexColumnWidth(),
-  //         },
-  //         children: [
-  //           // Header Row
-  //           TableRow(
-  //             children: [
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('Set',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R1',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R2',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R3',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R4',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R5',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //               Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('R6',style: Get.textTheme.labelLarge!.copyWith(color: AppColors.textColor), textAlign: TextAlign.center),
-  //               ),
-  //             ],
-  //           ),
-  //           // Team A row
-  //           TableRow(
-  //             children: [
-  //               const Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('Team A', textAlign: TextAlign.center),
-  //               ),
-  //               ...List.generate(6, (i) {
-  //                 return const Padding(
-  //                   padding: EdgeInsets.all(6),
-  //                   child: Text('W',
-  //                       textAlign: TextAlign.center,
-  //                       style: TextStyle(color: Colors.green)),
-  //                 );
-  //               }),
-  //             ],
-  //           ),
-  //           // Team B row
-  //           TableRow(
-  //             children: [
-  //               const Padding(
-  //                 padding: EdgeInsets.all(6),
-  //                 child: Text('Team B', textAlign: TextAlign.center),
-  //               ),
-  //               ...List.generate(6, (i) {
-  //                 return const Padding(
-  //                   padding: EdgeInsets.all(6),
-  //                   child: Text('-',
-  //                       textAlign: TextAlign.center,
-  //                       style: TextStyle(color: Colors.grey)),
-  //                 );
-  //               }),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 8),
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           Text(
-  //             "High Score: Team A (3:2)",
-  //             style: Get.textTheme.bodySmall,
-  //           ),
-  //           Container(
-  //             alignment: AlignmentGeometry.center,
-  //             height: 25,padding: EdgeInsets.symmetric(horizontal: 10),
-  //             decoration: BoxDecoration(
-  //               color: AppColors.primaryColor,
-  //               borderRadius: BorderRadius.circular(5),
-  //
-  //             ),
-  //             child: const Text(
-  //               "+ Add Score",
-  //               style: TextStyle(color: Colors.white, fontSize: 12),
-  //             ),
-  //           )
-  //         ],
-  //       ),
-  //       const SizedBox(height: 12),
-  //     ],
-  //   );
-  // }
 
   Widget _buildMatchSummary() {
     return Obx(() {

@@ -15,6 +15,7 @@ import '../../repositories/home_repository/home_repository.dart';
 
 class HomeController extends GetxController {
   ProfileController profileController = Get.put(ProfileController());
+
   // LOCATION ------------------------------------------------------------------
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
@@ -34,7 +35,9 @@ class HomeController extends GetxController {
   ];
 
   // DATE -------------------------
-  var selectedDate = DateTime.now().obs;
+  var selectedDate = DateTime
+      .now()
+      .obs;
 
   Future<void> selectDate(BuildContext context) async {
     try {
@@ -125,7 +128,8 @@ class HomeController extends GetxController {
   /// Fetch clubs with pagination and comprehensive error handling
   Future<void> fetchClubs({bool isRefresh = false}) async {
     try {
-      log("Fetching clubs - Page: ${currentPage.value}, Search: ${searchQuery.value}");
+      log("Fetching clubs - Page: ${currentPage.value}, Search: ${searchQuery
+          .value}");
 
       if (isRefresh || currentPage.value == 1) {
         isLoadingClub.value = true;
@@ -173,14 +177,16 @@ class HomeController extends GetxController {
         isInitialized.value = true;
       }
 
-      log("Successfully fetched ${courtsData.value?.data?.courts?.length ?? 0} courts");
-
+      log("Successfully fetched ${courtsData.value?.data?.courts?.length ??
+          0} courts");
     } catch (e) {
       log("Error fetching clubs: $e");
 
       // Set appropriate error message
-      if (e.toString().contains('network') || e.toString().contains('connection')) {
-        clubError.value = 'Network error. Please check your connection and try again.';
+      if (e.toString().contains('network') ||
+          e.toString().contains('connection')) {
+        clubError.value =
+        'Network error. Please check your connection and try again.';
       } else if (e.toString().contains('timeout')) {
         clubError.value = 'Request timeout. Please try again.';
       } else if (e.toString().contains('server')) {
@@ -193,7 +199,6 @@ class HomeController extends GetxController {
       if (!isInitialized.value && (isRefresh || currentPage.value == 1)) {
         isInitialized.value = true;
       }
-
     } finally {
       // Reset loading states
       isLoadingClub.value = false;
@@ -256,13 +261,15 @@ class HomeController extends GetxController {
 
   ///Your Bookings--------------------------------------------------------------
   var bookings = Rxn<BookingHistoryModel>();
-  BookingHistoryRepository bookingHistoryRepository = Get.put(BookingHistoryRepository());
+  BookingHistoryRepository bookingHistoryRepository = Get.put(
+      BookingHistoryRepository());
   RxBool isLoadingBookings = false.obs;
 
   Future<void> fetchBookings() async {
     isLoadingBookings.value = true;
     try {
-      final response = await bookingHistoryRepository.getBookingHistory(type: "upcoming");
+      final response = await bookingHistoryRepository.getBookingHistory(
+          type: "upcoming");
       bookings.value = response;
       if (response.success == true) {
         CustomLogger.logMessage(msg: "Booking fetched", level: LogLevel.debug);
@@ -288,15 +295,17 @@ class HomeController extends GetxController {
     // Example: pick a location via a dialog
     final result = await showDialog<String>(
       context: context,
-      builder: (_) => SimpleDialog(
-        title: const Text('Select Location'),
-        children: dummyLocations
-            .map((location) => SimpleDialogOption(
-          onPressed: () => Navigator.pop(context, location),
-          child: Text(location),
-        ))
-            .toList(),
-      ),
+      builder: (_) =>
+          SimpleDialog(
+            title: const Text('Select Location'),
+            children: dummyLocations
+                .map((location) =>
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, location),
+                  child: Text(location),
+                ))
+                .toList(),
+          ),
     );
 
     if (result != null) selectedLocation.value = result;
@@ -331,55 +340,46 @@ class HomeController extends GetxController {
     scrollController.dispose();
     super.onClose();
   }
-    ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
 
+  ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
+  RxBool isCheckingScoreboard = false.obs;
+  RxString loadingBookingId = ''.obs;
   Future<void> createScoreBoard({required String bookingId}) async {
     try {
-      // First, check if scoreboard already exists for this booking
-      final checkResponse = await repository.getScoreBoard(bookingId: bookingId);
+      isCheckingScoreboard.value = true; // 🔥 start loader
+      loadingBookingId.value = bookingId;
 
-      // Only check data - ignore success field
+      // First, check if scoreboard already exists for this booking
+      final checkResponse = await repository.getScoreBoard(
+          bookingId: bookingId);
+
       bool scoreboardExists = false;
 
       if (checkResponse.data != null) {
-        // Check if data is a list and not empty
         if (checkResponse.data is List) {
           scoreboardExists = (checkResponse.data as List).isNotEmpty;
-        }
-        // Check if data is an object (not a list)
-        else {
+        } else {
           scoreboardExists = true;
         }
       }
 
-      // If scoreboard exists, just navigate - DON'T create
       if (scoreboardExists) {
+        isCheckingScoreboard.value = false; // stop loader
         Get.toNamed(RoutesName.scoreBoard, arguments: {"bookingId": bookingId});
-        CustomLogger.logMessage(
-            msg: "ScoreBoard already exists - Navigating without creating - BOOKING ID -> $bookingId",
-            level: LogLevel.debug
-        );
-        return; // Exit early - DON'T hit create API
+        return;
       }
 
-      // If data is empty array or null, proceed to create
-      CustomLogger.logMessage(
-          msg: "ScoreBoard doesn't exist (empty data) - Proceeding to create - BOOKING ID -> $bookingId",
-          level: LogLevel.debug
-      );
-
-      // If we reach here, scoreboard doesn't exist - proceed with creation
+      // --- Create scoreboard ---
       final bookingList = bookings.value?.data ?? [];
 
       if (bookingList.isEmpty) {
+        isCheckingScoreboard.value = false;
         SnackBarUtils.showInfoSnackBar("No booking data found");
         return;
       }
 
-      // Take first upcoming booking
       final booking = bookingList.first;
 
-      // Create new scoreboard only if it doesn't exist
       final body = {
         "bookingId": bookingId,
         "matchDate": booking.bookingDate ?? "",
@@ -402,16 +402,16 @@ class HomeController extends GetxController {
 
       final response = await repository.createScoreBoard(data: body);
 
+      isCheckingScoreboard.value = false; // 🔥 stop loader
+
       if (response.success == true) {
         Get.toNamed(RoutesName.scoreBoard, arguments: {"bookingId": bookingId});
-        CustomLogger.logMessage(
-            msg: "ScoreBoard Created Successfully - BOOKING ID -> $bookingId",
-            level: LogLevel.debug
-        );
       }
-
     } catch (e) {
-      CustomLogger.logMessage(msg: "ERROR -> $e", level: LogLevel.error);
+      isCheckingScoreboard.value = false; // 🔥 always stop loader
       SnackBarUtils.showErrorSnackBar("Failed to load or create scoreboard");
+    }finally{
+      loadingBookingId.value = '';
     }
-  }}
+  }
+}
