@@ -129,7 +129,6 @@ class _NotificationTile extends StatelessWidget {
   final String bookingStatus;
   final String bookingId;
   final bool isRead;
-
   const _NotificationTile({
     required this.id,
     required this.title,

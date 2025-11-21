@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:logger/web.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
@@ -12,6 +11,8 @@ import '../../configs/routes/routes_name.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../generated/assets.dart';
 import '../../handler/logger.dart';
+import '../booking/details_page/details_page.dart';
+import '../booking/details_page/details_page_controller.dart';
 import 'openmatch_booking_controller.dart';
 
 class OpenMatchBookingScreen extends StatelessWidget {
@@ -265,18 +266,115 @@ class OpenMatchBookingScreen extends StatelessWidget {
       }) {
     return GestureDetector(
       onTap: () {
-        final id = match?.sId;
-        // Get.to(
-        //   () => DetailsScreen(
-        //     buttonType: completed ? "completed" : "upcoming",
-        //     matchId: id,
-        //   ),
-        //   transition: Transition.rightToLeft,
-        // );
-        CustomLogger.logMessage(
-          msg: "Selected Match Id -> $id",
-          level: LogLevel.debug,
-        );
+        if (match == null) return;
+
+        // Prepare data for details page
+        try {
+          // Safely get or create controller
+          final detailsController = Get.isRegistered<DetailsController>()
+              ? Get.find<DetailsController>()
+              : Get.put(DetailsController());
+
+          // Calculate total amount (same logic as footer)
+          final slots = match.slot ?? [];
+          final totalAmount = slots.isNotEmpty
+              ? slots
+                  .expand((slot) => slot.slotTimes ?? [])
+                  .map((st) => (st.amount ?? 0) as int)
+                  .fold(0, (a, b) => a + b)
+              : 0;
+
+          // Map basic match data
+          detailsController.localMatchData = {
+            "clubName": match.clubId?.clubName ?? "Unknown club",
+            "courtName": (match.slot?.isNotEmpty == true
+                    ? match.slot!.first.courtName
+                    : null) ??
+                "Court 1",
+            "clubId": match.clubId?.sId ?? "",
+            "matchDate": match.matchDate ?? "",
+            "matchTime": match.matchTime ?? [],
+            "skillLevel": match.skillLevel ?? "",
+            "skillDetails": match.skillDetails ?? [],
+            "playerLevel": match.playerLevel ?? "",
+            "price": totalAmount.toString(),
+            "address": match.clubId?.address ?? "",
+            "gender": match.gender ?? "",
+            "matchStatus": match.matchStatus ?? "",
+            "slot": match.slot ?? [],
+            "teamA": match.teamA ?? [],
+            "teamB": match.teamB ?? [],
+            "courtType": (match.clubId?.courtType ?? []).join(", "),
+            "court": {
+              "type": (match.clubId?.courtType?.isNotEmpty == true
+                      ? match.clubId!.courtType!.first
+                      : "") ??
+                  "",
+              "endRegistration": "Today at 10:00 PM"
+            }
+          };
+
+          // Map players to details controller format (exactly 2 slots each side)
+          List<Map<String, dynamic>> teamAList = List.generate(2, (index) {
+            if (index < (match.teamA?.length ?? 0)) {
+              final player = match.teamA![index];
+              final user = player.userId;
+              if (user != null) {
+                return <String, dynamic>{
+                  "name": (user.name ?? "").trim(),
+                  "lastName": (user.lastName ?? "").trim(),
+                  "image": user.profilePic ?? "",
+                  "userId": user.sId ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? ""),
+                  "levelLabel": user.playerLevel ?? "",
+                };
+              }
+            }
+            return <String, dynamic>{};
+          });
+
+          List<Map<String, dynamic>> teamBList = List.generate(2, (index) {
+            if (index < (match.teamB?.length ?? 0)) {
+              final player = match.teamB![index];
+              final user = player.userId;
+              if (user != null) {
+                return <String, dynamic>{
+                  "name": (user.name ?? "").trim(),
+                  "lastName": (user.lastName ?? "").trim(),
+                  "image": user.profilePic ?? "",
+                  "userId": user.sId ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? ""),
+                  "levelLabel": user.playerLevel ?? "",
+                };
+              }
+            }
+            return <String, dynamic>{};
+          });
+
+          detailsController.teamA.value = teamAList;
+          detailsController.teamB.value = teamBList;
+          detailsController.update();
+
+          final id = match.sId;
+          CustomLogger.logMessage(
+            msg: "Selected Match Id -> $id",
+            level: LogLevel.debug,
+          );
+
+          Get.to(
+            () => DetailsScreen(),
+            arguments: {
+              "fromOpenMatch": true,
+              "matchId": id,
+              "completed": completed,
+            },
+          );
+        } catch (e) {
+          CustomLogger.logMessage(
+            msg: "Error navigating to DetailsScreen from OpenMatch: $e",
+            level: LogLevel.error,
+          );
+        }
       },
       child: Container(
         width: double.infinity,
@@ -363,7 +461,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamAPlayers.length) {
         final player = teamAPlayers[i];
         final user = player.userId;
-        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
+        final level = _extractLevelCode(
+          (player.userId?.playerLevel?.isNotEmpty == true)
+              ? player.userId!.playerLevel!
+              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+        );
         if (!completed && user == null) {
           if (i == 0) {
             teamAWidgets.add(
@@ -373,7 +475,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                 category: true,
                 completed: completed,
                 level: level,
-                playerIndex: i + 1
+                playerIndex: i + 1, lastName: ''
               ),
             );
           } else {
@@ -409,7 +511,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: true,
               completed: completed,
               level: level,
-              playerIndex: i + 1
+              playerIndex: i + 1, lastName: (user?.lastName??'').trim()
             ),
           );
         }
@@ -422,7 +524,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
-              playerIndex: i + 1
+              playerIndex: i + 1, lastName: ''
             ),
           );
         } else {
@@ -447,7 +549,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
       if (i < teamBPlayers.length) {
         final player = teamBPlayers[i];
         final user = player.userId;
-        final level = _extractLevelCode(player.userId?.playerLevel ?? "");
+        final level = _extractLevelCode(
+          (player.userId?.playerLevel?.isNotEmpty == true)
+              ? player.userId!.playerLevel!
+              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+        );
 
         if (!completed && user == null) {
           teamBWidgets.add(
@@ -473,6 +579,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           );
         } else {
           teamBWidgets.add(
+
             _buildPlayerSlot(
               imageUrl: user?.profilePic ?? '',
               // imageUrl: '',
@@ -480,7 +587,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: true,
               completed: completed,
               level: level,
-              playerIndex: i + 3
+              playerIndex: i + 3, lastName: (user?.lastName??'').trim()
             ),
           );
         }
@@ -493,7 +600,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               category: false,
               completed: completed,
               level: "-",
-              playerIndex: i + 3
+              playerIndex: i + 3, lastName: ''
             ),
           );
         } else {
@@ -538,14 +645,15 @@ class OpenMatchBookingScreen extends StatelessWidget {
   Widget _buildPlayerSlot({
     required String imageUrl,
     required String name,
+    required String lastName,
     required bool category,
     required bool completed,
     required String level,
     required int playerIndex
   }) {
-  final firstLetter = name.trim().isNotEmpty
-      ? name.trim().split(" ").map((e) => e[0]).take(2).join().toUpperCase()
-      : 'P$playerIndex';
+    final initials = name.trim().isNotEmpty
+        ? "${name.trim()[0]}${lastName.trim().isNotEmpty ? lastName.trim()[0] : ''}".toUpperCase()
+        : "P$playerIndex";
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -561,7 +669,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             backgroundColor:
             AppColors.primaryColor.withValues(alpha: 0.1),
             child: Text(
-              firstLetter,
+              initials,
               style: const TextStyle(
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
@@ -587,7 +695,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
               errorWidget: (context, url, error) => CircleAvatar(
                 backgroundColor: Colors.grey.shade300,
                 child: Text(
-                  firstLetter,
+                  initials,
                   style: TextStyle(
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.bold,

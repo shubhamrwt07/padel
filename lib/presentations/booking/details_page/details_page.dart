@@ -20,6 +20,10 @@ class DetailsScreen extends StatelessWidget {
   DetailsScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments;
+    final bool fromOpenMatch =
+        args is Map && args['fromOpenMatch'] == true;
+
     final data = controller.localMatchData;
     List slots = data['slot'];
     log("Slots ${slots.length}");
@@ -268,8 +272,9 @@ class DetailsScreen extends StatelessWidget {
             ],
           ).paddingAll(16),
         ),
-        // Add the bottom bar here
-        bottomNavigationBar: bottomBar(context, controller),
+        // Add the bottom bar here (hidden when opened from OpenMatch booking list)
+        bottomNavigationBar:
+            fromOpenMatch ? null : bottomBar(context, controller),
       ),
     );
   }
