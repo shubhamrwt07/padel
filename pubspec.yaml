@@ -41,10 +41,6 @@ dependencies:
   share_plus:
   flutter_zoom_drawer:
   loading_animation_widget:
-
-
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

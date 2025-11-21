@@ -380,6 +380,8 @@ class UserId {
   String? role;
   List<String>? fcmTokens;
   String? playerLevel;
+  String? level;
+
   String? profilePic;
   String? createdAt;
   String? updatedAt;
@@ -401,6 +403,7 @@ class UserId {
     role = json['role'];
     fcmTokens = (json['fcmTokens'] as List?)?.cast<String>();
     playerLevel = json['playerLevel'];
+    level = json['level'];
     profilePic = json['profilePic'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -422,6 +425,7 @@ class UserId {
         'role': role,
         'fcmTokens': fcmTokens,
         'playerLevel': playerLevel,
+        'level': level,
         'profilePic': profilePic,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
