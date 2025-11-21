@@ -257,14 +257,11 @@ class Location {
         ?.map((e) => (e as num).toDouble())
         .toList();
   }
-
   Map<String, dynamic> toJson() => {
         'type': type,
         'coordinates': coordinates,
       };
 }
-
-
 class BusinessHours {
   String? time;
   String? day;

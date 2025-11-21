@@ -8,94 +8,107 @@ class CreateUserForOpenMatchModel {
   CreateUserForOpenMatchModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    response =
-    json['response'] != null ? Response.fromJson(json['response']) : null;
+    response = json['response'] != null
+        ? new Response.fromJson(json['response'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['status'] = status;
-    data['message'] = message;
-    if (response != null) {
-      data['response'] = response!.toJson();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
+    data['message'] = this.message;
+    if (this.response != null) {
+      data['response'] = this.response!.toJson();
     }
     return data;
   }
 }
 
 class Response {
+  Location? location;
+  String? sId;
   String? email;
   String? countryCode;
   int? phoneNumber;
   String? name;
+  String? lastName;
   String? gender;
-  Location? location;
   String? category;
   bool? isActive;
   bool? isDeleted;
   String? role;
   String? level;
-  String? sId;
+  List<String>? fcmTokens;
   String? createdAt;
   String? updatedAt;
   int? iV;
 
-  Response({
-    this.email,
-    this.countryCode,
-    this.phoneNumber,
-    this.name,
-    this.gender,
-    this.location,
-    this.category,
-    this.isActive,
-    this.isDeleted,
-    this.role,
-    this.level,
-    this.sId,
-    this.createdAt,
-    this.updatedAt,
-    this.iV,
-  });
+  Response(
+      {this.location,
+        this.sId,
+        this.email,
+        this.countryCode,
+        this.phoneNumber,
+        this.name,
+        this.lastName,
+        this.gender,
+        this.category,
+        this.isActive,
+        this.isDeleted,
+        this.role,
+        this.level,
+        this.fcmTokens,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
 
   Response.fromJson(Map<String, dynamic> json) {
+    location = json['location'] != null
+        ? new Location.fromJson(json['location'])
+        : null;
+    sId = json['_id'];
     email = json['email'];
     countryCode = json['countryCode'];
     phoneNumber = json['phoneNumber'];
     name = json['name'];
+    lastName = json['lastName'];
     gender = json['gender'];
-    location =
-    json['location'] != null ? Location.fromJson(json['location']) : null;
     category = json['category'];
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
     role = json['role'];
     level = json['level'];
-    sId = json['_id'];
+    fcmTokens = json['fcmTokens'] != null
+        ? List<String>.from(json['fcmTokens'].map((v) => v.toString()))
+        : null;
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
   }
 
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    data['email'] = email;
-    data['countryCode'] = countryCode;
-    data['phoneNumber'] = phoneNumber;
-    data['name'] = name;
-    data['gender'] = gender;
-    if (location != null) {
-      data['location'] = location!.toJson();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.location != null) {
+      data['location'] = this.location!.toJson();
     }
-    data['category'] = category;
-    data['isActive'] = isActive;
-    data['isDeleted'] = isDeleted;
-    data['role'] = role;
-    data['level'] = level;
-    data['_id'] = sId;
-    data['createdAt'] = createdAt;
-    data['updatedAt'] = updatedAt;
-    data['__v'] = iV;
+    data['_id'] = this.sId;
+    data['email'] = this.email;
+    data['countryCode'] = this.countryCode;
+    data['phoneNumber'] = this.phoneNumber;
+    data['name'] = this.name;
+    data['lastName'] = this.lastName;
+    data['gender'] = this.gender;
+    data['category'] = this.category;
+    data['isActive'] = this.isActive;
+    data['isDeleted'] = this.isDeleted;
+    data['role'] = this.role;
+    data['level'] = this.level;
+    if (this.fcmTokens != null) {
+      data['fcmTokens'] = this.fcmTokens;
+    }
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    data['__v'] = this.iV;
     return data;
   }
 }
@@ -106,15 +119,16 @@ class Location {
   Location({this.coordinates});
 
   Location.fromJson(Map<String, dynamic> json) {
-    if (json['coordinates'] != null) {
-      coordinates = List<double>.from(json['coordinates'].map((v) => v.toDouble()));
-    }
+    coordinates = json['coordinates'] != null
+        ? List<double>.from(
+            json['coordinates'].map((v) => (v as num).toDouble()))
+        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{};
-    if (coordinates != null) {
-      data['coordinates'] = coordinates;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.coordinates != null) {
+      data['coordinates'] = this.coordinates;
     }
     return data;
   }
