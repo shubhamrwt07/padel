@@ -16,9 +16,6 @@ class ScoreBoardController extends GetxController {
 
   final _uuid = Uuid();
 
-  // 🔥 NEW: Track the highest set number ever created
-  int _maxSetNumberEverCreated = 0;
-
   @override
   void onInit() async {
     super.onInit();
@@ -31,9 +28,7 @@ class ScoreBoardController extends GetxController {
 
   Future<void> addSet() async {
     if (sets.length < 10) {
-      // 🔥 FIXED: Use the next number after the highest ever created
-      int nextSetNumber = _maxSetNumberEverCreated + 1;
-      await createSets(nextSetNumber);
+      await createSets(_nextAvailableSetNumber());
     } else {
       SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 10 sets only");
     }
@@ -139,14 +134,8 @@ class ScoreBoardController extends GetxController {
         sets.clear();
 
         if (item.sets != null && item.sets!.isNotEmpty) {
-          // 🔥 FIXED: Find the maximum set number from existing sets
-          int maxSetNumber = 0;
-
           for (var s in item.sets!) {
             int setNum = s.setNumber ?? 0;
-            if (setNum > maxSetNumber) {
-              maxSetNumber = setNum;
-            }
 
             sets.add({
               "uniqueId": _uuid.v4(),
@@ -156,9 +145,6 @@ class ScoreBoardController extends GetxController {
               "winner": s.winner ?? null,
             });
           }
-
-          // Update the max tracker
-          _maxSetNumberEverCreated = maxSetNumber;
         } else {
           sets.add({
             "uniqueId": _uuid.v4(),
@@ -167,7 +153,6 @@ class ScoreBoardController extends GetxController {
             "teamBScore": 0,
             "winner": null,
           });
-          _maxSetNumberEverCreated = 1;
         }
 
         sets.refresh();
@@ -218,11 +203,6 @@ class ScoreBoardController extends GetxController {
           "teamBScore": 0,
           "winner": null,
         });
-
-        // 🔥 FIXED: Update the max tracker
-        if (setNumber > _maxSetNumberEverCreated) {
-          _maxSetNumberEverCreated = setNumber;
-        }
 
         sets.refresh();
 
@@ -277,5 +257,18 @@ class ScoreBoardController extends GetxController {
         sets.refresh();
       }
     }
+  }
+
+  int _nextAvailableSetNumber() {
+    final existingNumbers = sets
+        .map((s) => s["setNumber"])
+        .whereType<int>()
+        .toSet();
+
+    int candidate = 1;
+    while (existingNumbers.contains(candidate)) {
+      candidate++;
+    }
+    return candidate;
   }
 }
