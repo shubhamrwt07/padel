@@ -126,7 +126,7 @@ class SignUpRepository {
     }
   }
    ///Get Locations Api------------------------------------------------------------
-  Future<GetLocationsModel> getlocations() async {
+  Future<GetLocationsModel> getLocations() async {
     try {
       final response = await dioClient.get(
         AppEndpoints.getLocations,

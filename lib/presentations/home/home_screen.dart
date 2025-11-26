@@ -238,18 +238,30 @@ class HomeScreen extends GetView<HomeController> {
           ),
           onChanged: controller.searchClubs,
         ),
-        GestureDetector(
-          onTap: () => controller.showLocationAndDate.toggle(),
-          child: Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: AppColors.searchBarColor,
-              borderRadius: BorderRadius.circular(10),
+        Obx(() {
+          final isOpen = controller.showLocationAndDate.value;
+
+          return GestureDetector(
+            onTap: () => controller.showLocationAndDate.toggle(),
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: AppColors.searchBarColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: AnimatedRotation(
+                turns: isOpen ? 0.5 : 0,     // 0.5 turn = 180° rotation
+                duration: const Duration(milliseconds: 300),
+                child: Image.asset(
+                  Assets.imagesIcFilter,
+                  color: Colors.black,
+                  scale: 4.5,
+                ),
+              ),
             ),
-            child: Image.asset(Assets.imagesIcFilter,color: Colors.black,scale: 4.5,),
-          )
-        ),
+          );
+        })
       ],
     ).paddingOnly(
       bottom: Get.height * 0.01,
@@ -273,10 +285,10 @@ class HomeScreen extends GetView<HomeController> {
 
   Widget _locationPicker(BuildContext context) {
     return GestureDetector(
-      onTap: () => controller.showLocationPicker(context),
+      onTap: () => controller.showLocationPicker(),
       child: Container(
         height: 35,
-        width: Get.width * 0.61,
+        width: Get.width * 0.63,
         decoration: BoxDecoration(
           color: AppColors.textFieldColor,
           borderRadius: BorderRadius.circular(8),

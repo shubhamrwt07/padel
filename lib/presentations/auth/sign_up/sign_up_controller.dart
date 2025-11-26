@@ -187,7 +187,7 @@ class SignUpController extends GetxController {
   Future<void>fetchLocations()async{
     isLocationLoading.value = true;
     try{
-      final response = await signUpRepository.getlocations();
+      final response = await signUpRepository.getLocations();
       if(response.status == true){
         locations.assignAll(response.data?.toList()??[]);
       }

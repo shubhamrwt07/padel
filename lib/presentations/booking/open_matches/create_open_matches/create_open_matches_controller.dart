@@ -1,20 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
-import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
-import '../../../../configs/components/snack_bars.dart';
-import '../../../../configs/routes/routes_name.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../../repositories/cart/cart_repository.dart';
 import '../../../../repositories/home_repository/home_repository.dart';
 import '../../../cart/cart_controller.dart';
-import '../../../cart/cart_screen.dart';
 
 class CreateOpenMatchesController extends GetxController {
   final selectedDate = Rxn<DateTime>();
@@ -49,7 +43,6 @@ class CreateOpenMatchesController extends GetxController {
   // Keep existing for backward compatibility
   RxMap<String, Map<String, dynamic>> selectedSlotsWithCourtInfo = <String, Map<String, dynamic>>{}.obs;
   RxBool isBottomSheetOpen = false.obs;
-  DetailsController detailsController=Get.put(DetailsController());
   @override
   void onInit() {
     super.onInit();
@@ -97,16 +90,54 @@ class CreateOpenMatchesController extends GetxController {
     String primaryCourtId = courtIds.first;
     String primaryCourtName = courtNames.first;
 
+    // Clear existing controller and create fresh one
+    if (Get.isRegistered<DetailsController>()) {
+      Get.delete<DetailsController>();
+    }
+    final detailsController = Get.put(DetailsController());
+    
+    // Set flag to prevent profile initialization
+    detailsController.isFromOpenMatch = true;
+
     detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName ?? "");
+    detailsController.localMatchData.update("address", (value) => slots.value!.data![0].registerClubId?.address ?? "");
     detailsController.localMatchData.update("clubId", (v) => slots.value!.data![0].registerClubId!.sId ?? "");
     detailsController.localMatchData.update("matchDate", (v) => selectedDate.value ?? "");
+    detailsController.localMatchData.update("clubImage", (v)=> slots.value!.data![0].registerClubId?.courtImage ??[]);
     detailsController.localMatchData.update(
       "matchTime",
           (v) => selectedSlots.map((s) => s.time).toList(),
     );    detailsController.localMatchData.update("price", (v) => totalAmount.toString());
-    detailsController.localMatchData.update("courtType", (v) => slots.value!.data![0].registerClubId!.courtType ?? "");
+    // Get court types for all selected courts
+    final courtTypes = slots.value!.data![0].registerClubId!.courtType ?? [];
+    final courts = slots.value?.data ?? [];
+    List<String> selectedCourtTypes = [];
+    
+    // Get court type for each selected court
+    for (String courtId in courtIds) {
+      int courtIndex = -1;
+      for (int i = 0; i < courts.length; i++) {
+        if (courts[i].sId == courtId) {
+          courtIndex = i;
+          break;
+        }
+      }
+      
+      if (courtIndex >= 0 && courtIndex < courtTypes.length) {
+        selectedCourtTypes.add(courtTypes[courtIndex]);
+      } else if (courtTypes.isNotEmpty) {
+        selectedCourtTypes.add(courtTypes.first); // fallback
+      }
+    }
+    
+    // If single court, send string; if multiple courts, send list
+    final courtTypeValue = selectedCourtTypes.length == 1 
+        ? selectedCourtTypes.first 
+        : selectedCourtTypes;
+    
+    detailsController.localMatchData.update("courtType", (v) => courtTypeValue);
     detailsController.localMatchData.update("slot", (v) => selectedSlots);
-
+    
     // Use direct assignment for new keys instead of update
     detailsController.localMatchData["courtId"] = primaryCourtId;
     detailsController.localMatchData["courtName"] = primaryCourtName;

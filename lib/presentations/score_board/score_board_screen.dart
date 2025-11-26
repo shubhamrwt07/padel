@@ -8,6 +8,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
 import 'package:padel_mobile/presentations/score_board/widgets/add_player_bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -780,11 +781,105 @@ class ScoreBoardScreen extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
-        onPressed: () {},
+        onPressed: () {
+          _showAddScoreDialog();
+        },
         child: const Text(
           "+ Add Score",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
+      ),
+    );
+  }
+
+  void _showAddScoreDialog() {
+    final teamAController = TextEditingController();
+    final teamBController = TextEditingController();
+    int? selectedSetNumber;
+
+    Get.dialog(
+      AlertDialog(
+        title: Text("Add Score",style: Get.textTheme.headlineLarge,),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<int>(
+                  initialValue: selectedSetNumber,
+                  dropdownColor: Colors.white,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.textFieldColor,
+                    contentPadding: EdgeInsets.symmetric(vertical: 4,horizontal: Get.width * 0.04),
+                    labelText: "Select Set",
+                    border:  OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent,width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: AppColors.primaryColor,width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.textFieldColor,width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  items: controller.sets.map((set) {
+                    final setNum = set["setNumber"] as int;
+                    return DropdownMenuItem<int>(
+                      value: setNum,
+                      child: Text("Set $setNum",style: Get.textTheme.headlineSmall,),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedSetNumber = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                PrimaryTextField(
+                  controller: teamAController,
+                  labelText: "Team A Score",
+                  keyboardType: TextInputType.number,
+                  hintText: '',
+                ),
+                const SizedBox(height: 16),
+                PrimaryTextField(
+                  controller: teamBController,
+                  labelText: "Team B Score",
+                  keyboardType: TextInputType.number,
+                  hintText: '',
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
+          ),
+          PrimaryButton(
+            width: 70,
+              height: 40,
+              textStyle: Get.textTheme.headlineSmall!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),
+              onTap: () async {
+                if (selectedSetNumber == null) {
+                  SnackBarUtils.showInfoSnackBar("Please select a set");
+                  return;
+                }
+                final teamAScore = int.tryParse(teamAController.text) ?? 0;
+                final teamBScore = int.tryParse(teamBController.text) ?? 0;
+
+                Get.back();
+                await controller.addScore(selectedSetNumber!, teamAScore, teamBScore);
+              },
+              text: "Add"
+          ),
+        ],
       ),
     );
   }
@@ -820,6 +915,13 @@ class ScoreBoardScreen extends StatelessWidget {
                       return Dismissible(
                         key: ValueKey(uniqueId),  // ✅ Changed from setNumber to uniqueId
                         direction: DismissDirection.endToStart,
+                        confirmDismiss: (direction) async {
+                          if (setNumber == 1) {
+                            SnackBarUtils.showErrorSnackBar("Set 1 cannot be deleted");
+                            return false;
+                          }
+                          return true;
+                        },
                         onDismissed: (_) {
                           final int originalSetNumber = setNumber;
 
@@ -846,7 +948,16 @@ class ScoreBoardScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Icon(Icons.remove, color: Colors.black54, size: 16),
+                              (set["teamAScore"] != null && set["teamAScore"] != 0)
+                                  ? Text(
+                                      "${set["teamAScore"]}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    )
+                                  : const Icon(Icons.remove, color: Colors.black54, size: 16),
                               Text(
                                 "Set ${set["setNumber"] ?? index + 1}",
                                 style: const TextStyle(
@@ -855,7 +966,16 @@ class ScoreBoardScreen extends StatelessWidget {
                                   fontSize: 15,
                                 ),
                               ),
-                              const Icon(Icons.remove, color: Colors.black54, size: 16),
+                              (set["teamBScore"] != null && set["teamBScore"] != 0)
+                                  ? Text(
+                                      "${set["teamBScore"]}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    )
+                                  : const Icon(Icons.remove, color: Colors.black54, size: 16),
                             ],
                           ),
                         ),
@@ -943,7 +1063,7 @@ class ScoreBoardScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Team B Wins:"),
-                Text("${controller.teamAWins.value}"),
+                Text("${controller.teamBWins.value}"),
               ],
             ),
             Row(

@@ -19,8 +19,9 @@ class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
   RxBool isProcessing = false.obs;
   var option = ''.obs;
-  RxString gameType = 'Male only'.obs;
+  RxString gameType = 'Mixed Doubles'.obs;
   late RazorpayPaymentService _paymentService;
+  bool isFromOpenMatch = false;
 
   RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{
     "name": "",
@@ -32,15 +33,16 @@ class DetailsController extends GetxController {
 
   Map<String, dynamic> localMatchData = {
     "clubName": "Unknown club",
+    "clubImage": [],
     "courtName":"Court 1",
     "clubId": "clubid",
     "matchDate": "Unknown date",
-    "matchTime": "Unknown time",
+    "matchTime": [],
     "skillLevel": "Beginner",
     "skillDetails":[],
     "playerLevel":"",
     "price": "Unknown price",
-    "address": "add here",
+    "address": "",
     "gender": "",
     "matchStatus":"open",
     "slot":[],
@@ -543,9 +545,11 @@ class DetailsController extends GetxController {
         // Create player data object with explicit typing INCLUDING LEVEL
         Map<String, dynamic> newPlayer = <String, dynamic>{
           "name": fullNameController.text.trim(),
+          "lastName":lastNameController.text.trim(),
           "image": "",
           "userId": response!.response!.sId!,
-          "level": playerLevel.value, // ADD THIS LINE
+          "level": playerLevel.value,
+          "levelLabel": playerLevelMap[playerLevel.value] ?? playerLevel.value,
         };
 
         // Add player to correct team and index
@@ -575,6 +579,7 @@ class DetailsController extends GetxController {
   /// Clear form fields
   void clearForm() {
     fullNameController.clear();
+    lastNameController.clear();
     emailController.clear();
     phoneController.clear();
     gender.value = 'Male';
@@ -886,30 +891,33 @@ class DetailsController extends GetxController {
 
     profileController.fetchUserProfile();
 
-    String skillLevel = "";
-    // Prefer explicitly selected player level label if present
-    if ((localMatchData['playerLevel'] ?? '').toString().isNotEmpty) {
-      skillLevel = localMatchData['playerLevel'].toString();
-    } else {
-      final skillDetails = localMatchData['skillDetails'];
-      if (skillDetails != null && skillDetails is List && skillDetails.isNotEmpty) {
-        skillLevel = skillDetails.last.toString();
-      } else if (localMatchData['skillLevel'] != null) {
-        skillLevel = localMatchData['skillLevel'].toString();
+    // Only add profile data if not coming from OpenMatchBookingScreen
+    if (!isFromOpenMatch) {
+      String skillLevel = "";
+      // Prefer explicitly selected player level label if present
+      if ((localMatchData['playerLevel'] ?? '').toString().isNotEmpty) {
+        skillLevel = localMatchData['playerLevel'].toString();
+      } else {
+        final skillDetails = localMatchData['skillDetails'];
+        if (skillDetails != null && skillDetails is List && skillDetails.isNotEmpty) {
+          skillLevel = skillDetails.last.toString();
+        } else if (localMatchData['skillLevel'] != null) {
+          skillLevel = localMatchData['skillLevel'].toString();
+        }
       }
+
+      Map<String, dynamic> profileData = <String, dynamic>{
+        "name": profileController.profileModel.value?.response!.name ?? "",
+        "lastName": profileController.profileModel.value?.response?.lastName??"",
+        "image": profileController.profileModel.value?.response!.profilePic ?? "",
+        "userId": profileController.profileModel.value?.response!.sId ?? "",
+        // Store both label and short code where possible
+        "level": profileController.profileModel.value?.response!.playerLevel?.split(' ').first??"",
+        "levelLabel": skillLevel,
+     };
+
+      teamA.first.addAll(profileData);
     }
-
-    Map<String, dynamic> profileData = <String, dynamic>{
-      "name": profileController.profileModel.value?.response!.name ?? "",
-      "lastName": profileController.profileModel.value?.response?.lastName??"",
-      "image": profileController.profileModel.value?.response!.profilePic ?? "",
-      "userId": profileController.profileModel.value?.response!.sId ?? "",
-      // Store both label and short code where possible
-      "levelLabel": skillLevel,
-      "level": profileController.profileModel.value?.response!.playerLevel?.split(' ').first??"",
-   };
-
-    teamA.first.addAll(profileData);
 
     super.onInit();
   }

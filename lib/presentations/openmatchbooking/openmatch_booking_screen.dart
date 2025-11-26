@@ -270,10 +270,14 @@ class OpenMatchBookingScreen extends StatelessWidget {
 
         // Prepare data for details page
         try {
-          // Safely get or create controller
-          final detailsController = Get.isRegistered<DetailsController>()
-              ? Get.find<DetailsController>()
-              : Get.put(DetailsController());
+          // Clear existing controller and create fresh one
+          if (Get.isRegistered<DetailsController>()) {
+            Get.delete<DetailsController>();
+          }
+          final detailsController = Get.put(DetailsController());
+          
+          // Set flag to prevent profile initialization
+          detailsController.isFromOpenMatch = true;
 
           // Calculate total amount (same logic as footer)
           final slots = match.slot ?? [];
@@ -287,6 +291,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           // Map basic match data
           detailsController.localMatchData = {
             "clubName": match.clubId?.clubName ?? "Unknown club",
+            "clubImage": match.clubId?.courtImage ?? [],
             "courtName": (match.slot?.isNotEmpty == true
                     ? match.slot!.first.courtName
                     : null) ??
@@ -325,8 +330,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   "lastName": (user.lastName ?? "").trim(),
                   "image": user.profilePic ?? "",
                   "userId": user.sId ?? "",
-                  "level": _extractLevelCode(user.playerLevel ?? ""),
-                  "levelLabel": user.playerLevel ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? user.level ?? ""),
+                  "levelLabel": user.playerLevel ?? user.level ?? "",
                 };
               }
             }
@@ -343,14 +348,18 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   "lastName": (user.lastName ?? "").trim(),
                   "image": user.profilePic ?? "",
                   "userId": user.sId ?? "",
-                  "level": _extractLevelCode(user.playerLevel ?? ""),
-                  "levelLabel": user.playerLevel ?? "",
+                  "level": _extractLevelCode(user.playerLevel ?? user.level ?? ""),
+                  "levelLabel": user.playerLevel ?? user.level ?? "",
                 };
               }
             }
             return <String, dynamic>{};
           });
 
+          // Clear existing team data first
+          detailsController.teamA.clear();
+          detailsController.teamB.clear();
+          
           detailsController.teamA.value = teamAList;
           detailsController.teamB.value = teamBList;
           detailsController.update();

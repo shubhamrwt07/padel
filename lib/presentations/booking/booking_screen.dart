@@ -124,6 +124,10 @@ class BookingScreen extends GetView<BookingController> {
               automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               elevation: 0,
+              snap: false,
+              forceElevated: false,
+              stretch: false,  // Add this
+              excludeHeaderSemantics: true,
               // title: Obx(() {
               //   final clubName = controller.courtsData.value.clubName ?? '';
               //   return LayoutBuilder(

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../generated/assets.dart';
@@ -28,6 +29,9 @@ class DetailsScreen extends StatelessWidget {
     List slots = data['slot'];
     log("Slots ${slots.length}");
     return BackgroundContainer(
+      imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
+          ? (data['clubImage'] as List).first.toString() 
+          : (data['clubImage']?.toString() ?? ""),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: primaryAppBar(
@@ -41,50 +45,7 @@ class DetailsScreen extends StatelessWidget {
             appBarAction(
               Colors.white,
               const Icon(Icons.share_outlined, color: Colors.black, size: 18),
-            ),
-            SizedBox(width: Get.width * .04),
-            PopupMenuButton<String>(
-              offset: Offset(0, Get.height * .05),
-              color: Colors.white,
-              onSelected: (value) {
-                switch (value) {
-                  case 'share':
-                    break;
-                  case 'refresh':
-                    break;
-                  case 'settings':
-                    break;
-                  case 'logout':
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'refresh',
-                  child: Row(
-                    children: [
-                      Icon(Icons.refresh, size: 18, color: Colors.black54),
-                      SizedBox(width: 8),
-                      Text("Refresh"),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'settings',
-                  child: Row(
-                    children: [
-                      Icon(Icons.settings, size: 18, color: Colors.black54),
-                      SizedBox(width: 8),
-                      Text("Settings"),
-                    ],
-                  ),
-                ),
-              ],
-              child: appBarAction(
-                AppColors.whiteColor,
-                Icon(Icons.more_vert, color: AppColors.blackColor),
-              ),
-            ),
+            ).paddingOnly(right: 10),
           ],
         ),
         body: SingleChildScrollView(
@@ -135,7 +96,7 @@ class DetailsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        gameTypeSelector(),
+                        gameTypeSelector(readOnly: fromOpenMatch),
                         gameDetails(
                           "Game Level",
                           data['skillLevel'] ?? "-",
@@ -206,7 +167,9 @@ class DetailsScreen extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: CachedNetworkImage(
-                          imageUrl: "",
+                          imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
+                              ? (data['clubImage'] as List).first.toString() 
+                              : (data['clubImage']?.toString() ?? ""),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Center(
                             child: CircularProgressIndicator(
@@ -301,7 +264,7 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget gameTypeSelector() {
+  Widget gameTypeSelector({required bool readOnly}) {
     return Container(
       alignment: Alignment.center,
       color: Colors.transparent,
@@ -310,48 +273,56 @@ class DetailsScreen extends StatelessWidget {
         children: [
           Text("Game Type", style: Get.textTheme.bodyLarge),
           SizedBox(height: Get.height * .01),
-          Obx(() => PopupMenuButton<String>(
-            offset: Offset(0, 30),
-            onSelected: (value) {
-              controller.gameType.value = value;
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'Male only',
-                child: Text('Male only'),
-              ),
-              const PopupMenuItem(
-                value: 'Female only',
-                child: Text('Female only'),
-              ),
-              const PopupMenuItem(
-                value: 'Mixed doubles',
-                child: Text('Mixed doubles'),
-              ),
-            ],
-            child: Row(
+
+          Obx(() {
+            final currentValue = controller.gameType.value;
+
+            return readOnly
+                ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  controller.gameType.value,
+                  currentValue,
                   style: Get.textTheme.headlineMedium?.copyWith(
-                    color: AppColors.blackColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ) ?? const TextStyle(
                     color: AppColors.blackColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
                 ),
-                Icon(Icons.arrow_drop_down, color: AppColors.blackColor, size: 18),
               ],
-            ),
-          )),
+            )
+                : PopupMenuButton<String>(
+              offset: const Offset(0, 30),
+              onSelected: (value) {
+                controller.gameType.value = value;
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: 'Male Only', child: Text('Male Only')),
+                PopupMenuItem(value: 'Female Only', child: Text('Female Only')),
+                PopupMenuItem(value: 'Mixed Doubles', child: Text('Mixed Doubles')),
+              ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    currentValue,
+                    style: Get.textTheme.headlineMedium?.copyWith(
+                      color: AppColors.blackColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Icon(Icons.arrow_drop_down,
+                      color: AppColors.blackColor, size: 18),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
   }
+
 
   Widget gameDetails(
     String title,
@@ -439,7 +410,7 @@ class DetailsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: image.isEmpty ? AppColors.primaryColor.withValues(alpha: .1) : Colors.white,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primaryColor),
+              border: Border.all(color:image.isNotEmpty? AppColors.primaryColor:Colors.transparent),
             ),
             child: image.isNotEmpty
                 ? ClipOval(
@@ -494,7 +465,8 @@ class DetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 6),
-            height: 16,
+            height: 18,
+            width: 35,
             child: Text(
               skillLevel,
               style: Get.textTheme.bodyLarge?.copyWith(
@@ -557,9 +529,7 @@ class DetailsScreen extends StatelessWidget {
                                       controller.teamA[index]['name'] ?? "Unknown",
                                       true,
                                       controller.teamA[index]['image'] ?? "",
-                                      controller.teamA[index]['level'] ??
-                                          controller.teamA[index]['levelLabel'] ??
-                                          "",
+                                      controller.teamA[index]['level'] ?? "",
                                       lastName: controller.teamA[index]['lastName'],
                                     )
                                   : GestureDetector(
@@ -603,12 +573,14 @@ class DetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  SizedBox(width: 10,),
                   // Divider
                   Container(
                     height: Get.height * 0.1,
                     width: 1,
                     color: AppColors.blackColor.withAlpha(30),
                   ),
+                  SizedBox(width: 10,),
                   // Team B Players
                   Expanded(
                     child: SizedBox(
@@ -629,9 +601,7 @@ class DetailsScreen extends StatelessWidget {
                                       controller.teamB[index]['name'] ?? "Unknown",
                                       true,
                                       controller.teamB[index]['image'] ?? "",
-                                      controller.teamB[index]['level'] ??
-                                          controller.teamB[index]['levelLabel'] ??
-                                          "",
+                                      controller.teamB[index]['level'] ?? "",
                                       lastName: controller.teamB[index]['lastName'],
                                     )
                                   : GestureDetector(
@@ -700,6 +670,53 @@ class DetailsScreen extends StatelessWidget {
       ),
     );
   }
+  String _getEndRegistrationTime() {
+    final args = Get.arguments;
+    final bool fromOpenMatch = args is Map && args['fromOpenMatch'] == true;
+    
+    String timeString = "";
+    
+    if (fromOpenMatch) {
+      // From open match - use matchTime
+      final matchTime = controller.localMatchData['matchTime'];
+      if (matchTime is List && matchTime.isNotEmpty) {
+        timeString = matchTime.first?.toString() ?? "";
+      } else if (matchTime != null) {
+        timeString = matchTime.toString();
+      }
+    } else {
+      // From create open match - use slot time
+      final slots = controller.localMatchData['slot'] as List?;
+      if (slots != null && slots.isNotEmpty) {
+        final firstSlot = slots.first;
+        timeString = firstSlot.time?.toString() ?? "";
+      }
+    }
+    
+    if (timeString.isEmpty) return "Today at 10:00 PM";
+    
+    try {
+      // Normalize time format: "5 pm" -> "5:00 PM"
+      timeString = timeString.trim();
+      if (!timeString.contains(':')) {
+        final parts = timeString.split(' ');
+        if (parts.length == 2) {
+          timeString = '${parts[0]}:00 ${parts[1].toUpperCase()}';
+        }
+      }
+      
+      final format = DateFormat('h:mm a');
+      final time = format.parse(timeString);
+      final endRegistration = time.subtract(Duration(minutes: 15));
+      final formattedTime = format.format(endRegistration);
+      return "Today at $formattedTime";
+    } catch (e) {
+      print("Error parsing time: $e");
+    }
+    
+    return "Today at 10:00 PM";
+  }
+
   Widget information() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,12 +732,14 @@ class DetailsScreen extends StatelessWidget {
         ),
         ListTile(
           title: Text(
-            "Type of Court ( 2 court )",
+            "Type of Courts",
             style: Get.textTheme.bodyLarge,
           ),
           subtitle: Text(
-            "${controller.localMatchData['courtType']}",
-            style: Get.textTheme.headlineLarge,
+            controller.localMatchData['courtType'] is List 
+                ? (controller.localMatchData['courtType'] as List).join(', ')
+                : controller.localMatchData['courtType'].toString(),
+            style: Get.textTheme.bodyLarge,
           ),
         ),
         ListTile(
@@ -730,8 +749,8 @@ class DetailsScreen extends StatelessWidget {
           ),
           title: Text("End registration", style: Get.textTheme.bodyLarge),
           subtitle: Text(
-            "Today at 10:00 PM",
-            style: Get.textTheme.headlineLarge,
+            _getEndRegistrationTime(),
+            style: Get.textTheme.bodyLarge,
           ),
         ),
       ],
@@ -807,8 +826,9 @@ class DetailsScreen extends StatelessWidget {
 
 class BackgroundContainer extends StatelessWidget {
   final Widget child;
+  final String? imageUrl;
 
-  const BackgroundContainer({super.key, required this.child});
+  const BackgroundContainer({super.key, required this.child,this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -821,7 +841,16 @@ class BackgroundContainer extends StatelessWidget {
           Container(
             height: 200,
             width: Get.width,
-            decoration: const BoxDecoration(color: AppColors.primaryColor),
+            decoration: BoxDecoration(color: AppColors.primaryColor),
+            child: (imageUrl != null && imageUrl!.isNotEmpty)
+                ? CachedNetworkImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  LoadingWidget(color: AppColors.primaryColor),
+              errorWidget: (context, url, error) => Icon(Icons.image),
+            )
+                : Icon(Icons.image),
           ),
           Container(
             height: 200,
