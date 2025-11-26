@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
@@ -12,6 +14,7 @@ import 'package:padel_mobile/repositories/bookinghisory/booking_history_reposito
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import '../../repositories/home_repository/home_repository.dart';
+import '../../repositories/authentication_repository/sign_up_repository.dart';
 
 class HomeController extends GetxController {
   ProfileController profileController = Get.put(ProfileController());
@@ -20,19 +23,9 @@ class HomeController extends GetxController {
   final RxString selectedLocation = ''.obs;
   RxBool showLocationAndDate = false.obs;
   ScrollController scrollController = ScrollController();
-
-  final List<String> dummyLocations = [
-    'Delhi',
-    'Mumbai',
-    'Bangalore',
-    'Hyderabad',
-    'Chennai',
-    'Pune',
-    'Kolkata',
-    'Jaipur',
-    'Ahmedabad',
-    'Chandigarh',
-  ];
+  final SignUpRepository signUpRepository = SignUpRepository();
+  final RxList<String> locations = <String>[].obs;
+  RxBool isLoadingLocations = false.obs;
 
   // DATE -------------------------
   var selectedDate = DateTime
@@ -291,21 +284,77 @@ class HomeController extends GetxController {
     }
   }
 
-  void showLocationPicker(BuildContext context) async {
-    // Example: pick a location via a dialog
-    final result = await showDialog<String>(
-      context: context,
-      builder: (_) =>
-          SimpleDialog(
-            title: const Text('Select Location'),
-            children: dummyLocations
-                .map((location) =>
-                SimpleDialogOption(
-                  onPressed: () => Navigator.pop(context, location),
-                  child: Text(location),
-                ))
-                .toList(),
-          ),
+  Future<void> fetchLocations() async {
+    try {
+      isLoadingLocations.value = true;
+      final response = await signUpRepository.getLocations();
+      if (response.status == true && response.data != null) {
+        locations.value = response.data!.map((location) => location.name ?? '').where((name) => name.isNotEmpty).toList();
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error fetching locations: $e", level: LogLevel.error);
+    } finally {
+      isLoadingLocations.value = false;
+    }
+  }
+
+  void showLocationPicker() async { // Context is no longer needed in arguments
+    if (locations.isEmpty && !isLoadingLocations.value) {
+      await fetchLocations();
+    }
+    final scrollController = ScrollController();
+    // Get.dialog does not require a BuildContext
+    final result = await Get.dialog<String>(
+      AlertDialog(
+        title: Text('Select Location', style: Get.textTheme.titleMedium!.copyWith(color: AppColors.primaryColor)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Obx(() {
+            // Scroll after the first frame
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final index = locations.indexOf(selectedLocation.value);
+              if (index != -1 && scrollController.hasClients) {
+                scrollController.animateTo(
+                  index * 35, // Approx height of each ListTile
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              }
+            });
+
+            return isLoadingLocations.value
+                ? const Center(
+              child: LoadingWidget(color: AppColors.primaryColor),
+            )
+                : ListView.builder(
+              controller: scrollController,
+              shrinkWrap: true,
+              itemCount: locations.length,
+              itemBuilder: (_, index) {
+                final location = locations[index];
+                final isSelected = selectedLocation.value == location;
+
+                return ListTile(
+                  dense: true,
+                  tileColor: isSelected
+                      ? AppColors.primaryColor.withValues(alpha: 0.1)
+                      : null,
+                  title: Text(
+                    location,
+                    style: TextStyle(
+                      fontWeight:
+                      isSelected ? FontWeight.bold : FontWeight.normal,
+                      color:
+                      isSelected ? AppColors.primaryColor : null,
+                    ),
+                  ),
+                  onTap: () => Get.back(result: location),
+                );
+              },
+            );
+          }),
+        ),
+      ),
     );
 
     if (result != null) selectedLocation.value = result;
@@ -331,6 +380,7 @@ class HomeController extends GetxController {
       await Future.wait([
         fetchClubs(isRefresh: true),
         fetchBookings(),
+        fetchLocations(),
       ]);
     });
   }

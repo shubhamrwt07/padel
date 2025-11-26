@@ -78,21 +78,33 @@ class Data {
 class RegisterClubId {
   String? sId;
   String? clubName;
+  String? address;
+  String? city;
+  String? zipCode;
   List<String>? courtType;
+  List<String>? courtImage;
 
-  RegisterClubId({this.sId, this.clubName, this.courtType});
+  RegisterClubId({this.sId, this.clubName, this.courtType,this.courtImage,this.address,this.city,this.zipCode});
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubName = json['clubName'];
+    address = json['address'];
+    city = json['city'];
+    zipCode = json['zipCode'];
     courtType = json['courtType'].cast<String>();
+    courtImage = json['courtImage'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
     data['clubName'] = this.clubName;
+    data['address'] = this.address;
+    data['city'] = this.city;
+    data['zipCode'] = this.zipCode;
     data['courtType'] = this.courtType;
+    data['courtImage'] = this.courtImage;
     return data;
   }
 }

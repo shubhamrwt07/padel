@@ -222,7 +222,7 @@ class AddPlayerScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: AppColors.labelBlackColor,
           ),
-        ).paddingOnly(top: Get.height * .02),
+        ).paddingOnly(top: Get.height * .01),
         PrimaryTextField(
           hintText: "Enter $label",
           controller: controller,

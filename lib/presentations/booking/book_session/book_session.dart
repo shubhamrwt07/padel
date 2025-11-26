@@ -11,12 +11,10 @@ class BookSession extends StatelessWidget {
   final BookSessionController controller = Get.put(BookSessionController());
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      bottomNavigationBar: _bottomButton(context),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16,right: 16,bottom: 0),
+    return Stack(  // Change from Scaffold to Stack
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80), // bottom padding for button
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -32,7 +30,13 @@ class BookSession extends StatelessWidget {
             ],
           ),
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: _bottomButton(context),
+        ),
+      ],
     );
   }
   /// 📅 Date Picker - Fixed spacing and toggle functionality
@@ -54,7 +58,7 @@ class BookSession extends StatelessWidget {
               offset: const Offset(0, -25),
               child: Container(
                 width: 30,
-                height: Get.height * 0.068,
+                height: Get.height * 0.069,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),

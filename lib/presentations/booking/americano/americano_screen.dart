@@ -10,144 +10,141 @@ class AmericanoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ongoing Section
-            const Text(
-              'Ongoing',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ongoing Section
+          const Text(
+            'Ongoing',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 12),
 
-            // First Ongoing Match
-            _buildMatchCard(
-              date: '23 June',
-              time: '9:00am',
-              type: 'T/C',
-              typeColor: Colors.green,
-              genderIcon: Icons.female,
-              genderText: 'Female Only',
-              playerCount: '12 Players',
-              actionText: 'View Score',
-              actionColor: Colors.blue,
-              playerAvatars: [
-                'https://i.pravatar.cc/40?img=1',
-                'https://i.pravatar.cc/40?img=2',
-                'https://i.pravatar.cc/40?img=3',
-                'https://i.pravatar.cc/40?img=4',
-              ],
-              moreCount: '+5',
+          // First Ongoing Match
+          _buildMatchCard(
+            date: '23 June',
+            time: '9:00am',
+            type: 'T/C',
+            typeColor: Colors.green,
+            genderIcon: Icons.female,
+            genderText: 'Female Only',
+            playerCount: '12 Players',
+            actionText: 'View Score',
+            actionColor: Colors.blue,
+            playerAvatars: [
+              'https://i.pravatar.cc/40?img=1',
+              'https://i.pravatar.cc/40?img=2',
+              'https://i.pravatar.cc/40?img=3',
+              'https://i.pravatar.cc/40?img=4',
+            ],
+            moreCount: '+5',
+          ),
+
+          const SizedBox(height: 12),
+
+          // Second Ongoing Match
+          _buildMatchCard(
+            date: '23 June',
+            time: '9:00am',
+            type: 'C/D',
+            typeColor: Colors.green,
+            genderIcon: Icons.female,
+            genderText: 'Female Only',
+            playerCount: '12 Players',
+            actionText: 'View Score',
+            actionColor: Colors.blue,
+            playerAvatars: [
+              'https://i.pravatar.cc/40?img=5',
+              'https://i.pravatar.cc/40?img=6',
+              'https://i.pravatar.cc/40?img=7',
+              'https://i.pravatar.cc/40?img=8',
+            ],
+            moreCount: '+5',
+          ),
+
+          const SizedBox(height: 24),
+
+          // Upcoming Section
+          const Text(
+            'Upcoming',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
+          ),
+          const SizedBox(height: 12),
 
-            const SizedBox(height: 12),
+          // First Upcoming Match
+          _buildMatchCard(
+            date: '24 June',
+            time: '9:00am',
+            type: 'A/B',
+            typeColor: Colors.orange,
+            genderIcon: Icons.male,
+            genderText: 'Male only',
+            playerCount: 'Full',
+            playerCountColor: Colors.red,
+            actionText: null,
+            playerAvatars: [
+              'https://i.pravatar.cc/40?img=9',
+              'https://i.pravatar.cc/40?img=10',
+              'https://i.pravatar.cc/40?img=11',
+              'https://i.pravatar.cc/40?img=12',
+            ],
+            moreCount: '+5',
+          ),
 
-            // Second Ongoing Match
-            _buildMatchCard(
-              date: '23 June',
-              time: '9:00am',
-              type: 'C/D',
-              typeColor: Colors.green,
-              genderIcon: Icons.female,
-              genderText: 'Female Only',
-              playerCount: '12 Players',
-              actionText: 'View Score',
-              actionColor: Colors.blue,
-              playerAvatars: [
-                'https://i.pravatar.cc/40?img=5',
-                'https://i.pravatar.cc/40?img=6',
-                'https://i.pravatar.cc/40?img=7',
-                'https://i.pravatar.cc/40?img=8',
-              ],
-              moreCount: '+5',
-            ),
+          const SizedBox(height: 12),
 
-            const SizedBox(height: 24),
+          // Second Upcoming Match
+          _buildMatchCard(
+            date: '25 June',
+            time: '9:00am',
+            type: 'B/C',
+            typeColor: Colors.green,
+            genderIcon: Icons.people,
+            genderText: 'Mixed',
+            playerCount: '12 Players',
+            actionText: 'Join Now',
+            actionColor: Colors.blue,
+            playerAvatars: [
+              'https://i.pravatar.cc/40?img=13',
+              'https://i.pravatar.cc/40?img=14',
+              'https://i.pravatar.cc/40?img=15',
+              'https://i.pravatar.cc/40?img=16',
+            ],
+            moreCount: '+',
+          ),
 
-            // Upcoming Section
-            const Text(
-              'Upcoming',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-            // First Upcoming Match
-            _buildMatchCard(
-              date: '24 June',
-              time: '9:00am',
-              type: 'A/B',
-              typeColor: Colors.orange,
-              genderIcon: Icons.male,
-              genderText: 'Male only',
-              playerCount: 'Full',
-              playerCountColor: Colors.red,
-              actionText: null,
-              playerAvatars: [
-                'https://i.pravatar.cc/40?img=9',
-                'https://i.pravatar.cc/40?img=10',
-                'https://i.pravatar.cc/40?img=11',
-                'https://i.pravatar.cc/40?img=12',
-              ],
-              moreCount: '+5',
-            ),
-
-            const SizedBox(height: 12),
-
-            // Second Upcoming Match
-            _buildMatchCard(
-              date: '25 June',
-              time: '9:00am',
-              type: 'B/C',
-              typeColor: Colors.green,
-              genderIcon: Icons.people,
-              genderText: 'Mixed',
-              playerCount: '12 Players',
-              actionText: 'Join Now',
-              actionColor: Colors.blue,
-              playerAvatars: [
-                'https://i.pravatar.cc/40?img=13',
-                'https://i.pravatar.cc/40?img=14',
-                'https://i.pravatar.cc/40?img=15',
-                'https://i.pravatar.cc/40?img=16',
-              ],
-              moreCount: '+',
-            ),
-
-            const SizedBox(height: 12),
-
-            // ✅ Third Upcoming Match (Added)
-            _buildMatchCard(
-              date: '26 June',
-              time: '9:00am',
-              type: 'C/D',
-              typeColor: Colors.green,
-              genderIcon: Icons.female,
-              genderText: 'Female only',
-              playerCount: '12 Players',
-              actionText: 'Join Now',
-              actionColor: Colors.blue,
-              playerAvatars: [
-                'https://i.pravatar.cc/40?img=17',
-                'https://i.pravatar.cc/40?img=18',
-                'https://i.pravatar.cc/40?img=19',
-                'https://i.pravatar.cc/40?img=20',
-              ],
-              moreCount: '+',
-            ),
-          ],
-        ),
+          // ✅ Third Upcoming Match (Added)
+          _buildMatchCard(
+            date: '26 June',
+            time: '9:00am',
+            type: 'C/D',
+            typeColor: Colors.green,
+            genderIcon: Icons.female,
+            genderText: 'Female only',
+            playerCount: '12 Players',
+            actionText: 'Join Now',
+            actionColor: Colors.blue,
+            playerAvatars: [
+              'https://i.pravatar.cc/40?img=17',
+              'https://i.pravatar.cc/40?img=18',
+              'https://i.pravatar.cc/40?img=19',
+              'https://i.pravatar.cc/40?img=20',
+            ],
+            moreCount: '+',
+          ),
+        ],
       ),
     );
   }

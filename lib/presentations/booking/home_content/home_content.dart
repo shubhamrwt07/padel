@@ -84,48 +84,38 @@ class HomeContent extends StatelessWidget {
                 },
               ),
             ).paddingOnly(bottom: Get.height * 0.02),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                color: Colors.transparent,
-                height: Get.height * 0.1,
-                width: Get.width * 0.7,
-                child: ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: controller.homeOptionsList.length,
-                  itemBuilder: (context, index) {
-                    return Obx(() {
+            Container(
+              height: Get.height * 0.1,
+              width: double.infinity,
+              color: Colors.transparent,
+              child: Transform.translate(
+                offset: Offset(10, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    controller.homeOptionsList.length,
+                        (index) => Obx(() {
                       final item = controller.homeOptionsList[index];
-                      final isSelected =
-                          controller.selectedIndex.value == index;
+                      final isSelected = controller.selectedIndex.value == index;
 
                       final Widget iconWidget = item['isSvg']
                           ? SvgPicture.asset(
-                              item['image'],
-                              height: 24,
-                              width: 24,
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.labelBlackColor,
-                            )
+                        item['image'],
+                        height: 24,
+                        width: 24,
+                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
+                      )
                           : Icon(
-                              item['icon'],
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.labelBlackColor,
-                            );
+                        item['icon'],
+                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
+                      );
 
                       return GestureDetector(
                         onTap: () {
                           if (index != 1) {
                             controller.selectedIndex.value = index;
-                            if (index != 2) {
-                              controller.isShowAllReviews.value = false;
-                            }
-                            if (index != 3) {
-                              controller.isShowAllPhotos.value = false;
-                            }
+                            if (index != 2) controller.isShowAllReviews.value = false;
+                            if (index != 3) controller.isShowAllPhotos.value = false;
                           }
                         },
                         child: homeOptionItem(
@@ -133,13 +123,14 @@ class HomeContent extends StatelessWidget {
                           iconWidget: iconWidget,
                           label: item['label'],
                           isSelected: isSelected,
-                        ),
+                        ).paddingOnly(right: 32), // small spacing only
                       );
-                    });
-                  },
+                    }),
+                  ),
                 ),
               ),
             ),
+
             Obx(
               () => AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -287,7 +278,7 @@ class HomeContent extends StatelessWidget {
           ),
         ),
       ],
-    ).paddingOnly(right: Get.width * 0.07);
+    );
   }
 
   Widget getSelectedView(int index) {

@@ -9,103 +9,113 @@ class OpenMatchesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: Container(
-        height: Get.height * .09,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: CustomButton(
-          width: Get.width * 0.9,
-          child: Text(
-            "Create an Open Match",
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
-          ).paddingOnly(right: Get.width * 0.14),
-          onTap: () {
-            final booking = Get.put(BookSessionController());
-            Get.toNamed(RoutesName.createOpenMatch, arguments: {"id": booking.argument});
-          },
-        ).paddingOnly(bottom: 0),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDatePicker(),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.05),
-                child: _buildSlotHeader(context),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.05),
-                child: _buildTimeTabs(),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.04),
-                child: _buildTimeSlots(),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.04),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Available Matches", style: Get.textTheme.headlineMedium),
-                    GestureDetector(
-                      onTap: () => Get.toNamed(RoutesName.allOpenMatch, arguments: {"club": controller.argument}),
-                      child: Container(
-                        color: Colors.transparent,
-                        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                        alignment: Alignment.center,
-                        child: Text("View all", style: Get.textTheme.labelMedium!.copyWith(color: AppColors.primaryColor)),
-                      ),
-                    ),
-                  ],
-                ).paddingOnly(bottom: 10,top: 15),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.04),
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return Center(child: buildMatchCardShimmer());
-                  }
-                  final matches = controller.matchesBySelection.value;
-                  if (matches == null || (matches.data?.isEmpty ?? true)) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.event_busy_outlined, size: 50, color: AppColors.darkGrey),
-                          Text(
-                            'No matches available for this time',
-                            style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
-                            textAlign: TextAlign.center,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDatePicker(),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.05),
+                    child: _buildSlotHeader(context),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.05),
+                    child: _buildTimeTabs(),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.04),
+                    child: _buildTimeSlots(),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.04),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Available Matches", style: Get.textTheme.headlineMedium),
+                        GestureDetector(
+                          onTap: () => Get.toNamed(RoutesName.allOpenMatch, arguments: {"club": controller.argument}),
+                          child: Container(
+                            color: Colors.transparent,
+                            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                            alignment: Alignment.center,
+                            child: Text("View all", style: Get.textTheme.labelMedium!.copyWith(color: AppColors.primaryColor)),
                           ),
-                        ],
-                      ).paddingOnly(top: Get.height * 0.1),
-                    );
-                  }
-                  return Column(
-                    children: matches.data!.map((m) => _buildMatchCardFromData(context, m)).toList(),
-                  );
-                }),
+                        ),
+                      ],
+                    ).paddingOnly(bottom: 10,top: 15),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.04),
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return Center(child: buildMatchCardShimmer());
+                      }
+                      final matches = controller.matchesBySelection.value;
+                      if (matches == null || (matches.data?.isEmpty ?? true)) {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.event_busy_outlined, size: 50, color: AppColors.darkGrey),
+                              Text(
+                                'No matches available for this time',
+                                style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ).paddingOnly(top: Get.height * 0.1),
+                        );
+                      }
+                      return Column(
+                        children: matches.data!.map((m) => _buildMatchCardFromData(context, m)).toList(),
+                      );
+                    }),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: _bottomButton(context),
+        )
+      ],
     );
   }
-  /// --------------- DATE PICKER ---------------
+  ///---------------- BOTTOM BUTTON --------------
+  Widget _bottomButton(BuildContext context){
+    return Container(
+      height: Get.height * .09,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: CustomButton(
+        width: Get.width * 0.9,
+        child: Text(
+          "Create an Open Match",
+          style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
+        ).paddingOnly(right: Get.width * 0.14),
+        onTap: () {
+          final booking = Get.put(BookSessionController());
+          Get.toNamed(RoutesName.createOpenMatch, arguments: {"id": booking.argument});
+        },
+      ).paddingOnly(bottom: 0),
+    );
+  }
   /// --------------- DATE PICKER ---------------
   Widget _buildDatePicker() {
     return Column(
@@ -122,7 +132,7 @@ class OpenMatchesScreen extends StatelessWidget {
               children: [
                 Container(
                   width: 30,
-                  height: Get.height * 0.068,
+                  height: Get.height * 0.069,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),

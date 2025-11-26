@@ -32,6 +32,7 @@ class PrimaryTextField extends StatelessWidget {
   final TextStyle? hintStyle;
   final EdgeInsetsGeometry? contentPadding;
   final TextCapitalization? textCapitalization;
+  final String? labelText;
   const PrimaryTextField({
     super.key,
     this.action,
@@ -59,7 +60,7 @@ class PrimaryTextField extends StatelessWidget {
     this.prefix,this.prefixIcon,
     this.scrollPadding, this.obscureText,
     this.hintStyle, this.contentPadding,
-    this.textCapitalization
+    this.textCapitalization,this.labelText
   });
 
   @override
@@ -97,6 +98,7 @@ class PrimaryTextField extends StatelessWidget {
         ),
         counterText: "",
         hintText: hintText,
+        labelText: labelText,
         hintStyle:hintStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
         border:  OutlineInputBorder(
           borderSide: BorderSide(color: Colors.transparent,width: 2),

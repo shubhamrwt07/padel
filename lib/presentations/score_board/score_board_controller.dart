@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 
 class ScoreBoardController extends GetxController {
   RxList<Map<String, dynamic>> sets = <Map<String, dynamic>>[].obs;
-  RxInt expandedSetIndex = (-1).obs;
 
   RxInt teamAWins = 0.obs;
   RxInt teamBWins = 0.obs;
@@ -16,40 +15,21 @@ class ScoreBoardController extends GetxController {
 
   final _uuid = Uuid();
 
-  @override
-  void onInit() async {
-    super.onInit();
-    bookingId.value = Get.arguments["bookingId"];
-    CustomLogger.logMessage(msg: "BOOKING ID-> ${bookingId.value}", level: LogLevel.info);
-    await fetchScoreBoard();
-
-    expandedSetIndex.value = -1;
-  }
-
-  Future<void> addSet() async {
-    if (sets.length < 10) {
-      await createSets(_nextAvailableSetNumber());
-    } else {
-      SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 10 sets only");
-    }
-  }
+  ///Capitalize First Word------------------------------------------------------
   String capitalizeFirstWord(String text) {
     if (text.isEmpty) return text;
     List<String> words = text.split(" ");
     String first = words.first;
     return first[0].toUpperCase() + first.substring(1).toLowerCase();
   }
-  void toggleSetExpansion(int index) {
-    expandedSetIndex.value = (expandedSetIndex.value == index) ? -1 : index;
-  }
 
+  ///Get Score Board Api--------------------------------------------------------
   RxList<Map<String, dynamic>> teams = <Map<String, dynamic>>[].obs;
   var bookingId = ''.obs;
   var scoreboardId = ''.obs;
   ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
   final isLoading = true.obs;
   final isAddingSet = false.obs;
-
   Future<void> fetchScoreBoard({bool showLoader = true}) async {
     if (showLoader) {
       isLoading.value = true;
@@ -216,6 +196,7 @@ class ScoreBoardController extends GetxController {
     }
   }
 
+  ///Remove Sets Api------------------------------------------------------------
   Future<void> removeSetsFromAPI(int setNumber) async {
     // 🔥 FIXED: Store the removed set data for potential rollback
     final removedSet = sets.firstWhere(
@@ -259,6 +240,14 @@ class ScoreBoardController extends GetxController {
     }
   }
 
+  ///Add Set--------------------------------------------------------------------
+  Future<void> addSet() async {
+    if (sets.length < 10) {
+      await createSets(_nextAvailableSetNumber());
+    } else {
+      SnackBarUtils.showInfoSnackBar("Limit Reached\nYou can add up to 10 sets only");
+    }
+  }
   int _nextAvailableSetNumber() {
     final existingNumbers = sets
         .map((s) => s["setNumber"])
@@ -270,5 +259,46 @@ class ScoreBoardController extends GetxController {
       candidate++;
     }
     return candidate;
+  }
+
+  @override
+  void onInit() async {
+    super.onInit();
+    bookingId.value = Get.arguments["bookingId"];
+    CustomLogger.logMessage(msg: "BOOKING ID-> ${bookingId.value}", level: LogLevel.info);
+    await fetchScoreBoard();
+  }
+
+  ///Add Score------------------------------------------------------------------
+  Future<void> addScore(int setNumber, int teamAScore, int teamBScore) async {
+    try {
+      String winner = "None";
+      if (teamAScore > teamBScore) {
+        winner = "Team A";
+      } else if (teamBScore > teamAScore) {
+        winner = "Team B";
+      }
+
+      final body = {
+        "scoreboardId": scoreboardId.value,
+        "sets": [
+          {
+            "setNumber": setNumber,
+            "teamAScore": teamAScore,
+            "teamBScore": teamBScore,
+            "winner": winner
+          }
+        ]
+      };
+      
+      final response = await repository.updateScoreBoard(data: body);
+      if (response.success == true) {
+        CustomLogger.logMessage(msg: "Score Added Successfully", level: LogLevel.info);
+        await fetchScoreBoard(showLoader: false);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error-> $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to add score. Please try again.");
+    }
   }
 }
