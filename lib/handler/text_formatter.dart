@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class EmojiFilteringTextInputFormatter extends TextInputFormatter {
   @override
@@ -86,4 +87,23 @@ extension StringExtension on String {
   String l = lastName.trim().isNotEmpty ? lastName.trim()[0].toUpperCase() : "";
 
   return "$f$l";
+  }
+
+  ///Price Format--------------------------------------------------------
+String formatAmount(dynamic amount, {String? currency}) {
+  final raw = (amount ?? '').toString();
+  final cleaned = raw.replaceAll(RegExp(r'[^\d\.-]'), '');
+  final value = num.tryParse(cleaned);
+  if (value == null) return raw;
+
+  String formatted;
+  if (value >= 100000) {
+    // Compact (e.g. 100K, 1M)
+    formatted = NumberFormat.compact(locale: 'en_IN').format(value);
+  } else {
+    // Normal with commas
+    formatted = NumberFormat('#,##0', 'en_IN').format(value);
+  }
+
+  return currency != null ? '$currency $formatted' : formatted;
 }

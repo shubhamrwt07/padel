@@ -29,28 +29,43 @@ class SupportScreen extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.email_outlined, color: AppColors.labelBlackColor),
-              Text(
-                "Email",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.labelBlackColor,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Email",
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.labelBlackColor,
+                    ),
+                  ),
+                  SelectableText(
+                    "hello@support.app.com",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ).paddingOnly(left: 10),
             ],
           ),
+
           Row(
             children: [
-              Icon(
-                CupertinoIcons.phone,
-                // Example of a Cupertino-style caption/chat icon
-                color: AppColors.labelBlackColor,
-              ),
-              Text(
-                "Phone Number",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.labelBlackColor,
-                ),
+              Icon(CupertinoIcons.phone, color: AppColors.labelBlackColor),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Phone Number",
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.labelBlackColor,
+                    ),
+                  ),
+                  SelectableText(
+                    "9115559606",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ).paddingOnly(left: 10),
             ],
           ).paddingOnly(top: 20),

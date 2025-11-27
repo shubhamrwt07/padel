@@ -7,7 +7,7 @@ class ScoreBoardController extends GetxController {
 
   RxInt teamAWins = 0.obs;
   RxInt teamBWins = 0.obs;
-  RxString winner = "None".obs;
+  RxString winner = "".obs;
   RxString matchDate = "".obs;
   RxString matchTime = "".obs;
   RxString clubName = "".obs;

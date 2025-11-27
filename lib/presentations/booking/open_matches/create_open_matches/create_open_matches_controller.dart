@@ -277,12 +277,8 @@ class CreateOpenMatchesController extends GetxController {
       selectedSlotsWithCourtInfo.remove(compositeKey);
     } else {
       // CHECK: Prevent multi-date selection
-      // If there are existing selections, check if they're from a different date
       if (multiDateSelections.isNotEmpty) {
-        // Get the first existing selection's date
         final firstSelectionDate = multiDateSelections.values.first['date'] as String;
-
-        // If trying to select from a different date, show error and return
         if (firstSelectionDate != dateString) {
           Get.snackbar(
             "Single Date Selection Only",
@@ -296,6 +292,14 @@ class CreateOpenMatchesController extends GetxController {
         }
       }
 
+      // CHECK: Prevent same time slot selection across different courts
+      final slotTime = slot.time;
+      final isTimeConflict = _hasTimeConflictAcrossCourts(slotTime, resolvedCourtId, dateString);
+      if (isTimeConflict) {
+        SnackBarUtils.showErrorSnackBar("This time slot is already selected in another court");
+        return;
+      }
+
       // Enforce consecutiveness for selections within the same date and court
       final isAllowed = _isConsecutiveSelectionAllowed(
         resolvedCourtId,
@@ -304,7 +308,6 @@ class CreateOpenMatchesController extends GetxController {
       );
       if (!isAllowed) {
         SnackBarUtils.showErrorSnackBar("Please Select Consecutive Slots");
-
         return;
       }
 
@@ -333,6 +336,26 @@ class CreateOpenMatchesController extends GetxController {
 
     log("Selected ${multiDateSelections.length} slots for date: $dateString, Total: ₹${totalAmount.value}");
   }
+  // Check if the same time slot is already selected in a different court
+  bool _hasTimeConflictAcrossCourts(String? slotTime, String currentCourtId, String dateString) {
+    if (slotTime == null || slotTime.isEmpty) return false;
+    
+    for (final entry in multiDateSelections.entries) {
+      final selection = entry.value;
+      final existingDate = selection['date'] as String;
+      final existingCourtId = selection['courtId'] as String;
+      final existingSlot = selection['slot'] as Slots;
+      
+      // Check if same date, different court, and same time
+      if (existingDate == dateString && 
+          existingCourtId != currentCourtId && 
+          existingSlot.time == slotTime) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Validate that with the candidate slot included, all selected slots
   // for a given (date, court) form a contiguous block in the court's
   // base slot list (post availability filtering but pre time-of-day filter).

@@ -203,95 +203,99 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                       final dayName = DateFormat('E').format(date);
                       final dateString =
                           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                      final dateSelections =
-                          controller.getSelectionsByDate()[dateString] ?? [];
+                      
                       return GestureDetector(
                         onTap: onTap,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          child: SizedBox(
-                            height: 60,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  height: 60,
-                                  width: Get.width * 0.11,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: isSelected
-                                        ? Colors.black
-                                        : dateSelections.isNotEmpty
-                                        ? AppColors.primaryColor.withValues(alpha: 0.1)
-                                        : AppColors.playerCardBackgroundColor,
-                                    border: Border.all(
+                        child: Obx(() {
+                          final dateSelections =
+                              controller.getSelectionsByDate()[dateString] ?? [];
+                          
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            child: SizedBox(
+                              height: 60,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    height: 60,
+                                    width: Get.width * 0.11,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
                                       color: isSelected
-                                          ? Colors.transparent
+                                          ? Colors.black
                                           : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor
-                                          : AppColors.blackColor.withAlpha(20),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "${date.day}",
-                                        style: Get.textTheme.titleMedium!.copyWith(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: isSelected
-                                              ? Colors.white
-                                              : dateSelections.isNotEmpty
-                                              ? AppColors.primaryColor
-                                              : AppColors.textColor,
-                                        ),
+                                          ? AppColors.primaryColor.withValues(alpha: 0.1)
+                                          : AppColors.playerCardBackgroundColor,
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? Colors.transparent
+                                            : dateSelections.isNotEmpty
+                                            ? AppColors.primaryColor
+                                            : AppColors.blackColor.withAlpha(20),
                                       ),
-                                      Transform.translate(offset: Offset(0, -2),
-                                        child: Text(
-                                          dayName,
-                                          style: Get.textTheme.bodySmall!.copyWith(
-                                            fontSize: 11,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "${date.day}",
+                                          style: Get.textTheme.titleMedium!.copyWith(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
                                             color: isSelected
                                                 ? Colors.white
                                                 : dateSelections.isNotEmpty
                                                 ? AppColors.primaryColor
-                                                : Colors.black,
+                                                : AppColors.textColor,
+                                          ),
+                                        ),
+                                        Transform.translate(offset: Offset(0, -2),
+                                          child: Text(
+                                            dayName,
+                                            style: Get.textTheme.bodySmall!.copyWith(
+                                              fontSize: 11,
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : dateSelections.isNotEmpty
+                                                  ? AppColors.primaryColor
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (dateSelections.isNotEmpty)
+                                    Positioned(
+                                      top: -2,
+                                      right: -6,
+                                      child: Container(
+                                        height: 16,
+                                        width: 16,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: isSelected
+                                              ? AppColors.secondaryColor
+                                              : AppColors.primaryColor,
+                                        ),
+                                        child: Text(
+                                          "${dateSelections.length}",
+                                          style: const TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                if (dateSelections.isNotEmpty)
-                                  Positioned(
-                                    top: -2,
-                                    right: -6,
-                                    child: Container(
-                                      height: 16,
-                                      width: 16,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isSelected
-                                            ? AppColors.secondaryColor
-                                            : AppColors.primaryColor,
-                                      ),
-                                      child: Text(
-                                        "${dateSelections.length}",
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       );
                     },
                     onDateChange: (date) async {
@@ -389,6 +393,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   }
 
   Future<void> _openSelectedSlotsBottomSheet(BuildContext context) async {
+    if (Get.isSnackbarOpen) return;
     if (controller.getTotalSelectionsCount() == 0) return;
     if (controller.isBottomSheetOpen.value) return;
 
@@ -1068,27 +1073,27 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Obx(() {
-                      final courtId = courtData.sId ?? '';
-                      final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
-                      return selectedCount > 0
-                          ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondaryColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '$selectedCount selected',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                          : const SizedBox.shrink();
-                    }),
+                    // Obx(() {
+                    //   final courtId = courtData.sId ?? '';
+                    //   final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
+                    //   return selectedCount > 0
+                    //       ? Container(
+                    //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //     decoration: BoxDecoration(
+                    //       color: AppColors.secondaryColor,
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //     child: Text(
+                    //       '$selectedCount selected',
+                    //       style: const TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 12,
+                    //         fontWeight: FontWeight.w500,
+                    //       ),
+                    //     ),
+                    //   )
+                    //       : const SizedBox.shrink();
+                    // }),
                   ],
                 ),
                 const SizedBox(height: 4),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/packages/packages_controller.dart';
 class PackagesUi extends GetView<PackagesController> {
   const PackagesUi({super.key});
@@ -99,7 +100,7 @@ class PackagesUi extends GetView<PackagesController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          p.price,
+                          "₹ ${formatAmount(p.price)}",
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,

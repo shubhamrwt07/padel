@@ -3,7 +3,7 @@ import 'package:padel_mobile/data/request_models/create_review_model.dart';
 import 'package:padel_mobile/data/response_models/get_review_model.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/repositories/review_repo/review_repository.dart';
-import '../../../data/request_models/home_models/get_club_name_model.dart';
+import '../../../data/request_models/home_models/get_club_name_model.dart' hide Data;
 
 class HomeContentController extends GetxController{
   var selectedIndex = 0.obs;
@@ -20,6 +20,18 @@ class HomeContentController extends GetxController{
   final ReviewRepository repository = Get.put(ReviewRepository());
   var reviewResponse = Rxn<GetReviewModel>();
   var isLoading = false.obs;
+  
+  // Get reviews based on show all state
+  List<Reviews> get displayedReviews {
+    if (reviewResponse.value?.data == null) return [];
+    final clubData = reviewResponse.value!.data!.firstWhere(
+      (data) => data.registerClubId == argument.id,
+      orElse: () => Data(),
+    );
+    if (clubData.reviews == null) return [];
+    final allReviews = clubData.reviews!;
+    return isShowAllReviews.value ? allReviews : allReviews.take(3).toList();
+  }
   Future<void> fetchReview()async{
     isLoading.value = true;
     try{

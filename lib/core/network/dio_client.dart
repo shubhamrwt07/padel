@@ -14,7 +14,7 @@ class DioClient {
     BaseOptions(
       responseType: ResponseType.json,
       sendTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 50),
     ),
   ) {
     _dio.interceptors.addAll([

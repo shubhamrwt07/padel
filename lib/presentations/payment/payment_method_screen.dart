@@ -7,6 +7,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 
@@ -97,7 +98,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                   ),
                 ).paddingOnly(left: 30, right: 5),
                 Text(
-                  cartController.totalPrice.value.toString(),
+                  formatAmount(cartController.totalPrice.value.toString()),
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     color: AppColors.whiteColor,
                     fontWeight: FontWeight.w600,

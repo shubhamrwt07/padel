@@ -1,11 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:share_plus/share_plus.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../cart/cart_controller.dart';
 import 'americano/americano_screen.dart';
 import 'open_matches/open_match_screen.dart';
@@ -13,99 +6,6 @@ import 'widgets/booking_exports.dart';
 
 class BookingScreen extends GetView<BookingController> {
   const BookingScreen({super.key});
-
-  /// Try getting image file from cache or download if not available
-  // Future<File?> _getCachedOrDownloadImage(String imageUrl) async {
-  //   try {
-  //     final cacheManager = DefaultCacheManager();
-  //     final fileInfo = await cacheManager.getFileFromCache(imageUrl);
-  //
-  //     if (fileInfo != null && await fileInfo.file.exists()) {
-  //       return fileInfo.file;
-  //     }
-  //
-  //     final response = await http.get(Uri.parse(imageUrl));
-  //     if (response.statusCode == 200) {
-  //       final file = await cacheManager.putFile(
-  //         imageUrl,
-  //         response.bodyBytes,
-  //         fileExtension: 'jpg',
-  //       );
-  //       return file;
-  //     }
-  //   } catch (e) {
-  //     debugPrint('Error getting cached/downloaded image: $e');
-  //   }
-  //   return null;
-  // }
-
-  /// Share image with text
-  Future<void> _shareWithImage() async {
-    try {
-      final imageUrl = controller.courtsData.value.courtImage?.isNotEmpty == true
-          ? controller.courtsData.value.courtImage!.first
-          : null;
-
-      Get.dialog(
-        const Center(child: LoadingWidget(color: AppColors.primaryColor,)),
-        barrierDismissible: false,
-      );
-
-      await Future.delayed(const Duration(milliseconds: 150));
-
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        final imagePath = await compute((url) async {
-          try {
-            final cacheManager = DefaultCacheManager();
-            final fileInfo = await cacheManager.getFileFromCache(url);
-
-            if (fileInfo != null && await fileInfo.file.exists()) {
-              return fileInfo.file.path;
-            }
-
-            final response = await http.get(Uri.parse(url));
-            if (response.statusCode == 200) {
-              final file = await cacheManager.putFile(
-                url,
-                response.bodyBytes,
-                fileExtension: 'jpg',
-              );
-              return file.path;
-            }
-          } catch (_) {}
-          return null;
-        }, imageUrl);
-
-        Get.back();
-
-        if (imagePath != null) {
-          await Share.shareXFiles(
-            [XFile(imagePath)],
-            text:
-            'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
-            subject: 'Padel Club Details',
-          );
-        } else {
-          _shareTextOnly();
-        }
-      } else {
-        Get.back();
-        _shareTextOnly();
-      }
-    } catch (e) {
-      debugPrint('Error sharing: $e');
-      if (Get.isDialogOpen ?? false) Get.back();
-      _shareTextOnly();
-    }
-  }
-
-  void _shareTextOnly() {
-    Share.share(
-      'Check out this amazing club: ${controller.courtsData.value.clubName ?? 'Unknown Club'}\n${controller.courtsData.value.address ?? ''}, ${controller.courtsData.value.city ?? ''}',
-      subject: 'Padel Club Details',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -312,7 +212,7 @@ class BookingScreen extends GetView<BookingController> {
                                 Row(
                                   children: [
                                     GestureDetector(
-                                      onTap: _shareWithImage,
+                                      onTap: controller.shareWithImage,
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(

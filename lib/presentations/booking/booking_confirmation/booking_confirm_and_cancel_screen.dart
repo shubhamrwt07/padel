@@ -1,5 +1,6 @@
 
 import 'package:padel_mobile/configs/components/success_image.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:intl/intl.dart';
 
@@ -134,7 +135,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
     }
 
     // ✅ Decide the message based on status
-    String bookingMessage = "Your Slots are Successfully booked.";
+    String bookingMessage = "Your Slot is Successfully booked.";
     if (booking.bookingStatus?.toLowerCase() == "in-progress") {
       bookingMessage = "You will receive your refund within 7 days.";
     } else if (booking.bookingStatus?.toLowerCase() == "refunded") {
@@ -210,7 +211,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
 
                   return Column(
                     children: [
-                      bookingDetailRow(context, "Time", st.time ?? "N/A"),
+                      bookingDetailRow(context, "Time", formatTimeSlot(st.time ?? "N/A") ),
                       // bookingDetailRow(context, "Amount", amount),
                       const SizedBox(height: 0),
                     ],
@@ -257,7 +258,7 @@ class BookingConfirmAndCancelScreen extends GetView<BookingConfirmAndCancelContr
            bookingDetailRow(
             context,
             "Total Payment",
-            "₹ ${(booking.totalAmount ?? 0).toStringAsFixed(2)}",
+            "₹ ${formatAmount((booking.totalAmount ?? 0).toStringAsFixed(2))}",
           ),
 
           // ✅ Show refunded amount if status is refunded

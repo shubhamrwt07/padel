@@ -11,6 +11,7 @@ import '../../configs/routes/routes_name.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../generated/assets.dart';
 import '../../handler/logger.dart';
+import '../../handler/text_formatter.dart';
 import '../booking/details_page/details_page.dart';
 import '../booking/details_page/details_page_controller.dart';
 import 'openmatch_booking_controller.dart';
@@ -69,22 +70,25 @@ class OpenMatchBookingScreen extends StatelessWidget {
             title: const Text("Open matches"),
             context: context,
           ),
-          body: Column(
+          body: controller.tabController != null ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               tabBar(controller.tabController!),
               const SizedBox(height: 4),
-              Expanded(
-                child: TabBarView(
-                  controller: controller.tabController!,
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    _buildMatchesTab(context, completed: false),
-                    _buildMatchesTab(context, completed: true),
-                  ],
+              if (controller.tabController != null)
+                Expanded(
+                  child: TabBarView(
+                    controller: controller.tabController!,
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      _buildMatchesTab(context, completed: false),
+                      _buildMatchesTab(context, completed: true),
+                    ],
+                  ),
                 ),
-              ),
             ],
+          ) : const Center(
+            child: LoadingWidget(color: AppColors.primaryColor),
           ),
         ),
       );
@@ -180,10 +184,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
               // Show list
               return NotificationListener<ScrollNotification>(
                 onNotification: (ScrollNotification scrollInfo) {
-                  if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                  if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
                       hasMoreDataState.value &&
                       !isLoadingMoreState.value) {
-                    controller.loadMoreData();
+                    String type = completed ? 'completed' : 'upcoming';
+                    controller.loadMoreData(type: type);
                   }
                   return false;
                 },
@@ -433,7 +438,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: "${formatDateOnly(match?.matchDate ?? "")} | $times",
+                  text: "${formatDateOnly(match?.matchDate ?? "")} | ${formatTimeSlot(times)}",
                   style: Get.textTheme.headlineSmall,
                 ),
               ],
@@ -855,7 +860,6 @@ class OpenMatchBookingScreen extends StatelessWidget {
     }
   }
 
-  String formatAmount(int amount) => amount.toString();
 
   String _extractLevelCode(String value) {
     if (value.isEmpty) return '-';

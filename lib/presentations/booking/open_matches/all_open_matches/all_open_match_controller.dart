@@ -36,6 +36,34 @@ class AllOpenMatchController extends GetxController {
     }
   }
 
+  bool isMatchTimePassed(String? matchDate, String? matchTime) {
+    if (matchDate == null || matchTime == null) return false;
+    try {
+      // Parse the date (ISO format)
+      final date = DateTime.parse(matchDate);
+      
+      // Parse time - handle format like "8 pm", "10 am"
+      final timeStr = matchTime.toLowerCase().trim();
+      int hour = 0;
+      
+      if (timeStr.contains('pm')) {
+        final hourStr = timeStr.replaceAll('pm', '').trim();
+        hour = int.parse(hourStr);
+        if (hour != 12) hour += 12; // Convert to 24-hour format
+      } else if (timeStr.contains('am')) {
+        final hourStr = timeStr.replaceAll('am', '').trim();
+        hour = int.parse(hourStr);
+        if (hour == 12) hour = 0; // 12 AM is 0 hours
+      }
+      
+      final matchDateTime = DateTime(date.year, date.month, date.day, hour, 0);
+      return DateTime.now().isAfter(matchDateTime);
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error parsing match time: $e", level: LogLevel.error);
+      return false;
+    }
+  }
+
   //Filter----------------------------------------------------------------------
   var selectedTiming = ''.obs;
   RxString selectedLevel = ''.obs;

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../configs/routes/routes_name.dart';
@@ -92,10 +93,18 @@ class BookingHistoryUi extends StatelessWidget {
       return RefreshIndicator(
         color: Colors.white,
         onRefresh: () async => controller.refreshBookings(),
-        child: ListView.builder(
-          controller: controller.scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: bookings.length + (controller.hasMoreData(type) ? 1 : 0),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 100 &&
+                controller.hasMoreData(type) &&
+                !controller.isLoadingMore.value) {
+              controller.loadMoreBookings(type);
+            }
+            return false;
+          },
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: bookings.length + (controller.hasMoreData(type) ? 1 : 0),
           itemBuilder: (context, index) {
             // Show loading indicator at the bottom
             if (index == bookings.length) {
@@ -136,6 +145,7 @@ class BookingHistoryUi extends StatelessWidget {
             );
           },
         ),
+      ),
       );
     });
   }
@@ -267,7 +277,7 @@ class BookingHistoryUi extends StatelessWidget {
           ).paddingOnly(left: 5),
           if (timeString.isNotEmpty)
             Text(
-              timeString,
+              formatTimeSlot(timeString),
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                 color: AppColors.blackColor,
               ),

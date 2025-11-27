@@ -160,7 +160,7 @@ class ProfileUi extends GetView<ProfileController> {
             ),
           ),Obx(
             ()=> ProfileRow(
-              icon: Image.asset(Assets.imagesOpenMatch, scale: 5,color: controller.selectedIndex.value == 4 ? AppColors.primaryColor:AppColors.blackColor,),
+              icon: Image.asset(Assets.imagesIcPadelIcon, scale: 5,color: controller.selectedIndex.value == 4 ? AppColors.primaryColor:AppColors.blackColor,),
               title: AppStrings.openMatch,
               isSelected:  controller.selectedIndex.value == 4,
               onTap: (){

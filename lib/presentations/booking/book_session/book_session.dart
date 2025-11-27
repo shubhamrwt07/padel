@@ -127,8 +127,6 @@ class BookSession extends StatelessWidget {
                     final dayName = DateFormat('E').format(date);
                     final dateString =
                         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                    final dateSelections =
-                        controller.getSelectionsByDate()[dateString] ?? [];
 
                     return GestureDetector(
                       onTap: () {
@@ -138,84 +136,89 @@ class BookSession extends StatelessWidget {
                         controller.focusedMonth.value =
                             DateTime(date.year, date.month, 1);
                       },
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            height: 60,
-                            width: Get.width * 0.11,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: isSelected
-                                  ? Colors.black
-                                  : dateSelections.isNotEmpty
-                                  ? AppColors.primaryColor
-                                  .withValues(alpha: 0.1)
-                                  : AppColors.playerCardBackgroundColor,
-                              border: Border.all(
+                      child: Obx(() {
+                        final dateSelections =
+                            controller.getSelectionsByDate()[dateString] ?? [];
+                        
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              height: 60,
+                              width: Get.width * 0.11,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
                                 color: isSelected
-                                    ? Colors.transparent
+                                    ? Colors.black
                                     : dateSelections.isNotEmpty
                                     ? AppColors.primaryColor
-                                    : AppColors.blackColor.withAlpha(10),
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "${date.day}",
-                                  style: Get.textTheme.titleMedium!.copyWith(
-                                    fontSize: 20,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : dateSelections.isNotEmpty
-                                        ? AppColors.primaryColor
-                                        : AppColors.textColor,
-                                  ),
+                                    .withValues(alpha: 0.1)
+                                    : AppColors.playerCardBackgroundColor,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.transparent
+                                      : dateSelections.isNotEmpty
+                                      ? AppColors.primaryColor
+                                      : AppColors.blackColor.withAlpha(10),
                                 ),
-                                Transform.translate(
-                                  offset: const Offset(0, -2),
-                                  child: Text(
-                                    dayName,
-                                    style: Get.textTheme.bodySmall!.copyWith(
-                                      fontSize: 11,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "${date.day}",
+                                    style: Get.textTheme.titleMedium!.copyWith(
+                                      fontSize: 20,
                                       color: isSelected
                                           ? Colors.white
                                           : dateSelections.isNotEmpty
                                           ? AppColors.primaryColor
-                                          : Colors.black,
+                                          : AppColors.textColor,
+                                    ),
+                                  ),
+                                  Transform.translate(
+                                    offset: const Offset(0, -2),
+                                    child: Text(
+                                      dayName,
+                                      style: Get.textTheme.bodySmall!.copyWith(
+                                        fontSize: 11,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : dateSelections.isNotEmpty
+                                            ? AppColors.primaryColor
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (dateSelections.isNotEmpty)
+                              Positioned(
+                                top: 0,
+                                right: -2,
+                                child: Container(
+                                  height: 16,
+                                  width: 16,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.secondaryColor,
+                                  ),
+                                  child: Text(
+                                    "${dateSelections.length}",
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          if (dateSelections.isNotEmpty)
-                            Positioned(
-                              top: 0,
-                              right: -3,
-                              child: Container(
-                                height: 16,
-                                width: 16,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                child: Text(
-                                  "${dateSelections.length}",
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
                               ),
-                            ),
-                        ],
-                      ),
+                          ],
+                        );
+                      }),
                     );
                   },
 
@@ -465,27 +468,27 @@ class BookSession extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Obx(() {
-                      final courtId = courtData.sId ?? '';
-                      final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
-                      return selectedCount > 0
-                          ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondaryColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '$selectedCount selected',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                          : const SizedBox.shrink();
-                    }),
+                    // Obx(() {
+                    //   final courtId = courtData.sId ?? '';
+                    //   final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
+                    //   return selectedCount > 0
+                    //       ? Container(
+                    //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //     decoration: BoxDecoration(
+                    //       color: AppColors.secondaryColor,
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //     child: Text(
+                    //       '$selectedCount selected',
+                    //       style: const TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 12,
+                    //         fontWeight: FontWeight.w500,
+                    //       ),
+                    //     ),
+                    //   )
+                    //       : const SizedBox.shrink();
+                    // }),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -668,6 +671,7 @@ class BookSession extends StatelessWidget {
       final double collapsedHeight = Get.height * .11;
       final double expandedHeight = Get.height * .13;
       void openSelectedSlotsBottomSheet(BuildContext context) {
+        if (Get.isSnackbarOpen) return;
         if (controller.multiDateSelections.isEmpty) return;
 
         showModalBottomSheet(
@@ -767,7 +771,7 @@ class BookSession extends StatelessWidget {
                                       ),
                                       const Spacer(),
                                       Text(
-                                        '₹ $totalAmount',
+                                        '₹ ${formatAmount(totalAmount)}',
                                         style: Get.textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.primaryColor,
@@ -1052,7 +1056,7 @@ class BookSession extends StatelessWidget {
                           ),
                           const Spacer(),
                           Text(
-                            "₹ ${controller.totalAmount.value}",
+                            "₹ ${formatAmount(controller.totalAmount.value)}",
                             style: Get.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: AppColors.primaryColor,

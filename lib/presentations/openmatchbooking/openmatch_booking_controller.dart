@@ -117,9 +117,7 @@ class OpenMatchBookingController extends GetxController
 
   // Reset pagination for specific type
   void resetPagination({String? type}) {
-    if (type == null) {
-      type = _tabController?.index == 0 ? 'upcoming' : 'completed';
-    }
+    type ??= _tabController?.index == 0 ? 'upcoming' : 'completed';
 
     if (type == 'upcoming') {
       upcomingCurrentPage.value = 1;
@@ -281,59 +279,26 @@ class OpenMatchBookingController extends GetxController
     }
   }
 
-  Future<void> loadMoreData() async {
-    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
+  Future<void> loadMoreData({String? type}) async {
+    type ??= _tabController?.index == 0 ? 'upcoming' : 'completed';
     final hasMore = type == 'upcoming' ? upcomingHasMoreData.value : completedHasMoreData.value;
-    final loading = type == 'upcoming' ? isLoadingMoreUpcoming.value : isLoadingMoreCompleted.value;
+    final isLoadingMore = type == 'upcoming' ? isLoadingMoreUpcoming.value : isLoadingMoreCompleted.value;
 
-    if (!hasMore || loading) {
-      CustomLogger.logMessage(
-        msg: "LoadMore skipped - hasMoreData: $hasMore, isLoadingMore: $loading",
-        level: LogLevel.debug,
-      );
-      return;
-    }
+    if (!hasMore || isLoadingMore) return;
 
-    // Increment the appropriate page counter
+    // Increment page number
     if (type == 'upcoming') {
       upcomingCurrentPage.value++;
     } else {
       completedCurrentPage.value++;
     }
 
-    CustomLogger.logMessage(
-      msg: "Loading more data for $type - Page: ${type == 'upcoming' ? upcomingCurrentPage.value : completedCurrentPage.value}",
-      level: LogLevel.info,
-    );
-
     await fetchOpenMatchesBooking(type: type, isLoadMore: true);
-  }
-
-  Future<void> retryFetch() async {
-    showNoInternetScreen.value = false;
-    final type = _tabController?.index == 0 ? 'upcoming' : 'completed';
-    resetPagination(type: type);
-
-    CustomLogger.logMessage(
-      msg: "Retrying fetch for $type",
-      level: LogLevel.info,
-    );
-
-    await fetchOpenMatchesBooking(type: type);
   }
 
   @override
   void onClose() {
-    CustomLogger.logMessage(
-      msg: "OpenMatchBookingController disposing",
-      level: LogLevel.info,
-    );
-
-    // if (_tabController != null) {
-    //   _tabController!.removeListener(_handleTabChange);
-    //   _tabController!.dispose();
-    //   _tabController = null;
-    // }
+    _tabController?.dispose();
     super.onClose();
   }
 }
