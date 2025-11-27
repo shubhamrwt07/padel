@@ -226,7 +226,7 @@ class CartScreen extends StatelessWidget {
                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    "₹ ${slot.amount ?? '0'}",
+                                                    "₹ ${formatAmount(slot.amount ?? '0')}",
                                                     style: Get.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500),
                                                   ).paddingOnly(right: 10),
                         
@@ -328,7 +328,7 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${cartController.totalPrice.value}",
+                      formatAmount(cartController.totalPrice.value),
                       style: Get
                           .textTheme
                           .headlineMedium!
@@ -368,7 +368,7 @@ class CartScreen extends StatelessWidget {
               ),
             ).paddingOnly(left: 30),
             Text(
-              cartController.totalPrice.value.toString(),
+              formatAmount(cartController.totalPrice.value.toString()),
               style: Get.textTheme.titleMedium!.copyWith(
                 color: AppColors.whiteColor,
                 fontWeight: FontWeight.w600,

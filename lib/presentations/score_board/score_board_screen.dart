@@ -948,16 +948,22 @@ class ScoreBoardScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              (set["teamAScore"] != null && set["teamAScore"] != 0)
-                                  ? Text(
-                                      "${set["teamAScore"]}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    )
-                                  : const Icon(Icons.remove, color: Colors.black54, size: 16),
+                              () {
+                                final teamAScore = set["teamAScore"] ?? 0;
+                                final teamBScore = set["teamBScore"] ?? 0;
+                                final bothZero = teamAScore == 0 && teamBScore == 0;
+                                
+                                return (set["teamAScore"] != null && !bothZero)
+                                    ? Text(
+                                        "${set["teamAScore"]}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                          fontSize: 16,
+                                        ),
+                                      )
+                                    : const Icon(Icons.remove, color: Colors.black54, size: 16);
+                              }(),
                               Text(
                                 "Set ${set["setNumber"] ?? index + 1}",
                                 style: const TextStyle(
@@ -966,16 +972,22 @@ class ScoreBoardScreen extends StatelessWidget {
                                   fontSize: 15,
                                 ),
                               ),
-                              (set["teamBScore"] != null && set["teamBScore"] != 0)
-                                  ? Text(
-                                      "${set["teamBScore"]}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    )
-                                  : const Icon(Icons.remove, color: Colors.black54, size: 16),
+                              () {
+                                final teamAScore = set["teamAScore"] ?? 0;
+                                final teamBScore = set["teamBScore"] ?? 0;
+                                final bothZero = teamAScore == 0 && teamBScore == 0;
+                                
+                                return (set["teamBScore"] != null && !bothZero)
+                                    ? Text(
+                                        "${set["teamBScore"]}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                          fontSize: 16,
+                                        ),
+                                      )
+                                    : const Icon(Icons.remove, color: Colors.black54, size: 16);
+                              }(),
                             ],
                           ),
                         ),

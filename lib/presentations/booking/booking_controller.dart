@@ -1,7 +1,11 @@
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:padel_mobile/data/request_models/home_models/get_club_name_model.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:share_plus/share_plus.dart';
 
 class BookingController extends GetxController with GetSingleTickerProviderStateMixin {
   DetailsController detailsController = Get.put(DetailsController());
@@ -47,6 +51,98 @@ class BookingController extends GetxController with GetSingleTickerProviderState
   // void setCartCount(int count) {
   //   cartCount.value = count;
   // }
+
+  /// Try getting image file from cache or download if not available
+  // Future<File?> _getCachedOrDownloadImage(String imageUrl) async {
+  //   try {
+  //     final cacheManager = DefaultCacheManager();
+  //     final fileInfo = await cacheManager.getFileFromCache(imageUrl);
+  //
+  //     if (fileInfo != null && await fileInfo.file.exists()) {
+  //       return fileInfo.file;
+  //     }
+  //
+  //     final response = await http.get(Uri.parse(imageUrl));
+  //     if (response.statusCode == 200) {
+  //       final file = await cacheManager.putFile(
+  //         imageUrl,
+  //         response.bodyBytes,
+  //         fileExtension: 'jpg',
+  //       );
+  //       return file;
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error getting cached/downloaded image: $e');
+  //   }
+  //   return null;
+  // }
+
+  /// Share image with text
+  Future<void> shareWithImage() async {
+    try {
+      final imageUrl = courtsData.value.courtImage?.isNotEmpty == true
+          ? courtsData.value.courtImage!.first
+          : null;
+
+      Get.dialog(
+        const Center(child: LoadingWidget(color: AppColors.primaryColor,)),
+        barrierDismissible: false,
+      );
+
+      await Future.delayed(const Duration(milliseconds: 150));
+
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        final imagePath = await compute((url) async {
+          try {
+            final cacheManager = DefaultCacheManager();
+            final fileInfo = await cacheManager.getFileFromCache(url);
+
+            if (fileInfo != null && await fileInfo.file.exists()) {
+              return fileInfo.file.path;
+            }
+
+            final response = await http.get(Uri.parse(url));
+            if (response.statusCode == 200) {
+              final file = await cacheManager.putFile(
+                url,
+                response.bodyBytes,
+                fileExtension: 'jpg',
+              );
+              return file.path;
+            }
+          } catch (_) {}
+          return null;
+        }, imageUrl);
+
+        Get.back();
+
+        if (imagePath != null) {
+          await Share.shareXFiles(
+            [XFile(imagePath)],
+            text:
+            'Check out this amazing club: ${courtsData.value.clubName ?? 'Unknown Club'}\n${courtsData.value.address ?? ''}, ${courtsData.value.city ?? ''}',
+            subject: 'Padel Club Details',
+          );
+        } else {
+          shareTextOnly();
+        }
+      } else {
+        Get.back();
+        shareTextOnly();
+      }
+    } catch (e) {
+      debugPrint('Error sharing: $e');
+      if (Get.isDialogOpen ?? false) Get.back();
+      shareTextOnly();
+    }
+  }
+
+  void shareTextOnly() {
+    Share.share(
+      'Check out this amazing club: ${courtsData.value.clubName ?? 'Unknown Club'}\n${courtsData.value.address ?? ''}, ${courtsData.value.city ?? ''}',
+      subject: 'Padel Club Details',
+    );
+  }
 
   @override
   void onClose() {

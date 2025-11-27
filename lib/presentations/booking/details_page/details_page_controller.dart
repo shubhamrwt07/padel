@@ -3,10 +3,14 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
@@ -225,7 +229,7 @@ class DetailsController extends GetxController {
       // ✅ Navigate to match booking page
       // openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
       // Get.toNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
-      Get.offAllNamed(RoutesName.bottomNav);
+      Get.toNamed(RoutesName.bottomNav);
       openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
     } catch (e, st) {
       log("❌ Match creation error: $e\n$st");
@@ -928,5 +932,126 @@ class DetailsController extends GetxController {
     // Dispose payment service
     _paymentService.dispose();
     super.onClose();
+  }
+  Future<void> shareMatch(
+      OpenMatchDetailsModel match,
+      DetailsController controller,
+      BuildContext context,
+      ) async {
+    final teamA = match.data?.teamA ?? [];
+    final teamB = match.data?.teamB ?? [];
+
+    String formatPlayerNames(List<dynamic> players) {
+      if (players.isEmpty) return "Not decided";
+      return players.map((p) {
+        final user = p.userId;
+        final firstName = user?.name ?? '';
+        final lastName = user?.lastName ?? '';
+        final fullName = "$firstName $lastName".trim();
+        return fullName.isEmpty ? "Unknown" : fullName;
+      }).join(", ");
+    }
+
+    final teamAPlayers = formatPlayerNames(teamA);
+    final teamBPlayers = formatPlayerNames(teamB);
+
+    final matchDate = formatMatchDateAt(match.data?.matchDate ?? "");
+    final clubName = match.data?.clubId?.clubName ?? "Unknown Club";
+    final matchType = match.data?.matchType?.capitalizeFirst ?? "Open Match";
+    final gender = match.data?.gender?.capitalizeFirst ?? "-";
+    final skill = match.data?.skillLevel?.capitalizeFirst ?? "-";
+    final slots = match.data?.slot ?? [];
+    final totalAmount = slots.isNotEmpty
+        ? slots
+        .expand((slot) => slot.slotTimes ?? [])
+        .map((st) => (st.amount ?? 0) as int)
+        .fold(0, (a, b) => a + b)
+        : 0;
+
+    final message = '''
+🎾 *Padel Match Details*
+
+📍 *Club:* $clubName
+📅 *Date:* $matchDate
+⚧ *Gender:* $gender
+🏆 *Level:* $skill
+💰 *Price:* ₹$totalAmount
+🎮 *Match Type:* $matchType
+
+👥 *Team A:* $teamAPlayers
+👥 *Team B:* $teamBPlayers
+
+Join the excitement! 💪
+''';
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    // on iPad the rect must be non-zero; fallback to a tiny non-zero rect if null/zero
+    final Rect shareRect = (renderBox != null)
+        ? (renderBox.localToGlobal(Offset.zero) & renderBox.size)
+        : const Rect.fromLTWH(0, 0, 1, 1);
+
+    // sharePositionOrigin is a field of ShareParams
+    await SharePlus.instance.share(
+      ShareParams(
+        text: message,
+        subject: "Check out this Padel match!",
+        // important for iPad / iOS popover positioning
+        sharePositionOrigin: (shareRect.width == 0 || shareRect.height == 0)
+            ? const Rect.fromLTWH(0, 0, 1, 1)
+            : shareRect,
+      ),
+    );
+  }
+
+  Future<void> shareLocalMatch(BuildContext context) async {
+    String formatPlayerNames(List<Map<String, dynamic>> players) {
+      if (players.isEmpty) return "Available";
+      return players
+          .where((p) => p['name'] != null && p['name'].toString().isNotEmpty)
+          .map((p) {
+        final firstName = (p['name']?.toString())?.capitalizeFirst ?? '';
+        final lastName = (p['lastName']?.toString())?.capitalizeFirst ?? '';
+        final fullName = "$firstName $lastName".trim();
+        return fullName.isEmpty ? "Unknown" : fullName;
+      }).join(", ");
+    }
+
+    final teamAPlayers = formatPlayerNames(teamA.toList());
+    final teamBPlayers = formatPlayerNames(teamB.toList());
+
+    final matchDate = formatMatchDateAt(localMatchData['matchDate'] ?? "");
+    final clubName = localMatchData['clubName'] ?? "Unknown Club";
+    final skill = localMatchData['skillLevel'] ?? "-";
+    final price = localMatchData['price'] ?? "0";
+    final gameTypeValue = gameType.value;
+
+    final message = '''
+🎾 *Padel Match Details*
+
+📍 *Club:* $clubName
+📅 *Date:* $matchDate
+⚧ *Game Type:* $gameTypeValue
+🏆 *Level:* $skill
+💰 *Price:* ₹$price
+🎮 *Match Type:* Open Match
+
+👥 *Team A:* $teamAPlayers
+👥 *Team B:* $teamBPlayers
+
+Join the excitement! 💪
+''';
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final Rect shareRect = (renderBox != null)
+        ? (renderBox.localToGlobal(Offset.zero) & renderBox.size)
+        : const Rect.fromLTWH(0, 0, 1, 1);
+
+    await Share.share(
+      message,
+      subject: "Check out this Padel match!",
+      sharePositionOrigin: (shareRect.width == 0 || shareRect.height == 0)
+          ? const Rect.fromLTWH(0, 0, 1, 1)
+          : shareRect,
+    );
   }
 }

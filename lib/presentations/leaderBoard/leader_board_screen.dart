@@ -15,51 +15,54 @@ class LeaderboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryColor,
-      appBar: primaryAppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        leadingButtonColor: AppColors.whiteColor,
-        titleTextColor: AppColors.whiteColor,
-        centerTitle: true,
-        title: const Text("Leaderboard"),
-        context: context,
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              TopTabBar(),
-              const SizedBox(height: 16),
-              Obx(() {
-                if (controller.selectedCategory.value == 'Tournaments') {
-                  return _buildTournamentFilters();
-                } else {
-                  return _buildTabBar();
-                }
-              }),
-              const SizedBox(height: 10),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.primaryColor,
+        appBar: primaryAppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          leadingButtonColor: AppColors.whiteColor,
+          titleTextColor: AppColors.whiteColor,
+          centerTitle: true,
+          title: const Text("Leaderboard"),
+          context: context,
+        ),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                TopTabBar(),
+                const SizedBox(height: 16),
+                Obx(() {
+                  if (controller.selectedCategory.value == 'Tournaments') {
+                    return _buildTournamentFilters();
+                  } else {
+                    return _buildTabBar();
+                  }
+                }),
+                const SizedBox(height: 10),
 
-              // ✅ Directly reactive podium
-              Obx(() {
-                final isTeam = controller.selectedCategory.value == 'Team';
-                final top3 = (isTeam
-                    ? controller.clubs
-                    : controller.players)
-                    .take(3)
-                    .toList();
+                // ✅ Directly reactive podium
+                Obx(() {
+                  final isTeam = controller.selectedCategory.value == 'Team';
+                  final top3 = (isTeam
+                      ? controller.clubs
+                      : controller.players)
+                      .take(3)
+                      .toList();
 
-                return _buildPodiumSectionFor(top3);
-              }),
-            ],
-          ),
+                  return _buildPodiumSectionFor(top3);
+                }),
+              ],
+            ),
 
-          // ✅ Directly reactive leaderboard sheet
-          Obx(() {
-            final data = controller.leaderboardData;
-            return _buildLeaderboardSheet(context, data);
-          }),
-        ],
+            // ✅ Directly reactive leaderboard sheet
+            Obx(() {
+              final data = controller.leaderboardData;
+              return _buildLeaderboardSheet(context, data);
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -132,6 +135,8 @@ class LeaderboardScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: TextField(
                         cursorHeight: 15,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
                           hintText: 'Location',
@@ -171,75 +176,89 @@ class LeaderboardScreen extends StatelessWidget {
           const SizedBox(width: 8),
 
           // 🔹 Gender Dropdown
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 39,
-              padding: const EdgeInsets.only(left: 10, right: 5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: Obx(() => DropdownButton<String>(
-                  value: controller.selectedGender.value.isEmpty
-                      ? null
-                      : controller.selectedGender.value,
-                  hint: const Text(
-                    "Gender",
-                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
-                  ),
-                  items: ['Male', 'Female', 'Others']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {
-                    controller.selectedGender.value = val ?? '';
-                  },
-                  icon: const Icon(Icons.arrow_drop_down,
-                      color: AppColors.primaryColor),
-                  style:
-                  const TextStyle(color: AppColors.textColor, fontSize: 14),
-                  dropdownColor: Colors.white,
-                )),
-              ),
+        Expanded(
+          flex: 2,
+          child: Container(
+            height: 39,
+            padding: const EdgeInsets.only(left: 10, right: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
+            child: Obx(() {
+              return PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                offset: Offset(10, 39),
+                onSelected: (value) {
+                  controller.selectedGender.value = value;
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'Male', child: Text('Male',style: Get.textTheme.bodyLarge,)),
+                  PopupMenuItem(value: 'Female', child: Text('Female',style: Get.textTheme.bodyLarge,)),
+                  PopupMenuItem(value: 'Others', child: Text('Others',style: Get.textTheme.bodyLarge,)),
+                ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      controller.selectedGender.value.isEmpty
+                          ? "Gender"
+                          : controller.selectedGender.value,
+                      style: const TextStyle(
+                        color: AppColors.primaryColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
+                  ],
+                ),
+              );
+            }),
           ),
+        ),
           const SizedBox(width: 8),
 
           // 🔹 Year Dropdown
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 39,
-              padding: const EdgeInsets.only(left: 10, right: 5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: Obx(() => DropdownButton<String>(
-                  value: controller.selectedYear.value.isEmpty
-                      ? null
-                      : controller.selectedYear.value,
-                  hint: const Text(
-                    "Year",
-                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+      Expanded(
+        flex: 2,
+        child: Container(
+          height: 39,
+          padding: const EdgeInsets.only(left: 10, right: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Obx(() {
+            return PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
+              offset: Offset(10, 39),
+              onSelected: (value) {
+                controller.selectedYear.value = value;
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: '2023', child: Text('2023',style: Get.textTheme.bodyLarge,)),
+                PopupMenuItem(value: '2024', child: Text('2024',style: Get.textTheme.bodyLarge,)),
+                PopupMenuItem(value: '2025', child: Text('2025',style: Get.textTheme.bodyLarge,)),
+              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    controller.selectedYear.value.isEmpty
+                        ? "Year"
+                        : controller.selectedYear.value,
+                    style: const TextStyle(
+                      color: AppColors.primaryColor,
+                      fontSize: 14,
+                    ),
                   ),
-                  items: ['2023', '2024', '2025']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {
-                    controller.selectedYear.value = val ?? '';
-                  },
-                  icon: const Icon(Icons.arrow_drop_down,
-                      color: AppColors.primaryColor),
-                  style:
-                  const TextStyle(color: AppColors.textColor, fontSize: 14),
-                  dropdownColor: Colors.white,
-                )),
+                  const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
+                ],
               ),
-            ),
-          )
+            );
+          }),
+        ),
+      )
         ],
       ),
     );

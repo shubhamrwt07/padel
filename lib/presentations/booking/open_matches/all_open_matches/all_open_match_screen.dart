@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'all_open_match_controller.dart';
 
@@ -359,6 +360,9 @@ class AllOpenMatchScreen extends StatelessWidget {
         ? '₹${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '₹-';
 
+    final isTimePassed = controller.isMatchTimePassed(data.matchDate, data.matchTime);
+    CustomLogger.logMessage(msg: "Match: ${data.matchDate} ${data.matchTime} - Time passed: $isTimePassed", level: LogLevel.debug);
+    
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
       final pic = p.userId?.profilePic;
       final name = (p.userId?.name ?? "").trim();
@@ -367,7 +371,11 @@ class AllOpenMatchScreen extends StatelessWidget {
     }).toList();
 
     while (teamAPlayers.length < 2) {
-      teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
+      if (isTimePassed) {
+        teamAPlayers.add(_buildPlayerIndex("P${teamAPlayers.length + 1}","${teamAPlayers.length + 1}"));
+      } else {
+        teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
+      }
     }
 
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
@@ -378,7 +386,11 @@ class AllOpenMatchScreen extends StatelessWidget {
     }).toList();
 
     while (teamBPlayers.length < 2) {
-      teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
+      if (isTimePassed) {
+        teamBPlayers.add(_buildPlayerIndex("P${teamBPlayers.length + 3}","${teamBPlayers.length + 1}"));
+      } else {
+        teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
+      }
     }
 
     return Container(
@@ -503,7 +515,7 @@ class AllOpenMatchScreen extends StatelessWidget {
                 width: Get.width * .22,
                 color: AppColors.playerCardBackgroundColor,
                 child: Text(
-                  price,
+                  "₹ ${formatAmount(price)}",
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     color: AppColors.primaryColor,
                   ),
@@ -559,7 +571,7 @@ final firstLetter = name.trim().isNotEmpty
         Container(
           color: Colors.transparent,
           // height: 40,
-          width: Get.width*0.2,
+          width: Get.width*0.15,
           child: Text(
             name.split(' ').first.capitalizeFirst!,
             style: Get.textTheme.labelSmall,
@@ -620,6 +632,37 @@ final firstLetter = name.trim().isNotEmpty
           "Available",
           style: Get.textTheme.labelSmall!
               .copyWith(color: AppColors.primaryColor),
+        )
+      ],
+    );
+  }
+
+  Widget _buildPlayerIndex(String playerIndex,String index) {
+    return Column(
+      children: [
+        Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
+          ),
+          child: Center(
+            child: Text(
+              playerIndex,
+              style: const TextStyle(
+                fontSize: 20,
+                color: AppColors.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          "Player $index",
+          style: Get.textTheme.labelSmall!
+              .copyWith(color: AppColors.blackColor),
         )
       ],
     );

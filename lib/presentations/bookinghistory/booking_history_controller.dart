@@ -6,7 +6,6 @@ import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 
 class BookingHistoryController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
-  late ScrollController scrollController;
 
   final BookingHistoryRepository bookingRepo = BookingHistoryRepository();
 
@@ -30,25 +29,24 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
   @override
   void onInit() {
     tabController = TabController(length: 3, vsync: this);
-    scrollController = ScrollController();
 
-    // Add scroll listener for pagination
-    scrollController.addListener(() {
-      if (!scrollController.hasClients) return;
-
-      final currentPosition = scrollController.position.pixels;
-      final maxExtent = scrollController.position.maxScrollExtent;
-      final threshold = maxExtent - 200;
-
-      if (currentPosition >= threshold) {
-        final currentTabIndex = tabController.index;
-        String type = "upcoming";
-        if (currentTabIndex == 1) type = "completed";
-        if (currentTabIndex == 2) type = "cancelled";
-
-        if (hasMoreData(type) && !isLoadingMore.value) {
-          loadMoreBookings(type);
-        }
+    // Add tab listener to fetch data when switching tabs
+    tabController.addListener(() {
+      if (!tabController.indexIsChanging) return;
+      
+      final currentIndex = tabController.index;
+      String type = "upcoming";
+      if (currentIndex == 1) type = "completed";
+      if (currentIndex == 2) type = "cancelled";
+      
+      // Fetch data for the tab if not already loaded
+      switch (type) {
+        case "completed":
+          if (completedBookings.value == null) fetchBookings("completed");
+          break;
+        case "cancelled":
+          if (cancelledBookings.value == null) fetchBookings("cancelled");
+          break;
       }
     });
 
@@ -56,88 +54,57 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
     super.onInit();
   }
 
-  void fetchBookings() async {
+  void fetchBookings([String? specificType]) async {
     try {
-      if (kDebugMode) {
-        print("Starting to fetch booking data...");
-      }
       isLoading.value = true;
       errorMessage.value = '';
 
-      // Reset pagination
-      upcomingPage.value = 1;
-      completedPage.value = 1;
-      cancelledPage.value = 1;
-      upcomingHasMore.value = true;
-      completedHasMore.value = true;
-      cancelledHasMore.value = true;
-
-      // Fetch upcoming bookings
-      if (kDebugMode) {
-        print("Fetching upcoming bookings...");
-      }
-      final upcoming = await bookingRepo.getBookingHistory(type: "upcoming", page: 1, limit: 10);
-      if (kDebugMode) {
-        print("Upcoming response - page: ${upcoming.page}, totalPages: ${upcoming.totalPages}, data length: ${upcoming.data?.length}");
-      }
-
-      upcoming.data ??= [];
-      upcomingBookings.value = upcoming;
-
-      // Safe null check
-      if (upcoming.totalPages != null && upcoming.page != null) {
-        upcomingHasMore.value = upcoming.page! < upcoming.totalPages!;
+      if (specificType != null) {
+        await _fetchBookingType(specificType);
       } else {
-        upcomingHasMore.value = false;
-      }
+        // Reset pagination for all types
+        upcomingPage.value = 1;
+        completedPage.value = 1;
+        cancelledPage.value = 1;
+        upcomingHasMore.value = true;
+        completedHasMore.value = true;
+        cancelledHasMore.value = true;
 
-      // Fetch completed bookings
-      if (kDebugMode) {
-        print("Fetching completed bookings...");
-      }
-      final completed = await bookingRepo.getBookingHistory(type: "completed", page: 1, limit: 10);
-      if (kDebugMode) {
-        print("Completed response - page: ${completed.page}, totalPages: ${completed.totalPages}, data length: ${completed.data?.length}");
-      }
-
-      completed.data ??= [];
-      completedBookings.value = completed;
-
-      if (completed.totalPages != null && completed.page != null) {
-        completedHasMore.value = completed.page! < completed.totalPages!;
-      } else {
-        completedHasMore.value = false;
-      }
-
-      // Fetch cancelled bookings
-      if (kDebugMode) {
-        print("Fetching cancelled bookings...");
-      }
-      final cancelled = await bookingRepo.getBookingHistory(type: "cancelled", page: 1, limit: 10);
-      if (kDebugMode) {
-        print("Cancelled response - page: ${cancelled.page}, totalPages: ${cancelled.totalPages}, data length: ${cancelled.data?.length}");
-      }
-
-      cancelled.data ??= [];
-      cancelledBookings.value = cancelled;
-
-      if (cancelled.totalPages != null && cancelled.page != null) {
-        cancelledHasMore.value = cancelled.page! < cancelled.totalPages!;
-      } else {
-        cancelledHasMore.value = false;
+        // Only fetch upcoming initially (active tab)
+        await _fetchBookingType("upcoming");
       }
 
       update();
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print("Error fetching bookings: $e");
-      }
-      if (kDebugMode) {
-        print("Stack trace: $stackTrace");
-      }
+    } catch (e) {
       errorMessage.value = "Failed to fetch bookings: $e";
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _fetchBookingType(String type) async {
+    final data = await bookingRepo.getBookingHistory(type: type, page: 1, limit: 10);
+    data.data ??= [];
+
+    switch (type) {
+      case "upcoming":
+        upcomingPage.value = 1;
+        upcomingBookings.value = data;
+        upcomingHasMore.value = (data.totalPages != null && data.page != null) 
+            ? data.page! < data.totalPages! : false;
+        break;
+      case "completed":
+        completedPage.value = 1;
+        completedBookings.value = data;
+        completedHasMore.value = (data.totalPages != null && data.page != null) 
+            ? data.page! < data.totalPages! : false;
+        break;
+      case "cancelled":
+        cancelledPage.value = 1;
+        cancelledBookings.value = data;
+        cancelledHasMore.value = (data.totalPages != null && data.page != null) 
+            ? data.page! < data.totalPages! : false;
+        break;
     }
   }
 
@@ -284,26 +251,41 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
   }
 
   bool hasMoreData(String type) {
+    bool result;
     switch (type) {
       case "upcoming":
-        return upcomingHasMore.value;
+        result = upcomingHasMore.value;
+        if (kDebugMode) {
+          print("hasMoreData upcoming: $result, page: ${upcomingPage.value}, totalPages: ${upcomingBookings.value?.totalPages}");
+        }
+        break;
       case "completed":
-        return completedHasMore.value;
+        result = completedHasMore.value;
+        if (kDebugMode) {
+          print("hasMoreData completed: $result, page: ${completedPage.value}, totalPages: ${completedBookings.value?.totalPages}");
+        }
+        break;
       case "cancelled":
-        return cancelledHasMore.value;
+        result = cancelledHasMore.value;
+        if (kDebugMode) {
+          print("hasMoreData cancelled: $result, page: ${cancelledPage.value}, totalPages: ${cancelledBookings.value?.totalPages}");
+        }
+        break;
       default:
-        return false;
+        result = false;
     }
+    return result;
   }
 
   void refreshBookings() {
     fetchBookings();
   }
 
+
+
   @override
   void onClose() {
     tabController.dispose();
-    scrollController.dispose();
     super.onClose();
   }
 }

@@ -12,6 +12,7 @@ import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/handler/logger.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
@@ -502,7 +503,7 @@ class HomeScreen extends GetView<HomeController> {
               ),
               if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
                 Text(
-                  b.slot!.first.slotTimes!.first.time ?? "",
+                  formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? ""),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
                 ).paddingOnly(left: 5),
             ],
@@ -706,7 +707,7 @@ class HomeScreen extends GetView<HomeController> {
                           children: [
                             const TextSpan(text: '₹', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.blueColor, fontSize: 17)),
                             TextSpan(
-                              text: ' ${club.totalAmount ?? 00}',
+                              text: ' ${formatAmount(club.totalAmount ?? 00)}',
                               style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800, color: AppColors.blueColor, fontSize: 17),
                             ),
                           ],

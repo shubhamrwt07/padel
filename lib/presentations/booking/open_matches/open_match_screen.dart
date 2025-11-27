@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import '../widgets/booking_exports.dart';
 
 class OpenMatchesScreen extends StatelessWidget {
@@ -429,7 +430,7 @@ class OpenMatchesScreen extends StatelessWidget {
     final clubName = data.clubId?.clubName ?? '-';
     final address = data.clubId?.address ?? "N/A";
     final price = (data.slot?.isNotEmpty == true && data.slot!.first.slotTimes?.isNotEmpty == true)
-        ? '₹${data.slot!.first.slotTimes!.first.amount ?? ''}'
+        ? '${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '₹-';
 
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
@@ -554,7 +555,7 @@ class OpenMatchesScreen extends StatelessWidget {
                 width: Get.width * .22,
                 color: AppColors.playerCardBackgroundColor,
                 child: Text(
-                  price,
+                  "₹ ${formatAmount(price)}",
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColors.primaryColor),
                   overflow: TextOverflow.ellipsis,
                 ),

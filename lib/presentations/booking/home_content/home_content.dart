@@ -298,12 +298,11 @@ class HomeContent extends StatelessWidget {
         );
       case 2:
         return Obx(
-          () => Container(
-            // color: AppColors.redColor,
+          () => SizedBox(
             key: ValueKey(2),
-            // height: controller.isShowAllReviews.value
-            //     ? Get.height * 0.6
-            //     : Get.height * 0.3,
+            height: controller.isShowAllReviews.value
+                ? null
+                : Get.height * 0.33,
             child: reviewContent(Get.context!),
           ),
         );
@@ -321,16 +320,16 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget reviewContent(BuildContext context) {
-    final reviewData = controller.reviewResponse.value?.data?.first;
-    final reviews = reviewData?.reviews ?? [];
-
     if (controller.isLoading.value) {
       return const Center(child: LoadingWidget(color: AppColors.primaryColor,));
     }
 
-    if (reviews.isEmpty) {
-      return const Center(child: Text("No reviews available"));
-    }
+    return Obx(() {
+      final reviews = controller.displayedReviews;
+      
+      if (reviews.isEmpty) {
+        return const Center(child: Text("No reviews available"));
+      }
 
     return Column(
       children: [
@@ -364,21 +363,14 @@ class HomeContent extends StatelessWidget {
         ).paddingOnly(bottom: Get.height * 0.01),
 
         Container(
-          // When showing all reviews, we don't fix height — let it expand
           height: controller.isShowAllReviews.value
-              ? null // full height based on reviews
-              : (reviews.length >= 3
-              ? 3 * 85.0 // height for first 3 reviews
-              : reviews.length * 85.0),
+              ? null
+              : reviews.length * 85.0,
           color: Colors.transparent,
           child: ListView.builder(
-            itemCount: controller.isShowAllReviews.value
-                ? reviews.length
-                : reviews.length > 3
-                ? 3
-                : reviews.length,
+            itemCount: reviews.length,
             physics: controller.isShowAllReviews.value
-                ? const NeverScrollableScrollPhysics()
+                ? const AlwaysScrollableScrollPhysics()
                 : const NeverScrollableScrollPhysics(),
             shrinkWrap: true, // makes list take only the needed space
             padding: EdgeInsets.zero,
@@ -480,6 +472,7 @@ class HomeContent extends StatelessWidget {
         )
       ],
     );
+    });
   }
 
 

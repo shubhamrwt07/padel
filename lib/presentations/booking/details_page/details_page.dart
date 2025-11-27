@@ -2,14 +2,18 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
 import '../../../generated/assets.dart';
+import '../../../handler/logger.dart';
 import 'details_page_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -45,6 +49,9 @@ class DetailsScreen extends StatelessWidget {
             appBarAction(
               Colors.white,
               const Icon(Icons.share_outlined, color: Colors.black, size: 18),
+                ()async{
+                  await controller.shareLocalMatch(context);
+                }
             ).paddingOnly(right: 10),
           ],
         ),
@@ -65,7 +72,7 @@ class DetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
-
+                      leading: SvgPicture.asset(Assets.imagesIcPadelIcon,height: 30,),
                       title: Text(
                         data['clubName'] ?? "Unknown club",
                         style:
@@ -102,12 +109,14 @@ class DetailsScreen extends StatelessWidget {
                           data['skillLevel'] ?? "-",
                           AppColors.blackColor,
                           13,
+                            FontWeight.w400
                         ),
                         gameDetails(
                           "Price",
-                          "₹ ${data['price']}",
+                          "₹ ${formatAmount(data['price'])}",
                           AppColors.primaryColor,
                           16,
+                            FontWeight.w600
                         ),
                       ],
                     ).paddingOnly(
@@ -128,10 +137,22 @@ class DetailsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.blackColor.withAlpha(10)),
                 ),
-                child: Text(
-                  "Open match",
-                  style: Get.textTheme.bodyLarge,
-                ).paddingOnly(left: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Open Match",
+                      style: Get.textTheme.bodyLarge,
+                    ),
+                    fromOpenMatch?
+                    Row(
+                      children: [
+                        SvgPicture.asset(Assets.imagesIcCheckCircle,height: 15,).paddingOnly(right: 5),
+                        Text("Court Booked",style: Get.textTheme.bodySmall!.copyWith(fontSize: 10,color: AppColors.secondaryColor),),
+                      ],
+                    ):SizedBox.shrink()
+                  ],
+                ).paddingOnly(left: 14,right: 14),
               ).paddingOnly(top: Get.height * .015, bottom: Get.height * .015),
 
               // game card
@@ -184,45 +205,60 @@ class DetailsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      color: const Color(0xFFf4f6fc),
-                      width: Get.width * .51,
-                      height: Get.height * .1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                data['clubName'] ?? "",
-                                style:
-                                    Get.textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ) ??
-                                    const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                              Icon(
-                                Icons.directions,
-                                color: AppColors.secondaryColor,
-                                size: 30,
-                              ),
-                            ],
-                          ).paddingOnly(bottom: 5),
-                          Text(
-                            maxLines: 3,
-                            data['address'] ?? "Unknown address, please update",
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                Get.textTheme.displaySmall?.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 11,
-                                ) ??
-                                const TextStyle(fontSize: 11),
-                          ).paddingOnly(bottom: 10),
-                        ],
+                    GestureDetector(
+                      onTap: () async {
+                        final address = data['address'];
+                        final encodedAddress = Uri.encodeComponent(address);
+                        final googleMapsUrl =
+                            "https://www.google.com/maps/search/?api=1&query=$encodedAddress";
+
+                        if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+                          await launchUrl(Uri.parse(googleMapsUrl),
+                              mode: LaunchMode.externalApplication);
+                        } else {
+                          CustomLogger.logMessage(msg: "Could not open maps",level: LogLevel.debug);
+                        }
+                      },
+                      child: Container(
+                        color: const Color(0xFFf4f6fc),
+                        width: Get.width * .51,
+                        height: Get.height * .1,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  data['clubName'] ?? "",
+                                  style:
+                                      Get.textTheme.headlineSmall?.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                      ) ??
+                                      const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                                Icon(
+                                  Icons.directions,
+                                  color: AppColors.secondaryColor,
+                                  size: 30,
+                                ),
+                              ],
+                            ).paddingOnly(bottom: 5),
+                            Text(
+                              maxLines: 3,
+                              data['address'] ?? "Unknown address, please update",
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  Get.textTheme.displaySmall?.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 11,
+                                  ) ??
+                                  const TextStyle(fontSize: 11),
+                            ).paddingOnly(bottom: 10),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -243,23 +279,26 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget appBarAction(Color backgroundColor, Widget child) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            spreadRadius: 1,
-            blurRadius: 6,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: 18,
-        backgroundColor: backgroundColor,
-        child: child,
+  Widget appBarAction(Color backgroundColor, Widget child,Function()? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: CircleAvatar(
+          radius: 18,
+          backgroundColor: backgroundColor,
+          child: child,
+        ),
       ),
     );
   }
@@ -271,7 +310,7 @@ class DetailsScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Game Type", style: Get.textTheme.bodyLarge),
+          Text("Game Type", style: Get.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: Get.height * .01),
 
           Obx(() {
@@ -285,7 +324,7 @@ class DetailsScreen extends StatelessWidget {
                   currentValue,
                   style: Get.textTheme.headlineMedium?.copyWith(
                     color: AppColors.blackColor,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     fontSize: 13,
                   ),
                 ),
@@ -329,6 +368,7 @@ class DetailsScreen extends StatelessWidget {
     String subtitle,
     Color color,
     double fontSize,
+      FontWeight? fontWeight
   ) {
     return Container(
       alignment: Alignment.center,
@@ -336,19 +376,19 @@ class DetailsScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: Get.textTheme.bodyLarge),
+          Text(title, style: Get.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: Get.height * .01),
           Text(
             subtitle,
             style:
                 Get.textTheme.headlineMedium?.copyWith(
                   color: color,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:fontWeight,
                   fontSize: fontSize,
                 ) ??
                 TextStyle(
                   color: color,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:fontWeight,
                   fontSize: fontSize,
                 ),
           ),
@@ -731,12 +771,16 @@ class DetailsScreen extends StatelessWidget {
               const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         ListTile(
+          leading: SvgPicture.asset(
+            Assets.imagesIcMyClub,
+            colorFilter: ColorFilter.mode(AppColors.textColor, BlendMode.srcIn),
+          ),
           title: Text(
             "Type of Courts",
             style: Get.textTheme.bodyLarge,
           ),
           subtitle: Text(
-            controller.localMatchData['courtType'] is List 
+            controller.localMatchData['courtType'] is List
                 ? (controller.localMatchData['courtType'] as List).join(', ')
                 : controller.localMatchData['courtType'].toString(),
             style: Get.textTheme.bodyLarge,
@@ -796,7 +840,7 @@ class DetailsScreen extends StatelessWidget {
                             ),
                           ),
                           TextSpan(
-                            text: "${data['price'] ?? '₹0'}",
+                            text: formatAmount(data['price'] ?? '₹0'),
                             style: Get.textTheme.titleMedium!.copyWith(
                               color: AppColors.whiteColor,
                               fontWeight: FontWeight.w600,

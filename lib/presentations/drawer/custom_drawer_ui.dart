@@ -192,25 +192,41 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
           Obx(
                 () => ProfileRow(
-              icon: Icon(Icons.headset_mic_outlined, size: 20, color: controller.selectedIndex.value == 8 ? AppColors.primaryColor : AppColors.labelBlackColor),
-              title: AppStrings.helpSupport,
+              icon: Icon(Icons.group_outlined,
+                  size: 20,
+                  color: controller.selectedIndex.value == 8
+                      ? AppColors.primaryColor
+                      : AppColors.labelBlackColor),
+              title: "Community",
               isSelected: controller.selectedIndex.value == 8,
               onTap: () {
                 controller.selectedIndex.value = 8;
+                // Get.toNamed(RoutesName.community);
+              },
+            ),
+          ),
+          Obx(
+                () => ProfileRow(
+              icon: Icon(Icons.headset_mic_outlined, size: 20, color: controller.selectedIndex.value == 9 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              title: AppStrings.helpSupport,
+              isSelected: controller.selectedIndex.value == 9,
+              onTap: () {
+                controller.selectedIndex.value = 9;
                 Get.toNamed(RoutesName.support);
               },
             ),
           ),
           Obx(
                 () => ProfileRow(
-              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5, color: controller.selectedIndex.value == 9 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5, color: controller.selectedIndex.value == 10 ? AppColors.primaryColor : AppColors.labelBlackColor),
               title: AppStrings.privacy,
-              isSelected: controller.selectedIndex.value == 9,
+              isSelected: controller.selectedIndex.value == 10,
               onTap: () {
-                controller.selectedIndex.value = 9;
+                controller.selectedIndex.value = 10;
               },
             ),
           ),
+
           ProfileRow(
             icon: SvgPicture.asset(Assets.imagesIcLogOut, height: 15, width: 17).paddingOnly(left: 3),
             title: AppStrings.logout,

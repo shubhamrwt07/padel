@@ -2,13 +2,8 @@
 class Assets {
   Assets._();
 
-  static const String imagesChangingRoom = 'assets/images/changing_room.svg';
-  static const String imagesCourt = 'assets/images/court.svg';
-  static const String imagesDirections = 'assets/images/directions.svg';
-  static const String imagesEncrypted = 'assets/images/encrypted.png';
   static const String imagesGirl = 'assets/images/girl.png';
   static const String imagesGirls = 'assets/images/girls.png';
-  static const String imagesIcAmericano = 'assets/images/ic_americano.svg';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcBookingcancellation = 'assets/images/ic_bookingcancellation.svg';
@@ -16,42 +11,34 @@ class Assets {
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcCelebration = 'assets/images/ic_celebration.svg';
-  static const String imagesIcDummyIcon = 'assets/images/ic_dummy_icon.png';
+  static const String imagesIcCheckCircle = 'assets/images/ic_check_circle.svg';
   static const String imagesIcEye = 'assets/images/ic_eye.png';
   static const String imagesIcEyeOff = 'assets/images/ic_eye_off.png';
-  static const String imagesIcFacebook = 'assets/images/ic_facebook.svg';
   static const String imagesIcFilter = 'assets/images/ic_filter.png';
-  static const String imagesIcGoogle = 'assets/images/ic_google.svg';
   static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
   static const String imagesIcHomeBottomBar = 'assets/images/ic_home_bottomBar.svg';
   static const String imagesIcLocation = 'assets/images/ic_location.png';
   static const String imagesIcLogOut = 'assets/images/ic_log_out.svg';
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
   static const String imagesIcMixedGender = 'assets/images/ic_mixed_gender.svg';
+  static const String imagesIcMyClub = 'assets/images/ic_my_club.svg';
   static const String imagesIcPackages = 'assets/images/ic_packages.svg';
+  static const String imagesIcPadelIcon = 'assets/images/ic_padel_icon.svg';
   static const String imagesIcPadelIconBottomNav = 'assets/images/ic_padel_icon_bottomNav.svg';
   static const String imagesIcPaypal = 'assets/images/ic_paypal.svg';
-  static const String imagesIcPerson = 'assets/images/ic_person.png';
   static const String imagesIcPrivacy = 'assets/images/ic_privacy.png';
-  static const String imagesIcProfile = 'assets/images/ic_profile.svg';
-  static const String imagesIcRemove = 'assets/images/ic_remove.png';
   static const String imagesIcReview = 'assets/images/ic_review.svg';
   static const String imagesIcSearch = 'assets/images/ic_search.png';
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
-  static const String imagesIcTime = 'assets/images/ic_time.png';
   static const String imagesIcTradingDown = 'assets/images/ic_trading_down.svg';
   static const String imagesIcTreadingUp = 'assets/images/ic_treading_up.svg';
-  static const String imagesIcWallet = 'assets/images/ic_wallet.png';
   static const String imagesIconLeaderBoard = 'assets/images/icon_leaderBoard.svg';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBackgroundBottomBar = 'assets/images/img_background_bottomBar.png';
   static const String imagesImgBackgroundScoreView = 'assets/images/img_background_score_view.svg';
-  static const String imagesImgBookingBackground = 'assets/images/img_booking_background.png';
   static const String imagesImgBookingConfirm = 'assets/images/img_booking_confirm.svg';
   static const String imagesImgBookingSuccessful = 'assets/images/img_booking_successful.png';
-  static const String imagesImgCart = 'assets/images/img_cart.png';
   static const String imagesImgCrown = 'assets/images/img_crown.png';
-  static const String imagesImgCrownTopPlayer = 'assets/images/img_crown_top_player.svg';
   static const String imagesImgCustomerPicBooking = 'assets/images/img_customerPic_booking.png';
   static const String imagesImgDummy1 = 'assets/images/img_dummy_1.png';
   static const String imagesImgDummy2 = 'assets/images/img_dummy_2.png';
@@ -62,12 +49,6 @@ class Assets {
   static const String imagesImgRoundBackground = 'assets/images/img_round_background.svg';
   static const String imagesImgScoreView = 'assets/images/img_score_view.svg';
   static const String imagesImgVsRounds = 'assets/images/img_vs_rounds.svg';
-  static const String imagesLocation = 'assets/images/location.svg';
-  static const String imagesLocker = 'assets/images/locker.svg';
-  static const String imagesNum = 'assets/images/num.svg';
-  static const String imagesOpenMatch = 'assets/images/openMatch.png';
-  static const String imagesPadelIcon = 'assets/images/padel_icon.svg';
-  static const String imagesParking = 'assets/images/parking.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }

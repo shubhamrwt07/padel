@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/paymentwallet/payment_wallet_controller.dart';
 import 'package:padel_mobile/presentations/paymentwallet/widgets/custom_skeleton_loder.dart';
 
@@ -57,8 +58,9 @@ class PaymentWalletScreen extends StatelessWidget {
                     final clubName = payment.registerClubId?.clubName??"N/A";
                     final bookingDate = payment.bookingDate??"N/A";
                     final slot = payment.slot?[0].slotTimes?[0].time??"0";
+                    final courtName = payment.slot?[0].courtName??"";
                     final amount = (payment.slot?[0].slotTimes?[0].amount??"0").toString();
-                    return paymentTiles(clubName: clubName,bookingDate: bookingDate,slot: slot,amount: amount);
+                    return paymentTiles(clubName: clubName,bookingDate: bookingDate,slot: slot,amount: amount,courtName: courtName);
                   },
                 ),
               );
@@ -177,7 +179,7 @@ class PaymentWalletScreen extends StatelessWidget {
         ) ,              ],
     ).paddingOnly(top: 15,bottom: 15);
   }
-  Widget paymentTiles({required String clubName,required String bookingDate,required String slot,required String amount}){
+  Widget paymentTiles({required String clubName,required String bookingDate,required String slot,required String amount,required String courtName}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -209,7 +211,7 @@ class PaymentWalletScreen extends StatelessWidget {
             ),
             const SizedBox(width: 2),
             Text(
-              "( 60min )",
+              "( $courtName )",
               style: Get.textTheme.bodySmall!.copyWith(
                 fontWeight: FontWeight.w400,
                 color: AppColors.labelBlackColor,
@@ -226,7 +228,7 @@ class PaymentWalletScreen extends StatelessWidget {
             ).paddingOnly(top: 2),
             const SizedBox(width: 2),
             Text(
-              amount,
+              formatAmount(amount),
               style: Get
                   .textTheme
                   .headlineMedium!

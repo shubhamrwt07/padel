@@ -66,7 +66,8 @@ class AddReviewBottomSheet extends StatelessWidget {
               ).paddingOnly(bottom: Get.height * 0.01),
               PrimaryTextField(
                 hintText: "Write here",
-                maxLine: 4,
+                maxLine: 6,
+                maxLength: 250,
                 controller: controller.reviewController,
               ).paddingOnly(bottom: Get.height*0.02),
               Center(
