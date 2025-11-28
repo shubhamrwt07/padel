@@ -1045,25 +1045,28 @@ class BookSession extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: ()=>openSelectedSlotsBottomSheet(context),
-                      child: Row(
-                        children: [
-                          Text(
-                            "$totalSelections slot${totalSelections > 1 ? 's' : ''} selected",
-                            style: Get.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.blackColor,
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Row(
+                          children: [
+                            Text(
+                              "$totalSelections slot${totalSelections > 1 ? 's' : ''} selected",
+                              style: Get.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.blackColor,
+                              ),
                             ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            "₹ ${formatAmount(controller.totalAmount.value)}",
-                            style: Get.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryColor,
+                            const Spacer(),
+                            Text(
+                              "₹ ${formatAmount(controller.totalAmount.value)}",
+                              style: Get.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryColor,
+                              ),
                             ),
-                          ),
-                        ],
-                      ).paddingOnly(left: 18,right: 18,),
+                          ],
+                        ).paddingOnly(left: 18,right: 18,),
+                      ),
                     ),
                     Positioned(
                       top: -20,

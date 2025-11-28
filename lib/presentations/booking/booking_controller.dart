@@ -92,36 +92,34 @@ class BookingController extends GetxController with GetSingleTickerProviderState
       await Future.delayed(const Duration(milliseconds: 150));
 
       if (imageUrl != null && imageUrl.isNotEmpty) {
-        final imagePath = await compute((url) async {
-          try {
-            final cacheManager = DefaultCacheManager();
-            final fileInfo = await cacheManager.getFileFromCache(url);
+        String? imagePath;
+        try {
+          final cacheManager = DefaultCacheManager();
+          final fileInfo = await cacheManager.getFileFromCache(imageUrl);
 
-            if (fileInfo != null && await fileInfo.file.exists()) {
-              return fileInfo.file.path;
-            }
-
-            final response = await http.get(Uri.parse(url));
+          if (fileInfo != null && await fileInfo.file.exists()) {
+            imagePath = fileInfo.file.path;
+          } else {
+            final response = await http.get(Uri.parse(imageUrl));
             if (response.statusCode == 200) {
               final file = await cacheManager.putFile(
-                url,
+                imageUrl,
                 response.bodyBytes,
                 fileExtension: 'jpg',
               );
-              return file.path;
+              imagePath = file.path;
             }
-          } catch (_) {}
-          return null;
-        }, imageUrl);
+          }
+        } catch (_) {}
 
         Get.back();
 
         if (imagePath != null) {
           await Share.shareXFiles(
             [XFile(imagePath)],
-            text:
-            'Check out this amazing club: ${courtsData.value.clubName ?? 'Unknown Club'}\n${courtsData.value.address ?? ''}, ${courtsData.value.city ?? ''}',
+            text: 'Check out this amazing club: ${courtsData.value.clubName ?? 'Unknown Club'}\n${courtsData.value.address ?? ''}, ${courtsData.value.city ?? ''}',
             subject: 'Padel Club Details',
+            sharePositionOrigin: const Rect.fromLTWH(0, 0, 100, 100),
           );
         } else {
           shareTextOnly();
@@ -141,6 +139,7 @@ class BookingController extends GetxController with GetSingleTickerProviderState
     Share.share(
       'Check out this amazing club: ${courtsData.value.clubName ?? 'Unknown Club'}\n${courtsData.value.address ?? ''}, ${courtsData.value.city ?? ''}',
       subject: 'Padel Club Details',
+      sharePositionOrigin: const Rect.fromLTWH(0, 0, 100, 100),
     );
   }
 

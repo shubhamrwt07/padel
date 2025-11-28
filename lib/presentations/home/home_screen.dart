@@ -641,7 +641,7 @@ class HomeScreen extends GetView<HomeController> {
       onTap: () {
         log("CLUB ID -> ${club.id}");
         if (club.id != null) {
-          Get.toNamed(RoutesName.booking, arguments: {"data": club});
+          Get.toNamed(RoutesName.booking, arguments: {"data": club,"clubId":club.id});
           FocusManager.instance.primaryFocus?.unfocus();
         }
       },

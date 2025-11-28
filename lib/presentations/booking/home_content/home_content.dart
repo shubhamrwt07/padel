@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeContent extends StatelessWidget {
   HomeContent({super.key});
@@ -25,65 +26,148 @@ class HomeContent extends StatelessWidget {
                     color: AppColors.labelBlackColor,
                   ),
                 ),
-                Row(
-                  children: [
-                    RatingBar.builder(
-                      itemSize: 16,
-                      initialRating: 3,
-                      minRating: 0,
-                      unratedColor: AppColors.starUnselectedColor,
-                      direction: Axis.horizontal,
-                      allowHalfRating: true,
-                      itemCount: 5,
-                      itemPadding: EdgeInsets.zero,
-                      // No padding
-                      itemBuilder: (context, _) => Container(
-                        width: 5.0,
-                        height: 30.0,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.star,
-                          size: 27.0, // Adjust the size if needed
-                          color: AppColors.secondaryColor,
-                        ),
-                      ),
-                      onRatingUpdate: (rating) {},
-                    ).paddingOnly(right: Get.width * 0.02),
-                    Text(
-                      "4.5",
-                      style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.labelBlackColor,
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return Row(
+                      children: [
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 80,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                    ),
-                  ],
-                ),
+                        ).paddingOnly(right: Get.width * 0.02),
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 30,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  final reviewData = controller.registerClubResponse.value?.reviewData;
+                  final avgRating = reviewData?.averageRating?.toDouble() ?? 0.0;
+
+                  return Row(
+                    children: [
+                      RatingBar.builder(
+                        itemSize: 16,
+                        initialRating: avgRating,
+                        minRating: 0,
+                        unratedColor: AppColors.starUnselectedColor,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemPadding: EdgeInsets.zero,
+                        itemBuilder: (context, _) => Container(
+                          width: 5.0,
+                          height: 30.0,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.star,
+                            size: 27.0,
+                            color: AppColors.secondaryColor,
+                          ),
+                        ),
+                        onRatingUpdate: (rating) {},
+                      ).paddingOnly(right: Get.width * 0.02),
+                      Text(
+                        avgRating.toStringAsFixed(1),
+                        style: Theme.of(context).textTheme.headlineMedium!
+                            .copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.labelBlackColor,
+                            ),
+                      ),
+                    ],
+                  );
+                }),
               ],
             ).paddingOnly(top: Get.height * 0.02, bottom: Get.height * 0.005),
-            Text(
-              "5 Available courts",
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge!.copyWith(color: AppColors.textColor),
-            ).paddingOnly(bottom: Get.height * 0.02),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 120,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ).paddingOnly(bottom: Get.height * 0.02);
+              }
+
+              final clubData = controller.registerClubResponse.value?.data;
+              final courtCount = clubData?.courtCount ?? 0;
+
+              return Text(
+                "$courtCount Available courts",
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge!.copyWith(color: AppColors.textColor),
+              ).paddingOnly(bottom: Get.height * 0.02);
+            }),
             Text(
               "Facilities",
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.labelBlackColor,
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                color: AppColors.labelBlackColor,fontWeight: FontWeight.w700
               ),
             ).paddingOnly(bottom: Get.height * 0.01),
-            SizedBox(
-              height: 25,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 3,
-                itemBuilder: (BuildContext context, index) {
+            Obx(() {
+              if (controller.isLoading.value) {
+                return SizedBox(
+                  height: 25,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 3,
+                    itemBuilder: (BuildContext context, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          width: 80,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ).paddingOnly(right: 10);
+                    },
+                  ),
+                ).paddingOnly(bottom: Get.height * 0.02);
+              }
 
-                  return facilities(context, index);
-                },
-              ),
-            ).paddingOnly(bottom: Get.height * 0.02),
+              final clubData = controller.registerClubResponse.value?.data;
+              final features = clubData?.features ?? [];
+
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: features.asMap().entries.map((entry) {
+                  return SizedBox(
+                    width: (Get.width - 100) / 2, // 3 items per line with padding
+                    child: facilities(context, entry.key, entry.value),
+                  );
+                }).toList(),
+              ).paddingOnly(bottom: Get.height * 0.02);
+            }),
             Container(
               height: Get.height * 0.1,
               width: double.infinity,
@@ -103,7 +187,10 @@ class HomeContent extends StatelessWidget {
                         item['image'],
                         height: 24,
                         width: 24,
-                        color: isSelected ? Colors.white : AppColors.labelBlackColor,
+                        colorFilter: ColorFilter.mode(
+                          isSelected ? Colors.white : AppColors.labelBlackColor,
+                          BlendMode.srcIn,
+                        ),
                       )
                           : Icon(
                         item['icon'],
@@ -152,76 +239,161 @@ class HomeContent extends StatelessWidget {
               if (controller.selectedIndex.value == 0) {
                 return const SizedBox.shrink();
               }
-              return Center(
-                child: GestureDetector(
-                  onTap: () {
-                    if (controller.selectedIndex.value == 2) {
-                      controller.isShowAllReviews.toggle();
-                    } else if (controller.selectedIndex.value == 3) {
+
+              // For photos, only show if there are 2 or more court images
+              if (controller.selectedIndex.value == 3) {
+                final clubData = controller.registerClubResponse.value?.data;
+                final courtImages = clubData?.courtImage ?? [];
+                if (courtImages.length < 2) {
+                  return const SizedBox.shrink();
+                }
+
+                return Center(
+                  child: GestureDetector(
+                    onTap: () {
                       controller.isShowAllPhotos.toggle();
-                    }
-                  },
-                  child: Container(
-                    width: Get.width * 0.2,
-                    height: 20,
-                    color: Colors.transparent,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          controller.selectedIndex.value == 2
-                              ? (controller.isShowAllReviews.value
-                                    ? "Show Less"
-                                    : "Show All")
-                              : (controller.isShowAllPhotos.value
-                                    ? "Show Less"
-                                    : "Show All"),
-                          style: Theme.of(context).textTheme.labelMedium!
-                              .copyWith(color: AppColors.primaryColor),
-                        ),
-                        Icon(
-                          controller.selectedIndex.value == 2
-                              ? (controller.isShowAllReviews.value
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down)
-                              : (controller.isShowAllPhotos.value
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down),
-                          size: 15,
-                          color: AppColors.primaryColor,
-                        ),
-                      ],
+                    },
+                    child: Container(
+                      width: Get.width * 0.2,
+                      height: 20,
+                      color: Colors.transparent,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            controller.isShowAllPhotos.value
+                                ? "Show Less"
+                                : "Show All",
+                            style: Theme.of(context).textTheme.labelMedium!
+                                .copyWith(color: AppColors.primaryColor),
+                          ),
+                          Icon(
+                            controller.isShowAllPhotos.value
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 15,
+                            color: AppColors.primaryColor,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
+                );
+              }
+
+              return const SizedBox.shrink();
             }).paddingOnly(top: Get.height * 0.01),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Opening Hours",
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                     color: AppColors.labelBlackColor,
+                    fontWeight: FontWeight.w700
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Sunday-Saturday",
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: AppColors.textColor,
-                      ),
-                    ),
-                    Text(
-                      "8:00am-11:00pm",
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: AppColors.textColor,
-                      ),
-                    ),
-                  ],
-                ),
+                ).paddingOnly(bottom: 5),
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 100,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 120,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  final clubData = controller.registerClubResponse.value?.data;
+                  final businessHours = clubData?.businessHours ?? [];
+
+                  if (businessHours.isEmpty) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Monday-Sunday",
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: AppColors.textColor,
+                          ),
+                        ),
+                        Text(
+                          "6:00am to 10:00pm",
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: AppColors.textColor,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  // Group days by time
+                  Map<String, List<String>> timeGroups = {};
+                  for (var hour in businessHours) {
+                    final time = hour.time ?? "6:00am to 10:00pm";
+                    final day = hour.day ?? "";
+                    if (!timeGroups.containsKey(time)) {
+                      timeGroups[time] = [];
+                    }
+                    timeGroups[time]!.add(day);
+                  }
+
+                  return Column(
+                    children: timeGroups.entries.map((entry) {
+                      final time = entry.key;
+                      final days = entry.value;
+
+                      String dayDisplay;
+                      if (days.length == 7) {
+                        dayDisplay = "Monday-Sunday";
+                      } else if (days.length > 1) {
+                        dayDisplay = "${days.first}-${days.last}";
+                      } else {
+                        dayDisplay = days.first;
+                      }
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            dayDisplay,
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                          Text(
+                            time,
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                        ],
+                      ).paddingOnly(bottom: 2);
+                    }).toList(),
+                  );
+                }),
               ],
             ),
           ],
@@ -230,24 +402,28 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget facilities(BuildContext context, index) {
+  Widget facilities(BuildContext context, index, String feature) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.ac_unit,
-          size: 10,
-          color: AppColors.primaryColor,
-        ).paddingOnly(right: 5),
-        Text(
-          "${index + 1}. Free parking",
-          style: Theme.of(context).textTheme.displayMedium!.copyWith(
-            color: AppColors.primaryColor,
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
+        // Icon(
+        //   Icons.ac_unit,
+        //   size: 10,
+        //   color: AppColors.primaryColor,
+        // ).paddingOnly(right: 5, top: 2),
+        Flexible(
+          child: Text(
+            "${index + 1}. $feature",
+            style: Theme.of(context).textTheme.displayMedium!.copyWith(
+              color: AppColors.primaryColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
           ),
         ),
       ],
-    ).paddingOnly(right: 10);
+    );
   }
 
   Widget homeOptionItem(
@@ -297,14 +473,9 @@ class HomeContent extends StatelessWidget {
           child: const Center(child: Text("Call View")),
         );
       case 2:
-        return Obx(
-          () => SizedBox(
-            key: ValueKey(2),
-            height: controller.isShowAllReviews.value
-                ? null
-                : Get.height * 0.33,
-            child: reviewContent(Get.context!),
-          ),
+        return SizedBox(
+          key: ValueKey(2),
+          child: reviewContent(Get.context!),
         );
       case 3:
         return SizedBox(
@@ -326,9 +497,9 @@ class HomeContent extends StatelessWidget {
 
     return Obx(() {
       final reviews = controller.displayedReviews;
-      
+
       if (reviews.isEmpty) {
-        return const Center(child: Text("No reviews available"));
+        return Center(child: Text("No reviews available").paddingSymmetric(vertical: 30));
       }
 
     return Column(
@@ -362,23 +533,17 @@ class HomeContent extends StatelessWidget {
           ],
         ).paddingOnly(bottom: Get.height * 0.01),
 
-        Container(
-          height: controller.isShowAllReviews.value
-              ? null
-              : reviews.length * 85.0,
-          color: Colors.transparent,
-          child: ListView.builder(
-            itemCount: reviews.length,
-            physics: controller.isShowAllReviews.value
-                ? const AlwaysScrollableScrollPhysics()
-                : const NeverScrollableScrollPhysics(),
-            shrinkWrap: true, // makes list take only the needed space
-            padding: EdgeInsets.zero,
+        ListView.builder(
+          itemCount: reviews.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final review = reviews[index];
               final rating = review.reviewRating ?? 0;
               final comment = review.reviewComment ?? "";
-              final userName = review.userId?.email ?? "Anonymous";
+              // final userName = review.userId?.email ?? "Anonymous";
+              final userName = review.userId?.name ?? "Anonymous";
               final postDate = review.createdAt != null
                   ? DateFormat("dd/MM/yyyy").format(DateTime.parse(review.createdAt!))
                   : "N/A";
@@ -469,7 +634,6 @@ class HomeContent extends StatelessWidget {
               ).paddingOnly(bottom: 10);
             },
           ),
-        )
       ],
     );
     });
@@ -486,88 +650,207 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget photoGallery(BuildContext context) {
-    final List<String> imageUrls = [
-      Assets.imagesImgDummy1,
-      Assets.imagesImgDummy2,
-      Assets.imagesImgDummy3,
-      Assets.imagesImgDummy4,
-      Assets.imagesImgDummy5,
-      Assets.imagesImgDummy1,
-      Assets.imagesImgDummy2,
-      Assets.imagesImgDummy3,
-      Assets.imagesImgDummy4,
-      Assets.imagesImgDummy5,
-    ];
-
-    final bool isExpanded = controller.isShowAllPhotos.value;
-
-    return SizedBox(
-      height: isExpanded ? Get.height * 0.6 : Get.height * 0.33,
-      child: Column(
-        children: [
-          // First block (always shown)
-          Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                Expanded(flex: 2, child: _buildImage(imageUrls[0])),
-                SizedBox(width: 10),
-                Expanded(flex: 1, child: _buildImage(imageUrls[1])),
-              ],
-            ),
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return SizedBox(
+          height: Get.height * 0.33,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      flex: 1,
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 10),
+        );
+      }
+      
+      final clubData = controller.registerClubResponse.value?.data;
+      final courtImages = clubData?.courtImage ?? [];
+      
+      // Fallback to dummy images if no court images available
+      final List<String> imageUrls = courtImages.isNotEmpty ? courtImages : [
+        Assets.imagesImgDummy1,
+        Assets.imagesImgDummy2,
+        Assets.imagesImgDummy3,
+        Assets.imagesImgDummy4,
+        Assets.imagesImgDummy5,
+      ];
 
-          // Second block (always shown)
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                Expanded(child: _buildImage(imageUrls[2])),
-                SizedBox(width: 10),
-                Expanded(child: _buildImage(imageUrls[3])),
-                SizedBox(width: 10),
-                Expanded(child: _buildImage(imageUrls[4])),
-              ],
-            ),
-          ),
+      final bool isExpanded = controller.isShowAllPhotos.value;
+      
+      if (imageUrls.isEmpty) {
+        return const Center(child: Text("No images available"));
+      }
 
-          // Extra rows when expanded
-          if (isExpanded) ...[
-            SizedBox(height: 10),
+      return SizedBox(
+        height: isExpanded ? Get.height * 0.6 : Get.height * 0.33,
+        child: Column(
+          children: [
+            // First block (always shown)
             Expanded(
               flex: 2,
               child: Row(
                 children: [
-                  Expanded(flex: 2, child: _buildImage(imageUrls[0])),
+                  Expanded(flex: 2, child: _buildImage(imageUrls[0], courtImages.isNotEmpty)),
                   SizedBox(width: 10),
-                  Expanded(flex: 1, child: _buildImage(imageUrls[1])),
+                  if (imageUrls.length > 1)
+                    Expanded(flex: 1, child: _buildImage(imageUrls[1], courtImages.isNotEmpty)),
                 ],
               ),
             ),
             SizedBox(height: 10),
-            Expanded(
-              flex: 1,
-              child: Row(
-                children: [
-                  Expanded(child: _buildImage(imageUrls[2])),
-                  SizedBox(width: 10),
-                  Expanded(child: _buildImage(imageUrls[3])),
-                  SizedBox(width: 10),
-                  Expanded(child: _buildImage(imageUrls[4])),
-                ],
+
+            // Second block (always shown)
+            if (imageUrls.length > 2)
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    if (imageUrls.length > 2)
+                      Expanded(child: _buildImage(imageUrls[2], courtImages.isNotEmpty)),
+                    if (imageUrls.length > 3) ...[
+                      SizedBox(width: 10),
+                      Expanded(child: _buildImage(imageUrls[3], courtImages.isNotEmpty)),
+                    ],
+                    if (imageUrls.length > 4) ...[
+                      SizedBox(width: 10),
+                      Expanded(child: _buildImage(imageUrls[4], courtImages.isNotEmpty)),
+                    ],
+                  ],
+                ),
               ),
-            ),
+
+            // Extra rows when expanded
+            if (isExpanded && imageUrls.length > 5) ...[
+              SizedBox(height: 10),
+              Expanded(
+                flex: 2,
+                child: Row(
+                  children: [
+                    Expanded(flex: 2, child: _buildImage(imageUrls[0], courtImages.isNotEmpty)),
+                    SizedBox(width: 10),
+                    Expanded(flex: 1, child: _buildImage(imageUrls[1], courtImages.isNotEmpty)),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(child: _buildImage(imageUrls[2], courtImages.isNotEmpty)),
+                    SizedBox(width: 10),
+                    Expanded(child: _buildImage(imageUrls[3], courtImages.isNotEmpty)),
+                    SizedBox(width: 10),
+                    Expanded(child: _buildImage(imageUrls[4], courtImages.isNotEmpty)),
+                  ],
+                ),
+              ),
+            ],
           ],
-        ],
-      ),
-    );
+        ),
+      );
+    });
   }
 
-  Widget _buildImage(String url) {
+  Widget _buildImage(String url, bool isNetworkImage) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Image.asset(
+      child: isNetworkImage
+          ? CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[300],
+          child: const Center(
+            child: LoadingWidget(color: AppColors.primaryColor,),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[300],
+          child: Icon(Icons.error, color: Colors.grey[600]),
+        ),
+      )
+          : Image.asset(
         url,
         fit: BoxFit.cover,
         width: double.infinity,
@@ -591,4 +874,6 @@ class HomeContent extends StatelessWidget {
       ],
     );
   }
+
+
 }

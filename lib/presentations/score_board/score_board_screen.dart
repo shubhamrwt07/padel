@@ -1,18 +1,12 @@
 import 'dart:developer';
-
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/app_bar.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
 import 'package:padel_mobile/presentations/score_board/widgets/add_player_bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:padel_mobile/presentations/score_board/widgets/shimmer_widgets.dart';
 
 class ScoreBoardScreen extends StatelessWidget {
   final ScoreBoardController controller = Get.put(ScoreBoardController());
@@ -32,7 +26,7 @@ class ScoreBoardScreen extends StatelessWidget {
           action: [
             IconButton(
               icon: const Icon(Icons.share_outlined, color: Colors.white,size: 20,),
-              onPressed: () {},
+              onPressed: () => controller.shareScoreboard(context),
             ),
           ],
           context: context),
@@ -42,13 +36,13 @@ class ScoreBoardScreen extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Container(
+                Container( 
                   height: 120,
                   color: AppColors.primaryColor,
                   width: Get.width,
                 ),
                 Obx(() => controller.isLoading.value
-                    ? _buildMatchCardShimmer(context).paddingOnly(left: 15, right: 15, top: 10)
+                    ? BuildMatchCardShimmer().paddingOnly(left: 15, right: 15, top: 10)
                     : _buildMatchCard(context).paddingOnly(left: 15, right: 15, top: 10)),
               ],
             ),
@@ -56,274 +50,13 @@ class ScoreBoardScreen extends StatelessWidget {
             _buildAddScoreButton(),
             const SizedBox(height: 12),
             Obx(() => controller.isLoading.value
-                ? _buildSetSectionShimmer().paddingOnly(left: 15, right: 15)
+                ? BuildSetSectionShimmer().paddingOnly(left: 15, right: 15)
                 : _buildSetSection().paddingOnly(left: 15, right: 15)),
           ],
         ),
       ),
     );
   }
-
-  // Shimmer loader for Match Card
-  Widget _buildMatchCardShimmer(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-          border: Border.all(color: AppColors.blackColor.withAlpha(10)),
-          boxShadow: [
-            BoxShadow(
-                color: AppColors.greyColor,
-                blurRadius: 0.5,
-                spreadRadius: 0.6,
-                offset: Offset(0, 2)
-            )
-          ]
-      ),
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header shimmer
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 16,
-                      width: Get.width * 0.5,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Container(
-                      height: 12,
-                      width: Get.width * 0.3,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      height: 12,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Container(
-                      height: 10,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ).paddingOnly(bottom: 8),
-
-            // Players shimmer
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ...List.generate(2, (index) => _buildPlayerShimmer()),
-                  Container(
-                    width: 1,
-                    color: AppColors.blackColor.withAlpha(50),
-                  ).paddingOnly(bottom: 25),
-                  ...List.generate(2, (index) => _buildPlayerShimmer()),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Status shimmer
-            Center(
-              child: Container(
-                height: 24,
-                width: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlayerShimmer() {
-    return Column(
-      children: [
-        Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-          ),
-        ),
-        SizedBox(height: 4),
-        Container(
-          height: 10,
-          width: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Shimmer loader for Set Section
-  Widget _buildSetSectionShimmer() {
-    return Card(
-      child: Container(
-        constraints: const BoxConstraints(
-          minHeight: 500,   // 👈 Start with 500
-        ),
-        width: Get.width,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Set items shimmer
-              ...List.generate(5, (index) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      height: 10,
-                      width: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5)
-                        // shape: BoxShape.circle,
-                      ),
-                    ),
-                    Container(
-                      height: 14,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    Container(
-                      height: 10,
-                      width: 36,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5)
-                        // shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-
-              Column(
-                children: [
-                   SizedBox(height: Get.height*0.15),
-
-                  // Add Set button shimmer
-                  Container(
-                    height: 32,
-                    width: 220,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                  Divider(color: AppColors.greyColor, height: 0.1),
-
-                  // Match Summary shimmer
-                  Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 16,
-                          width: 120,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...List.generate(3, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  height: 12,
-                                  width: 80,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                                Container(
-                                  height: 12,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildMatchCard(BuildContext context) {
     return Column(
       children: [
@@ -767,8 +500,6 @@ class ScoreBoardScreen extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildAddScoreButton() {
     return Container(
       width: double.infinity,
@@ -862,11 +593,11 @@ class ScoreBoardScreen extends StatelessWidget {
             onPressed: () => Get.back(),
             child: const Text("Cancel"),
           ),
-          PrimaryButton(
+          Obx(() => PrimaryButton(
             width: 70,
               height: 40,
               textStyle: Get.textTheme.headlineSmall!.copyWith(color: Colors.white,fontWeight: FontWeight.w600),
-              onTap: () async {
+              onTap: controller.isAddingScore.value ? () {} : () {
                 if (selectedSetNumber == null) {
                   SnackBarUtils.showInfoSnackBar("Please select a set");
                   return;
@@ -874,11 +605,21 @@ class ScoreBoardScreen extends StatelessWidget {
                 final teamAScore = int.tryParse(teamAController.text) ?? 0;
                 final teamBScore = int.tryParse(teamBController.text) ?? 0;
 
-                Get.back();
-                await controller.addScore(selectedSetNumber!, teamAScore, teamBScore);
+                controller.addScore(selectedSetNumber!, teamAScore, teamBScore).then((_) {
+                  if (!controller.isAddingScore.value) {
+                    Get.back();
+                  }
+                });
               },
-              text: "Add"
-          ),
+              text: controller.isAddingScore.value ? "" : "Add",
+              child: controller.isAddingScore.value 
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: LoadingWidget(color: Colors.white,)
+                    )
+                  : null,
+          )),
         ],
       ),
     );
@@ -1038,7 +779,7 @@ class ScoreBoardScreen extends StatelessWidget {
                   )),
                   const SizedBox(height: 20),
                   Divider(color: AppColors.greyColor,height: 0.1,),
-                  _buildMatchSummary(),
+                  buildMatchSummary(),
                 ],
               )
             ],
@@ -1047,8 +788,8 @@ class ScoreBoardScreen extends StatelessWidget {
       );
     });
   }
-
-  Widget _buildMatchSummary() {
+  // Shimmer loader for Set Section
+  Widget buildMatchSummary() {
     return Obx(() {
       return Container(
         width: Get.width,

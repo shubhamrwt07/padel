@@ -9,6 +9,7 @@ import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/cart/cart_screen.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CustomDrawerUi extends GetView<ProfileController> {
   const CustomDrawerUi({super.key});
@@ -218,11 +219,26 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
           Obx(
                 () => ProfileRow(
-              icon: Image.asset(Assets.imagesIcPrivacy, scale: 5, color: controller.selectedIndex.value == 10 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              icon: Image.asset(
+                Assets.imagesIcPrivacy,
+                scale: 5,
+                color: controller.selectedIndex.value == 10
+                    ? AppColors.primaryColor
+                    : AppColors.labelBlackColor,
+              ),
               title: AppStrings.privacy,
               isSelected: controller.selectedIndex.value == 10,
-              onTap: () {
+              onTap: () async {
                 controller.selectedIndex.value = 10;
+
+                final url = Uri.parse("https://swootapp.com/privacy-policy");
+
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(
+                    url,
+                    mode: LaunchMode.externalApplication, // opens in browser
+                  );
+                }
               },
             ),
           ),
