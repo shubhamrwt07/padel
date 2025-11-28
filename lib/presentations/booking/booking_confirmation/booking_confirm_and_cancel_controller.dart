@@ -69,7 +69,7 @@ final fromCancelled = ''.obs;
     } catch (e) {
       error.value = e.toString();
       if (kDebugMode) print("Error fetching booking details: $e");
-      Get.snackbar("Error", "Failed to fetch booking details. Please try again.");
+      // Get.snackbar("Error", "Failed to fetch booking details. Please try again.");
     } finally {
       isLoading.value = false;
     }

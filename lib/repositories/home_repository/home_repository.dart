@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:padel_mobile/data/response_models/get_register_club_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/home_models/get_available_court.dart';
@@ -33,6 +34,7 @@ class HomeRepository {
       }
     }
   }
+
   Future<GetAllActiveCourtsForSlotWiseModel> fetchAvailableCourtsSlotWise({
     required String registerClubId,       // club id
     required String day,
@@ -60,4 +62,27 @@ class HomeRepository {
     }
   }
 
+  ///Get Register Club Data-----------------------------------------------------
+  Future<GetRegisterClubModel> getRegisterClub({required String clubId}) async {
+    try {
+      final url = "${AppEndpoints.getRegisterClub}clubId=$clubId";
+
+      final response = await dioClient.get(url);
+
+      if (response.statusCode == 200) {
+        log("Response Register Club Data: ${response.data}");
+        return GetRegisterClubModel.fromJson(response.data);
+      } else {
+        throw Exception("Failed to load Register Club data - status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        debugPrint("Dio Error: ${e.response?.statusMessage}");
+        throw Exception("Server error: ${e.response?.statusCode}");
+      } else {
+        debugPrint("Dio Error: ${e.message}");
+        throw Exception("Network error: ${e.message}");
+      }
+    }
+  }
 }

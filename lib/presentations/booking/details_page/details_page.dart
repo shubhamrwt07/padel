@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../configs/app_colors.dart';
@@ -161,8 +162,28 @@ class DetailsScreen extends StatelessWidget {
                 teamA: controller.teamA,
                 teamB: controller.teamB,
               ),
-
-              SizedBox(height: Get.height * .015),
+              !fromOpenMatch?SizedBox(height: Get.height * .015,):SizedBox.shrink(),
+              fromOpenMatch?
+              Center(
+                child: GestureDetector(
+                  onTap: ()=>Get.toNamed(RoutesName.chat),
+                  child: Container(
+                    height: 30,
+                    width: 70,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: BorderRadius.circular(15)
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_outlined,color: Colors.white,size: 16,).paddingOnly(right: 4),
+                        Text("Chat",style: Get.textTheme.headlineLarge!.copyWith(color: Colors.white,fontSize: 12),)
+                      ],
+                    ),
+                  ),
+                ),
+              ).paddingOnly(top: Get.height*0.01,bottom: Get.height*0.01):SizedBox.shrink(),
 
               // club info card
               Container(

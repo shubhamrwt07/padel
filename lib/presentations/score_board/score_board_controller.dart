@@ -1,6 +1,8 @@
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import 'package:uuid/uuid.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 
 class ScoreBoardController extends GetxController {
   RxList<Map<String, dynamic>> sets = <Map<String, dynamic>>[].obs;
@@ -30,6 +32,7 @@ class ScoreBoardController extends GetxController {
   ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
   final isLoading = true.obs;
   final isAddingSet = false.obs;
+  final isAddingScore = false.obs;
   Future<void> fetchScoreBoard({bool showLoader = true}) async {
     if (showLoader) {
       isLoading.value = true;
@@ -122,7 +125,7 @@ class ScoreBoardController extends GetxController {
               "setNumber": setNum,
               "teamAScore": s.teamAScore ?? 0,
               "teamBScore": s.teamBScore ?? 0,
-              "winner": s.winner ?? null,
+              "winner": s.winner,
             });
           }
         } else {
@@ -271,12 +274,19 @@ class ScoreBoardController extends GetxController {
 
   ///Add Score------------------------------------------------------------------
   Future<void> addScore(int setNumber, int teamAScore, int teamBScore) async {
+    if (teamAScore == 0 && teamBScore == 0) {
+      SnackBarUtils.showErrorSnackBar("Both team scores cannot be zero.");
+      return;
+    }
+    isAddingScore.value = true;
     try {
-      String winner = "None";
+      String? winner;
       if (teamAScore > teamBScore) {
         winner = "Team A";
       } else if (teamBScore > teamAScore) {
         winner = "Team B";
+      } else {
+        winner = null;
       }
 
       final body = {
@@ -299,6 +309,73 @@ class ScoreBoardController extends GetxController {
     } catch (e) {
       CustomLogger.logMessage(msg: "Error-> $e", level: LogLevel.error);
       SnackBarUtils.showErrorSnackBar("Failed to add score. Please try again.");
+    } finally {
+      isAddingScore.value = false;
     }
+  }
+
+  ///Share Scoreboard-----------------------------------------------------------
+  Future<void> shareScoreboard(BuildContext context) async {
+    String formatPlayerNames(List<dynamic> players) {
+      if (players.isEmpty) return "Available";
+      return players
+          .where((p) => p['name'] != null && p['name'].toString().isNotEmpty)
+          .map((p) {
+        final firstName = (p['name']?.toString())?.capitalizeFirst ?? '';
+        final lastName = (p['lastName']?.toString())?.capitalizeFirst ?? '';
+        final fullName = "$firstName $lastName".trim();
+        return fullName.isEmpty ? "Unknown" : fullName;
+      }).join(", ");
+    }
+
+    final teamAPlayers = teams.isNotEmpty ? formatPlayerNames(teams[0]["players"]) : "Available";
+    final teamBPlayers = teams.length > 1 ? formatPlayerNames(teams[1]["players"]) : "Available";
+
+    final formattedDate = formatMatchDateAt(matchDate.value);
+    final clubNameValue = clubName.value.isNotEmpty ? clubName.value : "Unknown Club";
+    final courtNameValue = courtName.value.isNotEmpty ? courtName.value : "Court 1";
+
+    String setsResults = "";
+    if (sets.isNotEmpty) {
+      setsResults = sets.map((set) {
+        final teamA = set["teamAScore"] ?? 0;
+        final teamB = set["teamBScore"] ?? 0;
+        return "Set ${set["setNumber"]}: $teamA - $teamB";
+      }).join("\n");
+    } else {
+      setsResults = "No scores recorded yet";
+    }
+
+    final message = '''
+🎾 *Padel Scoreboard*
+
+📍 *Club:* $clubNameValue
+🏟️ *Court:* $courtNameValue
+📅 *Date:* $formattedDate
+
+👥 *Team A:* $teamAPlayers
+👥 *Team B:* $teamBPlayers
+
+📊 *Scores:*
+$setsResults
+
+🏆 *Overall Score:* ${teamAWins.value} - ${teamBWins.value}
+${winner.value != "None" && winner.value.isNotEmpty ? "🎉 *Winner:* ${winner.value}" : ""}
+
+Great game! 🏓
+''';
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final Rect shareRect = (renderBox != null)
+        ? (renderBox.localToGlobal(Offset.zero) & renderBox.size)
+        : const Rect.fromLTWH(0, 0, 1, 1);
+
+    await Share.share(
+      message,
+      subject: "Check out this Padel scoreboard!",
+      sharePositionOrigin: (shareRect.width == 0 || shareRect.height == 0)
+          ? const Rect.fromLTWH(0, 0, 1, 1)
+          : shareRect,
+    );
   }
 }

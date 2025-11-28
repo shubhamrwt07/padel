@@ -1,15 +1,15 @@
 class GetReviewModel {
   String? message;
-  List<Data>? data;
+  List<GetReviewData>? data;
 
   GetReviewModel({this.message, this.data});
 
   GetReviewModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <GetReviewData>[];
       json['data'].forEach((v) {
-        data!.add(Data.fromJson(v));
+        data!.add(GetReviewData.fromJson(v));
       });
     }
   }
@@ -24,20 +24,20 @@ class GetReviewModel {
   }
 }
 
-class Data {
+class GetReviewData {
   String? registerClubId;
   double? averageRating;
   int? totalReviews;
   List<Reviews>? reviews;
 
-  Data({
+  GetReviewData({
     this.registerClubId,
     this.averageRating,
     this.totalReviews,
     this.reviews,
   });
 
-  Data.fromJson(Map<String, dynamic> json) {
+  GetReviewData.fromJson(Map<String, dynamic> json) {
     registerClubId = json['register_club_id'];
     averageRating = (json['averageRating'] != null)
         ? (json['averageRating'] as num).toDouble()
@@ -124,18 +124,21 @@ class Reviews {
 class UserId {
   String? sId;
   String? email;
+  String? name;
 
-  UserId({this.sId, this.email});
+  UserId({this.sId, this.email, this.name});
 
   UserId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     email = json['email'];
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
     data['_id'] = sId;
     data['email'] = email;
+    data['name'] = name;
     return data;
   }
 }

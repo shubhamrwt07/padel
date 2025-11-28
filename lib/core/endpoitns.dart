@@ -1,10 +1,10 @@
 class AppEndpoints {
   AppEndpoints._();
   /// -----------------------Live URL-------------------------------------------
-  static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
+  // static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
 
   ///-----------------------Local URL-------------------------------------------
-// static const String BASE_URL = "http://192.168.0.116:5070/api/customer/";
+static const String BASE_URL = "http://192.168.0.129:5070/api/customer/";
 
 
   static const String login = "${BASE_URL}customerLogin";
@@ -16,6 +16,8 @@ class AppEndpoints {
 
   static const String verifyOTP = "${BASE_URL}verifyOtp";
   static const String resetPassword = "${BASE_URL}forgotPassword";
+  ///Home Register Club---------------------------------------------------------
+  static const String getRegisterClub = "${BASE_URL}court/registerCourt/getClubById?";
   static const String getClub ="${BASE_URL}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getAllActiveCourtsForSlotWise = "${BASE_URL}court/saveCourt/getAllActiveCourtsForSlotWise?";
   static const String getLocations = "${BASE_URL}court/state/getStates";

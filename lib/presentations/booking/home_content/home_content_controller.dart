@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:padel_mobile/data/request_models/create_review_model.dart';
+import 'package:padel_mobile/data/response_models/get_register_club_model.dart';
 import 'package:padel_mobile/data/response_models/get_review_model.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:padel_mobile/repositories/home_repository/home_repository.dart';
 import 'package:padel_mobile/repositories/review_repo/review_repository.dart';
 import '../../../data/request_models/home_models/get_club_name_model.dart' hide Data;
 
@@ -17,25 +19,28 @@ class HomeContentController extends GetxController{
   ];
 
   ///Get Review Api-------------------------------------------------------------
-  final ReviewRepository repository = Get.put(ReviewRepository());
+  final ReviewRepository reviewRepository = Get.put(ReviewRepository());
   var reviewResponse = Rxn<GetReviewModel>();
   var isLoading = false.obs;
-  
-  // Get reviews based on show all state
+
+  // Get all reviews for current club
   List<Reviews> get displayedReviews {
-    if (reviewResponse.value?.data == null) return [];
+    if (reviewResponse.value?.data == null || reviewResponse.value!.data!.isEmpty) return [];
+    
+    final clubId = Get.arguments['clubId'];
     final clubData = reviewResponse.value!.data!.firstWhere(
-      (data) => data.registerClubId == argument.id,
-      orElse: () => Data(),
+      (data) => data.registerClubId == clubId,
+      orElse: () => GetReviewData(),
     );
+    
     if (clubData.reviews == null) return [];
-    final allReviews = clubData.reviews!;
-    return isShowAllReviews.value ? allReviews : allReviews.take(3).toList();
+    
+    return clubData.reviews!;
   }
   Future<void> fetchReview()async{
     isLoading.value = true;
     try{
-      final response = await repository.getReview();
+      final response = await reviewRepository.getReview();
       reviewResponse.value = response;
       if(response.data != null){
         isLoading.value = false;
@@ -62,7 +67,7 @@ class HomeContentController extends GetxController{
         "reviewRating":reviewRating.value,
         "register_club_id":argument.id!
       };
-      final response = await repository.createReview(data: body);
+      final response = await reviewRepository.createReview(data: body);
       createResponse.value = response;
       if(response.review != null){
         log("FETCH SUCCESS->${response.message}");
@@ -75,11 +80,33 @@ class HomeContentController extends GetxController{
     }
   }
 
+  ///Get Register Club Find ById------------------------------------------------
+  var registerClubResponse = Rxn<GetRegisterClubModel>();
+  HomeRepository homeRepository = Get.put(HomeRepository());
+  Future<void> fetchRegisterClub(String clubId) async {
+    try {
+      isLoading.value = true;
+
+      final response = await homeRepository.getRegisterClub(clubId: clubId);
+      registerClubResponse.value = response;
+
+      if (response.success == true) {
+        CustomLogger.logMessage(msg: "Fetching Register Club Successfully", level: LogLevel.info);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "ERROR-> $e", level: LogLevel.error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onInit()async {
     argument = Get.arguments['data'];
     log("Register club id = >${argument.id!}");
+   final clubId = Get.arguments['clubId'];
    await fetchReview();
+   await fetchRegisterClub(clubId);
     super.onInit();
   }
 }
