@@ -27,6 +27,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final args = Get.arguments;
+    final matchID = Get.arguments['matchId'];
     final bool fromOpenMatch =
         args is Map && args['fromOpenMatch'] == true;
 
@@ -166,7 +167,7 @@ class DetailsScreen extends StatelessWidget {
               fromOpenMatch?
               Center(
                 child: GestureDetector(
-                  onTap: ()=>Get.toNamed(RoutesName.chat),
+                  onTap: ()=>Get.toNamed(RoutesName.chat,arguments: {"matchID":matchID}),
                   child: Container(
                     height: 30,
                     width: 70,

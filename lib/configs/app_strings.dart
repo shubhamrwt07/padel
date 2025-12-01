@@ -1,6 +1,6 @@
 class AppStrings{
   AppStrings._();
-  static const String appName = "Padel";
+  static const String appName = "Swoot";
 
   // Login Screen---------------------------------------------------------------
   static const String login = "Login here";
@@ -60,7 +60,7 @@ class AppStrings{
   static const String openMatch = "Open Match";
   static const String cart = "Cart";
   static const String helpSupport = "Help & Support";
-  static const String privacy = "Privacy";
+  static const String privacy = "Privacy Policy";
   static const String logout = "Logout";
   static const String areYouSureToLogout = "Are you sure you want to\nlogout?";
   static const String yes = "Yes";

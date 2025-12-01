@@ -154,30 +154,41 @@ class SignUpController extends GetxController {
     SignUpModel result = await signUpRepository.createAccount(body: body);
 
     if (result.status == "200") {
-      // Try to read FCM token from storage; if empty, proactively fetch via NotificationController
-      String? firebaseToken = storage.read('firebase_token');
-      if (firebaseToken == null || firebaseToken.isEmpty) {
-        final notificationController = NotificationController.instance;
-        // Ensure permissions and try to refresh token
-        await notificationController.requestPermissions();
-        await notificationController.refreshToken();
-        firebaseToken = notificationController.getStoredToken();
-      }
-      LoginModel result = await loginRepository.loginUser(
+      /// 🔥 Get FCM token (same logic as login)
+      final firebaseToken = await getFcmToken();
+
+      /// Auto-login after signup
+      LoginModel loginResult = await loginRepository.loginUser(
         body: {
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
-          "fcmToken":firebaseToken??""
+          "fcmToken": firebaseToken ?? "",
         },
       );
-      if (result.status == "200") {
-        storage.write('token', result.response!.token);
-        storage.write('userId', result.response!.user!.id);
+
+      if (loginResult.status == "200") {
+        storage.write('token', loginResult.response!.token);
+        storage.write('userId', loginResult.response!.user!.id);
         Get.offAllNamed(RoutesName.bottomNav);
       }
+
     } else {
       SnackBarUtils.showErrorSnackBar(result.message!);
     }
+  }
+  Future<String?> getFcmToken() async {
+    // Try to read FCM token from storage
+    String? firebaseToken = storage.read('firebase_token');
+
+    // If empty → request permissions & refresh token
+    if (firebaseToken == null || firebaseToken.isEmpty) {
+      final notificationController = NotificationController.instance;
+      await notificationController.requestPermissions();
+      await notificationController.refreshToken();
+      firebaseToken = notificationController.getStoredToken();
+    }
+
+    return firebaseToken;
   }
   
   ///Get Location Api----------------------------------------------------
