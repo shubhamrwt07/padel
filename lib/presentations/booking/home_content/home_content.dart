@@ -860,19 +860,38 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget directionGoogleMaps() {
-    return FlutterMap(
-      mapController: MapController(),
-      options: MapOptions(
-        initialCenter: LatLng(30.7333, 76.7794),
-        initialZoom: 13,
-      ),
-      children: [
-        TileLayer(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c'],
+    return Obx(() {
+      final lat = controller.mapLatitude.value;
+      final lng = controller.mapLongitude.value;
+
+      return FlutterMap(
+        mapController: MapController(),
+        options: MapOptions(
+          initialCenter: LatLng(lat, lng),
+          initialZoom: 13,
         ),
-      ],
-    );
+        children: [
+          TileLayer(
+            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c'],
+          ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: LatLng(lat, lng),
+                width: 40,
+                height: 40,
+                child: Icon(
+                  Icons.location_pin,
+                  color: AppColors.primaryColor,
+                  size: 40,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 
 

@@ -43,6 +43,7 @@ dependencies:
   flutter_zoom_drawer:
   loading_animation_widget:
   url_launcher:
+  socket_io_client:
 
 dev_dependencies:
   flutter_test:

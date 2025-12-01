@@ -219,17 +219,36 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
           Obx(
                 () => ProfileRow(
+                  icon: Icon(Icons.copyright, size: 20, color: controller.selectedIndex.value == 9 ? AppColors.primaryColor : AppColors.labelBlackColor),
+                  title: "Terms and Conditions",
+              isSelected: controller.selectedIndex.value == 10,
+              onTap: () async {
+                controller.selectedIndex.value = 10;
+
+                final url = Uri.parse("https://swootapp.com/term-&-conditions");
+
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(
+                    url,
+                    mode: LaunchMode.externalApplication, // opens in browser
+                  );
+                }
+              },
+            ),
+          ),
+          Obx(
+                () => ProfileRow(
               icon: Image.asset(
                 Assets.imagesIcPrivacy,
                 scale: 5,
-                color: controller.selectedIndex.value == 10
+                color: controller.selectedIndex.value == 11
                     ? AppColors.primaryColor
                     : AppColors.labelBlackColor,
               ),
               title: AppStrings.privacy,
-              isSelected: controller.selectedIndex.value == 10,
+              isSelected: controller.selectedIndex.value == 11,
               onTap: () async {
-                controller.selectedIndex.value = 10;
+                controller.selectedIndex.value = 11;
 
                 final url = Uri.parse("https://swootapp.com/privacy-policy");
 
