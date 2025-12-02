@@ -13,6 +13,7 @@ import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/app_bar.dart';
+import '../../../configs/components/snack_bars.dart';
 import '../../../generated/assets.dart';
 import '../../../handler/logger.dart';
 import 'details_page_controller.dart';
@@ -24,6 +25,44 @@ class DetailsScreen extends StatelessWidget {
           ? Get.find<DetailsController>()
           : Get.put(DetailsController());
   DetailsScreen({super.key});
+
+  bool _shouldShowChatButton() {
+    final loggedInUserId = controller.profileController.profileModel.value?.response?.sId;
+    
+    if (loggedInUserId == null || loggedInUserId.isEmpty) {
+      return false;
+    }
+
+    bool isUserInTeamA = controller.teamA.any((player) => 
+        player['userId'] == loggedInUserId);
+    
+    bool isUserInTeamB = controller.teamB.any((player) => 
+        player['userId'] == loggedInUserId);
+
+    return isUserInTeamA || isUserInTeamB;
+  }
+
+  void _handleChatAccess(String matchID) {
+    final loggedInUserId = controller.profileController.profileModel.value?.response?.sId;
+    
+    if (loggedInUserId == null || loggedInUserId.isEmpty) {
+      SnackBarUtils.showErrorSnackBar("Please login to access chat");
+      return;
+    }
+
+    // Check if logged-in user is in teamA or teamB
+    bool isUserInTeamA = controller.teamA.any((player) => 
+        player['userId'] == loggedInUserId);
+    
+    bool isUserInTeamB = controller.teamB.any((player) => 
+        player['userId'] == loggedInUserId);
+
+    if (isUserInTeamA || isUserInTeamB) {
+      Get.toNamed(RoutesName.chat, arguments: {"matchID": matchID});
+    } else {
+      SnackBarUtils.showErrorSnackBar("Only match players can access the chat");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final args = Get.arguments;
@@ -163,11 +202,11 @@ class DetailsScreen extends StatelessWidget {
                 teamA: controller.teamA,
                 teamB: controller.teamB,
               ),
-              !fromOpenMatch?SizedBox(height: Get.height * .015,):SizedBox.shrink(),
-              fromOpenMatch?
+              SizedBox(height:_shouldShowChatButton()?null: Get.height * .015,),
+              _shouldShowChatButton() ?
               Center(
                 child: GestureDetector(
-                  onTap: ()=>Get.toNamed(RoutesName.chat,arguments: {"matchID":matchID}),
+                  onTap: () => _handleChatAccess(matchID),
                   child: Container(
                     height: 30,
                     width: 70,
@@ -184,7 +223,7 @@ class DetailsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              ).paddingOnly(top: Get.height*0.01,bottom: Get.height*0.01):SizedBox.shrink(),
+              ).paddingOnly(top: Get.height*0.01,bottom: Get.height*0.01) : SizedBox.shrink(),
 
               // club info card
               Container(

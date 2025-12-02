@@ -1,10 +1,10 @@
 class AppEndpoints {
   AppEndpoints._();
   /// -----------------------Live URL-------------------------------------------
-  static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
+  // static const String BASE_URL = "http://103.185.212.117:5070/api/customer/";
 
   ///-----------------------Local URL-------------------------------------------
-// static const String BASE_URL = "http://192.168.0.129:5070/api/customer/";
+  static const String BASE_URL = "http://192.168.0.129:5070/api/customer/";
 
 
   static const String login = "${BASE_URL}customerLogin";

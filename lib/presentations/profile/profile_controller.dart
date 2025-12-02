@@ -3,6 +3,7 @@
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/response_models/home_models/profile_model.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
+import 'package:padel_mobile/presentations/chat/chat_controller.dart';
 
 class ProfileController extends GetxController {
   // Repositories
@@ -58,7 +59,25 @@ var profileModel = Rxn<ProfileModel>();
               children: [
                 GestureDetector(
                   onTap: () async {
-                    await storage.erase();
+                    // Try to disconnect chat socket (if chat is in memory) before clearing storage
+                    if (Get.isRegistered<ChatController>()) {
+                      try {
+                        final chatCtrl = Get.find<ChatController>();
+                        chatCtrl.disconnectSocket();
+                        // Also remove the ChatController instance so it will be recreated
+                        // with the new user after login.
+                        Get.delete<ChatController>(force: true);
+                      } catch (_) {}
+                    }
+
+                    // Log before clearing
+                    log("🔍 BEFORE ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+                    await storage.remove("userId");
+                    await storage.erase(); // clear all stored data
+
+                    // Log after clearing
+                    log("🧹 AFTER ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+
                     Get.offAllNamed(RoutesName.login);
                   },
                   child: Container(

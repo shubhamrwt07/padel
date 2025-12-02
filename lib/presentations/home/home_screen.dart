@@ -563,13 +563,14 @@ class HomeScreen extends GetView<HomeController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: 150,),
             Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               controller.clubError.value,
               textAlign: TextAlign.center,
               style: Get.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-            ),
+            ).paddingOnly(left: 20,right: 20),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: controller.retryFetch,
