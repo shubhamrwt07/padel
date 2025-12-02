@@ -7,14 +7,131 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class ChatController extends GetxController {
   late IO.Socket socket;
   final TextEditingController messageController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
   final RxBool isConnected = false.obs;
-  // Always treat userId as String so comparison with senderId works reliably
-  final String userId = storage.read("userId").toString();
-  final String roomId = 'padel_room_1';
-   var matchId = ''.obs;
-   // If your backend uses different keys, adjust the mapping in
-   // `_handleMessages` and `_handleNewMessage` accordingly.
+  final RxBool showDateHeader = false.obs;
+  // Always treat userId as String so comparison with senderId works reliably.
+  // Use a getter so that after logout/login the latest value from storage is used.
+  String get userId => storage.read("userId")?.toString() ?? '';
+  String get userTeam {
+    final team = storage.read("userTeam") ?? 
+                 storage.read("team") ?? 
+                 Get.arguments?['userTeam'] ?? 
+                 Get.arguments?['team'] ?? 
+                 '';
+    print('DEBUG: userTeam = $team');
+    return _normalizeTeam(team);
+  }
+  var matchId = ''.obs;
+  // If your backend uses different keys, adjust the mapping in
+  // `_handleMessages` and `_handleNewMessage` accordingly.
+
+  /// Convert a full name into title case.
+  /// e.g. "sanjay bhandari" / "SANJAY BHANDARI" -> "Sanjay Bhandari"
+  String _toTitleCase(String? value) {
+    if (value == null) return '';
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return '';
+
+    final parts = trimmed.split(RegExp(r'\s+'));
+    final capitalized = parts.map((word) {
+      if (word.isEmpty) return '';
+      if (word.length == 1) return word.toUpperCase();
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    }).where((w) => w.isNotEmpty).join(' ');
+
+    return capitalized;
+  }
+
+  /// Normalize team code coming from backend (e.g. "teamA") into a
+  /// user‑friendly label used by the UI (e.g. "Team A").
+  String _normalizeTeam(dynamic rawTeam) {
+    final value = rawTeam?.toString().trim();
+    if (value == null || value.isEmpty) return '';
+
+    final lower = value.toLowerCase();
+    switch (lower) {
+      case 'teama':
+      case 'team a':
+        return 'Team A';
+      case 'teamb':
+      case 'team b':
+        return 'Team B';
+      default:
+        return value; // fallback to original
+    }
+  }
+
+  /// Format any incoming timestamp to a time-only string like "2:00pm".
+  /// - Accepts `DateTime`, ISO string, or raw string.
+  /// - Falls back gracefully to the original value if parsing fails.
+  String _formatTimestamp(dynamic raw) {
+    try {
+      DateTime? dt;
+
+      if (raw is DateTime) {
+        dt = raw;
+      } else if (raw is String && raw.isNotEmpty) {
+        // Try to parse ISO / standard datetime strings
+        dt = DateTime.tryParse(raw);
+      }
+
+      if (dt == null) {
+        // If we can't parse, just return the original string (or empty)
+        return raw?.toString() ?? '';
+      }
+
+      // Convert to a 12-hour format like "2:05pm"
+      final int hour = dt.hour;
+      final int minute = dt.minute;
+      final int hourOfPeriod =
+          hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+      final String minuteStr = minute.toString().padLeft(2, '0');
+      final String period = hour >= 12 ? 'pm' : 'am';
+      return '$hourOfPeriod:$minuteStr$period';
+    } catch (_) {
+      return raw?.toString() ?? '';
+    }
+  }
+
+  /// Parse timestamp and return DateTime object for date grouping
+  DateTime? _parseDateTime(dynamic raw) {
+    try {
+      if (raw is DateTime) {
+        return raw;
+      } else if (raw is String && raw.isNotEmpty) {
+        return DateTime.tryParse(raw);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Format date for chat headers like WhatsApp (Today, Yesterday, or date)
+  String formatDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final messageDate = DateTime(date.year, date.month, date.day);
+
+    if (messageDate == today) {
+      return 'Today';
+    } else if (messageDate == yesterday) {
+      return 'Yesterday';
+    } else {
+      return '${date.day}/${date.month}/${date.year.toString().substring(2)}';
+    }
+  }
+
+  /// Get current date header for fixed display
+  String get currentDateHeader {
+    if (messages.isEmpty) return formatDateHeader(DateTime.now());
+    final lastMessage = messages.last;
+    final lastDate = lastMessage['dateTime'] ?? DateTime.now();
+    return formatDateHeader(lastDate);
+  }
 
   @override
   void onInit() {
@@ -22,20 +139,53 @@ class ChatController extends GetxController {
     final matchID = Get.arguments['matchID'];
     matchId.value = matchID;
     print("matchID-> ${matchId.value}");
+    print("UserID-> ${storage.read("userId")}");
+    print("UserTeam-> ${userTeam}");
+    print("Arguments-> ${Get.arguments}");
+    _setupScrollListener();
     connectSocket();
+  }
+
+  void _setupScrollListener() {
+    // This will be handled by NotificationListener in the UI
+  }
+
+  void onScrollStart() {
+    showDateHeader.value = true;
+  }
+
+  void onScrollEnd() {
+    Future.delayed(const Duration(seconds: 2), () {
+      showDateHeader.value = false;
+    });
+  }
+
+  void scrollToBottom() {
+    if (scrollController.hasClients) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (scrollController.hasClients) {
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent + 100,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
   }
 
   void connectSocket() {
     socket = IO.io(
       'http://192.168.0.129:5070',
       IO.OptionBuilder()
-          // Start with default transports like the JS client; add websocket-only later if needed
-           .setTransports(['websocket'])
+          // Force a brand‑new connection so old auth/userId are not reused.
+          .setTransports(['websocket'])
           .disableAutoConnect()
+          .enableForceNew() // important when logging out / logging in as another user
           .setAuth({'userId': userId})
           .build(),
     );
-
+    print("USER ID_ CONNECT_> $userId");
     socket.connect();
 
     // Log all incoming events to understand what the backend is sending
@@ -90,15 +240,22 @@ class ChatController extends GetxController {
 
     // Optionally append the message locally so it shows immediately.
     // You can remove this if your backend echoes the message back via `newMessage`.
+    final now = DateTime.now();
     messages.add({
       'isMe': true,
       'message': messageController.text.trim(),
-      'team': '', // fill if you have team info locally
+      'team': userTeam,
       'sender': 'You',
-      'timestamp': TimeOfDay.now().format(Get.context!),
+      'timestamp': _formatTimestamp(now),
+      'dateTime': now,
     });
 
     messageController.clear();
+    
+    // Scroll to bottom after UI updates
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollToBottom();
+    });
   }
   Future<void> getMessages() async {
 
@@ -167,23 +324,34 @@ class ChatController extends GetxController {
               ].where((e) => e.isNotEmpty).join(' ')
             : '';
 
+        final rawSenderName = map['senderName'] ??
+            senderNameFromObject ??
+            map['playerName'] ??
+            'Player';
+
+        final rawTimestamp = map['createdAt'] ?? map['time'] ?? '';
+        final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
+        
         return {
           'isMe': senderId == userId,
           // Backend example uses `message` for text
           'message': map['message'] ?? map['text'] ?? '',
-          // Backend example uses `senderTeam`
-          'team': map['senderTeam'] ?? map['team'] ?? '',
+          // Normalize backend team code into UI label (e.g. "teamA" -> "Team A")
+          'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
           // Prefer explicit senderName, then build from senderId object, then fallback
-          'sender': map['senderName'] ??
-              senderNameFromObject ??
-              map['playerName'] ??
-              'Player',
-          // Backend example uses `createdAt`
-          'timestamp': map['createdAt'] ?? map['time'] ?? '',
+          'sender': _toTitleCase(rawSenderName),
+          // Backend example uses `createdAt` – format to time-only
+          'timestamp': _formatTimestamp(rawTimestamp),
+          'dateTime': dateTime,
         };
       }).toList();
 
       messages.assignAll(mapped);
+      
+      // Auto-scroll to bottom after loading messages
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToBottom();
+      });
 
       // PRINT / LOG ALL MESSAGES AFTER MAPPING
       CustomLogger.logMessage(
@@ -227,15 +395,26 @@ class ChatController extends GetxController {
         return;
       }
 
+      final rawSenderName = map['senderName'] ??
+          senderNameFromObject ??
+          map['playerName'] ??
+          'Player';
+
+      final rawTimestamp = map['createdAt'] ?? map['time'] ?? '';
+      final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
+
       messages.add({
         'isMe': senderId == userId,
         'message': map['message'] ?? map['text'] ?? '',
-        'team': map['senderTeam'] ?? map['team'] ?? '',
-        'sender': map['senderName'] ??
-            senderNameFromObject ??
-            map['playerName'] ??
-            'Player',
-        'timestamp': map['createdAt'] ?? map['time'] ?? '',
+        'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
+        'sender': _toTitleCase(rawSenderName),
+        'timestamp': _formatTimestamp(rawTimestamp),
+        'dateTime': dateTime,
+      });
+      
+      // Scroll to bottom when new message arrives
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToBottom();
       });
     } catch (e) {
       CustomLogger.logMessage(
@@ -247,8 +426,23 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
-    socket.disconnect();
+    // Ensure socket is properly disconnected when controller is closed
+    disconnectSocket();
     messageController.dispose();
+    scrollController.dispose();
     super.onClose();
+  }
+
+  /// Public method to safely disconnect the socket, can be called from anywhere (e.g. on logout).
+  void disconnectSocket() {
+    try {
+      if (socket.connected) {
+        socket.disconnect();
+      }
+    } catch (_) {
+      // Ignore any socket errors during manual disconnect
+    } finally {
+      isConnected.value = false;
+    }
   }
 }

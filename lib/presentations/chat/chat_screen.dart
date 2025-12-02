@@ -10,38 +10,94 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ChatController controller = Get.put(ChatController());
     
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
-      appBar: _buildAppBar(controller),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() => ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.messages.length,
-              itemBuilder: (context, index) {
-                final message = controller.messages[index];
-                return message['isMe']
-                    ? _buildSentMessage(
-                        message['message'],
-                        message['team'],
-                        message['timestamp'],
-                      )
-                    : _buildReceivedMessage(
-                        message['message'],
-                        message['sender'],
-                        message['team'],
-                        message['timestamp'],
-                        'https://randomuser.me/api/portraits/men/32.jpg',
-                      );
-              },
-            )),
-          ),
-          _buildMessageInput(controller),
-        ],
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF6F6F6),
+        resizeToAvoidBottomInset: true,
+        appBar: _buildAppBar(controller),
+        body: Column(
+          children: [
+            Expanded(
+              child: Obx(() => Stack(
+                children: [
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollStartNotification) {
+                        controller.onScrollStart();
+                      } else if (notification is ScrollEndNotification) {
+                        controller.onScrollEnd();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      controller: controller.scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.messages.length,
+                      itemBuilder: (context, index) {
+                        final message = controller.messages[index];
+                        return message['isMe']
+                            ? _buildSentMessage(
+                                message['message'],
+                                message['team'],
+                                message['timestamp'],
+                              )
+                            : _buildReceivedMessage(
+                                message['message'],
+                                message['sender'],
+                                message['team'],
+                                message['timestamp'],
+                              );
+                      },
+                    ),
+                  ),
+                  if (controller.showDateHeader.value)
+                    Positioned(
+                      top: 16,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            controller.currentDateHeader,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              )),
+            ),
+            _buildMessageInput(controller,context),
+          ],
+        ),
       ),
     );
   }
+
+  /// Return initials from a full name.
+  /// e.g. "Sanjay Bhandari" -> "SB", "Sanjay" -> "S"
+  String _getInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) {
+      return parts.first.substring(0, 1).toUpperCase();
+    }
+    final first = parts.first.substring(0, 1).toUpperCase();
+    final last = parts.last.substring(0, 1).toUpperCase();
+    return '$first$last';
+  }
+
+
 
   PreferredSizeWidget _buildAppBar(ChatController controller) {
     return AppBar(
@@ -81,7 +137,7 @@ class ChatScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Padel Squad',
+                'Padel Squad - Open Matches',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -103,16 +159,25 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageInput(ChatController controller) {
+  Widget _buildMessageInput(ChatController controller,BuildContext context) {
     return Container(
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+      padding: EdgeInsets.only(
+        left: 12,
+        right: 12,
+        top: 5,
+        bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 5 : 48,
+      ),
       color: Colors.white,
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: controller.messageController,
+              onTap: () {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  controller.scrollToBottom();
+                });
+              },
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
@@ -125,7 +190,7 @@ class ChatScreen extends StatelessWidget {
                 filled: true,
               ),
               onSubmitted: (_) => controller.sendMessage(),
-            ).paddingOnly(bottom: 10),
+            ),
           ),
           const SizedBox(width: 8),
           GestureDetector(
@@ -134,7 +199,7 @@ class ChatScreen extends StatelessWidget {
               radius: 20,
               backgroundColor: const Color(0xFF4DA6FF),
               child: const Icon(Icons.send, color: Colors.white, size: 20),
-            ).paddingOnly(bottom: 10),
+            ),
           ),
         ],
       ),
@@ -143,132 +208,149 @@ class ChatScreen extends StatelessWidget {
 
 
   Widget _buildSentMessage(String message, String team, String time) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                team,
-                style: TextStyle(
-                  fontSize: 10,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (team.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    team,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                "You",
+                style: const TextStyle(
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                  color: Colors.grey,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            margin: const EdgeInsets.only(left: 50),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor,
+              borderRadius: BorderRadius.circular(14),
             ),
-            const SizedBox(width: 8),
-            Text(
-              "You",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          margin: const EdgeInsets.only(left: 50),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(14),
           ),
-          child: Text(
-            message,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, right: 4),
+            child: Text(
+              time,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 4, right: 4),
-          child: Text(
-            time,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildReceivedMessage(String message, String playerName, String team, String time, String avatarUrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage(avatarUrl),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        playerName,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          team,
-                          style: TextStyle(
-                            fontSize: 10,
+  Widget _buildReceivedMessage(
+      String message, String playerName, String team, String time) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.blueGrey.shade100,
+                child: Text(
+                  _getInitials(playerName),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          playerName,
+                          style: const TextStyle(
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                            color: Colors.grey,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            team,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    margin: const EdgeInsets.only(top: 2),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
+                      child: Text(
+                        message,
+                        style: const TextStyle(color: Colors.black87, fontSize: 14),
+                      ),
                     ),
-                    child: Text(
-                      message,
-                      style: const TextStyle(color: Colors.black87, fontSize: 14),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 4, left: 40),
-          child: Text(
-            time,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ],
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 40),
+            child: Text(
+              time,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
