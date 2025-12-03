@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
@@ -11,6 +12,7 @@ import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
@@ -26,6 +28,12 @@ class DetailsController extends GetxController {
   RxString gameType = 'Mixed Doubles'.obs;
   late RazorpayPaymentService _paymentService;
   bool isFromOpenMatch = false;
+  
+  // Socket connection variables
+  IO.Socket? socket;
+  final RxBool isSocketConnected = false.obs;
+  final RxInt unreadCount = 0.obs;
+  String get userId => storage.read("userId")?.toString() ?? '';
 
   RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{
     "name": "",
@@ -865,6 +873,112 @@ class DetailsController extends GetxController {
     );
   }
 
+  /// Connect socket if user is part of the match and fromOpenMatch is true
+  void connectSocketIfEligible() {
+    // Only connect socket if coming from open match
+    if (!isFromOpenMatch) return;
+    
+    final args = Get.arguments;
+    if (args == null || args is! Map) return;
+    
+    final matchId = args['matchId']?.toString();
+    if (matchId == null || matchId.isEmpty) return;
+    
+    final loggedInUserId = profileController.profileModel.value?.response?.sId;
+    if (loggedInUserId == null || loggedInUserId.isEmpty) return;
+
+    // Check if user is in either team
+    bool isUserInTeamA = teamA.any((player) => player['userId'] == loggedInUserId);
+    bool isUserInTeamB = teamB.any((player) => player['userId'] == loggedInUserId);
+
+    if (isUserInTeamA || isUserInTeamB) {
+      _connectSocket(matchId);
+    }
+  }
+
+  /// Connect to socket for match chat
+  void _connectSocket(String matchId) {
+    try {
+      socket = IO.io(
+        'http://192.168.0.129:5070',
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .enableForceNew()
+            .setAuth({'userId': userId})
+            .build(),
+      );
+
+      socket!.connect();
+
+      socket!.on('connect', (_) {
+        CustomLogger.logMessage(
+          msg: '✅ Socket connected in detail page for match: $matchId',
+          level: LogLevel.info,
+        );
+        isSocketConnected.value = true;
+        socket!.emit('joinMatch', matchId);
+        socket!.emit('getUnreadCount', {'matchId': matchId});
+      });
+
+      socket!.on('unreadCount', (data) {
+        unreadCount.value = data['count'] ?? 0;
+      });
+
+      socket!.on('disconnect', (reason) {
+        CustomLogger.logMessage(
+          msg: '❌ Socket disconnected in detail page: $reason',
+          level: LogLevel.error,
+        );
+        isSocketConnected.value = false;
+      });
+
+      socket!.on('connect_error', (error) {
+        CustomLogger.logMessage(
+          msg: '🔥 Socket connection error in detail page: $error',
+          level: LogLevel.error,
+        );
+        isSocketConnected.value = false;
+      });
+
+      socket!.on('newMessage', (data) {
+        // Increment unread count locally for new messages from others
+        final senderId = data['senderId']?.toString() ?? '';
+        if (senderId != userId) {
+          unreadCount.value = unreadCount.value + 1;
+        }
+      });
+
+      // Listen for message read updates to reset unread count
+      socket!.on('messageReadUpdate', (data) {
+        // Check if the read update is for our user
+        final readBy = data['readBy'] as List?;
+        if (readBy != null && readBy.contains(userId)) {
+          unreadCount.value = 0;
+        }
+      });
+
+      // Listen for all messages marked as read
+      socket!.on('allMessagesRead', (data) {
+        final matchIdFromEvent = data['matchId']?.toString();
+        final userIdFromEvent = data['userId']?.toString();
+        final args = Get.arguments;
+        if (args is Map && 
+            matchIdFromEvent == args['matchId']?.toString() && 
+            userIdFromEvent == userId) {
+          unreadCount.value = 0;
+        }
+      });
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error connecting socket in detail page: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+
+
+
   @override
   void onInit() {
     // Initialize payment service with callbacks
@@ -895,6 +1009,10 @@ class DetailsController extends GetxController {
 
     profileController.fetchUserProfile();
 
+    // Set isFromOpenMatch flag
+    final args = Get.arguments;
+    isFromOpenMatch = args is Map && args['fromOpenMatch'] == true;
+    
     // Only add profile data if not coming from OpenMatchBookingScreen
     if (!isFromOpenMatch) {
       String skillLevel = "";
@@ -923,12 +1041,49 @@ class DetailsController extends GetxController {
       teamA.first.addAll(profileData);
     }
 
+    // Connect socket after initialization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      connectSocketIfEligible();
+    });
+
     super.onInit();
   }
 
 
+  /// Mark all messages as read for this match
+  void markAllMessagesAsRead() {
+    final args = Get.arguments;
+    if (args is Map && socket?.connected == true) {
+      final matchId = args['matchId']?.toString();
+      if (matchId != null) {
+        socket!.emit('markAllMessagesRead', {'matchId': matchId});
+        // Don't reset count immediately - wait for backend confirmation
+      }
+    }
+  }
+
+  /// Disconnect socket
+  void disconnectSocket() {
+    try {
+      if (socket?.connected == true) {
+        socket!.disconnect();
+      }
+    } catch (_) {
+      // Ignore errors during disconnect
+    } finally {
+      isSocketConnected.value = false;
+    }
+  }
+
+  /// Handle back navigation - disconnect socket
+  void handleBackNavigation() {
+    disconnectSocket();
+  }
+
   @override
   void onClose() {
+    // Disconnect socket when leaving detail page
+    disconnectSocket();
     // Dispose payment service
     _paymentService.dispose();
     super.onClose();

@@ -2,6 +2,7 @@
  import 'dart:developer';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/response_models/home_models/profile_model.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 import 'package:padel_mobile/presentations/chat/chat_controller.dart';
 
@@ -60,9 +61,9 @@ var profileModel = Rxn<ProfileModel>();
                 GestureDetector(
                   onTap: () async {
                     // Try to disconnect chat socket (if chat is in memory) before clearing storage
-                    if (Get.isRegistered<ChatController>()) {
+                    if (Get.isRegistered<DetailsController>()) {
                       try {
-                        final chatCtrl = Get.find<ChatController>();
+                        final chatCtrl = Get.find<DetailsController>();
                         chatCtrl.disconnectSocket();
                         // Also remove the ChatController instance so it will be recreated
                         // with the new user after login.

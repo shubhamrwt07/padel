@@ -58,6 +58,17 @@ class DetailsScreen extends StatelessWidget {
         player['userId'] == loggedInUserId);
 
     if (isUserInTeamA || isUserInTeamB) {
+      // Check socket connection status
+      if (!controller.isSocketConnected.value) {
+        SnackBarUtils.showWarningSnackBar("Connecting to chat...");
+        // Try to reconnect
+        controller.connectSocketIfEligible();
+        return;
+      }
+      // Mark all messages as read when chat button is clicked
+      controller.markAllMessagesAsRead();
+      // Reset unread count immediately for better UX
+      controller.unreadCount.value = 0;
       Get.toNamed(RoutesName.chat, arguments: {"matchID": matchID});
     } else {
       SnackBarUtils.showErrorSnackBar("Only match players can access the chat");
@@ -66,7 +77,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final args = Get.arguments;
-    final matchID = Get.arguments['matchId'];
+    final matchID = args is Map ? args['matchId'] : null;
     final bool fromOpenMatch =
         args is Map && args['fromOpenMatch'] == true;
 
@@ -77,25 +88,46 @@ class DetailsScreen extends StatelessWidget {
       imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
           ? (data['clubImage'] as List).first.toString() 
           : (data['clubImage']?.toString() ?? ""),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: primaryAppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-          titleTextColor: AppColors.whiteColor,
-          leadingButtonColor: AppColors.whiteColor,
-          title: Text("Details"),
-          context: context,
-          centerTitle: true,
-          action: [
-            appBarAction(
-              Colors.white,
-              const Icon(Icons.share_outlined, color: Colors.black, size: 18),
-                ()async{
-                  await controller.shareLocalMatch(context);
-                }
-            ).paddingOnly(right: 10),
-          ],
-        ),
+      child: WillPopScope(
+        onWillPop: () async {
+          controller.handleBackNavigation();
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: primaryAppBar(
+            systemOverlayStyle: SystemUiOverlayStyle.light,
+            titleTextColor: AppColors.whiteColor,
+            leadingButtonColor: AppColors.whiteColor,
+            title: Text("Details"),
+            context: context,
+            centerTitle: true,
+            leading: GestureDetector(
+              onTap: () {
+                controller.handleBackNavigation();
+                Get.back();
+              },
+              child: Container(
+                color: Colors.transparent,
+                height: 30,
+                width: 40,
+                child: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.whiteColor,
+                  size: 22,
+                ),
+              ),
+            ),
+            action: [
+              appBarAction(
+                Colors.white,
+                const Icon(Icons.share_outlined, color: Colors.black, size: 18),
+                  ()async{
+                    await controller.shareLocalMatch(context);
+                  }
+              ).paddingOnly(right: 10),
+            ],
+          ),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: Column(
@@ -202,26 +234,56 @@ class DetailsScreen extends StatelessWidget {
                 teamA: controller.teamA,
                 teamB: controller.teamB,
               ),
-              SizedBox(height:_shouldShowChatButton()?null: Get.height * .015,),
-              _shouldShowChatButton() ?
-              Center(
+              SizedBox(height:_shouldShowChatButton()&& fromOpenMatch?null: Get.height * .015,),
+              _shouldShowChatButton()&& fromOpenMatch ?
+              Align(
+                alignment: AlignmentGeometry.center,
                 child: GestureDetector(
                   onTap: () => _handleChatAccess(matchID),
-                  child: Container(
-                    height: 30,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.circular(15)
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_outlined,color: Colors.white,size: 16,).paddingOnly(right: 4),
-                        Text("Chat",style: Get.textTheme.headlineLarge!.copyWith(color: Colors.white,fontSize: 12),)
-                      ],
-                    ),
-                  ),
+                  child: Obx(() => Stack(
+                    children: [
+                      Container(
+                        height: 30,
+                        width: 70,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(15)
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.chat_outlined,color: Colors.white,size: 16,).paddingOnly(right: 4),
+                            Text("Chat",style: Get.textTheme.headlineLarge!.copyWith(color: Colors.white,fontSize: 12),)
+                          ],
+                        ),
+                      ),
+                      if (controller.unreadCount.value > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              controller.unreadCount.value > 99 ? '99+' : controller.unreadCount.value.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  )),
                 ),
               ).paddingOnly(top: Get.height*0.01,bottom: Get.height*0.01) : SizedBox.shrink(),
 
@@ -336,6 +398,7 @@ class DetailsScreen extends StatelessWidget {
         // Add the bottom bar here (hidden when opened from OpenMatch booking list)
         bottomNavigationBar:
             fromOpenMatch ? null : bottomBar(context, controller),
+        ),
       ),
     );
   }
@@ -392,14 +455,15 @@ class DetailsScreen extends StatelessWidget {
               ],
             )
                 : PopupMenuButton<String>(
-              offset: const Offset(0, 30),
+              offset: const Offset(-20, 30),
+
               onSelected: (value) {
                 controller.gameType.value = value;
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'Male Only', child: Text('Male Only')),
-                PopupMenuItem(value: 'Female Only', child: Text('Female Only')),
-                PopupMenuItem(value: 'Mixed Doubles', child: Text('Mixed Doubles')),
+              itemBuilder: (context) =>  [
+                PopupMenuItem(value: 'Male Only', child: Text('Male Only',style: Get.textTheme.bodyLarge,)),
+                PopupMenuItem(value: 'Female Only', child: Text('Female Only',style: Get.textTheme.bodyLarge,)),
+                PopupMenuItem(value: 'Mixed Doubles', child: Text('Mixed Doubles',style: Get.textTheme.bodyLarge,)),
               ],
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -589,7 +653,7 @@ class DetailsScreen extends StatelessWidget {
   }) {
     return GetBuilder<DetailsController>(
       builder: (controller) => Container(
-        height: Get.height * .20,
+        // height: Get.height * .20,
         width: Get.width,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.blackColor.withAlpha(10)),
@@ -748,6 +812,7 @@ class DetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              // SizedBox(height: 10,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -766,7 +831,7 @@ class DetailsScreen extends StatelessWidget {
                 ],
               ),
             ],
-          ).paddingOnly(left: 15, right: 15, top: 10, bottom: 5),
+          ).paddingOnly(left: 15, right: 15, top: 10, bottom: 10),
         ),
       ),
     );
