@@ -77,7 +77,15 @@ class ChatScreen extends StatelessWidget {
                 ],
               )),
             ),
-            _buildMessageInput(controller,context),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 0, left: 0, right: 0),
+                  child: _buildMessageInput(controller,context),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -137,7 +145,7 @@ class ChatScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Padel Squad - Open Matches',
+                'Padel Squad - Open Match',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -145,13 +153,43 @@ class ChatScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Obx(() => Text(
-                controller.isConnected.value ? '4 players online' : 'Connecting...',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey,
-                ),
-              )),
+              Obx(() {
+                if (!controller.isConnected.value) {
+                  return const Text(
+                    'Connecting...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  );
+                }
+
+                final players = controller.formattedPlayersForTitle;
+
+                if (players.length == 1) {
+                  return const Text(
+                    'You',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  );
+                }
+
+                final playerNames = players.join(', ');
+                return Container(
+                  color: Colors.transparent,
+                  width: Get.width*0.65,
+                  child: Text(
+                    playerNames,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }),
             ],
           ),
         ],
@@ -165,7 +203,7 @@ class ChatScreen extends StatelessWidget {
         left: 12,
         right: 12,
         top: 5,
-        bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 5 : 48,
+        bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 5 : 10,
       ),
       color: Colors.white,
       child: Row(
@@ -173,11 +211,7 @@ class ChatScreen extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller.messageController,
-              onTap: () {
-                Future.delayed(const Duration(milliseconds: 300), () {
-                  controller.scrollToBottom();
-                });
-              },
+              onTap: controller.onTextFieldFocus,
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
@@ -197,7 +231,7 @@ class ChatScreen extends StatelessWidget {
             onTap: controller.sendMessage,
             child: CircleAvatar(
               radius: 20,
-              backgroundColor: const Color(0xFF4DA6FF),
+              backgroundColor: AppColors.secondaryColor,
               child: const Icon(Icons.send, color: Colors.white, size: 20),
             ),
           ),
@@ -247,21 +281,31 @@ class ChatScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Container(
             margin: const EdgeInsets.only(left: 50),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primaryColor,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Text(
-              message,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4, right: 4),
-            child: Text(
-              time,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              borderRadius: BorderRadius.circular(14).copyWith(
+                topRight: const Radius.circular(0),  // bubble tail
+              ),),
+            child: IntrinsicWidth(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      message,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                  SizedBox(width: 6,),
+                  Transform.translate(
+                    offset: Offset(0, 4),
+                    child: Text(
+                      time,
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -327,27 +371,37 @@ class ChatScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Container(
                       margin: const EdgeInsets.only(top: 2),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        message,
-                        style: const TextStyle(color: Colors.black87, fontSize: 14),
+                        color: AppColors.whiteColor,
+                        borderRadius: BorderRadius.circular(14).copyWith(
+                          topLeft: const Radius.circular(0),  // bubble tail
+                        ),),
+                      child: IntrinsicWidth(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                message,
+                                style: const TextStyle(color: Colors.black87, fontSize: 14),
+                              ),
+                            ),
+                            SizedBox(width: 6,),
+                            Transform.translate(
+                              offset: Offset(0, 4),
+                              child: Text(
+                                time,
+                                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4, left: 40),
-            child: Text(
-              time,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
           ),
         ],
       ),

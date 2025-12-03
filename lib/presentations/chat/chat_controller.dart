@@ -11,6 +11,36 @@ class ChatController extends GetxController {
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
   final RxBool isConnected = false.obs;
   final RxBool showDateHeader = false.obs;
+  final RxList<String> connectedPlayers = <String>[].obs;
+  
+  // Static cache to persist messages across controller recreations
+  static final Map<String, List<Map<String, dynamic>>> _messageCache = {};
+
+  /// Get unique player names from messages as fallback (excluding current user)
+  List<String> get playersFromMessages {
+    final uniquePlayers = <String>{};
+    for (final message in messages) {
+      final sender = message['sender']?.toString();
+      final isCurrentUser = message['isMe'] == true;
+      
+      if (sender != null && sender.isNotEmpty && !isCurrentUser) {
+        uniquePlayers.add(sender);
+      }
+    }
+    
+    return uniquePlayers.take(4).toList();
+  }
+
+  /// Get formatted player names with "You" at the front for display in title
+  List<String> get formattedPlayersForTitle {
+    final players = connectedPlayers.isNotEmpty 
+        ? connectedPlayers 
+        : playersFromMessages;
+    
+    final result = <String>['You'];
+    result.addAll(players.take(3));
+    return result;
+  }
   // Always treat userId as String so comparison with senderId works reliably.
   // Use a getter so that after logout/login the latest value from storage is used.
   String get userId => storage.read("userId")?.toString() ?? '';
@@ -138,6 +168,16 @@ class ChatController extends GetxController {
     super.onInit();
     final matchID = Get.arguments['matchID'];
     matchId.value = matchID;
+    
+    // Load cached messages if available
+    if (_messageCache.containsKey(matchID)) {
+      messages.assignAll(_messageCache[matchID]!);
+      // Auto-scroll to bottom after loading cached messages
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToBottom();
+      });
+    }
+    
     print("matchID-> ${matchId.value}");
     print("UserID-> ${storage.read("userId")}");
     print("UserTeam-> ${userTeam}");
@@ -146,12 +186,49 @@ class ChatController extends GetxController {
     connectSocket();
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Mark messages as read when the chat screen is fully loaded and visible
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      markAllMessagesAsRead();
+    });
+  }
+
+  /// Mark all messages as read for this match
+  void markAllMessagesAsRead() {
+    if (socket.connected && matchId.value.isNotEmpty) {
+      socket.emit('markAllMessagesRead', {'matchId': matchId.value});
+      CustomLogger.logMessage(
+        msg: '📖 Marked all messages as read for match: ${matchId.value}',
+        level: LogLevel.info,
+      );
+    } else {
+      CustomLogger.logMessage(
+        msg: '⚠️ Cannot mark messages as read - socket not connected or matchId empty',
+        level: LogLevel.warning,
+      );
+      // Retry after a short delay if socket not connected yet
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (socket.connected && matchId.value.isNotEmpty) {
+          socket.emit('markAllMessagesRead', {'matchId': matchId.value});
+          CustomLogger.logMessage(
+            msg: '📖 Marked all messages as read for match: ${matchId.value} (retry)',
+            level: LogLevel.info,
+          );
+        }
+      });
+    }
+  }
+
   void _setupScrollListener() {
     // This will be handled by NotificationListener in the UI
   }
 
   void onScrollStart() {
     showDateHeader.value = true;
+    // Mark messages as read when user scrolls (indicating they're viewing)
+    markAllMessagesAsRead();
   }
 
   void onScrollEnd() {
@@ -163,7 +240,7 @@ class ChatController extends GetxController {
   void scrollToBottom() {
     if (scrollController.hasClients) {
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (scrollController.hasClients) {
+        if (scrollController.hasClients && scrollController.position.maxScrollExtent > 0) {
           scrollController.animateTo(
             scrollController.position.maxScrollExtent + 100,
             duration: const Duration(milliseconds: 300),
@@ -171,6 +248,25 @@ class ChatController extends GetxController {
           );
         }
       });
+    }
+  }
+
+  /// Mark individual message as read
+  void markMessageAsRead(String messageId) {
+    if (socket.connected && messageId.isNotEmpty) {
+      socket.emit('markMessageRead', {'messageId': messageId});
+    }
+  }
+
+  void onTextFieldFocus() {
+    if (scrollController.hasClients && scrollController.position.maxScrollExtent > 0) {
+      final isAtBottom = scrollController.position.pixels >= 
+          scrollController.position.maxScrollExtent - 50;
+      if (isAtBottom) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          scrollToBottom();
+        });
+      }
     }
   }
 
@@ -202,9 +298,12 @@ class ChatController extends GetxController {
       isConnected.value = true;
       // Join the match once connected
       socket.emit('joinMatch', matchId.value);
-      // Fetch existing messages for this match
-      getMessages();
-      print(getMessages());
+      // Request connected players
+      socket.emit('getConnectedPlayers', {'matchId': matchId.value});
+      // Fetch existing messages only if not already loaded
+      if (messages.isEmpty) {
+        getMessages();
+      }
     });
 
     // Handle initial list of messages for this match
@@ -213,6 +312,9 @@ class ChatController extends GetxController {
 
     // Handle new incoming single message (when someone sends a message)
     socket.on('newMessage', _handleNewMessage);
+
+    // Handle connected players updates
+    socket.on('playersUpdate', _handlePlayersUpdate);
 
     socket.on('disconnect', (reason) {
       CustomLogger.logMessage(
@@ -233,6 +335,10 @@ class ChatController extends GetxController {
 
   void sendMessage() {
     if (messageController.text.trim().isEmpty) return;
+    
+    // Mark all messages as read when user sends a message
+    markAllMessagesAsRead();
+    
     socket.emit('sendMessage', {
       'matchId': matchId.value,
       'message': messageController.text.trim()
@@ -241,18 +347,22 @@ class ChatController extends GetxController {
     // Optionally append the message locally so it shows immediately.
     // You can remove this if your backend echoes the message back via `newMessage`.
     final now = DateTime.now();
-    messages.add({
+    final newMessage = {
       'isMe': true,
       'message': messageController.text.trim(),
       'team': userTeam,
       'sender': 'You',
       'timestamp': _formatTimestamp(now),
       'dateTime': now,
-    });
+    };
+    
+    messages.add(newMessage);
+    // Update cache
+    _messageCache[matchId.value] = List.from(messages);
 
     messageController.clear();
     
-    // Scroll to bottom after UI updates
+    // Only scroll if content exceeds screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollToBottom();
     });
@@ -332,6 +442,8 @@ class ChatController extends GetxController {
         final rawTimestamp = map['createdAt'] ?? map['time'] ?? '';
         final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
         
+        final messageId = map['_id'] ?? map['id'];
+        
         return {
           'isMe': senderId == userId,
           // Backend example uses `message` for text
@@ -343,14 +455,28 @@ class ChatController extends GetxController {
           // Backend example uses `createdAt` – format to time-only
           'timestamp': _formatTimestamp(rawTimestamp),
           'dateTime': dateTime,
+          'messageId': messageId,
         };
       }).toList();
 
-      messages.assignAll(mapped);
+      // Only load messages if not cached
+      if (!_messageCache.containsKey(matchId.value)) {
+        messages.assignAll(mapped);
+        _messageCache[matchId.value] = List.from(mapped);
+      }
+      
+      // Update connected players from messages if backend doesn't provide them
+      if (connectedPlayers.isEmpty) {
+        connectedPlayers.assignAll(playersFromMessages);
+      }
       
       // Auto-scroll to bottom after loading messages
       WidgetsBinding.instance.addPostFrameCallback((_) {
         scrollToBottom();
+        // Mark all loaded messages as read since user opened chat
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          markAllMessagesAsRead();
+        });
       });
 
       // PRINT / LOG ALL MESSAGES AFTER MAPPING
@@ -402,19 +528,36 @@ class ChatController extends GetxController {
 
       final rawTimestamp = map['createdAt'] ?? map['time'] ?? '';
       final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
+      final messageId = map['_id'] ?? map['id'];
 
-      messages.add({
+      final newMessage = {
         'isMe': senderId == userId,
         'message': map['message'] ?? map['text'] ?? '',
         'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
         'sender': _toTitleCase(rawSenderName),
         'timestamp': _formatTimestamp(rawTimestamp),
         'dateTime': dateTime,
-      });
+        'messageId': messageId,
+      };
       
-      // Scroll to bottom when new message arrives
+      messages.add(newMessage);
+      // Update cache
+      _messageCache[matchId.value] = List.from(messages);
+      
+      // Update connected players from messages if backend doesn't provide them
+      if (connectedPlayers.isEmpty) {
+        connectedPlayers.assignAll(playersFromMessages);
+      }
+      
+      // Only scroll to bottom if user is already near bottom
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollToBottom();
+        if (scrollController.hasClients) {
+          final isNearBottom = scrollController.position.pixels >= 
+              scrollController.position.maxScrollExtent - 100;
+          if (isNearBottom) {
+            scrollToBottom();
+          }
+        }
       });
     } catch (e) {
       CustomLogger.logMessage(
@@ -424,25 +567,37 @@ class ChatController extends GetxController {
     }
   }
 
+  /// Handle players update from backend
+  void _handlePlayersUpdate(dynamic data) {
+    try {
+      CustomLogger.logMessage(
+        msg: '📥 Received playersUpdate: $data',
+        level: LogLevel.info,
+      );
+      
+      if (data is Map && data['players'] is List) {
+        final players = (data['players'] as List)
+            .map((p) => _toTitleCase(p['name']?.toString() ?? 'Player'))
+            .toList();
+        connectedPlayers.assignAll(players);
+      } else if (data is List) {
+        final players = data
+            .map((p) => _toTitleCase(p['name']?.toString() ?? 'Player'))
+            .toList();
+        connectedPlayers.assignAll(players);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error parsing players update: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+
   @override
   void onClose() {
-    // Ensure socket is properly disconnected when controller is closed
-    disconnectSocket();
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
-  }
-
-  /// Public method to safely disconnect the socket, can be called from anywhere (e.g. on logout).
-  void disconnectSocket() {
-    try {
-      if (socket.connected) {
-        socket.disconnect();
-      }
-    } catch (_) {
-      // Ignore any socket errors during manual disconnect
-    } finally {
-      isConnected.value = false;
-    }
   }
 }
