@@ -900,7 +900,8 @@ class DetailsController extends GetxController {
   void _connectSocket(String matchId) {
     try {
       socket = IO.io(
-        'http://192.168.0.129:5070',
+        // 'http://192.168.0.129:5070',
+        'http://103.185.212.117:5070',
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect()
