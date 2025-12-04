@@ -62,6 +62,7 @@ class ChatController extends GetxController {
     return _normalizeTeam(team);
   }
   var matchId = ''.obs;
+  var matchCreatedAt = DateTime.now().obs;
   // If your backend uses different keys, adjust the mapping in
   // `_handleMessages` and `_handleNewMessage` accordingly.
 
@@ -165,9 +166,26 @@ class ChatController extends GetxController {
 
   /// Get messages grouped by date
   List<Map<String, dynamic>> get groupedMessages {
-    if (messages.isEmpty) return [];
-    
     final grouped = <Map<String, dynamic>>[];
+    
+    if (messages.isEmpty) {
+      // Add group creation message when no messages exist
+      final creationDate = matchCreatedAt.value;
+      grouped.add({
+        'isDateHeader': true,
+        'dateText': formatDateHeader(creationDate),
+        'dateTime': creationDate,
+      });
+      grouped.add({
+        'isGroupCreated': true,
+        'message': 'Group created',
+        'timestamp': _formatTimestamp(creationDate),
+        'dateTime': creationDate,
+        'isDateHeader': false,
+      });
+      return grouped;
+    }
+    
     String? lastDateStr;
     
     for (int i = 0; i < messages.length; i++) {
@@ -204,6 +222,12 @@ class ChatController extends GetxController {
     super.onInit();
     final matchID = Get.arguments['matchID'];
     matchId.value = matchID;
+    
+    // Set match creation date from arguments or use current time
+    final createdAt = Get.arguments['createdAt'];
+    if (createdAt != null) {
+      matchCreatedAt.value = _parseDateTime(createdAt) ?? DateTime.now();
+    }
     
     // Load cached messages if available
     if (_messageCache.containsKey(matchID)) {

@@ -190,13 +190,13 @@ class CartController extends GetxController {
 
       log("Booking successful: ${bookingResult.toJson()}");
 
-      Get.snackbar(
-        "Success",
-        "Booking completed successfully",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   "Success",
+      //   "Booking completed successfully",
+      //   snackPosition: SnackPosition.TOP,
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
 
       await getCartItems();
 

@@ -22,6 +22,7 @@ import '../../../configs/components/snack_bars.dart';
 import '../../../data/request_models/home_models/get_available_court.dart';
 import '../../../handler/logger.dart';
 import '../../../services/payment_services/razorpay.dart';
+import '../../cart/cart_controller.dart';
 class DetailsController extends GetxController {
   OpenMatchRepository repository = OpenMatchRepository();
   RxBool isProcessing = false.obs;
@@ -29,6 +30,7 @@ class DetailsController extends GetxController {
   RxString gameType = 'Mixed Doubles'.obs;
   late RazorpayPaymentService _paymentService;
   bool isFromOpenMatch = false;
+  CartController get cartController => Get.find<CartController>();
   
   // Socket connection variables
   IO.Socket? socket;
@@ -49,6 +51,7 @@ class DetailsController extends GetxController {
     "clubImage": [],
     "courtName":"Court 1",
     "clubId": "clubid",
+    "ownerId": "",
     "matchDate": "Unknown date",
     "matchTime": [],
     "skillLevel": "Beginner",
@@ -152,8 +155,9 @@ class DetailsController extends GetxController {
 
       // ✅ Format both for backend
       final formattedMatchDate = DateFormat('yyyy-MM-dd').format(parsedMatchDate);
-      final formattedBookingDate = parsedMatchDate.toIso8601String();
-
+ final formattedBookingDate = parsedMatchDate != null 
+        ? DateTime.utc(parsedMatchDate.year, parsedMatchDate.month, parsedMatchDate.day).toIso8601String()
+        : "";
       // ✅ Safely extract slots
       final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
 
@@ -236,6 +240,9 @@ class DetailsController extends GetxController {
       log("🎯 Match Created -> ${response.toJson()}");
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
 
+      // ✅ Call createBooking after successful match creation
+      await createBooking();
+
       // ✅ Navigate to match booking page
       // openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
       // Get.toNamed(RoutesName.matchBooking, arguments: {"type": "detailPage"});
@@ -247,6 +254,58 @@ class DetailsController extends GetxController {
       showBookingErrorDialog();
       // SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
     }
+  }
+
+  Future<void> createBooking() async {
+    final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
+
+    // ✅ Read ownerId directly from localMatchData (set from source screens)
+    final String ownerId = (localMatchData["ownerId"] ?? "").toString();
+
+    // ✅ Format booking date to midnight
+    final matchDateValue = localMatchData["matchDate"];
+    DateTime? parsedMatchDate;
+    if (matchDateValue is DateTime) {
+      parsedMatchDate = matchDateValue;
+    } else if (matchDateValue != null) {
+      parsedMatchDate = DateTime.tryParse(matchDateValue.toString());
+    }
+    final formattedBookingDate = parsedMatchDate != null 
+        ? DateTime.utc(parsedMatchDate.year, parsedMatchDate.month, parsedMatchDate.day).toIso8601String()
+        : "";
+
+    final payload = [
+      {
+        "slot": slotData
+            .map(
+              (slot) => {
+                "slotId": slot.sId ?? "",
+                "businessHours": slot.businessHours?.map((bh) {
+                      return {
+                        "time": bh.time ?? "",
+                        "day": bh.day ?? "",
+                      };
+                    }).toList() ??
+                    [],
+                "slotTimes": [
+                  {
+                    "time": slot.time ?? "",
+                    "amount": slot.amount ?? 0,
+                  }
+                ],
+                "courtId": localMatchData["courtId"] ?? "",
+                "courtName": localMatchData["courtName"] ?? "",
+                "bookingDate": formattedBookingDate,
+              },
+            )
+            .toList(),
+        "register_club_id": localMatchData["clubId"] ?? "",
+        "ownerId": ownerId,
+      }
+    ];
+
+    log("🎯 Booking Payload: $payload");
+    await cartController.bookCart(data: payload);
   }
 
   Map<String, dynamic> removeEmpty(Map<String, dynamic> json) {

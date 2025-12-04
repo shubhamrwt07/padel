@@ -42,33 +42,34 @@ class OpenMatchBookingScreen extends StatelessWidget {
         child: Scaffold(
           appBar: primaryAppBar(
             centerTitle: true,
-            showLeading: controller.argument.value == "detailPage" || Navigator.canPop(context),
-            leading: GestureDetector(
-              onTap: () {
-                if (backRoute != null && backRoute.isNotEmpty) {
-                  Get.toNamed(backRoute);
-                  return;
-                }
-                if (controller.argument.value == "detailPage") {
-                  Get.toNamed(RoutesName.bottomNav);
-                } else if (controller.argument.value == "profile") {
-                  Get.back();
-                } else {
-                  Get.toNamed(RoutesName.bottomNav);
-                }
-              },
-              child: Container(
-                color: Colors.transparent,
-                height: 30,
-                width: 40,
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: AppColors.blackColor,
-                  size: 22,
-                ),
-              ),
-            ),
+            // showLeading: controller.argument.value == "detailPage" || Navigator.canPop(context),
+            showLeading: false,
+            // leading: GestureDetector(
+            //   onTap: () {
+            //     if (backRoute != null && backRoute.isNotEmpty) {
+            //       Get.toNamed(backRoute);
+            //       return;
+            //     }
+            //     if (controller.argument.value == "detailPage") {
+            //       Get.toNamed(RoutesName.bottomNav);
+            //     } else if (controller.argument.value == "profile") {
+            //       Get.back();
+            //     } else {
+            //       Get.toNamed(RoutesName.bottomNav);
+            //     }
+            //   },
+            //   child: Container(
+            //     color: Colors.transparent,
+            //     height: 30,
+            //     width: 40,
+            //     alignment: Alignment.center,
+            //     child: const Icon(
+            //       Icons.arrow_back,
+            //       color: AppColors.blackColor,
+            //       size: 22,
+            //     ),
+            //   ),
+            // ),
             title: const Text("Open matches"),
             context: context,
           ),
@@ -304,6 +305,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     : null) ??
                 "Court 1",
             "clubId": match.clubId?.sId ?? "",
+            // ✅ Store ownerId from club for booking payload
+            "ownerId": match.clubId?.ownerId ?? "",
             "matchDate": match.matchDate ?? "",
             "matchTime": match.matchTime ?? [],
             "skillLevel": match.skillLevel ?? "",
@@ -320,8 +323,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
             "court": {
               "type": (match.clubId?.courtType?.isNotEmpty == true
                       ? match.clubId!.courtType!.first
-                      : "") ??
-                  "",
+                      : ""),
               "endRegistration": "Today at 10:00 PM"
             }
           };

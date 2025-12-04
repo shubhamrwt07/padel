@@ -102,6 +102,9 @@ class CreateOpenMatchesController extends GetxController {
     detailsController.localMatchData.update("clubName", (value) => slots.value!.data![0].clubName ?? "");
     detailsController.localMatchData.update("address", (value) => slots.value!.data![0].registerClubId?.address ?? "");
     detailsController.localMatchData.update("clubId", (v) => slots.value!.data![0].registerClubId!.sId ?? "");
+    // ✅ Store ownerId from registerClubId for booking payload (use direct assignment to avoid missing-key issues)
+    detailsController.localMatchData["ownerId"] =
+        slots.value!.data![0].registerClubId?.ownerId?.sId ?? "";
     detailsController.localMatchData.update("matchDate", (v) => selectedDate.value ?? "");
     detailsController.localMatchData.update("clubImage", (v)=> slots.value!.data![0].registerClubId?.courtImage ??[]);
     detailsController.localMatchData.update(

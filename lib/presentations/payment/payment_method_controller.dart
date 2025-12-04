@@ -214,6 +214,7 @@ class PaymentMethodController extends GetxController {
 
       if (success) {
         // 👍 Booking success
+        SnackBarUtils.showSuccessSnackBar("Booking completed successfully");
         Get.to(() => BookingSuccessfulScreen());
       } else {
         // ❌ API returned error
