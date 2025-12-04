@@ -99,7 +99,8 @@ class AddPlayerScreen extends StatelessWidget {
                     top: Get.height * 0.02, bottom: Get.height * 0.01),
 
                 DropdownButtonFormField<String>(
-                  value: controller.playerLevel.value.isEmpty
+                  value: controller.playerLevel.value.isEmpty ||
+                         !controller.playerLevels.any((level) => level["value"] == controller.playerLevel.value)
                       ? null
                       : controller.playerLevel.value,
                   isDense: true,
@@ -143,9 +144,7 @@ class AddPlayerScreen extends StatelessWidget {
                     ),
                   ),
 
-                  onChanged: controller.isLoginUserAdding.value 
-                      ? null 
-                      : (value) => controller.playerLevel.value = value!,
+                  onChanged: (value) => controller.playerLevel.value = value ?? '',
 
                   decoration: const InputDecoration(
                     filled: true,

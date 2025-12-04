@@ -48,6 +48,13 @@ class ChatScreen extends StatelessWidget {
                           if (item['isDateHeader'] == true) {
                             return _buildDateHeader(item['dateText']);
                           }
+                           
+                          if (item['isGroupCreated'] == true) {
+                            return _buildGroupCreatedMessage(
+                              item['message'],
+                              item['timestamp'],
+                            );
+                          }
                           
                           return item['isMe']
                               ? _buildSentMessage(
@@ -343,6 +350,36 @@ class ChatScreen extends StatelessWidget {
               color: Colors.grey,
               fontWeight: FontWeight.w500,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupCreatedMessage(String message, String timestamp) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.yellow.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.group_add, size: 16, color: Colors.grey.shade600),
+              const SizedBox(width: 6),
+              Text(
+                '$message • $timestamp',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),
