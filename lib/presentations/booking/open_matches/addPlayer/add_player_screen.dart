@@ -18,7 +18,7 @@ class AddPlayerScreen extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
-            child: Column(
+            child: Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 textFieldWithLabel(
@@ -28,6 +28,7 @@ class AddPlayerScreen extends StatelessWidget {
                   context,
                   action: TextInputAction.next,
                   keyboardType: TextInputType.text,
+                  readOnly: controller.isLoginUserAdding.value,
                 ),
                  textFieldWithLabel(
                   "Last Name",
@@ -36,6 +37,7 @@ class AddPlayerScreen extends StatelessWidget {
                   context,
                   action: TextInputAction.next,
                   keyboardType: TextInputType.text,
+                  readOnly: controller.isLoginUserAdding.value,
                 ),
                 textFieldWithLabel(
                   "Email",
@@ -43,6 +45,7 @@ class AddPlayerScreen extends StatelessWidget {
                   context,
                   action: TextInputAction.next,
                   keyboardType: TextInputType.emailAddress,
+                  readOnly: controller.isLoginUserAdding.value,
                 ),
                 textFieldWithLabel(
                   "Phone Number",
@@ -51,6 +54,7 @@ class AddPlayerScreen extends StatelessWidget {
                   action: TextInputAction.next,
                   keyboardType: TextInputType.number,
                   maxLength: 10,
+                  readOnly: controller.isLoginUserAdding.value,
                 ),
 
                 Text(
@@ -61,7 +65,7 @@ class AddPlayerScreen extends StatelessWidget {
                   ),
                 ).paddingOnly(top: Get.height * 0.02),
 
-                Obx(() => Row(
+                Row(
                   children: ["Female", "Male", "Other"].map((g) {
                     return Expanded(
                       child: RadioListTile<String>(
@@ -74,14 +78,16 @@ class AddPlayerScreen extends StatelessWidget {
                         dense: true,
                         value: g,
                         groupValue: controller.gender.value.isEmpty
-                            ? null // 👈 No gender selected by default
+                            ? null
                             : controller.gender.value,
-                        onChanged: (value) => controller.gender.value = value!,
+                        onChanged: controller.isLoginUserAdding.value 
+                            ? null 
+                            : (value) => controller.gender.value = value!,
                         contentPadding: EdgeInsets.zero,
                       ),
                     );
                   }).toList(),
-                )),
+                ),
 
                 Text(
                   "Player Level",
@@ -92,14 +98,13 @@ class AddPlayerScreen extends StatelessWidget {
                 ).paddingOnly(
                     top: Get.height * 0.02, bottom: Get.height * 0.01),
 
-                Obx(() => DropdownButtonFormField<String>(
-                  initialValue: controller.playerLevel.value.isEmpty
+                DropdownButtonFormField<String>(
+                  value: controller.playerLevel.value.isEmpty
                       ? null
                       : controller.playerLevel.value,
                   isDense: true,
                   dropdownColor: AppColors.whiteColor,
 
-                  // 🔹 Dropdown menu items
                   items: controller.playerLevels.map((level) {
                     return DropdownMenuItem<String>(
                       value: level["value"],
@@ -108,7 +113,7 @@ class AddPlayerScreen extends StatelessWidget {
                         style: Get.textTheme.headlineSmall!.copyWith(
                           color: AppColors.textColor,
                           fontWeight: FontWeight.w600,
-                          fontSize: 12, // 👈 smaller text so full label fits nicely
+                          fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -116,27 +121,32 @@ class AddPlayerScreen extends StatelessWidget {
                     );
                   }).toList(),
 
-                  // 🔹 Selected item (shown when dropdown is closed)
                   selectedItemBuilder: (context) {
                     return controller.playerLevels.map((level) {
                       return Text(
                         level["label"] ?? "",
-                        style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
+                        style: Get.textTheme.headlineMedium!.copyWith(
+                          color: AppColors.textColor,
+                          fontWeight: FontWeight.w500
+                        ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       );
                     }).toList();
                   },
 
-                  // 🔹 Hint text
                   hint: Text(
                     "Select Player Level",
-                    style: Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
+                    style: Get.textTheme.headlineMedium!.copyWith(
+                      color: AppColors.textColor,
+                      fontWeight: FontWeight.w500
+                    ),
                   ),
 
-                  onChanged: (value) => controller.playerLevel.value = value!,
+                  onChanged: controller.isLoginUserAdding.value 
+                      ? null 
+                      : (value) => controller.playerLevel.value = value!,
 
-                  // 🔹 Input field decoration
                   decoration: const InputDecoration(
                     filled: true,
                     fillColor: AppColors.textFieldColor,
@@ -147,9 +157,9 @@ class AddPlayerScreen extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                ))
+                )
               ],
-            ),
+            )),
           ),
         ),
       ),
@@ -192,7 +202,7 @@ class AddPlayerScreen extends StatelessWidget {
               onTap: () {
                 controller.createUser();
               },
-              text: "Confirm",
+              text: controller.isLoginUserAdding.value ? "Add Me" : "Confirm",
               child: controller.isLoading.value
                   ? const AppLoader(size: 30, strokeWidth: 5)
                   : null,

@@ -85,7 +85,7 @@ class DetailsScreen extends StatelessWidget {
     List slots = data['slot'];
     log("Slots ${slots.length}");
     return BackgroundContainer(
-      imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
+    imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
           ? (data['clubImage'] as List).first.toString() 
           : (data['clubImage']?.toString() ?? ""),
       child: WillPopScope(
@@ -428,6 +428,9 @@ class DetailsScreen extends StatelessWidget {
   }
 
   Widget gameTypeSelector({required bool readOnly}) {
+    final data = controller.localMatchData;
+    final currentValue = data['gender'] ?? 'Mixed Doubles';
+    
     return Container(
       alignment: Alignment.center,
       color: Colors.transparent,
@@ -437,51 +440,46 @@ class DetailsScreen extends StatelessWidget {
           Text("Game Type", style: Get.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: Get.height * .01),
 
-          Obx(() {
-            final currentValue = controller.gameType.value;
-
-            return readOnly
-                ? Row(
+          readOnly
+              ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                currentValue,
+                style: Get.textTheme.headlineMedium?.copyWith(
+                  color: AppColors.blackColor,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          )
+              : Obx(() => PopupMenuButton<String>(
+            offset: const Offset(-20, 30),
+            onSelected: (value) {
+              controller.gameType.value = value;
+            },
+            itemBuilder: (context) =>  [
+              PopupMenuItem(value: 'Male Only', child: Text('Male Only',style: Get.textTheme.bodyLarge,)),
+              PopupMenuItem(value: 'Female Only', child: Text('Female Only',style: Get.textTheme.bodyLarge,)),
+              PopupMenuItem(value: 'Mixed Doubles', child: Text('Mixed Doubles',style: Get.textTheme.bodyLarge,)),
+            ],
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  currentValue,
+                  controller.gameType.value,
                   style: Get.textTheme.headlineMedium?.copyWith(
                     color: AppColors.blackColor,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
                 ),
+                Icon(Icons.arrow_drop_down,
+                    color: AppColors.blackColor, size: 18),
               ],
-            )
-                : PopupMenuButton<String>(
-              offset: const Offset(-20, 30),
-
-              onSelected: (value) {
-                controller.gameType.value = value;
-              },
-              itemBuilder: (context) =>  [
-                PopupMenuItem(value: 'Male Only', child: Text('Male Only',style: Get.textTheme.bodyLarge,)),
-                PopupMenuItem(value: 'Female Only', child: Text('Female Only',style: Get.textTheme.bodyLarge,)),
-                PopupMenuItem(value: 'Mixed Doubles', child: Text('Mixed Doubles',style: Get.textTheme.bodyLarge,)),
-              ],
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    currentValue,
-                    style: Get.textTheme.headlineMedium?.copyWith(
-                      color: AppColors.blackColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                  Icon(Icons.arrow_drop_down,
-                      color: AppColors.blackColor, size: 18),
-                ],
-              ),
-            );
-          }),
+            ),
+          )),
         ],
       ),
     );
@@ -699,11 +697,27 @@ class DetailsScreen extends StatelessWidget {
                                     )
                                   : GestureDetector(
                                       onTap: () {
-                                        controller.showDailogue(
-                                          context,
-                                          index: index,
-                                          team: "teamA",
-                                        );
+                                        final args = Get.arguments;
+                                        final bool fromOpenMatch = args is Map && args['fromOpenMatch'] == true;
+                                        
+                                        if (fromOpenMatch) {
+                                          final matchId = args['matchId'];
+                                          Get.toNamed(
+                                            RoutesName.addPlayer,
+                                            arguments: {
+                                              "matchId": matchId,
+                                              "team": "teamA",
+                                              "needBottomAllOpenMatches": true,
+                                              "isLoginUser": true,
+                                            },
+                                          );
+                                        } else {
+                                          controller.showDailogue(
+                                            context,
+                                            index: index,
+                                            team: "teamA",
+                                          );
+                                        }
                                       },
                                       child: Column(
                                         children: [
@@ -771,11 +785,27 @@ class DetailsScreen extends StatelessWidget {
                                     )
                                   : GestureDetector(
                                       onTap: () {
-                                        controller.showDailogue(
-                                          context,
-                                          index: index,
-                                          team: "teamB",
-                                        );
+                                        final args = Get.arguments;
+                                        final bool fromOpenMatch = args is Map && args['fromOpenMatch'] == true;
+                                        
+                                        if (fromOpenMatch) {
+                                          final matchId = args['matchId'];
+                                          Get.toNamed(
+                                            RoutesName.addPlayer,
+                                            arguments: {
+                                              "matchId": matchId,
+                                              "team": "teamB",
+                                              "needBottomAllOpenMatches": true,
+                                              "isLoginUser": true,
+                                            },
+                                          );
+                                        } else {
+                                          controller.showDailogue(
+                                            context,
+                                            index: index,
+                                            team: "teamB",
+                                          );
+                                        }
                                       },
                                       child: Column(
                                         children: [

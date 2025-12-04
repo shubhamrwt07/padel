@@ -60,24 +60,46 @@ var profileModel = Rxn<ProfileModel>();
               children: [
                 GestureDetector(
                   onTap: () async {
+                    log("🚪 LOGOUT: Starting logout process");
+                    
                     // Try to disconnect chat socket (if chat is in memory) before clearing storage
                     if (Get.isRegistered<DetailsController>()) {
                       try {
+                        log("🔍 LOGOUT: DetailsController found, attempting socket disconnect");
                         final chatCtrl = Get.find<DetailsController>();
+                        log("🔌 LOGOUT: Socket connected status: ${chatCtrl.socket?.connected}");
                         chatCtrl.disconnectSocket();
+                        log("✅ LOGOUT: Socket disconnect called");
+                        
                         // Also remove the ChatController instance so it will be recreated
                         // with the new user after login.
-                        Get.delete<ChatController>(force: true);
-                      } catch (_) {}
+                        if (Get.isRegistered<ChatController>()) {
+                          log("🗑️ LOGOUT: Deleting ChatController instance");
+                          Get.delete<ChatController>(force: true);
+                          log("✅ LOGOUT: ChatController deleted");
+                        } else {
+                          log("ℹ️ LOGOUT: ChatController not registered");
+                        }
+                        
+                        // Clear static message cache to prevent showing previous user's messages
+                        log("🧹 LOGOUT: Clearing ChatController static message cache");
+                        ChatController.clearMessageCache();
+                        log("✅ LOGOUT: Message cache cleared");
+                      } catch (e) {
+                        log("❌ LOGOUT: Error during socket disconnect: $e");
+                      }
+                    } else {
+                      log("ℹ️ LOGOUT: DetailsController not registered");
                     }
 
                     // Log before clearing
-                    log("🔍 BEFORE ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+                    log("🔍 LOGOUT: BEFORE ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
                     await storage.remove("userId");
                     await storage.erase(); // clear all stored data
 
                     // Log after clearing
-                    log("🧹 AFTER ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+                    log("🧹 LOGOUT: AFTER ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+                    log("🏁 LOGOUT: Navigating to login screen");
 
                     Get.offAllNamed(RoutesName.login);
                   },

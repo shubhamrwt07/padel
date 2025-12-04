@@ -1,10 +1,13 @@
+import 'package:get_storage/get_storage.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_controller.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import '../../widgets/booking_exports.dart';
 
 class AddPlayerController extends GetxController {
+  final storage = GetStorage();
   OpenMatchesController? openMatchesController;
   AllOpenMatchController? allOpenMatchController;
   OpenMatchBookingController? openMatchBookingController;
@@ -33,9 +36,16 @@ class AddPlayerController extends GetxController {
   var playerId = "".obs;
   var selectedTeam = "".obs;
   var matchId = "".obs;
+  var isLoginUserAdding = false.obs;
 
   Future<void> createUser() async {
     if (isLoading.value || Get.isSnackbarOpen) return;
+
+    // If login user is adding themselves, skip API call and add directly
+    if (isLoginUserAdding.value) {
+      await addLoginUserDirectly();
+      return;
+    }
 
     if (firstNameController.text.isEmpty) {
       return SnackBarUtils.showWarningSnackBar("Please Enter Full Name");
@@ -116,6 +126,48 @@ class AddPlayerController extends GetxController {
     }
   }
 
+  // Add login user directly without API call
+  Future<void> addLoginUserDirectly() async {
+    isLoading.value = true;
+    try {
+      final userId = storage.read('userId');
+      if (userId != null) {
+        playerId.value = userId;
+        
+        // Add player to match
+        if (allOpenMatchController != null) {
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "Login User Added Directly",
+              level: LogLevel.info,
+            );
+          }
+        } else if (openMatchesController != null) {
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "Login User Added Directly",
+              level: LogLevel.info,
+            );
+          }
+        } else if (openMatchBookingController != null) {
+          final added = await addPlayer();
+          if (added) {
+            CustomLogger.logMessage(
+              msg: "Login User Added Directly",
+              level: LogLevel.info,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error adding login user: $e", level: LogLevel.error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   ///Add Player In Open Match Api-----------------------------------------------
   Future<bool> addPlayer() async {
     try {
@@ -191,7 +243,36 @@ class AddPlayerController extends GetxController {
       return false;
     }
   }
-  @override
+  void preloadLoginUserData() {
+    if (Get.isRegistered<ProfileController>()) {
+      final profileController = Get.find<ProfileController>();
+      final profile = profileController.profileModel.value;
+      
+      if (profile?.response != null) {
+        final user = profile!.response!;
+        firstNameController.text = user.name?.capitalizeFirst ?? '';
+        lastNameController.text = user.lastName?.capitalizeFirst ?? '';
+        emailController.text = user.email ?? '';
+        phoneController.text = "${user.phoneNumber ?? ''}";
+        gender.value = user.gender ?? '';
+        
+        // Extract level code from full level string
+        final userLevel = user.playerLevel ?? user.level ?? '';
+        final levelCode = _extractLevelCode(userLevel);
+        playerLevel.value = levelCode;
+        
+        isLoginUserAdding.value = true;
+      }
+    }
+  }
+
+  String _extractLevelCode(String value) {
+    if (value.isEmpty) return '';
+    final parts = value.split(RegExp(r"\s*[–-]\s*"));
+    final code = parts.isNotEmpty ? parts.first.trim() : '';
+    return code;
+  }
+
   @override
   void onInit() {
     final args = Get.arguments;
@@ -217,6 +298,12 @@ class AddPlayerController extends GetxController {
     if (args["needAsGuest"] == true &&
         Get.isRegistered<ScoreBoardController>()) {
       scoreBoardController = Get.find<ScoreBoardController>();
+    }
+
+    // Check if login user wants to add themselves
+    final userId = storage.read('userId');
+    if (args["isLoginUser"] == true && userId != null) {
+      preloadLoginUserData();
     }
 
     super.onInit();
