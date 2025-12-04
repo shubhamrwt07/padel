@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/handler/logger.dart';
+import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatController extends GetxController {
@@ -11,10 +12,17 @@ class ChatController extends GetxController {
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
   final RxBool isConnected = false.obs;
   final RxBool showDateHeader = false.obs;
+  final RxString currentScrollDate = ''.obs;
   final RxList<String> connectedPlayers = <String>[].obs;
+  final RxBool isLoading = false.obs;
   
   // Static cache to persist messages across controller recreations
   static final Map<String, List<Map<String, dynamic>>> _messageCache = {};
+  
+  /// Clear static message cache (used during logout)
+  static void clearMessageCache() {
+    _messageCache.clear();
+  }
 
   /// Get unique player names from messages as fallback (excluding current user)
   List<String> get playersFromMessages {
@@ -50,7 +58,7 @@ class ChatController extends GetxController {
                  Get.arguments?['userTeam'] ?? 
                  Get.arguments?['team'] ?? 
                  '';
-    print('DEBUG: userTeam = $team');
+    CustomLogger.logMessage(msg: 'DEBUG: userTeam = $team',level: LogLevel.debug);
     return _normalizeTeam(team);
   }
   var matchId = ''.obs;
@@ -155,12 +163,40 @@ class ChatController extends GetxController {
     }
   }
 
-  /// Get current date header for fixed display
+  /// Get messages grouped by date
+  List<Map<String, dynamic>> get groupedMessages {
+    if (messages.isEmpty) return [];
+    
+    final grouped = <Map<String, dynamic>>[];
+    String? lastDateStr;
+    
+    for (int i = 0; i < messages.length; i++) {
+      final message = messages[i];
+      final messageDate = message['dateTime'] as DateTime? ?? DateTime.now();
+      final dateStr = formatDateHeader(messageDate);
+      
+      // Add date header if this is a new date
+      if (lastDateStr != dateStr) {
+        grouped.add({
+          'isDateHeader': true,
+          'dateText': dateStr,
+          'dateTime': messageDate,
+        });
+        lastDateStr = dateStr;
+      }
+      
+      // Add the actual message
+      grouped.add({...message, 'isDateHeader': false});
+    }
+    
+    return grouped;
+  }
+
+  /// Get current date header for scroll display
   String get currentDateHeader {
-    if (messages.isEmpty) return formatDateHeader(DateTime.now());
-    final lastMessage = messages.last;
-    final lastDate = lastMessage['dateTime'] ?? DateTime.now();
-    return formatDateHeader(lastDate);
+    return currentScrollDate.value.isNotEmpty 
+        ? currentScrollDate.value 
+        : formatDateHeader(DateTime.now());
   }
 
   @override
@@ -178,10 +214,10 @@ class ChatController extends GetxController {
       });
     }
     
-    print("matchID-> ${matchId.value}");
-    print("UserID-> ${storage.read("userId")}");
-    print("UserTeam-> ${userTeam}");
-    print("Arguments-> ${Get.arguments}");
+    CustomLogger.logMessage(msg: "matchID-> ${matchId.value}",level: LogLevel.debug);
+    CustomLogger.logMessage(msg: "UserID-> ${storage.read("userId")}",level: LogLevel.debug);
+    CustomLogger.logMessage(msg: "UserTeam-> $userTeam",level: LogLevel.debug);
+    CustomLogger.logMessage(msg: "Arguments-> ${Get.arguments}",level: LogLevel.debug);
     _setupScrollListener();
     connectSocket();
   }
@@ -198,7 +234,7 @@ class ChatController extends GetxController {
   /// Mark all messages as read for this match
   void markAllMessagesAsRead() {
     if (socket.connected && matchId.value.isNotEmpty) {
-      socket.emit('markAllMessagesRead', {'matchId': matchId.value});
+      socket.emit('markMessageRead', {'matchId': matchId.value});
       CustomLogger.logMessage(
         msg: '📖 Marked all messages as read for match: ${matchId.value}',
         level: LogLevel.info,
@@ -211,7 +247,7 @@ class ChatController extends GetxController {
       // Retry after a short delay if socket not connected yet
       Future.delayed(const Duration(milliseconds: 1000), () {
         if (socket.connected && matchId.value.isNotEmpty) {
-          socket.emit('markAllMessagesRead', {'matchId': matchId.value});
+          socket.emit('markMessageRead', {'matchId': matchId.value});
           CustomLogger.logMessage(
             msg: '📖 Marked all messages as read for match: ${matchId.value} (retry)',
             level: LogLevel.info,
@@ -227,6 +263,7 @@ class ChatController extends GetxController {
 
   void onScrollStart() {
     showDateHeader.value = true;
+    updateCurrentScrollDate();
     // Mark messages as read when user scrolls (indicating they're viewing)
     markAllMessagesAsRead();
   }
@@ -235,6 +272,21 @@ class ChatController extends GetxController {
     Future.delayed(const Duration(seconds: 2), () {
       showDateHeader.value = false;
     });
+  }
+
+  void updateCurrentScrollDate() {
+    if (!scrollController.hasClients || messages.isEmpty) return;
+    
+    // Find the message at current scroll position
+    final scrollOffset = scrollController.offset;
+    final itemHeight = 80.0; // Approximate message height
+    final visibleIndex = (scrollOffset / itemHeight).floor();
+    
+    if (visibleIndex >= 0 && visibleIndex < messages.length) {
+      final message = messages[visibleIndex];
+      final messageDate = message['dateTime'] as DateTime? ?? DateTime.now();
+      currentScrollDate.value = formatDateHeader(messageDate);
+    }
   }
 
   void scrollToBottom() {
@@ -251,12 +303,12 @@ class ChatController extends GetxController {
     }
   }
 
-  /// Mark individual message as read
-  void markMessageAsRead(String messageId) {
-    if (socket.connected && messageId.isNotEmpty) {
-      socket.emit('markMessageRead', {'messageId': messageId});
-    }
-  }
+  // /// Mark individual message as read
+  // void markMessageAsRead(String messageId) {
+  //   if (socket.connected && messageId.isNotEmpty) {
+  //     socket.emit('markMessageRead', {'messageId': messageId});
+  //   }
+  // }
 
   void onTextFieldFocus() {
     if (scrollController.hasClients && scrollController.position.maxScrollExtent > 0) {
@@ -272,8 +324,7 @@ class ChatController extends GetxController {
 
   void connectSocket() {
     socket = IO.io(
-      // 'http://192.168.0.129:5070',
-      'http://103.185.212.117:5070',
+      AppEndpoints.SOCKET_URL,
       IO.OptionBuilder()
           // Force a brand‑new connection so old auth/userId are not reused.
           .setTransports(['websocket'])
@@ -282,7 +333,7 @@ class ChatController extends GetxController {
           .setAuth({'userId': userId})
           .build(),
     );
-    print("USER ID_ CONNECT_> $userId");
+    CustomLogger.logMessage(msg: "USER ID_ CONNECT_> $userId",level: LogLevel.debug);
     socket.connect();
 
     // Log all incoming events to understand what the backend is sending
@@ -324,12 +375,12 @@ class ChatController extends GetxController {
     });
 
     socket.on('connect_error', (error) {
-      print('🔥 Connection error: $error');
+      CustomLogger.logMessage(msg: '🔥 Connection error: $error',level: LogLevel.debug);
       isConnected.value = false;
     });
 
     socket.on('error', (error) {
-      print('🔥 Socket error: $error');
+      CustomLogger.logMessage(msg: '🔥 Socket error: $error',level: LogLevel.debug);
     });
 
   }
@@ -369,9 +420,8 @@ class ChatController extends GetxController {
     });
   }
   Future<void> getMessages() async {
-
+    isLoading.value = true;
     socket.emit('getMessages', {
-
       'matchId': matchId.value,
     });
 
@@ -380,7 +430,6 @@ class ChatController extends GetxController {
       msg: '📤 getMessages emitted for matchId=${matchId.value}',
       level: LogLevel.info,
     );
-
   }
 
   /// Map the list of messages received from the backend into the UI model.
@@ -465,6 +514,7 @@ class ChatController extends GetxController {
         messages.assignAll(mapped);
         _messageCache[matchId.value] = List.from(mapped);
       }
+      isLoading.value = false;
       
       // Update connected players from messages if backend doesn't provide them
       if (connectedPlayers.isEmpty) {

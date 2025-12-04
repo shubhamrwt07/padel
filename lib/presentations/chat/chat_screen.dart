@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'chat_controller.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -21,36 +22,48 @@ class ChatScreen extends StatelessWidget {
             Expanded(
               child: Obx(() => Stack(
                 children: [
-                  NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollStartNotification) {
-                        controller.onScrollStart();
-                      } else if (notification is ScrollEndNotification) {
-                        controller.onScrollEnd();
-                      }
-                      return false;
-                    },
-                    child: ListView.builder(
-                      controller: controller.scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.messages.length,
-                      itemBuilder: (context, index) {
-                        final message = controller.messages[index];
-                        return message['isMe']
-                            ? _buildSentMessage(
-                                message['message'],
-                                message['team'],
-                                message['timestamp'],
-                              )
-                            : _buildReceivedMessage(
-                                message['message'],
-                                message['sender'],
-                                message['team'],
-                                message['timestamp'],
-                              );
+                  if (controller.isLoading.value)
+                    const Center(
+                      child: LoadingWidget(color: AppColors.primaryColor,),
+                    )
+                  else
+                    NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification is ScrollStartNotification) {
+                          controller.onScrollStart();
+                        } else if (notification is ScrollEndNotification) {
+                          controller.onScrollEnd();
+                        } else if (notification is ScrollUpdateNotification) {
+                          controller.updateCurrentScrollDate();
+                        }
+                        return false;
                       },
+                      child: ListView.builder(
+                        controller: controller.scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.groupedMessages.length,
+                        itemBuilder: (context, index) {
+                          final item = controller.groupedMessages[index];
+                          
+                          if (item['isDateHeader'] == true) {
+                            return _buildDateHeader(item['dateText']);
+                          }
+                          
+                          return item['isMe']
+                              ? _buildSentMessage(
+                                  item['message'],
+                                  item['team'],
+                                  item['timestamp'],
+                                )
+                              : _buildReceivedMessage(
+                                  item['message'],
+                                  item['sender'],
+                                  item['team'],
+                                  item['timestamp'],
+                                );
+                        },
+                      ),
                     ),
-                  ),
                   if (controller.showDateHeader.value)
                     Positioned(
                       top: 16,
@@ -309,6 +322,29 @@ class ChatScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDateHeader(String dateText) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            dateText,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ),
     );
   }

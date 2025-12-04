@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
+import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
@@ -209,6 +210,7 @@ class DetailsController extends GetxController {
 
         "matchStatus": "open",
         "matchTime": localMatchData["matchTime"] ?? "",
+        "gender":gameType.value,
 
         // ✅ Proper team A and B mapping
         "teamA": teamA
@@ -246,6 +248,7 @@ class DetailsController extends GetxController {
       // SnackBarUtils.showErrorSnackBar("Failed to create match: $e");
     }
   }
+
   Map<String, dynamic> removeEmpty(Map<String, dynamic> json) {
     json.removeWhere((key, value) =>
     value == null ||
@@ -900,8 +903,7 @@ class DetailsController extends GetxController {
   void _connectSocket(String matchId) {
     try {
       socket = IO.io(
-        // 'http://192.168.0.129:5070',
-        'http://103.185.212.117:5070',
+        AppEndpoints.SOCKET_URL,
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect()
@@ -1057,7 +1059,7 @@ class DetailsController extends GetxController {
     if (args is Map && socket?.connected == true) {
       final matchId = args['matchId']?.toString();
       if (matchId != null) {
-        socket!.emit('markAllMessagesRead', {'matchId': matchId});
+        socket!.emit('markMessageRead', {'matchId': matchId});
         // Don't reset count immediately - wait for backend confirmation
       }
     }
@@ -1065,14 +1067,38 @@ class DetailsController extends GetxController {
 
   /// Disconnect socket
   void disconnectSocket() {
+    CustomLogger.logMessage(
+      msg: '🔌 DETAILS: disconnectSocket() called',
+      level: LogLevel.info,
+    );
     try {
       if (socket?.connected == true) {
+        CustomLogger.logMessage(
+          msg: '🔌 DETAILS: Socket is connected, disconnecting...',
+          level: LogLevel.info,
+        );
         socket!.disconnect();
+        CustomLogger.logMessage(
+          msg: '✅ DETAILS: Socket disconnected successfully',
+          level: LogLevel.info,
+        );
+      } else {
+        CustomLogger.logMessage(
+          msg: 'ℹ️ DETAILS: Socket was not connected or null',
+          level: LogLevel.info,
+        );
       }
-    } catch (_) {
-      // Ignore errors during disconnect
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ DETAILS: Error during socket disconnect: $e',
+        level: LogLevel.error,
+      );
     } finally {
       isSocketConnected.value = false;
+      CustomLogger.logMessage(
+        msg: '🔴 DETAILS: isSocketConnected set to false',
+        level: LogLevel.info,
+      );
     }
   }
 

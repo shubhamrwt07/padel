@@ -50,6 +50,7 @@ class Response {
   String? gender;
   String? profilePic;
   String? playerLevel;
+  String? level;
 
   Response(
       {this.location,
@@ -72,7 +73,7 @@ class Response {
         this.dob,
         this.gender,
         this.profilePic,
-        this.playerLevel,});
+        this.playerLevel,this.level});
 
   Response.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -98,6 +99,7 @@ class Response {
     gender = json['gender'];
     profilePic = json['profilePic'];
     playerLevel = json['playerLevel'];
+    level = json['level'];
   }
 
   Map<String, dynamic> toJson() {
@@ -125,6 +127,7 @@ class Response {
     data['gender'] = this.gender;
     data['profilePic'] = this.profilePic;
     data['playerLevel'] = this.playerLevel;
+    data['level'] = this.level;
     return data;
   }
 }

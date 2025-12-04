@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 import '../../configs/routes/routes_name.dart';
@@ -18,6 +19,7 @@ import 'openmatch_booking_controller.dart';
 
 class OpenMatchBookingScreen extends StatelessWidget {
   final OpenMatchBookingController controller = Get.put(OpenMatchBookingController());
+  final storage = GetStorage();
   OpenMatchBookingScreen({super.key});
 
   @override
@@ -462,12 +464,31 @@ class OpenMatchBookingScreen extends StatelessWidget {
     ).paddingOnly(bottom: 8);
   }
 
+  // Helper method to check if login user is in the match
+  bool _isLoginUserInMatch(OpenMatchBookingData? match) {
+    final userId = storage.read('userId');
+    if (userId == null || match == null) return false;
+    
+    // Check in teamA
+    for (final player in match.teamA ?? []) {
+      if (player.userId?.sId == userId) return true;
+    }
+    
+    // Check in teamB
+    for (final player in match.teamB ?? []) {
+      if (player.userId?.sId == userId) return true;
+    }
+    
+    return false;
+  }
+
   Widget _buildPlayerRow({
     required bool completed,
     required OpenMatchBookingData? match,
   }) {
     final teamAPlayers = match?.teamA ?? [];
     final teamBPlayers = match?.teamB ?? [];
+    final isLoginUserInMatch = _isLoginUserInMatch(match);
 
     // Build exactly 2 slots for Team A
     List<Widget> teamAWidgets = [];
@@ -495,6 +516,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           } else {
             teamAWidgets.add(
               _buildAddPlayerSlot(
+                isLoginUserInMatch: isLoginUserInMatch,
                 onTap: () async {
                   final id = match?.sId;
                   final result = await Get.toNamed(
@@ -502,7 +524,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     arguments: {
                       "matchId": id,
                       "team": "teamA",
-                      "needBottomAllOpenMatches": true
+                      "needBottomAllOpenMatches": true,
+                      "isLoginUser": !isLoginUserInMatch
                     },
                   );
                   if (result == true) {
@@ -544,11 +567,17 @@ class OpenMatchBookingScreen extends StatelessWidget {
         } else {
           teamAWidgets.add(
             _buildAddPlayerSlot(
+              isLoginUserInMatch: isLoginUserInMatch,
               onTap: () {
                 final id = match?.sId;
                 Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamA","needBottomAllOpenMatches": true},
+                  arguments: {
+                    "matchId": id, 
+                    "team": "teamA",
+                    "needBottomAllOpenMatches": true,
+                    "isLoginUser": !isLoginUserInMatch
+                  },
                 );
               },
             ),
@@ -572,6 +601,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         if (!completed && user == null) {
           teamBWidgets.add(
             _buildAddPlayerSlot(
+              isLoginUserInMatch: isLoginUserInMatch,
               onTap: () async {
                 final id = match?.sId;
                 final result = await Get.toNamed(
@@ -579,7 +609,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                   arguments: {
                     "matchId": id,
                     "team": "teamB",
-                    "needBottomAllOpenMatches": true
+                    "needBottomAllOpenMatches": true,
+                    "isLoginUser": !isLoginUserInMatch
                   },
                 );
                 if (result == true) {
@@ -620,11 +651,17 @@ class OpenMatchBookingScreen extends StatelessWidget {
         } else {
           teamBWidgets.add(
             _buildAddPlayerSlot(
+              isLoginUserInMatch: isLoginUserInMatch,
               onTap: () {
                 final id = match?.sId;
                 Get.toNamed(
                   RoutesName.addPlayer,
-                  arguments: {"matchId": id, "team": "teamB","needBottomAllOpenMatches": true},
+                  arguments: {
+                    "matchId": id, 
+                    "team": "teamB",
+                    "needBottomAllOpenMatches": true,
+                    "isLoginUser": !isLoginUserInMatch
+                  },
                 );
               },
             ),
@@ -806,7 +843,10 @@ class OpenMatchBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAddPlayerSlot({required VoidCallback onTap}) {
+  Widget _buildAddPlayerSlot({
+    required VoidCallback onTap,
+    required bool isLoginUserInMatch,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -816,11 +856,19 @@ class OpenMatchBookingScreen extends StatelessWidget {
             width: 50,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.whiteColor,
-              border: Border.all(color: AppColors.primaryColor),
+              // color: isLoginUserInMatch ? Colors.green.withValues(alpha: 0.1) : AppColors.whiteColor,
+              color:AppColors.whiteColor,
+              border: Border.all(
+                // color: isLoginUserInMatch ? Colors.green : AppColors.primaryColor,
+                color: AppColors.primaryColor,
+              ),
             ),
-            child: const Icon(Icons.add,
-                size: 24, color: AppColors.primaryColor),
+            child: Icon(
+              Icons.add,
+              size: 24, 
+              // color: isLoginUserInMatch ? Colors.green : AppColors.primaryColor,
+              color:AppColors.primaryColor,
+            ),
           ),
           SizedBox(
             width: Get.width * 0.18,
@@ -829,7 +877,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               "Available",
               style: Get.textTheme.bodySmall!.copyWith(
-                color: AppColors.primaryColor,
+                // color: isLoginUserInMatch ? Colors.green : AppColors.primaryColor,
+                color:AppColors.primaryColor,
                 fontSize: 11,
               ),
             ).paddingOnly(top: Get.height * 0.003),
