@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import '../../data/response_models/openmatch_model/open_match_booking_model.dart';
 import '../../handler/logger.dart';
 import '../../repositories/openmatches/open_match_repository.dart';
@@ -46,6 +47,12 @@ class OpenMatchBookingController extends GetxController
   // Misc
   final OpenMatchRepository repository = Get.put(OpenMatchRepository());
   RxString argument = "".obs;
+
+  // Join requests
+  RxList<Map<String, dynamic>> joinRequests = <Map<String, dynamic>>[].obs;
+  RxBool isLoadingRequests = false.obs;
+  RxString acceptingRequestId = ''.obs;
+  RxString rejectingRequestId = ''.obs;
 
   // Helper getters for current tab with null safety
   RxList<OpenMatchBookingData> get currentList {
@@ -294,6 +301,73 @@ class OpenMatchBookingController extends GetxController
     }
 
     await fetchOpenMatchesBooking(type: type, isLoadMore: true);
+  }
+
+  Future<void> fetchJoinRequests(String matchId) async {
+    try {
+      isLoadingRequests.value = true;
+
+      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId);
+
+      if (response != null && response.requests != null) {
+        joinRequests.value = response.requests!.map((request) => {
+          'id': request.id ?? '',
+          'name': request.requesterId?.name ?? 'Unknown',
+          'profilePic': request.requesterId?.profilePic?? '',
+          'level': request.level ?? '',
+          'lastName': request.requesterId?.lastName ?? '',
+          'requestedAt': request.createdAt ?? DateTime.now(),
+        }).toList();
+      } else {
+        joinRequests.clear();
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: "Error fetching join requests: $e",
+        level: LogLevel.error,
+      );
+      joinRequests.clear();
+    } finally {
+      isLoadingRequests.value = false;
+    }
+  }
+
+  Future<void> acceptRequest(String requestId, String matchId) async {
+    try {
+      acceptingRequestId.value = requestId;
+      final body = {
+        "requestId": requestId,
+        "action": "accept"
+      };
+      
+      final response = await repository.acceptOrRejectRequestPlayer(body: body);
+      joinRequests.removeWhere((req) => req['id'] == requestId);
+      SnackBarUtils.showSuccessSnackBar(response?.message ?? "Request accepted");
+      fetchOpenMatchesBooking(type: 'upcoming');
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error $e", level: LogLevel.error);
+    } finally {
+      acceptingRequestId.value = '';
+    }
+  }
+
+  Future<void> rejectRequest(String requestId, String matchId) async {
+    try {
+      rejectingRequestId.value = requestId;
+      final body = {
+        "requestId": requestId,
+        "action": "reject"
+      };
+      
+      final response = await repository.acceptOrRejectRequestPlayer(body: body);
+      joinRequests.removeWhere((req) => req['id'] == requestId);
+      SnackBarUtils.showSuccessSnackBar(response?.message ?? "Request rejected");
+      // fetchOpenMatchesBooking(type: 'upcoming');
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error $e", level: LogLevel.error);
+    } finally {
+      rejectingRequestId.value = '';
+    }
   }
 
   @override

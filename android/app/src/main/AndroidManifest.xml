@@ -11,7 +11,7 @@
 
 
     <application
-        android:label="padel_mobile"
+        android:label="swoot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

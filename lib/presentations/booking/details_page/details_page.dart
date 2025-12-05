@@ -20,10 +20,7 @@ import 'details_page_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class DetailsScreen extends StatelessWidget {
-  final DetailsController controller =
-      Get.isRegistered<DetailsController>()
-          ? Get.find<DetailsController>()
-          : Get.put(DetailsController());
+  final DetailsController controller = Get.put(DetailsController(), permanent: true);
   DetailsScreen({super.key});
 
   bool _shouldShowChatButton() {
@@ -702,13 +699,14 @@ class DetailsScreen extends StatelessWidget {
                                         
                                         if (fromOpenMatch) {
                                           final matchId = args['matchId'];
+                                          final isLoginUserInMatch = controller.isLoginUserInMatch();
                                           Get.toNamed(
                                             RoutesName.addPlayer,
                                             arguments: {
                                               "matchId": matchId,
                                               "team": "teamA",
                                               "needBottomAllOpenMatches": true,
-                                              "isLoginUser": true,
+                                              "isLoginUser": !isLoginUserInMatch,
                                             },
                                           );
                                         } else {
@@ -790,13 +788,14 @@ class DetailsScreen extends StatelessWidget {
                                         
                                         if (fromOpenMatch) {
                                           final matchId = args['matchId'];
+                                          final isLoginUserInMatch = controller.isLoginUserInMatch();
                                           Get.toNamed(
                                             RoutesName.addPlayer,
                                             arguments: {
                                               "matchId": matchId,
                                               "team": "teamB",
                                               "needBottomAllOpenMatches": true,
-                                              "isLoginUser": true,
+                                              "isLoginUser": !isLoginUserInMatch,
                                             },
                                           );
                                         } else {

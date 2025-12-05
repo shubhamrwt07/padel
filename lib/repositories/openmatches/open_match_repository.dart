@@ -1,5 +1,8 @@
 import 'dart:developer';
+import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject_request_players_model.dart';
+import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
 import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
+import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/open matches/add_player_to_open_match_model.dart';
@@ -107,27 +110,27 @@ class OpenMatchRepository {
     }
   }
 
-  Future<OpenMatchDetailsModel> getParticularMatch(String clubId) async {
-    log("mes 2");
-    try {
-      log(AppEndpoints.getParticularMatch);
-      final response = await dioClient.get(AppEndpoints.getParticularMatch);
-      log("mes 3 ${response.data} ");
-
-      return  OpenMatchDetailsModel.fromJson(response.data);
-
-
-
-    } catch (e, st) {
-      log("mes 4 ");
-      CustomLogger.logMessage(
-        msg: "details error 2: ${e.toString()}",
-        level: LogLevel.error,
-        st: st,
-      );
-      rethrow;
-    }
-  }
+  // Future<OpenMatchDetailsModel> getParticularMatch(String clubId) async {
+  //   log("mes 2");
+  //   try {
+  //     log(AppEndpoints.getParticularMatch);
+  //     final response = await dioClient.get(AppEndpoints.getParticularMatch);
+  //     log("mes 3 ${response.data} ");
+  //
+  //     return  OpenMatchDetailsModel.fromJson(response.data);
+  //
+  //
+  //
+  //   } catch (e, st) {
+  //     log("mes 4 ");
+  //     CustomLogger.logMessage(
+  //       msg: "details error 2: ${e.toString()}",
+  //       level: LogLevel.error,
+  //       st: st,
+  //     );
+  //     rethrow;
+  //   }
+  // }
 
   ///Create User For Open Match Api--------------------------------------------------------
   Future<CreateUserForOpenMatchModel?> createUserForOpenMatch({
@@ -190,6 +193,108 @@ class OpenMatchRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Add Player For Open Match failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Request Player For Open Match Api--------------------------------------------------------
+  Future<RequestPlayerToOpenMatchModel?> requestPlayerForOpenMatch({
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      CustomLogger.logMessage(
+        msg: "Request Player For Open Match request body: $body",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.post(
+        AppEndpoints.requestUserForOpenMatch,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Request Player For Open Match Success: ${response.data}",
+          level: LogLevel.info,
+        );
+        return RequestPlayerToOpenMatchModel.fromJson(response.data);
+      } else {
+        throw Exception("Request Player For Open Match Failed with status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Request Player For Open Match failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Get Request Players Open Match --------------------------------------------
+  Future<GetRequestPlayersOpenMatchModel?> getRequestPlayersOpenMatch({
+    required String matchId,
+  }) async {
+    try {
+      final url = "${AppEndpoints.getRequestUserForOpenMatch}matchId=$matchId";
+
+      CustomLogger.logMessage(
+        msg: "Get Request Player For Open Match Bookings: $url",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.get(url);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Get Request Player For Open Match fetched successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetRequestPlayersOpenMatchModel.fromJson(response.data);
+      } else {
+        throw Exception(
+            "Failed to fetch Get Request Player For Open Match Status: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Error fetching Get Request Player For Open Match: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Accept Or Reject Request Player For Open Match Api--------------------------------------------------------
+  Future<AcceptOrRejectRequestPlayersModel?> acceptOrRejectRequestPlayer({
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      CustomLogger.logMessage(
+        msg: "Accept Or Reject Request Player For Open Match request body: $body",
+        level: LogLevel.info,
+      );
+
+      final response = await dioClient.put(
+        AppEndpoints.acceptOrRejectRequestUserForOpenMatch,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Accept Or Reject Request Player For Open Match Success: ${response.data}",
+          level: LogLevel.info,
+        );
+        return AcceptOrRejectRequestPlayersModel.fromJson(response.data);
+      } else {
+        throw Exception("Accept Or Reject Request Player For Open Match Failed with status code: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Accept Or Reject Request Player For Open Match failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );
