@@ -97,10 +97,10 @@ class AddPlayerController extends GetxController {
             );
           }
         }else if (openMatchBookingController != null){
-          final added = await addPlayer();
-          if (added) {
+          final requested = await requestPlayerForOpenMatch();
+          if (requested) {
             CustomLogger.logMessage(
-              msg: "User Created & Player Added $body",
+              msg: "User Created & Player Requested $body",
               level: LogLevel.info,
             );
           }
@@ -152,10 +152,10 @@ class AddPlayerController extends GetxController {
             );
           }
         } else if (openMatchBookingController != null) {
-          final added = await addPlayer();
-          if (added) {
+          final requested = await requestPlayerForOpenMatch();
+          if (requested) {
             CustomLogger.logMessage(
-              msg: "Login User Added Directly",
+              msg: "Login User Requested Directly",
               level: LogLevel.info,
             );
           }
@@ -194,6 +194,38 @@ class AddPlayerController extends GetxController {
       } else {
         SnackBarUtils.showInfoSnackBar(
             response?.message ?? "Failed to add player");
+        return false;
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
+      return false;
+    }
+  }
+
+  ///Request Player For Open Match Api-----------------------------------------------
+  Future<bool> requestPlayerForOpenMatch() async {
+    try {
+      final body = {
+        "matchId": matchId.value,
+        "preferredTeam": selectedTeam.value,
+        "level": playerLevel.value,
+        "requesterId": playerId.value
+      };
+      final response = await repository.requestPlayerForOpenMatch(body: body);
+
+      if (response != null) {
+        await openMatchBookingController?.fetchOpenMatchesBooking(type: "upcoming");
+        Get.back(result: true);
+        SnackBarUtils.showSuccessSnackBar(
+            "Player request sent successfully");
+        CustomLogger.logMessage(
+          msg: "Player Request Sent $body",
+          level: LogLevel.info,
+        );
+        return true;
+      } else {
+        SnackBarUtils.showInfoSnackBar(
+            "Failed to send player request");
         return false;
       }
     } catch (e) {

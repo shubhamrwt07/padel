@@ -6,7 +6,8 @@ import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatController extends GetxController {
-  late IO.Socket socket;
+  static IO.Socket? _sharedSocket;
+  IO.Socket get socket => _sharedSocket!;
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
@@ -22,6 +23,14 @@ class ChatController extends GetxController {
   /// Clear static message cache (used during logout)
   static void clearMessageCache() {
     _messageCache.clear();
+  }
+  
+  /// Disconnect shared socket (used during logout)
+  static void disconnectSharedSocket() {
+    if (_sharedSocket != null) {
+      _sharedSocket!.disconnect();
+      _sharedSocket = null;
+    }
   }
 
   /// Get unique player names from messages as fallback (excluding current user)
@@ -347,35 +356,46 @@ class ChatController extends GetxController {
   }
 
   void connectSocket() {
-    socket = IO.io(
+    // Reuse existing socket if connected
+    if (_sharedSocket != null && _sharedSocket!.connected) {
+      CustomLogger.logMessage(msg: "♻️ Reusing existing socket connection", level: LogLevel.info);
+      isConnected.value = true;
+      // Join the match and get messages
+      _sharedSocket!.emit('joinMatch', matchId.value);
+      _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
+      if (messages.isEmpty) {
+        getMessages();
+      }
+      return;
+    }
+    
+    _sharedSocket = IO.io(
       AppEndpoints.SOCKET_URL,
       IO.OptionBuilder()
-          // Force a brand‑new connection so old auth/userId are not reused.
           .setTransports(['websocket'])
           .disableAutoConnect()
-          .enableForceNew() // important when logging out / logging in as another user
           .setAuth({'userId': userId})
           .build(),
     );
     CustomLogger.logMessage(msg: "USER ID_ CONNECT_> $userId",level: LogLevel.debug);
-    socket.connect();
+    _sharedSocket!.connect();
 
     // Log all incoming events to understand what the backend is sending
-    socket.onAny((event, data) {
+    _sharedSocket!.onAny((event, data) {
       CustomLogger.logMessage(
         msg: '🔔 Socket event: $event -> $data',
         level: LogLevel.info,
       );
     });
 
-    socket.on('connect', (_) {
+    _sharedSocket!.on('connect', (_) {
       CustomLogger.logMessage(
           msg: '✅ Socket connected successfully', level: LogLevel.info);
       isConnected.value = true;
       // Join the match once connected
-      socket.emit('joinMatch', matchId.value);
+      _sharedSocket!.emit('joinMatch', matchId.value);
       // Request connected players
-      socket.emit('getConnectedPlayers', {'matchId': matchId.value});
+      _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
       // Fetch existing messages only if not already loaded
       if (messages.isEmpty) {
         getMessages();
@@ -384,26 +404,26 @@ class ChatController extends GetxController {
 
     // Handle initial list of messages for this match
     // Your backend emits `messagesReceived`, not `messages`
-    socket.on('messagesReceived', _handleMessages);
+    _sharedSocket!.on('messagesReceived', _handleMessages);
 
     // Handle new incoming single message (when someone sends a message)
-    socket.on('newMessage', _handleNewMessage);
+    _sharedSocket!.on('newMessage', _handleNewMessage);
 
     // Handle connected players updates
-    socket.on('playersUpdate', _handlePlayersUpdate);
+    _sharedSocket!.on('playersUpdate', _handlePlayersUpdate);
 
-    socket.on('disconnect', (reason) {
+    _sharedSocket!.on('disconnect', (reason) {
       CustomLogger.logMessage(
           msg: '❌ Socket disconnected: $reason', level: LogLevel.error);
       isConnected.value = false;
     });
 
-    socket.on('connect_error', (error) {
+    _sharedSocket!.on('connect_error', (error) {
       CustomLogger.logMessage(msg: '🔥 Connection error: $error',level: LogLevel.debug);
       isConnected.value = false;
     });
 
-    socket.on('error', (error) {
+    _sharedSocket!.on('error', (error) {
       CustomLogger.logMessage(msg: '🔥 Socket error: $error',level: LogLevel.debug);
     });
 

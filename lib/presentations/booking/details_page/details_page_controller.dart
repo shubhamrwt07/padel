@@ -14,6 +14,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:get_storage/get_storage.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/loader_widgets.dart';
 import '../../../configs/components/primary_button.dart';
@@ -31,12 +32,31 @@ class DetailsController extends GetxController {
   late RazorpayPaymentService _paymentService;
   bool isFromOpenMatch = false;
   CartController get cartController => Get.find<CartController>();
+  final storage = GetStorage();
   
   // Socket connection variables
   IO.Socket? socket;
   final RxBool isSocketConnected = false.obs;
   final RxInt unreadCount = 0.obs;
   String get userId => storage.read("userId")?.toString() ?? '';
+
+  // Helper method to check if login user is in the match
+  bool isLoginUserInMatch() {
+    final userId = storage.read('userId');
+    if (userId == null) return false;
+    
+    // Check in teamA
+    for (final player in teamA) {
+      if (player['userId'] == userId.toString()) return true;
+    }
+    
+    // Check in teamB
+    for (final player in teamB) {
+      if (player['userId'] == userId.toString()) return true;
+    }
+    
+    return false;
+  }
 
   RxList<Map<String, dynamic>> teamA = <Map<String, dynamic>>[{
     "name": "",

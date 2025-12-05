@@ -36,10 +36,13 @@ class AppEndpoints {
   static const String createReview = "${BASE_URL}court/review/saveCustomerReview";
   ///Open Matches---------------------------------------------------------------
   static const String createMatches = "${BASE_URL}court/openmatch/createOpenMatch";
-  static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68d2300a723257df65e574ab";
+  // static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68d2300a723257df65e574ab";
   static const String getOpenMatches = "${BASE_URL}court/openmatch/getOpenMatches";
   static const String createUserForOpenMatch = "${BASE_URL}customerSignupWithOutPassword";
   static const String addUserForOpenMatch = "${BASE_URL}court/openmatch/addPlayerToMatch";
+  static const String requestUserForOpenMatch = "${BASE_URL}court/openmatch/requestToJoin";
+  static const String acceptOrRejectRequestUserForOpenMatch = "${BASE_URL}court/openmatch/respondToRequest";
+  static const String getRequestUserForOpenMatch = "${BASE_URL}court/openmatch/pendingRequests?";
   static const String openMatchBooking = "${BASE_URL}court/openmatch/getAllOpenMatches";
   ///Notification---------------------------------------------------------------
   static const String getNotification = "${BASE_URL}court/userNotification/readNotification";

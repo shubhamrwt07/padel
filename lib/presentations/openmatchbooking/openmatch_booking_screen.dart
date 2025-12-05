@@ -405,7 +405,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildMatchHeader(context, match),
+            _buildMatchHeader(context, match, completed: completed),
             _buildPlayerRow(completed: completed, match: match),
             Divider(
               thickness: 1.5,
@@ -419,49 +419,76 @@ class OpenMatchBookingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match) {
+  Widget _buildMatchHeader(BuildContext context, OpenMatchBookingData? match, {required bool completed}) {
     final slots = match?.slot ?? [];
     final times = slots
         .expand((slot) => slot.slotTimes ?? [])
         .map((st) => st.time ?? "")
         .where((t) => t.isNotEmpty)
         .join(" | ");
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final isCreator = _isMatchCreator(match);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SizedBox(
-          width: Get.width * 0.6,
-          child: RichText(
-            overflow: TextOverflow.ellipsis,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: "${formatDayOnly(match?.matchDate ?? "")} ",
-                  style: Get.textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: Get.width * 0.6,
+              child: RichText(
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "${formatDayOnly(match?.matchDate ?? "")} ",
+                      style: Get.textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "${formatDateOnly(match?.matchDate ?? "")} | ${formatTimeSlot(times)}",
+                      style: Get.textTheme.headlineSmall,
+                    ),
+                  ],
                 ),
-                TextSpan(
-                  text: "${formatDateOnly(match?.matchDate ?? "")} | ${formatTimeSlot(times)}",
-                  style: Get.textTheme.headlineSmall,
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  "${match?.skillLevel ?? "N/A"} | ",
+                  style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
+                ),
+                genderIcon(match?.gender),
+                Text(
+                  match?.gender?.capitalizeFirst ?? "",
+                  style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
                 ),
               ],
-            ),
-          ),
-        ),
-        Row(
-          children: [
-            Text(
-              "${match?.skillLevel ?? "N/A"} | ",
-              style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
-            ),
-            genderIcon(match?.gender),
-            Text(
-              match?.gender?.capitalizeFirst ?? "",
-              style: Get.textTheme.displaySmall!.copyWith(fontSize: 11),
-            ),
+            ).paddingOnly(top: 2),
+
           ],
-        ).paddingOnly(top: 2),
+        ),
+        if (isCreator && !completed) ...[
+          GestureDetector(
+            onTap: () => _showRequestsDialog(context, match?.sId ?? ''),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.secondaryColor,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'Requests',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ).paddingOnly(bottom: 5),
+          ),
+        ],
       ],
     ).paddingOnly(bottom: 8);
   }
@@ -482,6 +509,21 @@ class OpenMatchBookingScreen extends StatelessWidget {
     }
     
     return false;
+  }
+
+  // Helper method to check if login user is the match creator
+  bool _isMatchCreator(OpenMatchBookingData? match) {
+    final userId = storage.read('userId');
+    if (userId == null || match == null) return false;
+    
+    // Debug logging
+    CustomLogger.logMessage(
+      msg: "DEBUG: Checking match creator - userId: $userId, match.createdBy.sId: ${match.createdBy?.sId}",
+      level: LogLevel.debug,
+    );
+    
+    // createdBy is a UserId object, so we need to check the sId field
+    return match.createdBy?.sId == userId.toString();
   }
 
   Widget _buildPlayerRow({
@@ -806,6 +848,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
         .map((st) => (st.amount ?? 0) as int)
         .fold(0, (a, b) => a + b)
         : 0;
+
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -917,6 +961,226 @@ class OpenMatchBookingScreen extends StatelessWidget {
     final parts = value.split(RegExp(r"\s*[–-]\s*"));
     final code = parts.isNotEmpty ? parts.first.trim() : '';
     return code.isNotEmpty ? code : '-';
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return '';
+    final parts = name.trim().split(' ');
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+    return '${parts[0][0].toUpperCase()}${parts.last[0].toUpperCase()}';
+  }
+
+  String _formatName(String name, [String? lastName]) {
+    if (name.isEmpty) return '';
+    String fullName = name;
+    if (lastName != null && lastName.isNotEmpty) {
+      fullName = '$name $lastName';
+    }
+    final parts = fullName.trim().split(' ');
+    return parts.map((part) => part[0].toUpperCase() + part.substring(1).toLowerCase()).join(' ');
+  }
+
+  String _getInitialsFromFullName(String name, [String? lastName]) {
+    if (name.isEmpty) return '';
+    String fullName = name;
+    if (lastName != null && lastName.isNotEmpty) {
+      fullName = '$name $lastName';
+    }
+    final parts = fullName.trim().split(' ');
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+    return '${parts[0][0].toUpperCase()}${parts.last[0].toUpperCase()}';
+  }
+
+  void _showRequestsDialog(BuildContext context, String matchId) {
+    controller.fetchJoinRequests(matchId);
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          width: Get.width * 0.9,
+          constraints: BoxConstraints(maxHeight: Get.height * 0.6),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                   Text(
+                    'Join Requests',
+                    style: Get.textTheme.titleSmall
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              Divider(color: Colors.grey.shade400,height: 0.1,).paddingOnly(bottom: 10),
+              Flexible(
+                child: Obx(() {
+                  if (controller.isLoadingRequests.value) {
+                    return Padding(
+                      padding: EdgeInsets.all(32),
+                      child: LoadingWidget(color: AppColors.primaryColor),
+                    );
+                  }
+                  
+                  if (controller.joinRequests.isEmpty) {
+                    return Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Text(
+                        'No join requests yet',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  }
+                  
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controller.joinRequests.length,
+                    itemBuilder: (context, index) {
+                      final request = controller.joinRequests[index];
+                      return _buildRequestItem(request, matchId);
+                    },
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestItem(Map<String, dynamic> request, String matchId) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.playerCardBackgroundColor,
+        border: Border.all(color: AppColors.blackColor.withValues(alpha: 0.05)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          (request['profilePic'] != null && request['profilePic'].isNotEmpty)
+              ? CachedNetworkImage(
+                  imageUrl: request['profilePic'],
+                  imageBuilder: (context, imageProvider) => CircleAvatar(
+                    radius: 25,
+                    backgroundImage: imageProvider,
+                  ),
+                  placeholder: (context, url) => CircleAvatar(
+                    radius: 25,
+                    backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                    child: Text(
+                      _getInitialsFromFullName(request['name'], request['lastName']),
+                      style: const TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => CircleAvatar(
+                    radius: 25,
+                    backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                    child: Text(
+                      _getInitialsFromFullName(request['name'], request['lastName']),
+                      style: const TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  radius: 25,
+                  backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                  child: Text(
+                    _getInitialsFromFullName(request['name'], request['lastName']),
+                    style: const TextStyle(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _formatName(request['name'], request['lastName']),
+                  style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w400),
+                ),
+                Text(
+                  'Level: ${request['level']}',
+                  style: Get.textTheme.labelSmall!.copyWith(color: Colors.grey)
+                ),
+              ],
+            ),
+          ),
+          Obx(() {
+            final isAccepting = controller.acceptingRequestId.value == request['id'];
+            final isRejecting = controller.rejectingRequestId.value == request['id'];
+            final anyLoading = isAccepting || isRejecting;
+            
+            return Row(
+              children: [
+                GestureDetector(
+                  onTap: anyLoading ? null : () => controller.acceptRequest(request['id'], matchId),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: anyLoading ? Colors.grey : Colors.green,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: isAccepting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: LoadingWidget(color: Colors.white),
+                          )
+                        : Text(
+                            'Accept',
+                            style: Get.textTheme.bodySmall!.copyWith(color: Colors.white)
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: anyLoading ? null : () => controller.rejectRequest(request['id'], matchId),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: anyLoading ? Colors.grey : Colors.red,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: isRejecting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: LoadingWidget(color: Colors.white),
+                          )
+                        : Text(
+                            'Reject',
+                            style: Get.textTheme.bodySmall!.copyWith(color: Colors.white)
+                          ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
   }
  
 }

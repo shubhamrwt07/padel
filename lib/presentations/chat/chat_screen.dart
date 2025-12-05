@@ -9,7 +9,7 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChatController controller = Get.put(ChatController());
+    final ChatController controller = Get.put(ChatController(), permanent: true);
     
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
