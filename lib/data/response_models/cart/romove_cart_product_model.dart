@@ -5,38 +5,37 @@ class RemoveToCartModel {
   int? newTotalAmount;
   bool? cartDeleted;
 
-  RemoveToCartModel(
-      {this.message,
-        this.deletedSlotIds,
-        this.remainingSlots,
-        this.newTotalAmount,
-        this.cartDeleted});
+  RemoveToCartModel({
+    this.message,
+    this.deletedSlotIds,
+    this.remainingSlots,
+    this.newTotalAmount,
+    this.cartDeleted,
+  });
 
   RemoveToCartModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    deletedSlotIds = json['deletedSlotIds'].cast<String>();
+    deletedSlotIds = json['deletedSlotIds'] != null
+        ? List<String>.from(json['deletedSlotIds'])
+        : null;
+
     if (json['remainingSlots'] != null) {
-      remainingSlots = <RemainingSlots>[];
-      json['remainingSlots'].forEach((v) {
-        remainingSlots!.add(new RemainingSlots.fromJson(v));
-      });
+      remainingSlots = (json['remainingSlots'] as List)
+          .map((e) => RemainingSlots.fromJson(e))
+          .toList();
     }
+
     newTotalAmount = json['newTotalAmount'];
     cartDeleted = json['cartDeleted'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['message'] = this.message;
-    data['deletedSlotIds'] = this.deletedSlotIds;
-    if (this.remainingSlots != null) {
-      data['remainingSlots'] =
-          this.remainingSlots!.map((v) => v.toJson()).toList();
-    }
-    data['newTotalAmount'] = this.newTotalAmount;
-    data['cartDeleted'] = this.cartDeleted;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'message': message,
+        'deletedSlotIds': deletedSlotIds,
+        'remainingSlots': remainingSlots?.map((e) => e.toJson()).toList(),
+        'newTotalAmount': newTotalAmount,
+        'cartDeleted': cartDeleted,
+      };
 }
 
 class RemainingSlots {
@@ -47,22 +46,18 @@ class RemainingSlots {
 
   RemainingSlots.fromJson(Map<String, dynamic> json) {
     slotId = json['slotId'];
+
     if (json['times'] != null) {
-      times = <Times>[];
-      json['times'].forEach((v) {
-        times!.add(new Times.fromJson(v));
-      });
+      times = (json['times'] as List)
+          .map((e) => Times.fromJson(e))
+          .toList();
     }
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['slotId'] = this.slotId;
-    if (this.times != null) {
-      data['times'] = this.times!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'slotId': slotId,
+        'times': times?.map((e) => e.toJson()).toList(),
+      };
 }
 
 class Times {
@@ -76,10 +71,8 @@ class Times {
     slotId = json['slotId'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
-    data['slotId'] = this.slotId;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'time': time,
+        'slotId': slotId,
+      };
 }

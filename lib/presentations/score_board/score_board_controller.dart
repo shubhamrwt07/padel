@@ -2,7 +2,6 @@ import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart'
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:padel_mobile/handler/text_formatter.dart';
 
 class ScoreBoardController extends GetxController {
   RxList<Map<String, dynamic>> sets = <Map<String, dynamic>>[].obs;

@@ -135,7 +135,7 @@ class Filters extends StatelessWidget {
                   isDense: true, // Helps reduce extra padding
                 ),
                 dropdownColor: AppColors.whiteColor,
-                value: controller.selectedLocation.value.isEmpty
+                initialValue: controller.selectedLocation.value.isEmpty
                     ? null
                     : controller.selectedLocation.value,
                 hint: Row(

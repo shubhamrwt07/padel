@@ -6,17 +6,14 @@ class CreateReviewModel {
 
   CreateReviewModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    review =
-    json['review'] != null ? new Review.fromJson(json['review']) : null;
+    review = json['review'] != null ? Review.fromJson(json['review']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['message'] = this.message;
-    if (this.review != null) {
-      data['review'] = this.review!.toJson();
-    }
-    return data;
+    return {
+      'message': message,
+      if (review != null) 'review': review!.toJson(),
+    };
   }
 }
 
@@ -32,17 +29,18 @@ class Review {
   String? updatedAt;
   int? iV;
 
-  Review(
-      {this.reviewRating,
-        this.reviewComment,
-        this.userId,
-        this.registerClubId,
-        this.isActive,
-        this.isDeleted,
-        this.sId,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+  Review({
+    this.reviewRating,
+    this.reviewComment,
+    this.userId,
+    this.registerClubId,
+    this.isActive,
+    this.isDeleted,
+    this.sId,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Review.fromJson(Map<String, dynamic> json) {
     reviewRating = json['reviewRating'];
@@ -58,17 +56,17 @@ class Review {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['reviewRating'] = this.reviewRating;
-    data['reviewComment'] = this.reviewComment;
-    data['userId'] = this.userId;
-    data['register_club_id'] = this.registerClubId;
-    data['isActive'] = this.isActive;
-    data['isDeleted'] = this.isDeleted;
-    data['_id'] = this.sId;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['__v'] = this.iV;
-    return data;
+    return {
+      'reviewRating': reviewRating,
+      'reviewComment': reviewComment,
+      'userId': userId,
+      'register_club_id': registerClubId,
+      'isActive': isActive,
+      'isDeleted': isDeleted,
+      '_id': sId,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      '__v': iV,
+    };
   }
 }

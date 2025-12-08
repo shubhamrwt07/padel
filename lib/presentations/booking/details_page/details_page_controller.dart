@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
@@ -12,7 +11,6 @@ import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:get_storage/get_storage.dart';
 import '../../../configs/app_colors.dart';
@@ -175,9 +173,7 @@ class DetailsController extends GetxController {
 
       // ✅ Format both for backend
       final formattedMatchDate = DateFormat('yyyy-MM-dd').format(parsedMatchDate);
- final formattedBookingDate = parsedMatchDate != null 
-        ? DateTime.utc(parsedMatchDate.year, parsedMatchDate.month, parsedMatchDate.day).toIso8601String()
-        : "";
+ final formattedBookingDate = DateTime.utc(parsedMatchDate.year, parsedMatchDate.month, parsedMatchDate.day).toIso8601String();
       // ✅ Safely extract slots
       final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
 
