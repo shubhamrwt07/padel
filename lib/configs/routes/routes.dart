@@ -62,7 +62,7 @@ import '../../presentations/openmatchbooking/openmatch_booking_binding.dart';
 import '../../presentations/openmatchbooking/openmatch_booking_screen.dart';
 import '../../presentations/profile/profile_screen.dart';
 import '../../presentations/registration/registration_americano_screen.dart';
-import '../../presentations/scoreview/score_view_screen .dart';
+import '../../presentations/scoreview/score_view_screen.dart';
 import '../../presentations/splash/splash_binding.dart';
 import 'routes_name.dart';
 class Routes {

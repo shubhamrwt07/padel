@@ -553,11 +553,9 @@ class ChatController extends GetxController {
         };
       }).toList();
 
-      // Only load messages if not cached
-      if (!_messageCache.containsKey(matchId.value)) {
-        messages.assignAll(mapped);
-        _messageCache[matchId.value] = List.from(mapped);
-      }
+      // Load messages and update cache
+      messages.assignAll(mapped);
+      _messageCache[matchId.value] = List.from(mapped);
 
       
       // Update connected players from messages if backend doesn't provide them
@@ -622,6 +620,8 @@ class ChatController extends GetxController {
           map['playerName'] ??
           'Player';
 
+      final senderName = _toTitleCase(rawSenderName);
+
       final rawTimestamp = map['createdAt'] ?? map['time'] ?? '';
       final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
       final messageId = map['_id'] ?? map['id'];
@@ -630,19 +630,20 @@ class ChatController extends GetxController {
         'isMe': senderId == userId,
         'message': map['message'] ?? map['text'] ?? '',
         'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
-        'sender': _toTitleCase(rawSenderName),
+        'sender': senderName,
         'timestamp': _formatTimestamp(rawTimestamp),
         'dateTime': dateTime,
         'messageId': messageId,
       };
       
       messages.add(newMessage);
+      messages.refresh();
       // Update cache
       _messageCache[matchId.value] = List.from(messages);
       
-      // Update connected players from messages if backend doesn't provide them
-      if (connectedPlayers.isEmpty) {
-        connectedPlayers.assignAll(playersFromMessages);
+      // Add new player to title if not already present
+      if (senderName.isNotEmpty && !connectedPlayers.contains(senderName)) {
+        connectedPlayers.add(senderName);
       }
       
       // Only scroll to bottom if user is already near bottom

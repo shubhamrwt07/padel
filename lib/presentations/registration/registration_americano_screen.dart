@@ -84,7 +84,7 @@ class RegistrationView extends GetView<RegistrationController> {
             ).paddingOnly(top: Get.height * 0.02, bottom: Get.height * 0.01),
             Obx(
                   () => DropdownButtonFormField<String>(
-                value: controller.playerLevel.value,
+                initialValue: controller.playerLevel.value,
                 isDense: true,
                 items: controller.playerLevels.map((level) {
                   return DropdownMenuItem(

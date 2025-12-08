@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:padel_mobile/configs/routes/routes_name.dart';
-
 import '../../configs/app_colors.dart';
 import '../../configs/components/app_bar.dart';
 

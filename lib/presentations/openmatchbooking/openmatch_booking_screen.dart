@@ -24,9 +24,9 @@ class OpenMatchBookingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments;
-    final String? backRoute =
-    (args is Map) ? args['backRoute'] as String? : null;
+    // final args = Get.arguments;
+    // final String? backRoute =
+    // (args is Map) ? args['backRoute'] as String? : null;
 
     return Obx(() {
       if (!controller.isControllerReady.value || controller.tabController == null) {

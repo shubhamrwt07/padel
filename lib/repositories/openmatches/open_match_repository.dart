@@ -1,7 +1,5 @@
-import 'dart:developer';
 import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject_request_players_model.dart';
 import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
-import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';

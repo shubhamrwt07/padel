@@ -35,7 +35,7 @@ class ChatScreen extends StatelessWidget {
                     },
                     child: ListView.builder(
                       controller: controller.scrollController,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(left: 16,right: 16),
                       itemCount: controller.groupedMessages.length,
                       itemBuilder: (context, index) {
                         final item = controller.groupedMessages[index];

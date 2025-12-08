@@ -9,19 +9,15 @@ class SignUpModel {
     status = json['status'];
     message = json['message'];
     response = json['response'] != null
-        ? new Response.fromJson(json['response'])
+        ? Response.fromJson(json['response'])
         : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.response != null) {
-      data['response'] = this.response!.toJson();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'status': status,
+        'message': message,
+        if (response != null) 'response': response!.toJson(),
+      };
 }
 
 class Response {
@@ -42,23 +38,24 @@ class Response {
   String? updatedAt;
   int? iV;
 
-  Response(
-      {this.email,
-        this.countryCode,
-        this.phoneNumber,
-        this.name,
-        this.lastname,
-        this.password,
-        this.location,
-        this.city,
-        this.agreeTermsAndCondition,
-        this.category,
-        this.isActive,
-        this.isDeleted,
-        this.sId,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+  Response({
+    this.email,
+    this.countryCode,
+    this.phoneNumber,
+    this.name,
+    this.lastname,
+    this.password,
+    this.location,
+    this.city,
+    this.agreeTermsAndCondition,
+    this.category,
+    this.isActive,
+    this.isDeleted,
+    this.sId,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Response.fromJson(Map<String, dynamic> json) {
     email = json['email'];
@@ -68,7 +65,7 @@ class Response {
     lastname = json['lastname'];
     password = json['password'];
     location = json['location'] != null
-        ? new Location.fromJson(json['location'])
+        ? Location.fromJson(json['location'])
         : null;
     city = json['city'];
     agreeTermsAndCondition = json['agreeTermsAndCondition'];
@@ -81,28 +78,24 @@ class Response {
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['email'] = this.email;
-    data['countryCode'] = this.countryCode;
-    data['phoneNumber'] = this.phoneNumber;
-    data['name'] = this.name;
-    data['lastname'] = this.lastname;
-    data['password'] = this.password;
-    if (this.location != null) {
-      data['location'] = this.location!.toJson();
-    }
-    data['city'] = this.city;
-    data['agreeTermsAndCondition'] = this.agreeTermsAndCondition;
-    data['category'] = this.category;
-    data['isActive'] = this.isActive;
-    data['isDeleted'] = this.isDeleted;
-    data['_id'] = this.sId;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['__v'] = this.iV;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'email': email,
+        'countryCode': countryCode,
+        'phoneNumber': phoneNumber,
+        'name': name,
+        'lastname': lastname,
+        'password': password,
+        if (location != null) 'location': location!.toJson(),
+        'city': city,
+        'agreeTermsAndCondition': agreeTermsAndCondition,
+        'category': category,
+        'isActive': isActive,
+        'isDeleted': isDeleted,
+        '_id': sId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        '__v': iV,
+      };
 }
 
 class Location {
@@ -113,13 +106,12 @@ class Location {
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    coordinates =
+        json['coordinates']?.map<double>((e) => e.toDouble()).toList();
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    data['coordinates'] = this.coordinates;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'coordinates': coordinates,
+      };
 }
