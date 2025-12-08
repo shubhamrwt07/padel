@@ -15,7 +15,7 @@ class ChatController extends GetxController {
   final RxBool showDateHeader = false.obs;
   final RxString currentScrollDate = ''.obs;
   final RxList<String> connectedPlayers = <String>[].obs;
-  final RxBool isLoading = false.obs;
+
   
   // Static cache to persist messages across controller recreations
   static final Map<String, List<Map<String, dynamic>>> _messageCache = {};
@@ -464,7 +464,6 @@ class ChatController extends GetxController {
     });
   }
   Future<void> getMessages() async {
-    isLoading.value = true;
     socket.emit('getMessages', {
       'matchId': matchId.value,
     });
@@ -503,6 +502,7 @@ class ChatController extends GetxController {
           msg: '⚠️ _handleMessages received unsupported format: $data',
           level: LogLevel.error,
         );
+
         return;
       }
 
@@ -558,7 +558,7 @@ class ChatController extends GetxController {
         messages.assignAll(mapped);
         _messageCache[matchId.value] = List.from(mapped);
       }
-      isLoading.value = false;
+
       
       // Update connected players from messages if backend doesn't provide them
       if (connectedPlayers.isEmpty) {
@@ -584,6 +584,7 @@ class ChatController extends GetxController {
         msg: '❌ Error parsing messages: $e',
         level: LogLevel.error,
       );
+
     }
   }
 

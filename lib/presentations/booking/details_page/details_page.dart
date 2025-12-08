@@ -77,6 +77,8 @@ class DetailsScreen extends StatelessWidget {
     final matchID = args is Map ? args['matchId'] : null;
     final bool fromOpenMatch =
         args is Map && args['fromOpenMatch'] == true;
+    final bool isCompleted =
+        args is Map && args['completed'] == true;
 
     final data = controller.localMatchData;
     List slots = data['slot'];
@@ -231,8 +233,8 @@ class DetailsScreen extends StatelessWidget {
                 teamA: controller.teamA,
                 teamB: controller.teamB,
               ),
-              SizedBox(height:_shouldShowChatButton()&& fromOpenMatch?null: Get.height * .015,),
-              _shouldShowChatButton()&& fromOpenMatch ?
+              SizedBox(height:_shouldShowChatButton() && fromOpenMatch && !isCompleted ? null : Get.height * .015,),
+              _shouldShowChatButton() && fromOpenMatch && !isCompleted ?
               Align(
                 alignment: AlignmentGeometry.center,
                 child: GestureDetector(
@@ -570,7 +572,7 @@ class DetailsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: image.isEmpty ? AppColors.primaryColor.withValues(alpha: .1) : Colors.white,
               shape: BoxShape.circle,
-              border: Border.all(color:image.isNotEmpty? AppColors.primaryColor:Colors.transparent),
+              border: Border.all(color:Colors.transparent),
             ),
             child: image.isNotEmpty
                 ? ClipOval(
