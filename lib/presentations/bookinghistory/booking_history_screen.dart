@@ -22,6 +22,7 @@ class BookingHistoryUi extends StatelessWidget {
     return Scaffold(
       appBar: primaryAppBar(
         centerTitle: true,
+        leading: SizedBox.shrink(),
         title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
         context: context,
       ),

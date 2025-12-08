@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
-import 'package:padel_mobile/configs/components/loader_widgets.dart';
+
 import 'chat_controller.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -22,55 +22,50 @@ class ChatScreen extends StatelessWidget {
             Expanded(
               child: Obx(() => Stack(
                 children: [
-                  if (controller.isLoading.value)
-                    const Center(
-                      child: LoadingWidget(color: AppColors.primaryColor,),
-                    )
-                  else
-                    NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is ScrollStartNotification) {
-                          controller.onScrollStart();
-                        } else if (notification is ScrollEndNotification) {
-                          controller.onScrollEnd();
-                        } else if (notification is ScrollUpdateNotification) {
-                          controller.updateCurrentScrollDate();
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollStartNotification) {
+                        controller.onScrollStart();
+                      } else if (notification is ScrollEndNotification) {
+                        controller.onScrollEnd();
+                      } else if (notification is ScrollUpdateNotification) {
+                        controller.updateCurrentScrollDate();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      controller: controller.scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.groupedMessages.length,
+                      itemBuilder: (context, index) {
+                        final item = controller.groupedMessages[index];
+                        
+                        if (item['isDateHeader'] == true) {
+                          return _buildDateHeader(item['dateText']);
                         }
-                        return false;
+                         
+                        if (item['isGroupCreated'] == true) {
+                          return _buildGroupCreatedMessage(
+                            item['message'],
+                            item['timestamp'],
+                          );
+                        }
+                        
+                        return item['isMe']
+                            ? _buildSentMessage(
+                                item['message'],
+                                item['team'],
+                                item['timestamp'],
+                              )
+                            : _buildReceivedMessage(
+                                item['message'],
+                                item['sender'],
+                                item['team'],
+                                item['timestamp'],
+                              );
                       },
-                      child: ListView.builder(
-                        controller: controller.scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: controller.groupedMessages.length,
-                        itemBuilder: (context, index) {
-                          final item = controller.groupedMessages[index];
-                          
-                          if (item['isDateHeader'] == true) {
-                            return _buildDateHeader(item['dateText']);
-                          }
-                           
-                          if (item['isGroupCreated'] == true) {
-                            return _buildGroupCreatedMessage(
-                              item['message'],
-                              item['timestamp'],
-                            );
-                          }
-                          
-                          return item['isMe']
-                              ? _buildSentMessage(
-                                  item['message'],
-                                  item['team'],
-                                  item['timestamp'],
-                                )
-                              : _buildReceivedMessage(
-                                  item['message'],
-                                  item['sender'],
-                                  item['team'],
-                                  item['timestamp'],
-                                );
-                        },
-                      ),
                     ),
+                  ),
                   if (controller.showDateHeader.value)
                     Positioned(
                       top: 16,
