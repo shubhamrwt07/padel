@@ -1,4 +1,3 @@
-import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
 

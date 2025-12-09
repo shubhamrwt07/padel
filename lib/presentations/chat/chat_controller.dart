@@ -393,7 +393,7 @@ class ChatController extends GetxController {
     
     CustomLogger.logMessage(msg: "🆕 CHAT: Creating NEW socket connection for user: $currentUserId", level: LogLevel.info);
     _sharedSocket = IO.io(
-      AppEndpoints.SOCKET_URL,
+      AppEndpoints.socketUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

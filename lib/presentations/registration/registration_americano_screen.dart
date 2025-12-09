@@ -55,24 +55,26 @@ class RegistrationView extends GetView<RegistrationController> {
               ),
             ).paddingOnly(top: Get.height * 0.02),
             Obx(
-                  () => Row(
-                children: ["Female", "Male", "Other"].map((g) {
-                  return Expanded(
-                    child: RadioListTile<String>(
-                      title: Text(
-                        g,
-                        style: Get.textTheme.headlineSmall,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                  () => RadioGroup<String>(
+                groupValue: controller.gender.value,
+                onChanged: (value) => controller.gender.value = value!,
+                child: Row(
+                  children: ["Female", "Male", "Other"].map((g) {
+                    return Expanded(
+                      child: RadioListTile<String>(
+                        title: Text(
+                          g,
+                          style: Get.textTheme.headlineSmall,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        dense: true,
+                        value: g,
+                        contentPadding: EdgeInsets.zero,
                       ),
-                      dense: true,
-                      value: g,
-                      groupValue: controller.gender.value,
-                      onChanged: (value) => controller.gender.value = value!,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             Text(

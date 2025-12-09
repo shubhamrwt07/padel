@@ -963,14 +963,14 @@ class OpenMatchBookingScreen extends StatelessWidget {
     return code.isNotEmpty ? code : '-';
   }
 
-  String _getInitials(String name) {
-    if (name.isEmpty) return '';
-    final parts = name.trim().split(' ');
-    if (parts.length == 1) {
-      return parts[0][0].toUpperCase();
-    }
-    return '${parts[0][0].toUpperCase()}${parts.last[0].toUpperCase()}';
-  }
+  // String _getInitials(String name) {
+  //   if (name.isEmpty) return '';
+  //   final parts = name.trim().split(' ');
+  //   if (parts.length == 1) {
+  //     return parts[0][0].toUpperCase();
+  //   }
+  //   return '${parts[0][0].toUpperCase()}${parts.last[0].toUpperCase()}';
+  // }
 
   String _formatName(String name, [String? lastName]) {
     if (name.isEmpty) return '';

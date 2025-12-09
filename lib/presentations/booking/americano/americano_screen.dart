@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 
 import 'americano_bottomsheet_content.dart';

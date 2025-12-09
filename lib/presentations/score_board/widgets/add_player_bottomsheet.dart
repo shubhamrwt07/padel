@@ -21,8 +21,8 @@ class AddPlayerBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
-      onPopInvoked: (didPop) {
+        canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           controller.pageIndex.value = 0;
         }

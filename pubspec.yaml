@@ -17,6 +17,7 @@ dependencies:
   get_storage:
   connectivity_plus:
   dio:
+  http:
   logger:
   flutter_svg:
   pin_code_fields:
@@ -44,6 +45,7 @@ dependencies:
   loading_animation_widget:
   url_launcher:
   socket_io_client:
+  flutter_cache_manager:
 
 dev_dependencies:
   flutter_test:

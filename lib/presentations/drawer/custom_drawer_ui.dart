@@ -171,7 +171,17 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
           Obx(
                 () => ProfileRow(
-              icon: SvgPicture.asset(Assets.imagesIconLeaderBoard, height: 22, width: 22, color: controller.selectedIndex.value == 6 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              icon: SvgPicture.asset(
+                  Assets.imagesIconLeaderBoard,
+                  height: 22,
+                  width: 22,
+                  colorFilter: ColorFilter.mode(
+                    controller.selectedIndex.value == 6
+                        ? AppColors.primaryColor
+                        : AppColors.labelBlackColor,
+                    BlendMode.srcIn,
+                  ),
+                ),
               title: "LeaderBoard",
               isSelected: controller.selectedIndex.value == 6,
               onTap: () {
@@ -181,8 +191,18 @@ class CustomDrawerUi extends GetView<ProfileController> {
             ),
           ),
           Obx(
-                () => ProfileRow(
-              icon: SvgPicture.asset(Assets.imagesIcPackages, height: 17, width: 17, color: controller.selectedIndex.value == 7 ? AppColors.primaryColor : AppColors.labelBlackColor),
+            () => ProfileRow(
+              icon: SvgPicture.asset(
+                Assets.imagesIcPackages,
+                height: 17,
+                width: 17,
+                colorFilter: ColorFilter.mode(
+                  controller.selectedIndex.value == 7
+                      ? AppColors.primaryColor
+                      : AppColors.labelBlackColor,
+                  BlendMode.srcIn,
+                ),
+              ),
               title: "Packages",
               isSelected: controller.selectedIndex.value == 7,
               onTap: () {

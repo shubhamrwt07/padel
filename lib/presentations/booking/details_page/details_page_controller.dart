@@ -781,24 +781,26 @@ class DetailsController extends GetxController {
                             ),
                           ).paddingOnly(top: Get.height * 0.02),
 
-                          Obx(() => Row(
-                            children: ["Female", "Male", "Other"].map((g) {
-                              return Expanded(
-                                child: RadioListTile<String>(
-                                  title: Text(
-                                    g,
-                                    style: Get.textTheme.headlineSmall,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
+                          Obx(() => RadioGroup<String>(
+                            groupValue: gender.value,
+                            onChanged: (value) => gender.value = value!,
+                            child: Row(
+                              children: ["Female", "Male", "Other"].map((g) {
+                                return Expanded(
+                                  child: RadioListTile<String>(
+                                    title: Text(
+                                      g,
+                                      style: Get.textTheme.headlineSmall,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    dense: true,
+                                    value: g,
+                                    contentPadding: EdgeInsets.zero,
                                   ),
-                                  dense: true,
-                                  value: g,
-                                  groupValue: gender.value,
-                                  onChanged: (value) => gender.value = value!,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                              );
-                            }).toList(),
+                                );
+                              }).toList(),
+                            ),
                           )),
 
                           // Player Level
@@ -819,7 +821,7 @@ class DetailsController extends GetxController {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 DropdownButtonFormField<String>(
-                                  value: currentValue,
+                                  initialValue: currentValue,
                                   isDense: true,
                                   dropdownColor: AppColors.whiteColor,
                                   decoration: InputDecoration(
@@ -1076,7 +1078,7 @@ class DetailsController extends GetxController {
       );
       
       socket = IO.io(
-        AppEndpoints.SOCKET_URL,
+        AppEndpoints.socketUrl,
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect()

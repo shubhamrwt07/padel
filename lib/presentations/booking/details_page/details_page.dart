@@ -85,11 +85,11 @@ class DetailsScreen extends StatelessWidget {
     imageUrl: (data['clubImage'] is List && (data['clubImage'] as List).isNotEmpty) 
           ? (data['clubImage'] as List).first.toString() 
           : (data['clubImage']?.toString() ?? ""),
-      child: WillPopScope(
-        onWillPop: () async {
-          controller.handleBackNavigation();
-          return true;
-        },
+      child: PopScope(
+            canPop: true,
+            onPopInvokedWithResult: (didPop, result) {
+              controller.handleBackNavigation();
+            },
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: primaryAppBar(
@@ -906,7 +906,7 @@ class DetailsScreen extends StatelessWidget {
       final formattedTime = format.format(endRegistration);
       return "Today at $formattedTime";
     } catch (e) {
-      print("Error parsing time: $e");
+      CustomLogger.logMessage(msg: "Error parsing time: $e",level: LogLevel.error);
     }
     
     return "Today at 10:00 PM";

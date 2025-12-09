@@ -420,7 +420,7 @@ class CreateOpenMatchesController extends GetxController {
   }
 
 // Replace your existing _clearCurrentDateSelections method with this:
-  void _clearCurrentDateSelections() {
+  void clearCurrentDateSelections() {
     final currentDate = selectedDate.value ?? DateTime.now();
     final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
 
