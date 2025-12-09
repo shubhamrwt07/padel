@@ -62,43 +62,50 @@ var profileModel = Rxn<ProfileModel>();
                   onTap: () async {
                     log("🚪 LOGOUT: Starting logout process");
                     
-                    // Try to disconnect chat socket (if chat is in memory) before clearing storage
-                    if (Get.isRegistered<DetailsController>()) {
-                      try {
-                        log("🔍 LOGOUT: DetailsController found, attempting socket disconnect");
-                        final chatCtrl = Get.find<DetailsController>();
-                        log("🔌 LOGOUT: Socket connected status: ${chatCtrl.socket?.connected}");
-                        chatCtrl.disconnectSocket();
-                        log("✅ LOGOUT: Socket disconnect called");
-                        
-                        // Also remove the ChatController instance so it will be recreated
-                        // with the new user after login.
-                        if (Get.isRegistered<ChatController>()) {
-                          log("🗑️ LOGOUT: Deleting ChatController instance");
-                          Get.delete<ChatController>(force: true);
-                          log("✅ LOGOUT: ChatController deleted");
-                        } else {
-                          log("ℹ️ LOGOUT: ChatController not registered");
-                        }
-                        
-                        // Clear static message cache to prevent showing previous user's messages
-                        log("🧹 LOGOUT: Clearing ChatController static message cache");
-                        ChatController.clearMessageCache();
-                        log("✅ LOGOUT: Message cache cleared");
-                      } catch (e) {
-                        log("❌ LOGOUT: Error during socket disconnect: $e");
+                    // Complete cleanup of all socket connections and controllers
+                    try {
+                      // Disconnect shared socket first
+                      log("🔌 LOGOUT: Disconnecting shared socket");
+                      ChatController.disconnectSharedSocket();
+                      log("✅ LOGOUT: Shared socket disconnected");
+                      
+                      // Clear static message cache
+                      log("🧹 LOGOUT: Clearing ChatController static message cache");
+                      ChatController.clearMessageCache();
+                      log("✅ LOGOUT: Message cache cleared");
+                      
+                      // Disconnect details controller socket if exists
+                      if (Get.isRegistered<DetailsController>()) {
+                        log("🔍 LOGOUT: DetailsController found, disconnecting socket");
+                        final detailsCtrl = Get.find<DetailsController>();
+                        detailsCtrl.disconnectSocket();
+                        log("✅ LOGOUT: Details socket disconnected");
                       }
-                    } else {
-                      log("ℹ️ LOGOUT: DetailsController not registered");
+                      
+                      // Delete all controller instances to force fresh creation
+                      if (Get.isRegistered<ChatController>()) {
+                        log("🗑️ LOGOUT: Deleting ChatController instance");
+                        Get.delete<ChatController>(force: true);
+                        log("✅ LOGOUT: ChatController deleted");
+                      }
+                      
+                      if (Get.isRegistered<DetailsController>()) {
+                        log("🗑️ LOGOUT: Deleting DetailsController instance");
+                        Get.delete<DetailsController>(force: true);
+                        log("✅ LOGOUT: DetailsController deleted");
+                      }
+                      
+                    } catch (e) {
+                      log("❌ LOGOUT: Error during cleanup: $e");
                     }
 
-                    // Log before clearing
+                    // Clear storage completely
                     log("🔍 LOGOUT: BEFORE ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
-                    await storage.remove("userId");
                     await storage.erase(); // clear all stored data
-
-                    // Log after clearing
-                    log("🧹 LOGOUT: AFTER ERASE: ${storage.getKeys().map((k) => "$k: ${storage.read(k)}").join(", ")}");
+                    log("🧹 LOGOUT: AFTER ERASE: Storage cleared");
+                    
+                    // Small delay to ensure cleanup is complete
+                    await Future.delayed(const Duration(milliseconds: 500));
                     log("🏁 LOGOUT: Navigating to login screen");
 
                     Get.offAllNamed(RoutesName.login);

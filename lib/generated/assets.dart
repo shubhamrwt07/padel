@@ -2,6 +2,7 @@
 class Assets {
   Assets._();
 
+  static const String imagesAppLogo = 'assets/images/app_logo.png';
   static const String imagesGirl = 'assets/images/girl.png';
   static const String imagesGirls = 'assets/images/girls.png';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
@@ -49,6 +50,7 @@ class Assets {
   static const String imagesImgRoundBackground = 'assets/images/img_round_background.svg';
   static const String imagesImgScoreView = 'assets/images/img_score_view.svg';
   static const String imagesImgVsRounds = 'assets/images/img_vs_rounds.svg';
+  static const String imagesPadelLogo11 = 'assets/images/Padel_logo_11.svg';
   static const String lottieFilesNoData = 'assets/lottie_files/no_data.gif';
 
 }
