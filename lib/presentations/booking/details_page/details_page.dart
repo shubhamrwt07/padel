@@ -63,9 +63,7 @@ class DetailsScreen extends StatelessWidget {
         return;
       }
       // Mark all messages as read when chat button is clicked
-      controller.markAllMessagesAsRead();
-      // Reset unread count immediately for better UX
-      controller.unreadCount.value = 0;
+      controller.markAllMessagesAsReadFromDetails();
       Get.toNamed(RoutesName.chat, arguments: {"matchID": matchID});
     } else {
       SnackBarUtils.showErrorSnackBar("Only match players can access the chat");

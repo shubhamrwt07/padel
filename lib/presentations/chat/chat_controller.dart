@@ -28,8 +28,18 @@ class ChatController extends GetxController {
   /// Disconnect shared socket (used during logout)
   static void disconnectSharedSocket() {
     if (_sharedSocket != null) {
+      CustomLogger.logMessage(
+        msg: '🔌 CHAT: Disconnecting shared socket and leaving all matches',
+        level: LogLevel.info,
+      );
+      // Leave all matches before disconnecting
+      _sharedSocket!.emit('leaveAllMatches');
       _sharedSocket!.disconnect();
       _sharedSocket = null;
+      CustomLogger.logMessage(
+        msg: '✅ CHAT: Shared socket disconnected',
+        level: LogLevel.info,
+      );
     }
   }
 
@@ -356,28 +366,42 @@ class ChatController extends GetxController {
   }
 
   void connectSocket() {
-    // Reuse existing socket if connected
-    if (_sharedSocket != null && _sharedSocket!.connected) {
-      CustomLogger.logMessage(msg: "♻️ Reusing existing socket connection", level: LogLevel.info);
-      isConnected.value = true;
-      // Join the match and get messages
-      _sharedSocket!.emit('joinMatch', matchId.value);
-      _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
-      if (messages.isEmpty) {
-        getMessages();
+    // Check if we need to create a new socket connection for a different user
+    final currentUserId = userId;
+    CustomLogger.logMessage(msg: "🔍 CHAT: connectSocket called with userId: $currentUserId", level: LogLevel.info);
+    
+    // Always create fresh socket connection to avoid stale authentication
+    if (_sharedSocket != null) {
+      final socketUserId = _sharedSocket!.auth?['userId']?.toString() ?? '';
+      CustomLogger.logMessage(msg: "🔄 CHAT: Existing socket found for user: $socketUserId, current user: $currentUserId", level: LogLevel.info);
+      
+      if (socketUserId != currentUserId || !_sharedSocket!.connected) {
+        CustomLogger.logMessage(msg: "🔌 CHAT: Disconnecting existing socket (different user or not connected)", level: LogLevel.info);
+        _sharedSocket!.disconnect();
+        _sharedSocket = null;
+      } else {
+        CustomLogger.logMessage(msg: "♻️ CHAT: Reusing existing socket for same user", level: LogLevel.info);
+        isConnected.value = true;
+        _sharedSocket!.emit('joinMatch', matchId.value);
+        _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
+        if (messages.isEmpty) {
+          getMessages();
+        }
+        return;
       }
-      return;
     }
     
+    CustomLogger.logMessage(msg: "🆕 CHAT: Creating NEW socket connection for user: $currentUserId", level: LogLevel.info);
     _sharedSocket = IO.io(
       AppEndpoints.SOCKET_URL,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
-          .setAuth({'userId': userId})
+          .enableForceNew() // Force new connection
+          .setAuth({'userId': currentUserId})
           .build(),
     );
-    CustomLogger.logMessage(msg: "USER ID_ CONNECT_> $userId",level: LogLevel.debug);
+    CustomLogger.logMessage(msg: "🔗 CHAT: Socket created with auth userId: $currentUserId",level: LogLevel.info);
     _sharedSocket!.connect();
 
     // Log all incoming events to understand what the backend is sending

@@ -1,3 +1,5 @@
+import 'package:padel_mobile/generated/assets.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/presentations/splash/widgets/splash_exports.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -10,7 +12,7 @@ class SplashScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: Center(
             child:
-            Text(AppStrings.appName,style: TextStyle(fontSize: 22),)),
+            SvgPicture.asset(Assets.imagesPadelLogo11,height: 60,width: 60,)),
       ),
     );
   }
