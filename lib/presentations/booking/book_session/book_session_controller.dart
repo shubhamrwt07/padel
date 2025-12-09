@@ -10,8 +10,8 @@ import '../../cart/cart_controller.dart';
 
 class BookSessionController extends GetxController {
   // Booking limits
-  static const int MAX_SLOTS = 24;
-  static const int MAX_DAYS = 5;
+  static const int maxSlots = 24;
+  static const int maxDays = 5;
   final focusedMonth = DateTime.now().obs;
 
   // Date formatter for consistency
@@ -238,16 +238,16 @@ class BookSessionController extends GetxController {
   /// Check if adding a new slot would violate limits
   bool _canAddSlot() {
     final currentCount = multiDateSelections.length;
-    if (currentCount >= MAX_SLOTS) {
-      SnackBarUtils.showErrorSnackBar("Booking Limit Reached\nYou can select a maximum of $MAX_SLOTS slots.");
+    if (currentCount >= maxSlots) {
+      SnackBarUtils.showErrorSnackBar("Booking Limit Reached\nYou can select a maximum of $maxSlots slots.");
       return false;
     }
 
     final uniqueDates = _getUniqueDates();
-    if (uniqueDates.length >= MAX_DAYS) {
+    if (uniqueDates.length >= maxDays) {
       Get.snackbar(
         "Day Limit Reached",
-        "You can book for a maximum of $MAX_DAYS days only.",
+        "You can book for a maximum of $maxDays days only.",
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

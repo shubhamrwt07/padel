@@ -215,7 +215,6 @@ class NotificationController extends GetxController {
   /// Send token to server
   Future<void> _sendTokenToServer(String token) async {
     try {
-      // TODO: Replace with your actual API endpoint
       if (kDebugMode) {
         print('📤 Token should be sent to server: $token');
       }

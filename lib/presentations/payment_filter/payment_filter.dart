@@ -160,32 +160,35 @@ class PaymentFilterUi extends GetView<PaymentFilterController> {
                   color: AppColors.labelBlackColor,
                 ),
               ).paddingOnly(top: 10,left: Get.width*.05,right: Get.width*.05),
-              ...['Completed', 'Failed', 'Processing'].map(
-                    (status) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Radio<String>(
-                          value: status,
-                          groupValue: controller.selectedStatus.value,
-                          onChanged: (val) =>
-                              controller.selectStatus(val ?? 'Completed'),
-                          materialTapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                      Text(
-                        status,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(color: AppColors.labelBlackColor),
-                      ),
-                    ],
-                  ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
+              RadioGroup<String>(
+                groupValue: controller.selectedStatus.value,
+                onChanged: (val) => controller.selectStatus(val ?? 'Completed'),
+                child: Column(
+                  children: ['Completed', 'Failed', 'Processing'].map(
+                        (status) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          Transform.scale(
+                            scale: 0.8,
+                            child: Radio<String>(
+                              value: status,
+                              materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                          Text(
+                            status,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .copyWith(color: AppColors.labelBlackColor),
+                          ),
+                        ],
+                      ).paddingOnly(left: Get.width*.03,right: Get.width*.03),
+                    ),
+                  ).toList(),
                 ),
               ),
 

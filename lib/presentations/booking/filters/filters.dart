@@ -339,33 +339,35 @@ class Filters extends StatelessWidget {
       children: [
         Text("Sort By", style: Get.textTheme.headlineMedium),
         const SizedBox(height: 8),
-        ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: controller.sortOptions.length,
-          itemBuilder: (context, index) {
-            final option = controller.sortOptions[index];
-            return Obx(
-                  () => Transform.translate(
-                offset: const Offset(-9, 0),
-                child: RadioListTile<String>(
-                  dense: true, // Minimizes vertical space
-                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    option,
-                    style: Get.textTheme.headlineSmall?.copyWith(fontSize: 14), // Optional: smaller font
+        Obx(
+          () => RadioGroup<String>(
+            groupValue: controller.selectedOption.value,
+            onChanged: (value) {
+              controller.selectedOption.value = value!;
+            },
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.sortOptions.length,
+              itemBuilder: (context, index) {
+                final option = controller.sortOptions[index];
+                return Transform.translate(
+                  offset: const Offset(-9, 0),
+                  child: RadioListTile<String>(
+                    dense: true,
+                    visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      option,
+                      style: Get.textTheme.headlineSmall?.copyWith(fontSize: 14),
+                    ),
+                    value: option,
                   ),
-                  value: option,
-                  groupValue: controller.selectedOption.value,
-                  onChanged: (value) {
-                    controller.selectedOption.value = value!;
-                  },
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ),
         )
       ],
     ).paddingOnly(bottom: Get.height*0.02);

@@ -65,28 +65,28 @@ class AddPlayerScreen extends StatelessWidget {
                   ),
                 ).paddingOnly(top: Get.height * 0.02),
 
-                Row(
-                  children: ["Female", "Male", "Other"].map((g) {
-                    return Expanded(
-                      child: RadioListTile<String>(
-                        title: Text(
-                          g,
-                          style: Get.textTheme.headlineSmall,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                RadioGroup<String>(
+                  groupValue: controller.gender.value.isEmpty ? null : controller.gender.value,
+                  onChanged: controller.isLoginUserAdding.value 
+                      ? (_) {} 
+                      : (value) => controller.gender.value = value!,
+                  child: Row(
+                    children: ["Female", "Male", "Other"].map((g) {
+                      return Expanded(
+                        child: RadioListTile<String>(
+                          title: Text(
+                            g,
+                            style: Get.textTheme.headlineSmall,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          dense: true,
+                          value: g,
+                          contentPadding: EdgeInsets.zero,
                         ),
-                        dense: true,
-                        value: g,
-                        groupValue: controller.gender.value.isEmpty
-                            ? null
-                            : controller.gender.value,
-                        onChanged: controller.isLoginUserAdding.value 
-                            ? null 
-                            : (value) => controller.gender.value = value!,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
 
                 Text(
@@ -99,7 +99,7 @@ class AddPlayerScreen extends StatelessWidget {
                     top: Get.height * 0.02, bottom: Get.height * 0.01),
 
                 DropdownButtonFormField<String>(
-                  value: controller.playerLevel.value.isEmpty ||
+                  initialValue: controller.playerLevel.value.isEmpty ||
                          !controller.playerLevels.any((level) => level["value"] == controller.playerLevel.value)
                       ? null
                       : controller.playerLevel.value,

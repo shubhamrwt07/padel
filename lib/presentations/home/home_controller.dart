@@ -302,7 +302,7 @@ class HomeController extends GetxController {
     if (locations.isEmpty && !isLoadingLocations.value) {
       await fetchLocations();
     }
-    final scrollController = ScrollController();
+    final locationScrollController = ScrollController();
     // Get.dialog does not require a BuildContext
     final result = await Get.dialog<String>(
       AlertDialog(
@@ -313,8 +313,8 @@ class HomeController extends GetxController {
             // Scroll after the first frame
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final index = locations.indexOf(selectedLocation.value);
-              if (index != -1 && scrollController.hasClients) {
-                scrollController.animateTo(
+              if (index != -1 && locationScrollController.hasClients) {
+                locationScrollController.animateTo(
                   index * 35, // Approx height of each ListTile
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeOut,
@@ -327,7 +327,7 @@ class HomeController extends GetxController {
               child: LoadingWidget(color: AppColors.primaryColor),
             )
                 : ListView.builder(
-              controller: scrollController,
+              controller: locationScrollController,
               shrinkWrap: true,
               itemCount: locations.length,
               itemBuilder: (_, index) {

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:padel_mobile/firebase_options.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/presentations/notification/notification_controller.dart';
 import 'package:padel_mobile/services/notification_service/firebase_notification.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -48,7 +49,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } catch (e) {
     if (kDebugMode) {
-      print('❌ Error in background handler: ${e}');
+      print('❌ Error in background handler: $e');
     }
   }
 }
@@ -60,15 +61,15 @@ Future<void> main() async {
   try {
     // Initialize Firebase
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    print('✅ Firebase initialized');
+    CustomLogger.logMessage(msg: '✅ Firebase initialized',level: LogLevel.debug);
 
     // Initialize timezone data for scheduled notifications
     tz.initializeTimeZones();
-    print('✅ Timezone initialized');
+    CustomLogger.logMessage(msg: '✅ Timezone initialized',level: LogLevel.debug);
 
     // Initialize GetStorage
     await GetStorage.init();
-    print('✅ GetStorage initialized');
+    CustomLogger.logMessage(msg: '✅ GetStorage initialized',level: LogLevel.debug);
 
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -159,7 +160,7 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
     final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
 
     if (initialMessage != null) {
-      print('🔔 App launched from notification: ${initialMessage.messageId}');
+      CustomLogger.logMessage(msg: '🔔 App launched from notification: ${initialMessage.messageId}',level: LogLevel.debug);
 
       // Wait for app to be ready, then handle navigation
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -183,7 +184,7 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
         Get.toNamed('/notifications');
       }
     } catch (e) {
-      print('❌ Error navigating from notification: $e');
+      CustomLogger.logMessage(msg: '❌ Error navigating from notification: $e',level: LogLevel.error);
     }
   }
 
@@ -193,26 +194,26 @@ class _NotificationWrapperState extends State<NotificationWrapper> with WidgetsB
 
     switch (state) {
       case AppLifecycleState.resumed:
-        print('📱 App resumed');
+        CustomLogger.logMessage(msg: '📱 App resumed',level: LogLevel.debug);
         // Refresh notification controller state if needed
         try {
           final controller = NotificationController.instance;
           controller.refreshToken();
         } catch (e) {
-          print('❌ Error refreshing on resume: $e');
+          CustomLogger.logMessage(msg: '❌ Error refreshing on resume: $e',level: LogLevel.debug);
         }
         break;
       case AppLifecycleState.paused:
-        print('📱 App paused');
+        CustomLogger.logMessage(msg: '📱 App paused',level: LogLevel.debug);
         break;
       case AppLifecycleState.detached:
-        print('📱 App detached');
+        CustomLogger.logMessage(msg: '📱 App detached',level: LogLevel.debug);
         break;
       case AppLifecycleState.inactive:
-        print('📱 App inactive');
+        CustomLogger.logMessage(msg: '📱 App inactive',level: LogLevel.debug);
         break;
       case AppLifecycleState.hidden:
-        print('📱 App hidden');
+        CustomLogger.logMessage(msg: '📱 App hidden',level: LogLevel.debug);
         break;
     }
   }

@@ -301,6 +301,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     onDateChange: (date) async {
                       controller.selectedDate.value = date;
                       controller.focusedMonth.value = DateTime(date.year, date.month, 1);
+                      controller.clearAllSelections();
                       controller.isLoadingCourts.value = true;
                       await controller.getAvailableCourtsById(
                         controller.argument.id!,
@@ -754,7 +755,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     return Obx(() {
       final totalSelections = controller.getTotalSelectionsCount();
       final hasSelections = totalSelections > 0;
-      final isSheetOpen = controller.isBottomSheetOpen.value;
+      // final isSheetOpen = controller.isBottomSheetOpen.value;
 
       final double collapsedHeight = Get.height * .11;
       final double expandedHeight = Get.height * .13;

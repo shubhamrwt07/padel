@@ -5,33 +5,35 @@ class CartItemsModel {
   List<CartItems>? cartItems;
   int? grandTotal;
 
-  CartItemsModel(
-      {this.status, this.count, this.message, this.cartItems, this.grandTotal});
+  CartItemsModel({
+    this.status,
+    this.count,
+    this.message,
+    this.cartItems,
+    this.grandTotal,
+  });
 
   CartItemsModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     count = json['count'];
     message = json['message'];
+
     if (json['cartItems'] != null) {
-      cartItems = <CartItems>[];
-      json['cartItems'].forEach((v) {
-        cartItems!.add(new CartItems.fromJson(v));
-      });
+      cartItems = (json['cartItems'] as List)
+          .map((e) => CartItems.fromJson(e))
+          .toList();
     }
+
     grandTotal = json['grandTotal'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['count'] = this.count;
-    data['message'] = this.message;
-    if (this.cartItems != null) {
-      data['cartItems'] = this.cartItems!.map((v) => v.toJson()).toList();
-    }
-    data['grandTotal'] = this.grandTotal;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'status': status,
+        'count': count,
+        'message': message,
+        'cartItems': cartItems?.map((e) => e.toJson()).toList(),
+        'grandTotal': grandTotal,
+      };
 }
 
 class CartItems {
@@ -45,29 +47,30 @@ class CartItems {
   String? updatedAt;
   int? iV;
 
-  CartItems(
-      {this.sId,
-        this.userId,
-        this.slot,
-        this.registerClubId,
-        this.totalAmount,
-        this.courtName,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+  CartItems({
+    this.sId,
+    this.userId,
+    this.slot,
+    this.registerClubId,
+    this.totalAmount,
+    this.courtName,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   CartItems.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     userId = json['userId'];
+
     if (json['slot'] != null) {
-      slot = <Slot>[];
-      json['slot'].forEach((v) {
-        slot!.add(new Slot.fromJson(v));
-      });
+      slot = (json['slot'] as List).map((e) => Slot.fromJson(e)).toList();
     }
+
     registerClubId = json['register_club_id'] != null
-        ? new RegisterClubId.fromJson(json['register_club_id'])
+        ? RegisterClubId.fromJson(json['register_club_id'])
         : null;
+
     totalAmount = json['totalAmount'];
     courtName = json['courtName'];
     createdAt = json['createdAt'];
@@ -75,23 +78,17 @@ class CartItems {
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['userId'] = this.userId;
-    if (this.slot != null) {
-      data['slot'] = this.slot!.map((v) => v.toJson()).toList();
-    }
-    if (this.registerClubId != null) {
-      data['register_club_id'] = this.registerClubId!.toJson();
-    }
-    data['totalAmount'] = this.totalAmount;
-    data['courtName'] = this.courtName;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['__v'] = this.iV;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        '_id': sId,
+        'userId': userId,
+        'slot': slot?.map((e) => e.toJson()).toList(),
+        'register_club_id': registerClubId?.toJson(),
+        'totalAmount': totalAmount,
+        'courtName': courtName,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        '__v': iV,
+      };
 }
 
 class Slot {
@@ -102,22 +99,16 @@ class Slot {
 
   Slot.fromJson(Map<String, dynamic> json) {
     if (json['slotTimes'] != null) {
-      slotTimes = <SlotTimes>[];
-      json['slotTimes'].forEach((v) {
-        slotTimes!.add(new SlotTimes.fromJson(v));
-      });
+      slotTimes =
+          (json['slotTimes'] as List).map((e) => SlotTimes.fromJson(e)).toList();
     }
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.slotTimes != null) {
-      data['slotTimes'] = this.slotTimes!.map((v) => v.toJson()).toList();
-    }
-    data['_id'] = this.sId;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'slotTimes': slotTimes?.map((e) => e.toJson()).toList(),
+        '_id': sId,
+      };
 }
 
 class SlotTimes {
@@ -129,14 +120,15 @@ class SlotTimes {
   String? courtName;
   String? courtId;
 
-  SlotTimes(
-      {this.time,
-        this.amount,
-        this.slotId,
-        this.bookingDate,
-        this.sId,
-        this.courtName,
-        this.courtId});
+  SlotTimes({
+    this.time,
+    this.amount,
+    this.slotId,
+    this.bookingDate,
+    this.sId,
+    this.courtName,
+    this.courtId,
+  });
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
     time = json['time'];
@@ -148,17 +140,15 @@ class SlotTimes {
     courtId = json['courtId'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
-    data['amount'] = this.amount;
-    data['slotId'] = this.slotId;
-    data['bookingDate'] = this.bookingDate;
-    data['_id'] = this.sId;
-    data['courtName'] = this.courtName;
-    data['courtId'] = this.courtId;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'time': time,
+        'amount': amount,
+        'slotId': slotId,
+        'bookingDate': bookingDate,
+        '_id': sId,
+        'courtName': courtName,
+        'courtId': courtId,
+      };
 }
 
 class RegisterClubId {
@@ -184,57 +174,58 @@ class RegisterClubId {
   String? zipCode;
   String? description;
 
-  RegisterClubId(
-      {this.location,
-        this.sId,
-        this.ownerId,
-        this.clubName,
-        this.iV,
-        this.address,
-        this.businessHours,
-        this.city,
-        this.courtCount,
-        this.courtImage,
-        this.courtType,
-        this.createdAt,
-        this.features,
-        this.isActive,
-        this.isDeleted,
-        this.isFeatured,
-        this.isVerified,
-        this.state,
-        this.updatedAt,
-        this.zipCode,
-        this.description});
+  RegisterClubId({
+    this.location,
+    this.sId,
+    this.ownerId,
+    this.clubName,
+    this.iV,
+    this.address,
+    this.businessHours,
+    this.city,
+    this.courtCount,
+    this.courtImage,
+    this.courtType,
+    this.createdAt,
+    this.features,
+    this.isActive,
+    this.isDeleted,
+    this.isFeatured,
+    this.isVerified,
+    this.state,
+    this.updatedAt,
+    this.zipCode,
+    this.description,
+  });
 
   RegisterClubId.fromJson(Map<String, dynamic> json) {
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    location = json['location'] != null ? Location.fromJson(json['location']) : null;
+
     sId = json['_id'];
     ownerId = json['ownerId'];
     clubName = json['clubName'];
     iV = json['__v'];
     address = json['address'];
+
     if (json['businessHours'] != null) {
-      businessHours = <BusinessHours>[];
-      json['businessHours'].forEach((v) {
-        businessHours!.add(new BusinessHours.fromJson(v));
-      });
+      businessHours =
+          (json['businessHours'] as List).map((e) => BusinessHours.fromJson(e)).toList();
     }
+
     city = json['city'];
     courtCount = json['courtCount'];
-    courtImage = json['courtImage'].cast<String>();
+    courtImage = (json['courtImage'] as List?)?.cast<String>();
+
     final ct = json['courtType'];
-    if (ct is List) {
-      courtType = ct.whereType<String>().toList();
-    } else if (ct is String) {
-      courtType = [ct];
-    } else {
-      courtType = null;
-    }
+    courtType = ct is List
+        ? ct.whereType<String>().toList()
+        : ct is String
+            ? [ct]
+            : null;
+
     createdAt = json['createdAt'];
-    features = json['features'].cast<String>();
+    features = (json['features'] as List?)?.cast<String>();
+
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
     isFeatured = json['isFeatured'];
@@ -245,36 +236,29 @@ class RegisterClubId {
     description = json['description'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.location != null) {
-      data['location'] = this.location!.toJson();
-    }
-    data['_id'] = this.sId;
-    data['ownerId'] = this.ownerId;
-    data['clubName'] = this.clubName;
-    data['__v'] = this.iV;
-    data['address'] = this.address;
-    if (this.businessHours != null) {
-      data['businessHours'] =
-          this.businessHours!.map((v) => v.toJson()).toList();
-    }
-    data['city'] = this.city;
-    data['courtCount'] = this.courtCount;
-    data['courtImage'] = this.courtImage;
-    data['courtType'] = this.courtType;
-    data['createdAt'] = this.createdAt;
-    data['features'] = this.features;
-    data['isActive'] = this.isActive;
-    data['isDeleted'] = this.isDeleted;
-    data['isFeatured'] = this.isFeatured;
-    data['isVerified'] = this.isVerified;
-    data['state'] = this.state;
-    data['updatedAt'] = this.updatedAt;
-    data['zipCode'] = this.zipCode;
-    data['description'] = this.description;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'location': location?.toJson(),
+        '_id': sId,
+        'ownerId': ownerId,
+        'clubName': clubName,
+        '__v': iV,
+        'address': address,
+        'businessHours': businessHours?.map((e) => e.toJson()).toList(),
+        'city': city,
+        'courtCount': courtCount,
+        'courtImage': courtImage,
+        'courtType': courtType,
+        'createdAt': createdAt,
+        'features': features,
+        'isActive': isActive,
+        'isDeleted': isDeleted,
+        'isFeatured': isFeatured,
+        'isVerified': isVerified,
+        'state': state,
+        'updatedAt': updatedAt,
+        'zipCode': zipCode,
+        'description': description,
+      };
 }
 
 class Location {
@@ -285,15 +269,13 @@ class Location {
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    coordinates = (json['coordinates'] as List?)?.cast<double>();
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    data['coordinates'] = this.coordinates;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'coordinates': coordinates,
+      };
 }
 
 class BusinessHours {
@@ -309,11 +291,9 @@ class BusinessHours {
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
-    data['day'] = this.day;
-    data['_id'] = this.sId;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'time': time,
+        'day': day,
+        '_id': sId,
+      };
 }

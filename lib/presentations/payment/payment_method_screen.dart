@@ -169,17 +169,19 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               ],
             ),
             Obx(
-                  () => Radio<String>(
-                value: value,
+                  () => RadioGroup<String>(
                 groupValue: controller.option.value,
                 onChanged: (val) {
                   controller.option.value = val!;
                 },
-                activeColor: AppColors.primaryColor,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                focusColor: AppColors.primaryColor,
-                overlayColor: WidgetStateProperty.all(AppColors.primaryColor),
-                fillColor: WidgetStateProperty.all(AppColors.primaryColor),
+                child: Radio<String>(
+                  value: value,
+                  activeColor: AppColors.primaryColor,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  focusColor: AppColors.primaryColor,
+                  overlayColor: WidgetStateProperty.all(AppColors.primaryColor),
+                  fillColor: WidgetStateProperty.all(AppColors.primaryColor),
+                ),
               ),
             ),
           ],

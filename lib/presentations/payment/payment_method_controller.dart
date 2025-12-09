@@ -361,7 +361,6 @@ class PaymentMethodController extends GetxController {
       String orderId,
       String signature,
       ) async {
-    // TODO: Implement server-side payment verification
     // Send paymentId, orderId, and signature to your backend for verification
     debugPrint('Verifying payment: $paymentId, $orderId, $signature');
   }
