@@ -11,7 +11,7 @@
 
 
     <application
-        android:label="swoot"
+        android:label="Swoot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
