@@ -1125,14 +1125,20 @@ class DetailsController extends GetxController {
       });
 
       socket!.on('newMessage', (data) {
-        // Don't increment unread count in details page - let the server handle it
         final senderId = data['senderId']?.toString() ?? '';
         final messageMatchId = data['matchId']?.toString() ?? '';
+        final args = Get.arguments;
         
-        CustomLogger.logMessage(
-          msg: '📨 New message received from $senderId for match $messageMatchId (not incrementing count in details)',
-          level: LogLevel.info,
-        );
+        // Only increment if message is for this match and not from current user
+        if (args is Map && 
+            messageMatchId == args['matchId']?.toString() && 
+            senderId != userId) {
+          unreadCount.value = unreadCount.value + 1;
+          CustomLogger.logMessage(
+            msg: '📨 New message received, incrementing unread count to ${unreadCount.value}',
+            level: LogLevel.info,
+          );
+        }
       });
 
       // Listen for message read updates to reset unread count

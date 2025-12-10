@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/core/endpoitns.dart';
+import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatController extends GetxController {
@@ -15,6 +16,8 @@ class ChatController extends GetxController {
   final RxBool showDateHeader = false.obs;
   final RxString currentScrollDate = ''.obs;
   final RxList<String> connectedPlayers = <String>[].obs;
+  final RxList<Map<String, dynamic>> allMatchPlayers = <Map<String, dynamic>>[].obs;
+  final RxBool isChatScreenActive = false.obs;
 
   
   // Static cache to persist messages across controller recreations
@@ -58,14 +61,43 @@ class ChatController extends GetxController {
     return uniquePlayers.take(4).toList();
   }
 
-  /// Get formatted player names with "You" at the front for display in title
+  /// Get formatted player names with "You" always first, then other players
   List<String> get formattedPlayersForTitle {
-    final players = connectedPlayers.isNotEmpty 
-        ? connectedPlayers 
-        : playersFromMessages;
-    
     final result = <String>['You'];
-    result.addAll(players.take(3));
+    
+    // Always prioritize all match players if available
+    if (allMatchPlayers.isNotEmpty) {
+      final otherPlayers = allMatchPlayers
+          .where((player) {
+            final playerId = player['userId']?.toString() ?? player['_id']?.toString() ?? '';
+            return playerId != userId; // Exclude logged-in user
+          })
+          .map((player) {
+            final firstName = player['name']?.toString() ?? '';
+            final lastName = player['lastName']?.toString() ?? '';
+            final fullName = '$firstName $lastName'.trim();
+            return _toTitleCase(fullName);
+          })
+          .where((name) => name.isNotEmpty)
+          .toList();
+      
+      result.addAll(otherPlayers);
+      CustomLogger.logMessage(
+        msg: '👥 Using ${otherPlayers.length} other players for title: $otherPlayers',
+        level: LogLevel.debug,
+      );
+    } else {
+      // Fallback: add other players after "You"
+      final players = connectedPlayers.isNotEmpty 
+          ? connectedPlayers 
+          : playersFromMessages;
+      result.addAll(players.take(3));
+      CustomLogger.logMessage(
+        msg: '👥 Using fallback players for title: $result',
+        level: LogLevel.debug,
+      );
+    }
+    
     return result;
   }
   // Always treat userId as String so comparison with senderId works reliably.
@@ -248,6 +280,9 @@ class ChatController extends GetxController {
       matchCreatedAt.value = _parseDateTime(createdAt) ?? DateTime.now();
     }
     
+    // Get all match players from DetailsController
+    _loadAllMatchPlayers();
+    
     // Load cached messages if available
     if (_messageCache.containsKey(matchID)) {
       messages.assignAll(_messageCache[matchID]!);
@@ -261,6 +296,7 @@ class ChatController extends GetxController {
     CustomLogger.logMessage(msg: "UserID-> ${storage.read("userId")}",level: LogLevel.debug);
     CustomLogger.logMessage(msg: "UserTeam-> $userTeam",level: LogLevel.debug);
     CustomLogger.logMessage(msg: "Arguments-> ${Get.arguments}",level: LogLevel.debug);
+    CustomLogger.logMessage(msg: "AllMatchPlayers-> ${allMatchPlayers.length} players",level: LogLevel.debug);
     _setupScrollListener();
     connectSocket();
   }
@@ -268,14 +304,24 @@ class ChatController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    isChatScreenActive.value = true;
     // Mark messages as read when the chat screen is fully loaded and visible
     Future.delayed(const Duration(milliseconds: 1500), () {
-      markAllMessagesAsRead();
+      if (isChatScreenActive.value) {
+        markAllMessagesAsRead();
+      }
     });
   }
 
   /// Mark all messages as read for this match
   void markAllMessagesAsRead() {
+    if (!isChatScreenActive.value) {
+      CustomLogger.logMessage(
+        msg: '⚠️ Chat screen not active, skipping mark as read',
+        level: LogLevel.info,
+      );
+      return;
+    }
     if (socket.connected && matchId.value.isNotEmpty) {
       socket.emit('markMessageRead', {'matchId': matchId.value});
       CustomLogger.logMessage(
@@ -308,7 +354,9 @@ class ChatController extends GetxController {
     showDateHeader.value = true;
     updateCurrentScrollDate();
     // Mark messages as read when user scrolls (indicating they're viewing)
-    markAllMessagesAsRead();
+    if (isChatScreenActive.value) {
+      markAllMessagesAsRead();
+    }
   }
 
   void onScrollEnd() {
@@ -384,9 +432,12 @@ class ChatController extends GetxController {
         isConnected.value = true;
         _sharedSocket!.emit('joinMatch', matchId.value);
         _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
+        getMatchPlayers();
         if (messages.isEmpty) {
           getMessages();
         }
+        // Ensure listeners point to THIS controller instance
+        _bindSocketListeners();
         return;
       }
     }
@@ -420,21 +471,14 @@ class ChatController extends GetxController {
       _sharedSocket!.emit('joinMatch', matchId.value);
       // Request connected players
       _sharedSocket!.emit('getConnectedPlayers', {'matchId': matchId.value});
+      // Request all match players
+      getMatchPlayers();
       // Fetch existing messages only if not already loaded
       if (messages.isEmpty) {
         getMessages();
       }
     });
-
-    // Handle initial list of messages for this match
-    // Your backend emits `messagesReceived`, not `messages`
-    _sharedSocket!.on('messagesReceived', _handleMessages);
-
-    // Handle new incoming single message (when someone sends a message)
-    _sharedSocket!.on('newMessage', _handleNewMessage);
-
-    // Handle connected players updates
-    _sharedSocket!.on('playersUpdate', _handlePlayersUpdate);
+    _bindSocketListeners();
 
     _sharedSocket!.on('disconnect', (reason) {
       CustomLogger.logMessage(
@@ -451,6 +495,38 @@ class ChatController extends GetxController {
       CustomLogger.logMessage(msg: '🔥 Socket error: $error',level: LogLevel.debug);
     });
 
+  }
+
+  /// Bind socket event listeners to this controller instance.
+  /// We always `off` first to avoid handlers from an old controller
+  /// instance consuming events when we reuse the shared socket.
+  void _bindSocketListeners() {
+    if (_sharedSocket == null) return;
+
+    // Remove previous bindings for these events to prevent duplicate handlers
+    _sharedSocket!
+      ..off('messagesReceived')
+      ..off('newMessage')
+      ..off('playersUpdate')
+      ..off('matchPlayersReceived')
+      ..off('playersReceived')
+      ..off('allPlayersReceived')
+      ..off('matchPlayers');
+
+    // Handle initial list of messages for this match
+    _sharedSocket!.on('messagesReceived', _handleMessages);
+
+    // Handle new incoming single message (when someone sends a message)
+    _sharedSocket!.on('newMessage', _handleNewMessage);
+
+    // Handle connected players updates
+    _sharedSocket!.on('playersUpdate', _handlePlayersUpdate);
+    
+    // Handle match players response - try multiple possible event names
+    _sharedSocket!.on('matchPlayersReceived', _handleMatchPlayers);
+    _sharedSocket!.on('playersReceived', _handleMatchPlayers);
+    _sharedSocket!.on('allPlayersReceived', _handleMatchPlayers);
+    _sharedSocket!.on('matchPlayers', _handleMatchPlayers);
   }
 
   void sendMessage() {
@@ -474,7 +550,7 @@ class ChatController extends GetxController {
       'sender': 'You',
       'timestamp': _formatTimestamp(now),
       'dateTime': now,
-      'readBy': <String>[],
+
     };
     
     messages.add(newMessage);
@@ -498,6 +574,75 @@ class ChatController extends GetxController {
       msg: '📤 getMessages emitted for matchId=${matchId.value}',
       level: LogLevel.info,
     );
+  }
+
+  /// Load all match players from DetailsController
+  void _loadAllMatchPlayers() {
+    try {
+      // Try to get DetailsController if it exists
+      if (Get.isRegistered<DetailsController>()) {
+        final detailsController = Get.find<DetailsController>();
+        final allPlayers = <Map<String, dynamic>>[];
+        
+        // Add all players from teamA
+        for (final player in detailsController.teamA) {
+          if (player.isNotEmpty && 
+              (player['name']?.toString().isNotEmpty == true || 
+               player['userId']?.toString().isNotEmpty == true)) {
+            allPlayers.add({
+              '_id': player['userId'] ?? player['_id'] ?? '',
+              'userId': player['userId'] ?? player['_id'] ?? '',
+              'name': player['name'] ?? '',
+              'lastName': player['lastName'] ?? '',
+            });
+          }
+        }
+        
+        // Add all players from teamB
+        for (final player in detailsController.teamB) {
+          if (player.isNotEmpty && 
+              (player['name']?.toString().isNotEmpty == true || 
+               player['userId']?.toString().isNotEmpty == true)) {
+            allPlayers.add({
+              '_id': player['userId'] ?? player['_id'] ?? '',
+              'userId': player['userId'] ?? player['_id'] ?? '',
+              'name': player['name'] ?? '',
+              'lastName': player['lastName'] ?? '',
+            });
+          }
+        }
+        
+        allMatchPlayers.assignAll(allPlayers);
+        CustomLogger.logMessage(
+          msg: '📥 Loaded ${allPlayers.length} players from DetailsController: ${allPlayers.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
+          level: LogLevel.info,
+        );
+      } else {
+        CustomLogger.logMessage(
+          msg: '⚠️ DetailsController not found, will try to get players from backend',
+          level: LogLevel.warning,
+        );
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error loading players from DetailsController: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+  
+  /// Request all players in this match from backend (fallback)
+  void getMatchPlayers() {
+    if (socket.connected && matchId.value.isNotEmpty) {
+      // Try multiple possible event names that backend might use
+      socket.emit('getMatchPlayers', {'matchId': matchId.value});
+      socket.emit('getPlayers', {'matchId': matchId.value});
+      socket.emit('getAllPlayers', {'matchId': matchId.value});
+      CustomLogger.logMessage(
+        msg: '📤 Match players requests emitted for matchId=${matchId.value}',
+        level: LogLevel.info,
+      );
+    }
   }
 
   /// Map the list of messages received from the backend into the UI model.
@@ -563,14 +708,7 @@ class ChatController extends GetxController {
         
         final messageId = map['_id'] ?? map['id'];
         
-        // Extract readBy names
-        final readByList = map['readBy'] as List? ?? [];
-        final readByNames = readByList.map((reader) {
-          if (reader is Map) {
-            return _toTitleCase(reader['name']?.toString() ?? '');
-          }
-          return '';
-        }).where((name) => name.isNotEmpty).toList();
+
 
         return {
           'isMe': senderId == userId,
@@ -584,7 +722,7 @@ class ChatController extends GetxController {
           'timestamp': _formatTimestamp(rawTimestamp),
           'dateTime': dateTime,
           'messageId': messageId,
-          'readBy': readByNames,
+
         };
       }).toList();
 
@@ -598,14 +736,49 @@ class ChatController extends GetxController {
         connectedPlayers.assignAll(playersFromMessages);
       }
       
+      // If we still don't have match players, try to extract from messages
+      if (allMatchPlayers.isEmpty && messages.isNotEmpty) {
+        final uniquePlayerIds = <String>{};
+        final playersFromMsgs = <Map<String, dynamic>>[];
+        
+        for (final message in messages) {
+          final senderId = message['senderId']?.toString();
+          final senderName = message['sender']?.toString();
+          
+          if (senderId != null && senderId.isNotEmpty && !uniquePlayerIds.contains(senderId)) {
+            uniquePlayerIds.add(senderId);
+            playersFromMsgs.add({
+              '_id': senderId,
+              'name': senderName?.split(' ').first ?? 'Player',
+              'lastName': senderName?.split(' ').skip(1).join(' ') ?? '',
+            });
+          }
+        }
+        
+        if (playersFromMsgs.isNotEmpty) {
+          allMatchPlayers.assignAll(playersFromMsgs);
+          CustomLogger.logMessage(
+            msg: '📥 Extracted ${playersFromMsgs.length} players from messages',
+            level: LogLevel.info,
+          );
+        }
+      }
+      
       // Auto-scroll to bottom after loading messages
       WidgetsBinding.instance.addPostFrameCallback((_) {
         scrollToBottom();
         // Mark all loaded messages as read since user opened chat
         Future.delayed(const Duration(milliseconds: 1000), () {
-          markAllMessagesAsRead();
+          if (isChatScreenActive.value) {
+            markAllMessagesAsRead();
+          }
         });
       });
+
+      // Mark messages as read immediately when messages are loaded
+      if (isChatScreenActive.value) {
+        markAllMessagesAsRead();
+      }
 
       // PRINT / LOG ALL MESSAGES AFTER MAPPING
       CustomLogger.logMessage(
@@ -661,24 +834,17 @@ class ChatController extends GetxController {
       final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
       final messageId = map['_id'] ?? map['id'];
 
-      // Extract readBy names for new message
-      final readByList = map['readBy'] as List? ?? [];
-      final readByNames = readByList.map((reader) {
-        if (reader is Map) {
-          return _toTitleCase(reader['name']?.toString() ?? '');
-        }
-        return '';
-      }).where((name) => name.isNotEmpty).toList();
+
 
       final newMessage = {
         'isMe': senderId == userId,
         'message': map['message'] ?? map['text'] ?? '',
         'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
         'sender': senderName,
+        'senderId': senderId,
         'timestamp': _formatTimestamp(rawTimestamp),
         'dateTime': dateTime,
         'messageId': messageId,
-        'readBy': readByNames,
       };
       
       messages.add(newMessage);
@@ -690,6 +856,13 @@ class ChatController extends GetxController {
       if (senderName.isNotEmpty && !connectedPlayers.contains(senderName)) {
         connectedPlayers.add(senderName);
       }
+      
+      // Mark new message as read since chat is open
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (isChatScreenActive.value) {
+          markAllMessagesAsRead();
+        }
+      });
       
       // Only scroll to bottom if user is already near bottom
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -736,8 +909,62 @@ class ChatController extends GetxController {
     }
   }
 
+  /// Handle match players response from backend
+  void _handleMatchPlayers(dynamic data) {
+    try {
+      CustomLogger.logMessage(
+        msg: '📥 Received match players data: $data',
+        level: LogLevel.info,
+      );
+      
+      List<dynamic> playersList = [];
+      
+      if (data is Map) {
+        if (data['players'] is List) {
+          playersList = data['players'] as List;
+        } else if (data['data'] is List) {
+          playersList = data['data'] as List;
+        } else if (data['users'] is List) {
+          playersList = data['users'] as List;
+        }
+      } else if (data is List) {
+        playersList = data;
+      }
+      
+      if (playersList.isEmpty) {
+        CustomLogger.logMessage(
+          msg: '⚠️ No players found in response: $data',
+          level: LogLevel.warning,
+        );
+        return;
+      }
+      
+      final players = playersList.map((p) => Map<String, dynamic>.from(p as Map)).toList();
+      allMatchPlayers.assignAll(players);
+      
+      CustomLogger.logMessage(
+        msg: '✅ Updated allMatchPlayers: ${allMatchPlayers.length} players - ${players.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
+        level: LogLevel.info,
+      );
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error parsing match players: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+
+  void onChatScreenClosed() {
+    isChatScreenActive.value = false;
+    CustomLogger.logMessage(
+      msg: '🚪 Chat screen closed, stopping message read marking',
+      level: LogLevel.info,
+    );
+  }
+
   @override
   void onClose() {
+    isChatScreenActive.value = false;
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
