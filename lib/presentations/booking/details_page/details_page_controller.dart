@@ -567,6 +567,7 @@ class DetailsController extends GetxController {
   RxBool isLoading = false.obs;
   RxString gender = 'Male'.obs;
   RxString playerLevel = ''.obs;
+  var apiPlayerLevels = <Map<String, dynamic>>[].obs;
 
   final Map<String, String> playerLevelMap = {
     'A': 'A – Top Player',
@@ -578,6 +579,18 @@ class DetailsController extends GetxController {
     'D2': 'D2 – Novice Player',
     'E': 'E – Entry Level',
   };
+
+  Map<String, String> get dynamicPlayerLevelMap {
+    if (apiPlayerLevels.isNotEmpty) {
+      return Map.fromEntries(
+        apiPlayerLevels.map((level) => MapEntry(
+          level['code'] ?? '',
+          '${level['code']} – ${level['question']}',
+        )),
+      );
+    }
+    return playerLevelMap;
+  }
 
   /// Add player to team method
   void addPlayerToTeam(String team, int index, Map<String, dynamic> playerData) {
@@ -846,7 +859,7 @@ class DetailsController extends GetxController {
                                     Icons.keyboard_arrow_down_rounded,
                                     color: AppColors.textColor,
                                   ),
-                                  items: playerLevelMap.entries.map((entry) {
+                                  items: dynamicPlayerLevelMap.entries.map((entry) {
                                     return DropdownMenuItem<String>(
                                       value: entry.key,
                                       child: Text(

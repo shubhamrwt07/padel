@@ -569,7 +569,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                       "matchId": id,
                       "team": "teamA",
                       "needBottomAllOpenMatches": true,
-                      "isLoginUser": !isLoginUserInMatch
+                      "isLoginUser": !isLoginUserInMatch,
+                      "matchLevel":match?.skillLevel??""
                     },
                   );
                   if (result == true) {
@@ -620,7 +621,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     "matchId": id, 
                     "team": "teamA",
                     "needBottomAllOpenMatches": true,
-                    "isLoginUser": !isLoginUserInMatch
+                    "isLoginUser": !isLoginUserInMatch,
+                    "matchLevel":match?.skillLevel??""
                   },
                 );
               },
@@ -654,7 +656,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     "matchId": id,
                     "team": "teamB",
                     "needBottomAllOpenMatches": true,
-                    "isLoginUser": !isLoginUserInMatch
+                    "isLoginUser": !isLoginUserInMatch,
+                    "matchLevel":match?.skillLevel??""
                   },
                 );
                 if (result == true) {
@@ -704,7 +707,8 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     "matchId": id, 
                     "team": "teamB",
                     "needBottomAllOpenMatches": true,
-                    "isLoginUser": !isLoginUserInMatch
+                    "isLoginUser": !isLoginUserInMatch,
+                    "matchLevel":match?.skillLevel??""
                   },
                 );
               },

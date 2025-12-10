@@ -36,12 +36,11 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (controller.currentStep.value == 1) _buildLevelSelection(),
-                      if (controller.currentStep.value == 2) _buildSportSelection(),
-                      if (controller.currentStep.value == 3) _buildTrainingSelection(controller),
-                      if (controller.currentStep.value == 4) _buildAgeSelection(controller),
-                      if (controller.currentStep.value == 5) _buildVolleySelection(controller),
-                      if (controller.currentStep.value == 6) _buildPlayerLevel(controller),
-
+                      if (controller.currentStep.value == 2) _buildPlayerLevel(controller),
+                      if (controller.currentStep.value == 3) _buildSportSelection(),
+                      if (controller.currentStep.value == 4) _buildTrainingSelection(controller),
+                      if (controller.currentStep.value == 5) _buildAgeSelection(controller),
+                      if (controller.currentStep.value == 6) _buildVolleySelection(controller),
                       if (controller.currentStep.value == 7) _buildWallReboundSelection(controller),
                     ],
                   ),
@@ -104,7 +103,10 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
         ...levels.map((level) => Obx(() => _buildOption(
           title: level,
           isSelected: controller.selectedLevel.value == level,
-          onTap: () => controller.selectedLevel.value = level,
+          onTap: () {
+            controller.selectedLevel.value = level;
+            controller.fetchPlayerLevels();
+          },
         ))),
       ],
     );
@@ -259,27 +261,28 @@ class CreateQuestionsScreen extends GetView<CreateQuestionsController> {
     );
   }
   Widget _buildPlayerLevel(CreateQuestionsController controller)  {
-    final options = [
-      'A – Top Player',
-      'B1 – Experienced Player',
-      'B2 – Advanced Player',
-      'C1 – Confident Player',
-      'C2 – Intermediate Player',
-      'D1 – Amateur Player',
-      'D2 – Novice Player',
-      'E – Entry Level',
-    ];
     final style = Get.textTheme.headlineMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Which padel player are you?", style: style),
         const SizedBox(height: 16),
-        ...options.map((option) => Obx(() => _buildOption(
-          title: option,
-          isSelected: controller.selectPlayerLevel.value == option,
-          onTap: () => controller.selectPlayerLevel.value = option,
-        ))),
+        Obx(() {
+          print('Loading: ${controller.isLoading.value}, Levels: ${controller.playerLevels.length}');
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (controller.playerLevels.isEmpty) {
+            return Text('Please select a level first', style: Get.textTheme.bodyMedium);
+          }
+          return Column(
+            children: controller.playerLevels.map((level) => _buildOption(
+              title: '${level['code']} – ${level['question']}',
+              isSelected: controller.selectPlayerLevel.value == '${level['code']} – ${level['question']}',
+              onTap: () => controller.selectPlayerLevel.value = '${level['code']} – ${level['question']}',
+            )).toList(),
+          );
+        }),
       ],
     );
   }

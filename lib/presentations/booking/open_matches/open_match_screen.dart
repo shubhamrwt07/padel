@@ -445,7 +445,7 @@ class OpenMatchesScreen extends StatelessWidget {
     }).toList();
 
     while (teamAPlayers.length < 2) {
-      teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
+      teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? "", data.skillLevel));
     }
 
     final teamBPlayers = (data.teamB ?? []).take(2).map((p) {
@@ -460,7 +460,7 @@ class OpenMatchesScreen extends StatelessWidget {
     }).toList();
 
     while (teamBPlayers.length < 2) {
-      teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
+      teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? "", data.skillLevel));
     }
 
     return Container(
@@ -629,14 +629,14 @@ final firstLetter = name.trim().isNotEmpty
       ],
     );
   }
-  Widget _buildAvailableCircle(String team, String matchId) {
+  Widget _buildAvailableCircle(String team, String matchId, String? skillLevel) {
     return Column(
       children: [
         GestureDetector(
           onTap: () {
             Get.toNamed(
               RoutesName.addPlayer,
-              arguments: {"team": team, "matchId": matchId, "needOpenMatches": true},
+              arguments: {"team": team, "matchId": matchId, "needOpenMatches": true, "matchLevel": skillLevel},
             );
           },
           child: Container(

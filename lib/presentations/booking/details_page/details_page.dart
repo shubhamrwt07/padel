@@ -707,6 +707,7 @@ class DetailsScreen extends StatelessWidget {
                                               "team": "teamA",
                                               "needBottomAllOpenMatches": true,
                                               "isLoginUser": !isLoginUserInMatch,
+                                              "matchLevel": controller.localMatchData['skillLevel'] ?? "-"
                                             },
                                           );
                                         } else {
@@ -796,6 +797,7 @@ class DetailsScreen extends StatelessWidget {
                                               "team": "teamB",
                                               "needBottomAllOpenMatches": true,
                                               "isLoginUser": !isLoginUserInMatch,
+                                              "matchLevel": controller.localMatchData['skillLevel'] ?? "-"
                                             },
                                           );
                                         } else {

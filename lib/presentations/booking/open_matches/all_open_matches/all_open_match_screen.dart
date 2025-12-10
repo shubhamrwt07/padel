@@ -374,7 +374,7 @@ class AllOpenMatchScreen extends StatelessWidget {
       if (isTimePassed) {
         teamAPlayers.add(_buildPlayerIndex("P${teamAPlayers.length + 1}","${teamAPlayers.length + 1}"));
       } else {
-        teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? ""));
+        teamAPlayers.add(_buildAvailableCircle("teamA", data.sId ?? "", data.skillLevel));
       }
     }
 
@@ -389,7 +389,7 @@ class AllOpenMatchScreen extends StatelessWidget {
       if (isTimePassed) {
         teamBPlayers.add(_buildPlayerIndex("P${teamBPlayers.length + 3}","${teamBPlayers.length + 1}"));
       } else {
-        teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? ""));
+        teamBPlayers.add(_buildAvailableCircle("teamB", data.sId ?? "", data.skillLevel));
       }
     }
 
@@ -598,7 +598,7 @@ final firstLetter = name.trim().isNotEmpty
     );
   }
 
-  Widget _buildAvailableCircle(String team, String matchId) {
+  Widget _buildAvailableCircle(String team, String matchId, String? skillLevel) {
     return Column(
       children: [
         GestureDetector(
@@ -608,7 +608,8 @@ final firstLetter = name.trim().isNotEmpty
               arguments: {
                 "team": team,
                 "matchId": matchId,
-                "needAllOpenMatches": true
+                "needAllOpenMatches": true,
+                "matchLevel": skillLevel,
               },
             );
             CustomLogger.logMessage(
