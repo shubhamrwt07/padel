@@ -474,6 +474,7 @@ class ChatController extends GetxController {
       'sender': 'You',
       'timestamp': _formatTimestamp(now),
       'dateTime': now,
+      'readBy': <String>[],
     };
     
     messages.add(newMessage);
@@ -562,6 +563,15 @@ class ChatController extends GetxController {
         
         final messageId = map['_id'] ?? map['id'];
         
+        // Extract readBy names
+        final readByList = map['readBy'] as List? ?? [];
+        final readByNames = readByList.map((reader) {
+          if (reader is Map) {
+            return _toTitleCase(reader['name']?.toString() ?? '');
+          }
+          return '';
+        }).where((name) => name.isNotEmpty).toList();
+
         return {
           'isMe': senderId == userId,
           // Backend example uses `message` for text
@@ -574,6 +584,7 @@ class ChatController extends GetxController {
           'timestamp': _formatTimestamp(rawTimestamp),
           'dateTime': dateTime,
           'messageId': messageId,
+          'readBy': readByNames,
         };
       }).toList();
 
@@ -650,6 +661,15 @@ class ChatController extends GetxController {
       final dateTime = _parseDateTime(rawTimestamp) ?? DateTime.now();
       final messageId = map['_id'] ?? map['id'];
 
+      // Extract readBy names for new message
+      final readByList = map['readBy'] as List? ?? [];
+      final readByNames = readByList.map((reader) {
+        if (reader is Map) {
+          return _toTitleCase(reader['name']?.toString() ?? '');
+        }
+        return '';
+      }).where((name) => name.isNotEmpty).toList();
+
       final newMessage = {
         'isMe': senderId == userId,
         'message': map['message'] ?? map['text'] ?? '',
@@ -658,6 +678,7 @@ class ChatController extends GetxController {
         'timestamp': _formatTimestamp(rawTimestamp),
         'dateTime': dateTime,
         'messageId': messageId,
+        'readBy': readByNames,
       };
       
       messages.add(newMessage);

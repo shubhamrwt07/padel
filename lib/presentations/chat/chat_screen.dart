@@ -56,12 +56,14 @@ class ChatScreen extends StatelessWidget {
                                 item['message'],
                                 item['team'],
                                 item['timestamp'],
+                                item['readBy'],
                               )
                             : _buildReceivedMessage(
                                 item['message'],
                                 item['sender'],
                                 item['team'],
                                 item['timestamp'],
+                                item['readBy'],
                               );
                       },
                     ),
@@ -256,7 +258,7 @@ class ChatScreen extends StatelessWidget {
   }
 
 
-  Widget _buildSentMessage(String message, String team, String time) {
+  Widget _buildSentMessage(String message, String team, String time, [List<String>? readBy]) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -266,21 +268,21 @@ class ChatScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (team.isNotEmpty) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    team,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
-                    ),
-                  ),
-                ),
+                // Container(
+                //   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                //   decoration: BoxDecoration(
+                //     color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   child: Text(
+                //     team,
+                //     style: TextStyle(
+                //       fontSize: 10,
+                //       fontWeight: FontWeight.w600,
+                //       color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(width: 8),
               ],
               Text(
@@ -323,6 +325,17 @@ class ChatScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (readBy != null && readBy.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, right: 14),
+              child: Text(
+                'Seen by: ${readBy.join(', ')}',
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -382,7 +395,7 @@ class ChatScreen extends StatelessWidget {
   }
 
   Widget _buildReceivedMessage(
-      String message, String playerName, String team, String time) {
+      String message, String playerName, String team, String time, [List<String>? readBy]) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -419,21 +432,21 @@ class ChatScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            team,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
-                            ),
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        //   decoration: BoxDecoration(
+                        //     color: team == "Team A" ? Colors.red.shade100 : Colors.blue.shade100,
+                        //     borderRadius: BorderRadius.circular(8),
+                        //   ),
+                        //   child: Text(
+                        //     team,
+                        //     style: TextStyle(
+                        //       fontSize: 10,
+                        //       fontWeight: FontWeight.w600,
+                        //       color: team == "Team A" ? Colors.red.shade700 : Colors.blue.shade700,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -466,6 +479,17 @@ class ChatScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (readBy != null && readBy.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 14),
+                        child: Text(
+                          'Seen by: ${readBy.join(', ')}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
