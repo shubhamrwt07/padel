@@ -9,10 +9,31 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChatController controller = Get.put(ChatController(), permanent: true);
+    final String matchId = Get.arguments['matchID'] ?? '';
+    // Use a tag per match so a fresh controller is created for each match chat.
+    final ChatController controller = Get.put(ChatController(), tag: matchId);
     
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+    // Mark chat screen as active and mark messages as read when screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.isChatScreenActive.value = true;
+      controller.markAllMessagesAsRead();
+    });
+    
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        // Mark chat screen as inactive when user navigates back
+        controller.onChatScreenClosed();
+        // Dispose controller for this match so opening another match gets a fresh instance
+        Get.delete<ChatController>(tag: matchId);
+      },
+      child: GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus!.unfocus();
+          // Mark messages as read when user taps anywhere on screen
+          if (controller.isChatScreenActive.value) {
+            controller.markAllMessagesAsRead();
+          }
+        },
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F6F6),
         resizeToAvoidBottomInset: true,
@@ -38,6 +59,12 @@ class ChatScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 16,right: 16),
                       itemCount: controller.groupedMessages.length,
                       itemBuilder: (context, index) {
+                        // Mark messages as read when they are being displayed
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (controller.isChatScreenActive.value) {
+                            controller.markAllMessagesAsRead();
+                          }
+                        });
                         final item = controller.groupedMessages[index];
                         
                         if (item['isDateHeader'] == true) {
@@ -56,14 +83,12 @@ class ChatScreen extends StatelessWidget {
                                 item['message'],
                                 item['team'],
                                 item['timestamp'],
-                                item['readBy'],
                               )
                             : _buildReceivedMessage(
                                 item['message'],
                                 item['sender'],
                                 item['team'],
                                 item['timestamp'],
-                                item['readBy'],
                               );
                       },
                     ),
@@ -106,7 +131,7 @@ class ChatScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   /// Return initials from a full name.
@@ -142,19 +167,19 @@ class ChatScreen extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 child: Icon(Icons.group, color: Colors.white),
               ),
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Obx(() => Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: controller.isConnected.value ? Colors.green : Colors.red,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1),
-                  ),
-                )),
-              ),
+              // Positioned(
+              //   right: 0,
+              //   bottom: 0,
+              //   child: Obx(() => Container(
+              //     width: 12,
+              //     height: 12,
+              //     decoration: BoxDecoration(
+              //       color: controller.isConnected.value ? Colors.green : Colors.red,
+              //       shape: BoxShape.circle,
+              //       border: Border.all(color: Colors.white, width: 1),
+              //     ),
+              //   )),
+              // ),
             ],
           ),
           const SizedBox(width: 12),
@@ -258,7 +283,7 @@ class ChatScreen extends StatelessWidget {
   }
 
 
-  Widget _buildSentMessage(String message, String team, String time, [List<String>? readBy]) {
+  Widget _buildSentMessage(String message, String team, String time) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -325,17 +350,7 @@ class ChatScreen extends StatelessWidget {
               ),
             ),
           ),
-          if (readBy != null && readBy.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4, right: 14),
-              child: Text(
-                'Seen by: ${readBy.join(', ')}',
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
+
         ],
       ),
     );
@@ -395,7 +410,7 @@ class ChatScreen extends StatelessWidget {
   }
 
   Widget _buildReceivedMessage(
-      String message, String playerName, String team, String time, [List<String>? readBy]) {
+      String message, String playerName, String team, String time) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -479,17 +494,7 @@ class ChatScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (readBy != null && readBy.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4, left: 14),
-                        child: Text(
-                          'Seen by: ${readBy.join(', ')}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
+
                   ],
                 ),
               ),
