@@ -98,65 +98,76 @@ class AddPlayerScreen extends StatelessWidget {
                 ).paddingOnly(
                     top: Get.height * 0.02, bottom: Get.height * 0.01),
 
-                DropdownButtonFormField<String>(
-                  initialValue: controller.playerLevel.value.isEmpty ||
-                         !controller.playerLevels.any((level) => level["value"] == controller.playerLevel.value)
-                      ? null
-                      : controller.playerLevel.value,
-                  isDense: true,
-                  dropdownColor: AppColors.whiteColor,
-
-                  items: controller.playerLevels.map((level) {
-                    return DropdownMenuItem<String>(
-                      value: level["value"],
-                      child: Text(
-                        level["label"] ?? "",
-                        style: Get.textTheme.headlineSmall!.copyWith(
-                          color: AppColors.textColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                controller.isLoadingLevels.value
+                    ? Container(
+                        height: 50,
+                        decoration: const BoxDecoration(
+                          color: AppColors.textFieldColor,
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    );
-                  }).toList(),
-
-                  selectedItemBuilder: (context) {
-                    return controller.playerLevels.map((level) {
-                      return Text(
-                        level["label"] ?? "",
-                        style: Get.textTheme.headlineMedium!.copyWith(
-                          color: AppColors.textColor,
-                          fontWeight: FontWeight.w500
+                        child: const Center(
+                          child: LoadingWidget(color: AppColors.primaryColor,),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      );
-                    }).toList();
-                  },
+                      )
+                    : DropdownButtonFormField<String>(
+                        initialValue: controller.playerLevel.value.isEmpty ||
+                               !controller.playerLevels.any((level) => level["value"] == controller.playerLevel.value)
+                            ? null
+                            : controller.playerLevel.value,
+                        isDense: true,
+                        dropdownColor: AppColors.whiteColor,
 
-                  hint: Text(
-                    "Select Player Level",
-                    style: Get.textTheme.headlineMedium!.copyWith(
-                      color: AppColors.textColor,
-                      fontWeight: FontWeight.w500
-                    ),
-                  ),
+                        items: controller.playerLevels.map((level) {
+                          return DropdownMenuItem<String>(
+                            value: level["value"],
+                            child: Text(
+                              level["label"] ?? "",
+                              style: Get.textTheme.headlineSmall!.copyWith(
+                                color: AppColors.textColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          );
+                        }).toList(),
 
-                  onChanged: (value) => controller.playerLevel.value = value ?? '',
+                        selectedItemBuilder: (context) {
+                          return controller.playerLevels.map((level) {
+                            return Text(
+                              level["label"] ?? "",
+                              style: Get.textTheme.headlineMedium!.copyWith(
+                                color: AppColors.textColor,
+                                fontWeight: FontWeight.w500
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            );
+                          }).toList();
+                        },
 
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.textFieldColor,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                )
+                        hint: Text(
+                          "Select Player Level",
+                          style: Get.textTheme.headlineMedium!.copyWith(
+                            color: AppColors.textColor,
+                            fontWeight: FontWeight.w500
+                          ),
+                        ),
+
+                        onChanged: (value) => controller.playerLevel.value = value ?? '',
+
+                        decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.textFieldColor,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      )
               ],
             )),
           ),

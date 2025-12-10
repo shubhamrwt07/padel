@@ -21,17 +21,10 @@ class AddPlayerController extends GetxController {
   RxString gender = ''.obs;
   RxString playerLevel = ''.obs;
 
-  /// Updated: unique values for dropdown items
-  final playerLevels = [
-    {"label": "A - Top Player", "value": "A"},
-    {"label": "B1 - Experienced Player", "value": "B1"},
-    {"label": "B2 - Advanced Player", "value": "B2"},
-    {"label": "C1 - Confident Player", "value": "C1"},
-    {"label": "C2 - Intermediate Player", "value": "C2"},
-    {"label": "D1 - Amateur Player", "value": "D1"},
-    {"label": "D2 - Novice Player", "value": "D2"},
-  ];
+  /// Player levels from API
+  var playerLevels = <Map<String, String>>[].obs;
   var isLoading = false.obs;
+  var isLoadingLevels = false.obs;
   OpenMatchRepository repository = Get.put(OpenMatchRepository());
   var playerId = "".obs;
   var selectedTeam = "".obs;
@@ -305,6 +298,30 @@ class AddPlayerController extends GetxController {
     return code;
   }
 
+
+  ///Get Players Level Api------------------------------------------------------
+  var matchLevel = ''.obs;
+  Future<void> fetchPlayerLevels() async {
+    isLoadingLevels.value = true;
+    try {
+      final response = await repository.getPlayerLevels(type: matchLevel.value);
+      if (response?.status == 200 && response?.data != null) {
+        playerLevels.clear();
+        for (var levelGroup in response!.data!) {
+          for (var level in levelGroup.levelIds ?? []) {
+            playerLevels.add({
+              "label": "${level.code} - ${level.question}",
+              "value": level.code ?? ""
+            });
+          }
+        }
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error-> $e", level: LogLevel.debug);
+    } finally {
+      isLoadingLevels.value = false;
+    }
+  }
   @override
   void onInit() {
     final args = Get.arguments;
@@ -312,6 +329,7 @@ class AddPlayerController extends GetxController {
     matchId.value = args["matchId"] ?? "";
     selectedTeam.value = args["team"] ?? "";
     scoreboardId.value = args["scoreBoardId"] ?? "";
+    matchLevel.value = args["matchLevel"]??"";
 
     if (args["needAllOpenMatches"] == true &&
         Get.isRegistered<AllOpenMatchController>()) {
@@ -338,6 +356,7 @@ class AddPlayerController extends GetxController {
       preloadLoginUserData();
     }
 
+    fetchPlayerLevels();
     super.onInit();
   }
 }

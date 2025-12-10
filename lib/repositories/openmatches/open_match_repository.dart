@@ -1,5 +1,6 @@
 import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject_request_players_model.dart';
 import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
+import 'package:padel_mobile/data/response_models/get_players_level_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
@@ -299,5 +300,41 @@ class OpenMatchRepository {
       rethrow;
     }
   }
+
+  ///Get Players Levels --------------------------------------------------------
+  Future<GetPlayersLevelModel?> getPlayerLevels({
+    required String type,
+  }) async {
+    try {
+      // base URL
+      String url = AppEndpoints.getPlayersLevel;
+
+      // only add type if not empty
+      if (type.isNotEmpty) {
+        url += "?type=$type";
+      }
+
+      final response = await dioClient.get(url);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Get Players Levels fetched successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetPlayersLevelModel.fromJson(response.data);
+      } else {
+        throw Exception(
+            "Failed to fetch Get Players Levels Status: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Error fetching Get Players Levels: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
 
 }
