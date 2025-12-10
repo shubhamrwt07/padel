@@ -281,6 +281,24 @@ class CustomDrawerUi extends GetView<ProfileController> {
               },
             ),
           ),
+          Obx(
+                () => ProfileRow(
+              icon: Icon(
+                Icons.delete_forever_outlined,
+                size: 20,
+                color: controller.selectedIndex.value == 12
+                    ? AppColors.primaryColor
+                    : AppColors.labelBlackColor,
+              ),
+              title: "Deactivate Account",
+              isSelected: controller.selectedIndex.value == 12,
+              onTap: () {
+                controller.selectedIndex.value = 12;
+                controller.showDeactivateDialog(Get.context!);
+              },
+            ),
+          ),
+
 
           ProfileRow(
             icon: SvgPicture.asset(Assets.imagesIcLogOut, height: 15, width: 17).paddingOnly(left: 3),

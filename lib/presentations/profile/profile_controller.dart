@@ -147,4 +147,22 @@ var profileModel = Rxn<ProfileModel>();
       ),
     );
   }
+  void showDeactivateDialog(BuildContext context) {
+    Get.defaultDialog(
+      title: "Deactivate Account",
+      middleText: "Are you sure you want to deactivate your account?\nThis action cannot be undone.",
+      textConfirm: "Deactivate",
+      confirmTextColor: Colors.white,
+      textCancel: "Cancel",
+      buttonColor: Colors.red,
+      onConfirm: () {
+        // Call API here
+        // deactivateAccountApi();
+        Get.offAllNamed(RoutesName.login);
+      },
+      onCancel: (){
+        Get.back();
+      }
+    );
+  }
 }
