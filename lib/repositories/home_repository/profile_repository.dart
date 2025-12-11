@@ -1,5 +1,6 @@
  import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:padel_mobile/data/request_models/delete_customer_model.dart';
 import 'package:padel_mobile/data/response_models/home_models/profile_model.dart';
 
 import '../../core/endpoitns.dart';
@@ -105,6 +106,32 @@ class ProfileRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Profile update failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Delete USer----------------------------------------------------------------
+  Future<DeleteCustomerModel> deleteCustomer() async {
+    try {
+      final response = await dioClient.delete(AppEndpoints.deleteAccount, data: {});
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Customer Delete successful: ${response.data}",
+          level: LogLevel.info,
+        );
+        return DeleteCustomerModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          "Delete Customer failed with status code: ${response.statusCode}",
+        );
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Delete Customer failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );

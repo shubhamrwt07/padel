@@ -147,22 +147,34 @@ var profileModel = Rxn<ProfileModel>();
       ),
     );
   }
-  void showDeactivateDialog(BuildContext context) {
+  void showDeleteAccountDialog(BuildContext context) {
     Get.defaultDialog(
-      title: "Deactivate Account",
-      middleText: "Are you sure you want to deactivate your account?\nThis action cannot be undone.",
-      textConfirm: "Deactivate",
+      title: "Delete Account",
+      titleStyle: Get.textTheme.headlineLarge,
+      middleTextStyle: Get.textTheme.bodySmall,
+      middleText: "This will permanently delete your account and all associated data, including personal information, content, and preferences. You won’t be able to recover anything after this action.",
+      textConfirm: "Delete",
       confirmTextColor: Colors.white,
       textCancel: "Cancel",
       buttonColor: Colors.red,
       onConfirm: () {
-        // Call API here
-        // deactivateAccountApi();
-        Get.offAllNamed(RoutesName.login);
+        // Call delete account API here
+        deleteCustomer();
       },
-      onCancel: (){
+      onCancel: () {
         Get.back();
-      }
+      },
     );
+  }
+  Future<void>deleteCustomer()async{
+    try{
+      final response = await profileRepository.deleteCustomer();
+      if(response.status == 200){
+        SnackBarUtils.showSuccessSnackBar(response.message??"User Delete");
+        Get.offAllNamed(RoutesName.login);
+      }
+    }catch(e){
+      CustomLogger.logMessage(msg: "Error-> $e", level: LogLevel.error);
+    }
   }
 }

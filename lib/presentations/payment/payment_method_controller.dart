@@ -378,7 +378,7 @@ class PaymentMethodController extends GetxController {
         keyId: 'rzp_test_1DP5mmOlF5G5ag',
         amount: cartController.totalPrice.value.toDouble(), // Use dynamic amount from cart
         currency: 'INR',
-        name: 'Matchacha Padel',
+        name: 'Swoot',
         description: 'Paying for court booking',
         orderId: '',
         userEmail: 'test@example.com',

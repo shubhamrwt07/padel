@@ -290,11 +290,11 @@ class CustomDrawerUi extends GetView<ProfileController> {
                     ? AppColors.primaryColor
                     : AppColors.labelBlackColor,
               ),
-              title: "Deactivate Account",
+              title: "Delete Account",
               isSelected: controller.selectedIndex.value == 12,
               onTap: () {
                 controller.selectedIndex.value = 12;
-                controller.showDeactivateDialog(Get.context!);
+                controller.showDeleteAccountDialog(Get.context!);
               },
             ),
           ),

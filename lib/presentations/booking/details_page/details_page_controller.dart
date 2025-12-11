@@ -483,7 +483,7 @@ class DetailsController extends GetxController {
         keyId: 'rzp_test_1DP5mmOlF5G5ag',
         amount: price,
         currency: 'INR',
-        name: 'Matchacha Padel',
+        name: 'Swoot',
         description: 'Payment for court booking and match creation',
         orderId: '', // You can generate order ID from your backend if needed
         userEmail: profileController.profileModel.value?.response?.email ?? 'test@example.com',
