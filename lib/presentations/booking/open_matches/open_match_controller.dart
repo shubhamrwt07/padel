@@ -178,7 +178,7 @@ class OpenMatchesController extends GetxController {
       final repo = OpenMatchRepository();
       final response = await repo.getMatchesByDateTime(
         matchDate: formattedDate,
-        matchTime: formattedTime,
+        matchTime: '',
         cubId: argument.id ?? "",
       );
       matchesBySelection.value = response;
