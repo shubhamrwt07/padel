@@ -87,12 +87,12 @@ class OpenMatchRepository {
 
   Future<AllOpenMatches> getMatchesByDateTime({
     required String matchDate,
-    required String matchTime,
+    String? matchTime,
     required String cubId
   }) async {
     try {
       // Encode matchTime properly (space → %20)
-      final encodedTime = Uri.encodeComponent(matchTime);
+      final encodedTime = Uri.encodeComponent(matchTime!);
 
       final url =
           "${AppEndpoints.getOpenMatches}?clubId=$cubId&matchDate=$matchDate&matchTime=$encodedTime";
