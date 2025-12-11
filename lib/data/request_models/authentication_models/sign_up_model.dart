@@ -99,19 +99,22 @@ class Response {
 }
 
 class Location {
-  String? type;
-  List<double>? coordinates;
+  String type;
+  List<double> coordinates;
 
-  Location({this.type, this.coordinates});
+  Location({required this.type, required this.coordinates});
 
-  Location.fromJson(Map<String, dynamic> json) {
-    type = json['type'];
-    coordinates =
-        json['coordinates']?.map<double>((e) => e.toDouble()).toList();
+  factory Location.fromJson(Map<String, dynamic> json) {
+    return Location(
+      type: json['type'] ?? '',
+      coordinates: (json['coordinates'] as List)
+          .map((coord) => (coord as num).toDouble()) // Convert num to double
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'coordinates': coordinates,
-      };
+    'type': type,
+    'coordinates': coordinates,
+  };
 }

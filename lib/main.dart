@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Matchacha Padel',
+      title: 'Swoot',
       theme: AppThemes.appTheme,
       darkTheme: ThemeData.light(),
       themeMode: ThemeMode.light,

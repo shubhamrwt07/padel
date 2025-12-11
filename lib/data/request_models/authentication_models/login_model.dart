@@ -80,6 +80,10 @@ class Location {
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    coordinates = json['coordinates'] != null
+        ? (json['coordinates'] as List)
+        .map((e) => (e as num).toDouble())
+        .toList()
+        : null;
   }
 }
