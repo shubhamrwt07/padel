@@ -30,6 +30,7 @@ class AddPlayerController extends GetxController {
   var selectedTeam = "".obs;
   var matchId = "".obs;
   var isLoginUserAdding = false.obs;
+  var isMatchCreator = false.obs;
 
   Future<void> createUser() async {
     if (isLoading.value || Get.isSnackbarOpen) return;
@@ -81,15 +82,25 @@ class AddPlayerController extends GetxController {
               level: LogLevel.info,
             );
           }
-        }else if (openMatchesController != null){
-          final added = await addPlayer();
-          if (added) {
-            CustomLogger.logMessage(
-              msg: "User Created & Player Added $body",
-              level: LogLevel.info,
-            );
+        } else if (openMatchesController != null) {
+          if (isMatchCreator.value) {
+            final added = await addPlayer();
+            if (added) {
+              CustomLogger.logMessage(
+                msg: "User Created & Player Added $body",
+                level: LogLevel.info,
+              );
+            }
+          } else {
+            final requested = await requestPlayerForOpenMatch();
+            if (requested) {
+              CustomLogger.logMessage(
+                msg: "User Created & Player Requested $body",
+                level: LogLevel.info,
+              );
+            }
           }
-        }else if (openMatchBookingController != null){
+        } else if (openMatchBookingController != null) {
           final requested = await requestPlayerForOpenMatch();
           if (requested) {
             CustomLogger.logMessage(
@@ -137,12 +148,22 @@ class AddPlayerController extends GetxController {
             );
           }
         } else if (openMatchesController != null) {
-          final added = await addPlayer();
-          if (added) {
-            CustomLogger.logMessage(
-              msg: "Login User Added Directly",
-              level: LogLevel.info,
-            );
+          if (isMatchCreator.value) {
+            final added = await addPlayer();
+            if (added) {
+              CustomLogger.logMessage(
+                msg: "Login User Added Directly",
+                level: LogLevel.info,
+              );
+            }
+          } else {
+            final requested = await requestPlayerForOpenMatch();
+            if (requested) {
+              CustomLogger.logMessage(
+                msg: "Login User Requested Directly",
+                level: LogLevel.info,
+              );
+            }
           }
         } else if (openMatchBookingController != null) {
           final requested = await requestPlayerForOpenMatch();
@@ -329,7 +350,8 @@ class AddPlayerController extends GetxController {
     matchId.value = args["matchId"] ?? "";
     selectedTeam.value = args["team"] ?? "";
     scoreboardId.value = args["scoreBoardId"] ?? "";
-    matchLevel.value = args["matchLevel"]??"";
+    matchLevel.value = args["matchLevel"] ?? "";
+    isMatchCreator.value = args["isMatchCreator"] ?? false;
 
     if (args["needAllOpenMatches"] == true &&
         Get.isRegistered<AllOpenMatchController>()) {

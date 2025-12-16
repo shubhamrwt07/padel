@@ -22,6 +22,15 @@ class AddPlayerScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 textFieldWithLabel(
+                  "Phone Number",
+                  controller.phoneController,
+                  context,
+                  action: TextInputAction.next,
+                  keyboardType: TextInputType.number,
+                  maxLength: 10,
+                  readOnly: controller.isLoginUserAdding.value,
+                ),
+                textFieldWithLabel(
                   "First Name",
                   textCapitalization: TextCapitalization.words,
                   controller.firstNameController,
@@ -47,16 +56,6 @@ class AddPlayerScreen extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                   readOnly: controller.isLoginUserAdding.value,
                 ),
-                textFieldWithLabel(
-                  "Phone Number",
-                  controller.phoneController,
-                  context,
-                  action: TextInputAction.next,
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                  readOnly: controller.isLoginUserAdding.value,
-                ),
-
                 Text(
                   "Gender",
                   style: Get.textTheme.headlineSmall!.copyWith(

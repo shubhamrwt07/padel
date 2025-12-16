@@ -7,6 +7,7 @@ class OpenMatchesController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
   RxList<String> selectedSlots = <String>[].obs;
   RxString selectedTimeFilter = 'morning'.obs; // New: for tab selection
+  RxString selectedGameLevel = 'Game Level'.obs; // New: for game level selection
 
   String? selectedTime;
   Rx<DateTime> selectedDate = DateTime.now().obs;
@@ -14,6 +15,12 @@ class OpenMatchesController extends GetxController {
   Rx<OpenMatchModel?> createdMatch = Rx<OpenMatchModel?>(null);
   Rx<AllOpenMatches?> matchesBySelection = Rx<AllOpenMatches?>(null);
   RxString errorMessage = ''.obs;
+  
+  // Join requests related observables
+  RxList<Map<String, dynamic>> joinRequests = <Map<String, dynamic>>[].obs;
+  RxBool isLoadingRequests = false.obs;
+  RxString acceptingRequestId = ''.obs;
+  RxString rejectingRequestId = ''.obs;
 
   final List<String> timeSlots = [
     "6:00 am",
@@ -258,6 +265,79 @@ class OpenMatchesController extends GetxController {
         selectedSlots.clear();
         selectedTime = null;
       }
+    }
+  }
+
+  /// Fetch join requests for a match
+  Future<void> fetchJoinRequests(String matchId) async {
+    try {
+      isLoadingRequests.value = true;
+      joinRequests.clear();
+      
+      final repo = OpenMatchRepository();
+      final response = await repo.getRequestPlayersOpenMatch(matchId: matchId);
+      
+      if (response != null && response.requests != null) {
+        joinRequests.value = response.requests!.map((request) => {
+          'id': request.id ?? '',
+          'name': request.requesterId?.name ?? '',
+          'lastName': request.requesterId?.lastName ?? '',
+          'profilePic': request.requesterId?.profilePic ?? '',
+          'level': request.level ?? '',
+        }).toList();
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error fetching join requests: $e", level: LogLevel.error);
+      Get.snackbar("Error", "Failed to fetch join requests");
+    } finally {
+      isLoadingRequests.value = false;
+    }
+  }
+
+  /// Accept a join request
+  Future<void> acceptRequest(String requestId, String matchId) async {
+    try {
+      acceptingRequestId.value = requestId;
+      final body = {
+        "requestId": requestId,
+        "action": "accept"
+      };
+      final repo = OpenMatchRepository();
+      await repo.acceptOrRejectRequestPlayer(body: body);
+      
+      // Remove from requests list
+      joinRequests.removeWhere((request) => request['id'] == requestId);
+      
+      SnackBarUtils.showSuccessSnackBar("Request accepted successfully");
+      
+      // Refresh matches
+      await fetchMatchesForSelection();
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error accepting request: $e", level: LogLevel.error);
+    } finally {
+      acceptingRequestId.value = '';
+    }
+  }
+
+  /// Reject a join request
+  Future<void> rejectRequest(String requestId, String matchId) async {
+    try {
+      rejectingRequestId.value = requestId;
+      final body = {
+        "requestId": requestId,
+        "action": "reject"
+      };
+      
+      final repo = OpenMatchRepository();
+      await repo.acceptOrRejectRequestPlayer(body: body);
+      
+      // Remove from requests list
+      joinRequests.removeWhere((request) => request['id'] == requestId);
+      SnackBarUtils.showSuccessSnackBar("Request rejected");
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error rejecting request: $e", level: LogLevel.error);
+    } finally {
+      rejectingRequestId.value = '';
     }
   }
 }
