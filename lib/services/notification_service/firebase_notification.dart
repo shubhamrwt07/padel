@@ -66,7 +66,7 @@ class NotificationService {
   /// Initialize local notifications
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/ic_padel_notification');
 
     // Request permissions on iOS during initialization
     const DarwinInitializationSettings iosSettings =
@@ -308,7 +308,7 @@ class NotificationService {
           when: DateTime.now().millisecondsSinceEpoch,
           playSound: true,
           enableVibration: true,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_padel_notification',
           autoCancel: true, // Auto-dismiss when tapped
           ongoing: false, // Not ongoing notification
           visibility: NotificationVisibility.public, // Show on lock screen

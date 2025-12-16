@@ -135,11 +135,11 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                 offset: Offset(0, 0),
                 child: Container(
                   width: 30,
-                  height: Get.height * 0.069,
+                  height: 55,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: AppColors.textFieldColor,
+                    borderRadius: BorderRadius.circular(5),
+                    color: Color(0xffF3F3F5),
                     border: Border.all(
                       color: AppColors.blackColor.withAlpha(10),
                     ),
@@ -155,7 +155,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                           (char) => Text(
                         char,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           height: 1.0,
                           color: Colors.black,
@@ -203,31 +203,37 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                       final dayName = DateFormat('E').format(date);
                       final dateString =
                           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                      
+
                       return GestureDetector(
                         onTap: onTap,
                         child: Obx(() {
                           final dateSelections =
                               controller.getSelectionsByDate()[dateString] ?? [];
-                          
+
                           return AnimatedSwitcher(
                             duration: const Duration(milliseconds: 500),
                             child: SizedBox(
-                              height: 60,
+                              height: 55,
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
                                   Container(
-                                    height: 60,
+                                    height: 55,
                                     width: Get.width * 0.11,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: isSelected
-                                          ? Colors.black
-                                          : dateSelections.isNotEmpty
-                                          ? AppColors.primaryColor.withValues(alpha: 0.1)
-                                          : AppColors.playerCardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(5),
+                                      gradient: isSelected ? LinearGradient(
+                                        colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ) : null,
+                                      color: isSelected ? null : Colors.white,
+                                      // color: isSelected
+                                      //     ? Colors.black
+                                      //     : dateSelections.isNotEmpty
+                                      //     ? AppColors.primaryColor.withValues(alpha: 0.1)
+                                      //     : AppColors.playerCardBackgroundColor,
                                       border: Border.all(
                                         color: isSelected
                                             ? Colors.transparent
@@ -242,7 +248,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                         Text(
                                           "${date.day}",
                                           style: Get.textTheme.titleMedium!.copyWith(
-                                            fontSize: 20,
+                                            fontSize: 18,
                                             fontWeight: FontWeight.w600,
                                             color: isSelected
                                                 ? Colors.white
@@ -325,69 +331,94 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     return Obx(() {
       final selectedTab = controller.selectedTimeOfDay.value;
       final tabs = [
-        {"label": "Morning", "icon": Icons.wb_twilight_sharp},
-        {"label": "Noon", "icon": Icons.wb_sunny},
-        {"label": "Night", "icon": Icons.nightlight_round},
+        {"label": "Morning", "icon": Icons.wb_twilight_sharp, "value": 0},
+        {"label": "Noon", "icon": Icons.wb_sunny, "value": 1},
+        {"label": "Evening", "icon": Icons.nightlight_round, "value": 2},
       ];
 
-      return Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: AppColors.lightBlueColor,
+      return Theme(
+        data: Theme.of(Get.context!).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(tabs.length, (index) {
-            final tab = tabs[index];
-            final isSelected = selectedTab == index;
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black26),
+              ),
+              child: Row(
+                children: List.generate(tabs.length, (index) {
+                  final tab = tabs[index];
+                  final value = tab["value"] as int;
+                  final isSelected = selectedTab == value;
 
-            return Expanded(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(30),
-                  onTap: () {
-                    controller.selectedTimeOfDay.value = index;
-                    controller.filterSlotsByTimeOfDay();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primaryColor.withValues(alpha: 0.1)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          tab["icon"] as IconData,
-                          size: 18,
-                          color: isSelected
-                              ? AppColors.primaryColor
-                              : Colors.black87,
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        controller.selectedTimeOfDay.value = value;
+                        controller.filterSlotsByTimeOfDay();
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: isSelected
+                              ? [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 0),
+                            )
+                          ]
+                              : [],
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          tab['label'] as String,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        child: Center(
+                          child: Icon(
+                            tab["icon"] as IconData,
+                            size: 20,
                             color: isSelected
                                 ? AppColors.primaryColor
                                 : Colors.black87,
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(tabs.length, (index) {
+                final tab = tabs[index];
+                final value = tab["value"] as int;
+                final isSelected = selectedTab == value;
+
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      tab["label"] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }),
+                );
+              }),
+            ),
+          ],
         ),
       );
     });
@@ -419,7 +450,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                 ),
                 child: Stack(
                   clipBehavior: Clip.none,
-                    alignment: Alignment.center,
+                  alignment: Alignment.center,
                   children: [
                     Obx(() {
                       final selectionsByDate = controller.getSelectionsByDate();
@@ -452,7 +483,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                   Text(
                                     'Selected Slots Summary',
                                     style: Get.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,fontSize: 16
+                                        fontWeight: FontWeight.w700,fontSize: 16
                                     ),
                                   ),
                                   // IconButton(
@@ -482,7 +513,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                         Text(
                                           'Total Summary',
                                           style: Get.textTheme.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.w600,
                                               fontSize: 14
                                           ),
                                         ),
@@ -490,7 +521,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                         Text(
                                           '$totalSelections slot${totalSelections > 1 ? 's' : ''} selected',
                                           style: Get.textTheme.bodySmall?.copyWith(
-                                            color: AppColors.darkGrey,
+                                              color: AppColors.darkGrey,
                                               fontSize: 12
                                           ),
                                         ),
@@ -500,8 +531,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                     Text(
                                       '₹ $totalAmount',
                                       style: Get.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.primaryColor,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.primaryColor,
                                           fontSize: 16
                                       ),
                                     ),
@@ -564,7 +595,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                                 Text(
                                                   '$formattedDate ($dayName)',
                                                   style: Get.textTheme.bodyMedium?.copyWith(
-                                                    fontWeight: FontWeight.w600,
+                                                      fontWeight: FontWeight.w600,
                                                       fontSize: 14
                                                   ),
                                                 ),
@@ -574,8 +605,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: AppColors.secondaryColor,
-                                              shape: BoxShape.circle
+                                                color: AppColors.secondaryColor,
+                                                shape: BoxShape.circle
                                             ),
                                             child: Text(
                                               '${selections.length}',
@@ -612,9 +643,9 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                             ...selectionsByCourt.entries.map((courtEntry) {
                                               final courtSelections = courtEntry.value;
                                               final courtName =
-                                                  (courtSelections.first['courtName'] as String?)?.isNotEmpty == true
-                                                      ? courtSelections.first['courtName'] as String
-                                                      : 'Court';
+                                              (courtSelections.first['courtName'] as String?)?.isNotEmpty == true
+                                                  ? courtSelections.first['courtName'] as String
+                                                  : 'Court';
 
                                               return Container(
                                                 margin: const EdgeInsets.only(bottom: 0),
@@ -638,8 +669,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                                           child: Text(
                                                             courtName,
                                                             style: Get.textTheme.bodyMedium?.copyWith(
-                                                              fontWeight: FontWeight.w600,
-                                                              fontSize: 13
+                                                                fontWeight: FontWeight.w600,
+                                                                fontSize: 13
                                                             ),
                                                           ),
                                                         ),
@@ -648,8 +679,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                                                               ? '1 slot'
                                                               : '${courtSelections.length} slots',
                                                           style: Get.textTheme.bodySmall?.copyWith(
-                                                            color: AppColors.darkGrey,
-                                                            fontSize: 11
+                                                              color: AppColors.darkGrey,
+                                                              fontSize: 11
                                                           ),
                                                         ),
                                                       ],
@@ -780,10 +811,10 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           onVerticalDragEnd: hasSelections
               ? (details) {
-                  if ((details.primaryVelocity ?? 0) < -300) {
-                    _openSelectedSlotsBottomSheet(context);
-                  }
-                }
+            if ((details.primaryVelocity ?? 0) < -300) {
+              _openSelectedSlotsBottomSheet(context);
+            }
+          }
               : null,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -873,8 +904,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       );
     });
   }
-// In create_open_matches_screen.dart
-// Replace the _buildAllCourtsWithSlots method with this:
 
   Widget _buildAllCourtsWithSlots() {
     return Obx(() {
@@ -919,83 +948,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       );
     });
   }
-
-// Also update the controller to remove PageController:
-// In create_open_matches_controller.dart
-
-// REMOVE these lines:
-// PageController pageController = PageController();
-// RxInt currentPage = 0.obs;
-
-// In onClose() method, REMOVE:
-// pageController.dispose();
-  /// Build all courts with their slots
-  // Widget _buildAllCourtsWithSlots() {
-  //   return Obx(() {
-  //     if (controller.isLoadingCourts.value) {
-  //       return CourtSlotsShimmer();
-  //     }
-  //
-  //     final slotsData = controller.slots.value;
-  //
-  //     if (slotsData == null || slotsData.data == null || slotsData.data!.isEmpty) {
-  //       return const Center(child: Text("No courts available"));
-  //     }
-  //
-  //     final courts = slotsData.data!;
-  //     final totalPages = (courts.length / 2).ceil();
-  //
-  //     return Column(
-  //       children: [
-  //         // PageView for courts
-  //         SizedBox(
-  //           height: Get.height * 0.46,
-  //           child: PageView.builder(
-  //             controller: controller.pageController,
-  //             onPageChanged: (index) {
-  //               controller.currentPage.value = index;
-  //             },
-  //             itemCount: totalPages,
-  //             itemBuilder: (context, pageIndex) {
-  //               final start = pageIndex * 2;
-  //               final end = (start + 2 > courts.length) ? courts.length : start + 2;
-  //               final courtsSlice = courts.sublist(start, end);
-  //
-  //               return Column(
-  //                 children: courtsSlice.map((court) => _buildCourtSection(court)).toList(),
-  //               );
-  //             },
-  //           ),
-  //         ),
-  //
-  //         const SizedBox(height: 6),
-  //
-  //         /// Swipe hint with arrow animation
-  //         Obx(() {
-  //           final currentPage = controller.currentPage.value;
-  //
-  //           if (totalPages <= 1) return const SizedBox.shrink();
-  //
-  //           if (currentPage == 0) {
-  //             // First page → swipe left
-  //             return _buildSwipeHint("Swipe Left for more slots ", Icons.arrow_right_alt);
-  //           } else if (currentPage == totalPages - 1) {
-  //             // Last page → swipe right
-  //             return _buildSwipeHint("Swipe Right", Icons.arrow_left);
-  //           }
-  //           return const SizedBox.shrink();
-  //         }),
-  //
-  //         const SizedBox(height: 6),
-  //
-  //         /// Dot indicator placed right below courts
-  //         _buildDotIndicator(totalPages),
-  //         const SizedBox(height: 26),
-  //
-  //       ],
-  //     );
-  //   });
-  // }
 
   /// Helper method to safely extract court type as String
   String _getCourtType(dynamic courtData) {
@@ -1074,27 +1026,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Obx(() {
-                    //   final courtId = courtData.sId ?? '';
-                    //   final selectedCount = controller.getSelectedSlotsCountForCourt(courtId);
-                    //   return selectedCount > 0
-                    //       ? Container(
-                    //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    //     decoration: BoxDecoration(
-                    //       color: AppColors.secondaryColor,
-                    //       borderRadius: BorderRadius.circular(12),
-                    //     ),
-                    //     child: Text(
-                    //       '$selectedCount selected',
-                    //       style: const TextStyle(
-                    //         color: Colors.white,
-                    //         fontSize: 12,
-                    //         fontWeight: FontWeight.w500,
-                    //       ),
-                    //     ),
-                    //   )
-                    //       : const SizedBox.shrink();
-                    // }),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -1124,12 +1055,6 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       return const Center(
         child: Column(
           children: [
-            // Icon(
-            //   Icons.schedule,
-            //   size: 20,
-            //   color: Colors.grey,
-            // ),
-            // SizedBox(height: 2),
             Text(
               "No time slots available",
               style: TextStyle(
@@ -1205,7 +1130,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
     );
   }
 
-  /// Build individual slot tile
+  /// Build individual slot tile with new modern UI design
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
 
@@ -1215,19 +1140,8 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    Color backgroundColor;
-    Color textColor;
-
-    if (isUnavailable) {
-      backgroundColor = Colors.grey.shade300;
-      textColor = Colors.grey.shade600;
-    } else if (isSelected) {
-      backgroundColor = Colors.black;
-      textColor = Colors.white;
-    } else {
-      backgroundColor = AppColors.playerCardBackgroundColor;
-      textColor = Colors.black;
-    }
+    const blueColor = Color(0xff1F41BB);
+    const radius = 5.0;
 
     return GestureDetector(
       onTap: isUnavailable
@@ -1239,27 +1153,67 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           courtName: '',
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
-            width: 1,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            color: isUnavailable ? Colors.grey.shade100 : Colors.white,
+            gradient: isSelected
+                ? const LinearGradient(
+              colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            )
+                : null,
+            border: Border.all(
+              color: isUnavailable
+                  ? Colors.grey.shade300
+                  : Colors.grey.shade300,
+            ),
           ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          formatTimeSlot(slot.time??""),
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
+          child: Stack(
+            children: [
+              /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE)
+              if (!isUnavailable && !isSelected)
+                Positioned.fill(
+                  left: 0,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: blueColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(radius),
+                          bottomLeft: Radius.circular(radius),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              /// TIME TEXT
+              Center(
+                child: Text(
+                  formatTimeSlot(slot.time ?? ""),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: isUnavailable
+                        ? Colors.grey.shade500
+                        : isSelected
+                        ? Colors.white
+                        : Colors.black87,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
 }

@@ -1,8 +1,12 @@
 class AppEndpoints {
   AppEndpoints._();
-  /// -----------------------Live URL-------------------------------------------
-  static const String baseUrl = "http://103.185.212.117:5070/api/customer/";
-  static const String socketUrl = "http://103.185.212.117:5070";
+  // /// -----------------------Live URL-------------------------------------------
+  // static const String baseUrl = "http://103.185.212.117:5070/api/customer/";
+  // static const String socketUrl = "http://103.185.212.117:5070";
+
+  /// -----------------------New Live URL-------------------------------------------
+  static const String baseUrl = "http://103.142.118.40:5070/api/customer/";
+  static const String socketUrl = "http://103.142.118.40:5070";
 
   ///-----------------------Local URL-------------------------------------------
   // static const String baseUrl = "http://192.168.0.129:5070/api/customer/";

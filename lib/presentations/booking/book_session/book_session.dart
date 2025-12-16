@@ -51,195 +51,208 @@ class BookSession extends StatelessWidget {
           ),
         ).paddingOnly(top: 10),
 
-        Obx(() => Row(
-          children: [
-            /// Month container (vertical text)
-            Transform.translate(
-              offset: const Offset(0, -25),
-              child: Container(
-                width: 30,
-                height: Get.height * 0.069,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: AppColors.textFieldColor,
-                  border: Border.all(
-                    color: AppColors.blackColor.withAlpha(10),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: DateFormat('MMM')
-                      .format(controller.focusedMonth.value)
-                      .toUpperCase()
-                      .split('')
-                      .map(
-                        (char) => Text(
-                      char,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        height: 1.0,
-                        color: Colors.black,
-                      ),
+        Obx(() => Transform.translate(
+          offset: const Offset(0, -30),
+
+          child: Row(
+            children: [
+              /// Month container (vertical text)
+              Transform.translate(
+                offset: const Offset(0, 0),
+                child: Container(
+                  width: 30,
+                  height: 55,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: Color(0xffF3F3F5),
+                    border: Border.all(
+                      color: AppColors.blackColor.withAlpha(10),
                     ),
-                  )
-                      .toList(),
-                ),
-              ).paddingOnly(right: 5),
-            ),
-
-            /// Date timeline with scroll listener
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (scrollNotification) {
-                  if (scrollNotification is ScrollUpdateNotification) {
-                    final scrollOffset = scrollNotification.metrics.pixels;
-                    final itemExtent = 46.0;
-                    final itemsScrolled = (scrollOffset / itemExtent).round();
-                    final estimatedDate = DateTime.now().add(Duration(days: itemsScrolled));
-
-                    // Update focusedMonth based on scroll position
-                    final newMonth = DateTime(estimatedDate.year, estimatedDate.month, 1);
-                    if (controller.focusedMonth.value.month != newMonth.month ||
-                        controller.focusedMonth.value.year != newMonth.year) {
-                      controller.focusedMonth.value = newMonth;
-                    }
-                  }
-                  return false;
-                },
-                child: EasyDateTimeLinePicker.itemBuilder(
-                  headerOptions: HeaderOptions(
-                    headerBuilder: (_, context, date) =>
-                    const SizedBox.shrink(),
                   ),
-                  selectionMode: SelectionMode.alwaysFirst(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2030, 3, 18),
-                  focusedDate: controller.selectedDate.value,
-                  itemExtent: 46,
-                  itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
-                    final now = DateTime.now();
-                    final today = DateTime(now.year, now.month, now.day);
-                    final currentDate = DateTime(date.year, date.month, date.day);
-                    if (currentDate.isBefore(today)) return const SizedBox.shrink();
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: DateFormat('MMM')
+                        .format(controller.focusedMonth.value)
+                        .toUpperCase()
+                        .split('')
+                        .map(
+                          (char) => Text(
+                        char,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          height: 1.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )
+                        .toList(),
+                  ),
+                ).paddingOnly(right: 5),
+              ),
 
-                    final dayName = DateFormat('E').format(date);
-                    final dateString =
-                        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+              /// Date timeline with scroll listener
+              Expanded(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollUpdateNotification) {
+                      final scrollOffset = scrollNotification.metrics.pixels;
+                      final itemExtent = 46.0;
+                      final itemsScrolled = (scrollOffset / itemExtent).round();
+                      final estimatedDate = DateTime.now().add(Duration(days: itemsScrolled));
 
-                    return GestureDetector(
-                      onTap: () {
-                        onTap();
-                        // Update both selectedDate and focusedMonth here
-                        controller.selectedDate.value = date;
-                        controller.focusedMonth.value =
-                            DateTime(date.year, date.month, 1);
-                      },
-                      child: Obx(() {
-                        final dateSelections =
-                            controller.getSelectionsByDate()[dateString] ?? [];
-                        
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              height: 60,
-                              width: Get.width * 0.11,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: isSelected
-                                    ? Colors.black
-                                    : dateSelections.isNotEmpty
-                                    ? AppColors.primaryColor
-                                    .withValues(alpha: 0.1)
-                                    : AppColors.playerCardBackgroundColor,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Colors.transparent
-                                      : dateSelections.isNotEmpty
-                                      ? AppColors.primaryColor
-                                      : AppColors.blackColor.withAlpha(10),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${date.day}",
-                                    style: Get.textTheme.titleMedium!.copyWith(
-                                      fontSize: 20,
+                      // Update focusedMonth based on scroll position
+                      final newMonth = DateTime(estimatedDate.year, estimatedDate.month, 1);
+                      if (controller.focusedMonth.value.month != newMonth.month ||
+                          controller.focusedMonth.value.year != newMonth.year) {
+                        controller.focusedMonth.value = newMonth;
+                      }
+                    }
+                    return false;
+                  },
+                  child: EasyDateTimeLinePicker.itemBuilder(
+                    headerOptions: HeaderOptions(
+                      headerBuilder: (_, context, date) =>
+                      const SizedBox.shrink(),
+                    ),
+                    selectionMode: SelectionMode.alwaysFirst(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2030, 3, 18),
+                    focusedDate: controller.selectedDate.value,
+                    itemExtent: 46,
+                    itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+                      final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
+                      final currentDate = DateTime(date.year, date.month, date.day);
+                      if (currentDate.isBefore(today)) return const SizedBox.shrink();
+
+                      final dayName = DateFormat('E').format(date);
+                      final dateString =
+                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+                      return GestureDetector(
+                        onTap: () {
+                          onTap();
+                          // Update both selectedDate and focusedMonth here
+                          controller.selectedDate.value = date;
+                          controller.focusedMonth.value =
+                              DateTime(date.year, date.month, 1);
+                        },
+                        child: Obx(() {
+                          final dateSelections =
+                              controller.getSelectionsByDate()[dateString] ?? [];
+
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  height: 55,
+                                  width: Get.width * 0.11,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    gradient: isSelected ? LinearGradient(
+                                      colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                    ) : null,
+                                    color: isSelected ? null : Colors.white,
+                                    // color: isSelected
+                                    //     ? Colors.black
+                                    //     : dateSelections.isNotEmpty
+                                    //     ? AppColors.primaryColor
+                                    //     .withValues(alpha: 0.1)
+                                    //     : AppColors.playerCardBackgroundColor,
+                                    border: Border.all(
                                       color: isSelected
-                                          ? Colors.white
+                                          ? Colors.transparent
                                           : dateSelections.isNotEmpty
                                           ? AppColors.primaryColor
-                                          : AppColors.textColor,
+                                          : AppColors.blackColor.withAlpha(20),
                                     ),
                                   ),
-                                  Transform.translate(
-                                    offset: const Offset(0, -2),
-                                    child: Text(
-                                      dayName,
-                                      style: Get.textTheme.bodySmall!.copyWith(
-                                        fontSize: 11,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : dateSelections.isNotEmpty
-                                            ? AppColors.primaryColor
-                                            : Colors.black,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "${date.day}",
+                                        style: Get.textTheme.titleMedium!.copyWith(
+                                          fontSize: 18,
+                                          color: isSelected
+                                              ? Colors.white
+                                              : dateSelections.isNotEmpty
+                                              ? AppColors.primaryColor
+                                              : AppColors.textColor,
+                                        ),
+                                      ),
+                                      Transform.translate(
+                                        offset: const Offset(0, -2),
+                                        child: Text(
+                                          dayName,
+                                          style: Get.textTheme.bodySmall!.copyWith(
+                                            fontSize: 11,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : dateSelections.isNotEmpty
+                                                ? AppColors.primaryColor
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (dateSelections.isNotEmpty)
+                                  Positioned(
+                                    top: -3,
+                                    right: -2,
+                                    child: Container(
+                                      height: 16,
+                                      width: 16,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                      child: Text(
+                                        "${dateSelections.length}",
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                              ],
                             ),
-                            if (dateSelections.isNotEmpty)
-                              Positioned(
-                                top: 0,
-                                right: -2,
-                                child: Container(
-                                  height: 16,
-                                  width: 16,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: AppColors.secondaryColor,
-                                  ),
-                                  child: Text(
-                                    "${dateSelections.length}",
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        );
-                      }),
-                    );
-                  },
+                          );
+                        }),
+                      );
+                    },
 
-                  onDateChange: (date) async {
-                    controller.selectedDate.value = date;
-                    controller.focusedMonth.value =
-                        DateTime(date.year, date.month, 1);
-                    controller.isLoadingCourts.value = true;
-                    await controller.getAvailableCourtsById(
-                      controller.argument.id!,
-                      showUnavailable:
-                      controller.showUnavailableSlots.value,
-                    );
-                    controller.slots.refresh();
-                    controller.isLoadingCourts.value = false;
-                  },
+                    onDateChange: (date) async {
+                      controller.selectedDate.value = date;
+                      controller.focusedMonth.value =
+                          DateTime(date.year, date.month, 1);
+                      controller.isLoadingCourts.value = true;
+                      await controller.getAvailableCourtsById(
+                        controller.argument.id!,
+                        showUnavailable:
+                        controller.showUnavailableSlots.value,
+                      );
+                      controller.slots.refresh();
+                      controller.isLoadingCourts.value = false;
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
-        ).paddingOnly(top: 10)),
+            ],
+          ).paddingOnly(top: 10),
+        )),
 
         /// Toggle Row
         Obx(() => Transform.translate(
@@ -289,71 +302,95 @@ class BookSession extends StatelessWidget {
   Widget _buildTimeOfDayTabs() {
     return Obx(() {
       final selectedTab = controller.selectedTimeOfDay.value;
-
       final tabs = [
-        {"label": "Morning", "icon": Icons.wb_twilight_sharp},
-        {"label": "AfterNoon", "icon": Icons.wb_sunny},
-        {"label": "Night", "icon": Icons.nightlight_round},
+        {"label": "Morning", "icon": Icons.wb_twilight_sharp, "value": 0},
+        {"label": "Noon", "icon": Icons.wb_sunny, "value": 1},
+        {"label": "Evening", "icon": Icons.nightlight_round, "value": 2},
       ];
 
-      return Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
-          color: AppColors.lightBlueColor,
+      return Theme(
+        data: Theme.of(Get.context!).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(tabs.length, (index) {
-            final tab = tabs[index];
-            final isSelected = selectedTab == index;
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black26),
+              ),
+              child: Row(
+                children: List.generate(tabs.length, (index) {
+                  final tab = tabs[index];
+                  final value = tab["value"] as int;
+                  final isSelected = selectedTab == value;
 
-            return Flexible(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(25),
-                  onTap: () {
-                    controller.selectedTimeOfDay.value = index;
-                    controller.filterSlotsByTimeOfDay();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 3),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primaryColor.withValues(alpha: 0.1)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          tab["icon"] as IconData,
-                          size: 14,
-                          color: isSelected
-                              ? AppColors.primaryColor
-                              : Colors.black87,
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        controller.selectedTimeOfDay.value = value;
+                        controller.filterSlotsByTimeOfDay();
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: isSelected
+                              ? [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 0),
+                            )
+                          ]
+                              : [],
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          tab['label'] as String,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        child: Center(
+                          child: Icon(
+                            tab["icon"] as IconData,
+                            size: 20,
                             color: isSelected
                                 ? AppColors.primaryColor
                                 : Colors.black87,
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(tabs.length, (index) {
+                final tab = tabs[index];
+                final value = tab["value"] as int;
+                final isSelected = selectedTab == value;
+
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      tab["label"] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }),
+                );
+              }),
+            ),
+          ],
         ),
       );
     });
@@ -612,19 +649,8 @@ class BookSession extends StatelessWidget {
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    Color backgroundColor;
-    Color textColor;
-
-    if (isUnavailable) {
-      backgroundColor = Colors.grey.shade300;
-      textColor = Colors.grey.shade600;
-    } else if (isSelected) {
-      backgroundColor = Colors.black;
-      textColor = Colors.white;
-    } else {
-      backgroundColor = AppColors.playerCardBackgroundColor;
-      textColor = Colors.black;
-    }
+    const blueColor = Color(0xff1F41BB);
+    const radius = 5.0;
 
     return GestureDetector(
       onTap: isUnavailable
@@ -636,25 +662,63 @@ class BookSession extends StatelessWidget {
           courtName: '',
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: isSelected ? Colors.black : AppColors.blackColor.withAlpha(20),
-
-            width: 1,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            color: isUnavailable ? Colors.grey.shade100 : Colors.white,
+            gradient: isSelected
+                ? const LinearGradient(
+              colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            )
+                : null,
+            border: Border.all(
+              color: isUnavailable
+                  ? Colors.grey.shade300
+                  : Colors.grey.shade300,
+            ),
           ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          formatTimeSlot(slot.time??""),
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: textColor,
+          child: Stack(
+            children: [
+              /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE)
+              if (!isUnavailable && !isSelected)
+                Positioned.fill(
+                  left: 0,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: blueColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(radius),
+                          bottomLeft: Radius.circular(radius),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              /// TIME TEXT
+              Center(
+                child: Text(
+                  formatTimeSlot(slot.time ?? ""),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: isUnavailable
+                        ? Colors.grey.shade500
+                        : isSelected
+                        ? Colors.white
+                        : Colors.black87,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
