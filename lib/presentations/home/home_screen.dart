@@ -17,6 +17,7 @@ import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
 import 'package:padel_mobile/presentations/notification/notification_controller.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -642,6 +643,7 @@ class HomeScreen extends GetView<HomeController> {
       onTap: () {
         log("CLUB ID -> ${club.id}");
         if (club.id != null) {
+          Get.delete<BookingController>();
           Get.toNamed(RoutesName.booking, arguments: {"data": club,"clubId":club.id});
           FocusManager.instance.primaryFocus?.unfocus();
         }

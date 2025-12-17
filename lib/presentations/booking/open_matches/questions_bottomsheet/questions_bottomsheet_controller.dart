@@ -340,7 +340,7 @@ class QuestionsBottomsheetController extends GetxController {
                         ),
                       ),
                       onPressed: () {
-                        Get.offAllNamed(RoutesName.bottomNav);
+                        Get.toNamed(RoutesName.bottomNav);
                       },
                       child: const Text(
                         "Go to Home",

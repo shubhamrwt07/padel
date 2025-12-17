@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:get_storage/get_storage.dart';
 import '../widgets/booking_exports.dart';
@@ -133,39 +134,40 @@ class OpenMatchesScreen extends StatelessWidget {
               "Select Date",
               style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
             ),
-            // Obx(() => PopupMenuButton<String>(
-            //   offset: Offset(0, 30),
-            //   splashRadius: 0,
-            //   padding: EdgeInsets.zero,
-            //   child: Container(
-            //     padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-            //     decoration: BoxDecoration(
-            //       color: AppColors.primaryColor,
-            //       border: Border.all(color: AppColors.blackColor.withAlpha(20)),
-            //       borderRadius: BorderRadius.circular(4),
-            //     ),
-            //     child: Row(
-            //       mainAxisSize: MainAxisSize.min,
-            //       children: [
-            //         Text(
-            //           controller.selectedGameLevel.value,
-            //           style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
-            //         ),
-            //         SizedBox(width: 4),
-            //         Icon(Icons.keyboard_arrow_down, size: 16,color: Colors.white,),
-            //       ],
-            //     ),
-            //   ),
-            //   itemBuilder: (context) => [
-            //     PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
-            //     PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
-            //     PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
-            //     PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
-            //   ],
-            //   onSelected: (value) {
-            //     controller.selectedGameLevel.value = value;
-            //   },
-            // )),
+            Obx(() => PopupMenuButton<String>(
+              offset: Offset(0, 30),
+              splashRadius: 0,
+              padding: EdgeInsets.zero,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  border: Border.all(color: AppColors.blackColor.withAlpha(20)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.selectedGameLevel.value,
+                      style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.keyboard_arrow_down, size: 16,color: Colors.white,),
+                  ],
+                ),
+              ),
+              itemBuilder: (context) => [
+                PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
+                PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
+                PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
+                PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
+              ],
+              onSelected: (value) {
+                controller.selectedGameLevel.value = value;
+                controller.fetchMatchesForSelection();
+              },
+            )),
           ],
         ),
         Obx(
@@ -518,6 +520,7 @@ class OpenMatchesScreen extends StatelessWidget {
         data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '${data.slot!.first.slotTimes!.first.amount ?? ''}'
         : '-';
+    final pendingRequestsCount = data.pendingRequestsCount ?? 0;
 
     // TEAM A
     final teamAPlayers = (data.teamA ?? []).take(2).map((p) {
@@ -526,7 +529,8 @@ class OpenMatchesScreen extends StatelessWidget {
         p.userId?.name ?? "",
         p.userId?.playerLevel?.split(' ').first ?? "-",
         index,
-        p.userId?.lastName??""
+        p.userId?.lastName??"",
+        matchData: data,
       );
     }).toList();
 
@@ -543,7 +547,8 @@ class OpenMatchesScreen extends StatelessWidget {
         p.userId?.name ?? "",
         p.userId?.playerLevel?.split(' ').first ?? "-",
         index,
-        p.userId?.lastName??""
+        p.userId?.lastName??"",
+        matchData: data,
       );
     }).toList();
 
@@ -705,32 +710,55 @@ class OpenMatchesScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.only(left: 5,right: 1),
-                // height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
+              if (_isLoginUserInMatch(data))
+                GestureDetector(
+                  onTap: (){
+                    // Convert team data to map format for passing to chat
+                    final teamAData = (data.teamA ?? []).map((p) => {
+                      'userId': p.userId?.sId ?? '',
+                      'name': p.userId?.name ?? '',
+                      'lastName': p.userId?.lastName ?? '',
+                    }).toList();
+                    final teamBData = (data.teamB ?? []).map((p) => {
+                      'userId': p.userId?.sId ?? '',
+                      'name': p.userId?.name ?? '',
+                      'lastName': p.userId?.lastName ?? '',
+                    }).toList();
+                    
+                    Get.toNamed(RoutesName.chat, arguments: {
+                      "matchID": data.sId ?? "",
+                      "teamA": teamAData,
+                      "teamB": teamBData,
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 5,right: 1),
+                    // height: 46,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Start Chat with Players",
+                          style: TextStyle(color: Colors.grey,fontSize: 12),
+                        ).paddingOnly(right: 5),
+                        Container(
+                          height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                            ),
+                            child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Start Chat with Players",
-                      style: TextStyle(color: Colors.grey,fontSize: 12),
-                    ).paddingOnly(right: 5),
-                    Container(
-                      height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
-                        ),
-                        child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
-                    )
-                  ],
-                ),
-              ),
+              if (!_isLoginUserInMatch(data)) const SizedBox.shrink(),
               Row(
                 children: [
                   if (_isMatchCreator(data)) ...[
@@ -754,7 +782,7 @@ class OpenMatchesScreen extends StatelessWidget {
                                     ),
                                   ),
                                   TextSpan(
-                                    text: '0',
+                                    text: "$pendingRequestsCount",
                                     style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
                                   ),
                                   TextSpan(
@@ -773,7 +801,8 @@ class OpenMatchesScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                   ],
-                  const Icon(Icons.share, size: 20,color: AppColors.darkGreyColor,),
+                  if (_isLoginUserInMatch(data))
+                    const Icon(Icons.share, size: 20,color: AppColors.darkGreyColor,),
                 ],
               ),
             ],
@@ -832,35 +861,52 @@ class OpenMatchesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilledPlayer(String? imageUrl, String name, String level,int index,String lastName) {
+  Widget _buildFilledPlayer(String? imageUrl, String name, String level,int index,String lastName, {MatchData? matchData}) {
     final firstLetter = name.trim().isNotEmpty
         ? '${name.trim()[0]}${lastName.trim().isNotEmpty ? lastName.trim()[0] : ''}'
         : '?';
 
-    return CircleAvatar(
-      radius: 26,
-      backgroundColor: Colors.white,
+    return GestureDetector(
+      onTap: () {
+        if (matchData != null && (_isLoginUserInMatch(matchData) || _isMatchCreator(matchData))) {
+          _showPlayerDetailsDialog(matchData);
+        }
+      },
       child: CircleAvatar(
-        radius: 24,
-        backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
-        child: ClipOval(
-          child: (imageUrl != null && imageUrl.isNotEmpty)
-              ? CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            placeholder: (context, url) => Center(
-              child: Text(
-                firstLetter,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.primaryColor.withOpacity(0.5),
-                  fontWeight: FontWeight.bold,
+        radius: 26,
+        backgroundColor: Colors.white,
+        child: CircleAvatar(
+          radius: 24,
+          backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
+          child: ClipOval(
+            child: (imageUrl != null && imageUrl.isNotEmpty)
+                ? CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (context, url) => Center(
+                child: Text(
+                  firstLetter,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.primaryColor.withOpacity(0.5),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            errorWidget: (context, url, error) => Center(
+              errorWidget: (context, url, error) => Center(
+                child: Text(
+                  firstLetter,
+                  style:  TextStyle(
+                    fontSize: 18,
+                    color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+                : Center(
               child: Text(
                 firstLetter,
                 style:  TextStyle(
@@ -868,16 +914,6 @@ class OpenMatchesScreen extends StatelessWidget {
                   color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-            ),
-          )
-              : Center(
-            child: Text(
-              firstLetter,
-              style:  TextStyle(
-                fontSize: 18,
-                color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
-                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -889,19 +925,25 @@ class OpenMatchesScreen extends StatelessWidget {
 
   Widget _buildAvailableCircle(String team, String matchId, String? skillLevel, int index, MatchData? match) {
     final isLoginUserInMatch = _isLoginUserInMatch(match);
+    final isMatchCreator = _isMatchCreator(match);
+    
     return GestureDetector(
       onTap: () {
-        Get.toNamed(
-          RoutesName.addPlayer,
-          arguments: {
-            "team": team,
-            "matchId": matchId,
-            "needOpenMatches": true,
-            "matchLevel": skillLevel,
-            "isLoginUser": !isLoginUserInMatch,
-            "isMatchCreator": _isMatchCreator(match),
-          },
-        );
+        if (isMatchCreator) {
+          Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId), isScrollControlled: true);
+        } else {
+          Get.toNamed(
+            RoutesName.addPlayer,
+            arguments: {
+              "team": team,
+              "matchId": matchId,
+              "needOpenMatches": true,
+              "matchLevel": skillLevel,
+              "isLoginUser": !isLoginUserInMatch,
+              "isMatchCreator": isMatchCreator,
+            },
+          );
+        }
       },
       child: CircleAvatar(
         radius: 26,
@@ -942,6 +984,143 @@ class OpenMatchesScreen extends StatelessWidget {
     return match.createdBy == userId.toString();
   }
 
+  void _showPlayerDetailsDialog(MatchData matchData) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Player Information',
+                    style: Get.textTheme.titleMedium
+                        ?.copyWith(color: AppColors.primaryColor),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: Get.back,
+                  ),
+                ],
+              ),
+              const Divider(thickness: 0.6),
+              ..._buildPlayers(matchData.teamA ?? []),
+              ..._buildPlayers(matchData.teamB ?? []),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  List<Widget> _buildPlayers(List<dynamic> players) {
+    return players.map((p) {
+      final name = [
+        p.userId?.name,
+        p.userId?.lastName,
+      ]
+          .where((e) => e != null && e!.isNotEmpty)
+          .map((e) => e![0].toUpperCase() + e.substring(1).toLowerCase())
+          .join(' ');
+      final phoneNumber = p.userId?.phoneNumber;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Row(
+          children: [
+            /// Avatar with badge
+            Stack(
+              children: [
+                CircleAvatar(
+                  backgroundColor: AppColors.secondaryColor,
+                  child: CircleAvatar(
+                    radius: 26,
+                    backgroundImage:
+                    (p.userId?.profilePic?.isNotEmpty ?? false)
+                        ? CachedNetworkImageProvider(p.userId!.profilePic!)
+                        : null,
+                    child: (p.userId?.profilePic?.isEmpty ?? true)
+                        ? Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold),
+                    )
+                        : null,
+                  ),
+                ),
+                Positioned(
+                  bottom: -2,
+                  right: 0,
+                  left: 0,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.green,
+                    child: Text(
+                      'A',
+                      style: const TextStyle(
+                          fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(width: 12),
+
+            /// Name + XP + phone
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name,
+                      style: Get.textTheme.labelLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    '⭐ 0 XP Points | $phoneNumber',
+                    style: Get.textTheme.bodySmall
+                        ?.copyWith(color: Colors.orange),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 30,
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.sync, size: 16,color: Colors.white,),
+                      label: const Text('Replace',style: TextStyle(color: Colors.white),),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 12),
+                        textStyle:
+                        const TextStyle(fontSize: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// Call button
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primaryColor,
+              child: const Icon(Icons.call,
+                  color: Colors.white, size: 20),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
   void _showRequestsBottomSheet(BuildContext context, String matchId) {
     controller.fetchJoinRequests(matchId);
 
@@ -1324,4 +1503,267 @@ class OpenMatchesScreen extends StatelessWidget {
   //   );
   // }
 
+}
+class AppPlayersBottomSheet extends StatelessWidget {
+  final String matchId;
+  const AppPlayersBottomSheet({super.key, required this.matchId});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<OpenMatchesController>();
+    controller.fetchNearByPlayers();
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _header(),
+            PrimaryTextField(
+              hintStyle: Get.textTheme.headlineSmall!.copyWith(color: AppColors.textColor),
+                suffixIcon: Icon(Icons.search,color: AppColors.textColor),
+                hintText: 'Search by Name / Phone number'),
+            const SizedBox(height: 8),
+            Text(
+              'Nearby & match your level',
+              style: Get.textTheme.labelLarge,
+            ),
+            const SizedBox(height: 12),
+            _playersList(),
+            const SizedBox(height: 12),
+            _actionButtons(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _header() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+         Text(
+          'App Players',
+          style: Get.textTheme.headlineMedium,
+        ),
+        Transform.translate(
+          offset: Offset(8, 0),
+          child: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () => Get.back(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _searchField() {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: 'Search by Name / Phone number',
+        prefixIcon: const Icon(Icons.search),
+        filled: true,
+        fillColor: const Color(0xffF5F6FA),
+        contentPadding: EdgeInsets.symmetric(vertical: 5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade500)
+        )
+      ),
+    );
+  }
+
+  Widget _playersList() {
+    final controller = Get.find<OpenMatchesController>();
+    return Obx(() {
+      if (controller.isLoadingNearbyPlayers.value) {
+        return const SizedBox(
+          height: 100,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      
+      if (controller.nearbyPlayers.isEmpty) {
+        return SizedBox(
+          height: 100,
+          child: Center(
+            child: Text(
+              'No nearby players found',
+              style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.darkGrey),
+            ),
+          ),
+        );
+      }
+      
+      final itemCount = controller.nearbyPlayers.length;
+      final displayCount = itemCount > 5 ? 5 : itemCount;
+      final itemHeight = 60.0;
+      final listHeight = displayCount * itemHeight + (displayCount - 1) * 1;
+      
+      return SizedBox(
+        height: listHeight,
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: itemCount,
+          separatorBuilder: (_, __) => Divider(
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
+          ),
+          itemBuilder: (_, i) {
+          final player = controller.nearbyPlayers[i];
+          final isRequested = false;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                  child: (player['profilePic']?.isNotEmpty == true)
+                      ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: player['profilePic'],
+                            fit: BoxFit.cover,
+                            width: 44,
+                            height: 44,
+                            placeholder: (context, url) => Text(
+                              '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            errorWidget: (context, url, error) => Text(
+                              '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        )
+                      : Text(
+                          '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+                const SizedBox(width: 12),
+
+                /// Name + City
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${player['name'] ?? ''} ${player['lastName'] ?? ''}',
+                        style: Get.textTheme.labelLarge!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        player['city'] ?? '',
+                        style: Get.textTheme.bodyLarge!
+                            .copyWith(fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// Button
+                _requestButton(isRequested, player['id'] ?? ''),
+              ],
+            ),
+          );
+        },
+        ),
+      );
+    });
+  }
+
+
+  Widget _requestButton(bool sent, String playerId) {
+    return GestureDetector(
+      onTap: sent ? null : () async {
+        final addPlayerController = Get.put(AddPlayerController());
+        addPlayerController.matchId.value = matchId;
+        addPlayerController.playerId.value = playerId;
+        addPlayerController.selectedTeam.value = 'teamA';
+        addPlayerController.openMatchesController = Get.find<OpenMatchesController>();
+        await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: sent ? const Color(0xffE9ECF5) : const Color(0xffEEF1FF),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          sent ? 'Request Sent' : 'Send Request',
+          style: Get.textTheme.bodyLarge!.copyWith(color: sent ? Colors.grey : AppColors.primaryColor,)
+        ),
+      ),
+    );
+  }
+
+  Widget _actionButtons() {
+    final style =  Get.textTheme.labelLarge!.copyWith(color: Colors.white);
+    return Column(
+      children: [
+        OutlinedButton(
+          onPressed: () {},
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(40), // ↓ height
+            side: const BorderSide(color: Colors.green),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            'Invite Player',
+            style: Get.textTheme.labelLarge!.copyWith(color: AppColors.secondaryColor),
+          ),
+        ),
+        const SizedBox(height: 4),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(40),
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child:  Text('Invite Player through whatsapp',style: style,),
+        ),
+        const SizedBox(height: 4),
+        ElevatedButton(
+          onPressed: () {
+            Get.toNamed(
+              RoutesName.addPlayer,
+              arguments: {
+                "team": "teamA",
+                "matchId": matchId,
+                "needOpenMatches": true,
+                "matchLevel": "",
+                "isLoginUser": false,
+                "isMatchCreator": true,
+              },
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(40),
+            backgroundColor: const Color(0xff2D3EBE),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text('Add Guest  →',style: style,),
+        ),
+      ],
+    );
+  }
 }

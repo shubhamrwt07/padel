@@ -2,6 +2,9 @@ import 'dart:developer';
 import 'package:padel_mobile/data/request_models/home_models/get_club_name_model.dart';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:padel_mobile/presentations/booking/home_content/home_content_controller.dart';
+import 'package:padel_mobile/presentations/booking/book_session/book_session_controller.dart';
+import 'package:padel_mobile/presentations/booking/americano/americano_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
@@ -26,8 +29,13 @@ class BookingController extends GetxController with GetSingleTickerProviderState
       initialIndex: 1,
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((callback) {
-      courtsData.value = Get.arguments["data"];
+    _loadBookingData();
+  }
+
+  void _loadBookingData() {
+    final args = Get.arguments;
+    if (args != null && args["data"] != null) {
+      courtsData.value = args["data"];
       detailsController.localMatchData.update(
         "address",
             (v) => "${courtsData.value.city},${courtsData.value.address}",
@@ -35,7 +43,27 @@ class BookingController extends GetxController with GetSingleTickerProviderState
 
       log("Data Fetch Successfully -> ${courtsData.value}");
       profileController.fetchUserProfile();
-    });
+      _refreshChildControllers();
+    }
+  }
+
+  void _refreshChildControllers() {
+    try {
+      if (Get.isRegistered<HomeContentController>()) {
+        Get.delete<HomeContentController>();
+      }
+      if (Get.isRegistered<BookSessionController>()) {
+        Get.delete<BookSessionController>();
+      }
+      if (Get.isRegistered<OpenMatchesController>()) {
+        Get.delete<OpenMatchesController>();
+      }
+      if (Get.isRegistered<AmericanoController>()) {
+        Get.delete<AmericanoController>();
+      }
+    } catch (e) {
+      log("Error refreshing child controllers: $e");
+    }
   }
 
   // /// Optional helper methods to modify cart count

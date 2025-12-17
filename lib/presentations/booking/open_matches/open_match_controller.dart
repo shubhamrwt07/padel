@@ -21,6 +21,10 @@ class OpenMatchesController extends GetxController {
   RxBool isLoadingRequests = false.obs;
   RxString acceptingRequestId = ''.obs;
   RxString rejectingRequestId = ''.obs;
+  
+  // Nearby players
+  RxList<Map<String, dynamic>> nearbyPlayers = <Map<String, dynamic>>[].obs;
+  RxBool isLoadingNearbyPlayers = false.obs;
 
   final List<String> timeSlots = [
     "6:00 am",
@@ -135,7 +139,7 @@ class OpenMatchesController extends GetxController {
   List<String> get filteredUnavailableSlots {
     return filterSlotsByPeriod(unavailableSlots);
   }
-
+  final OpenMatchRepository repository = Get.put(OpenMatchRepository());
   /// Function to create match
   Future<void> createOpenMatch() async {
     try {
@@ -154,8 +158,7 @@ class OpenMatchesController extends GetxController {
         "slots": selectedSlots,
       };
 
-      final repo = OpenMatchRepository();
-      final response = await repo.createMatch(data: data);
+      final response = await repository.createMatch(data: data);
 
       createdMatch.value = response;
 
@@ -180,13 +183,13 @@ class OpenMatchesController extends GetxController {
       }
       final formattedDate = DateFormat("yyyy-MM-dd").format(selectedDate.value);
 
-      final formattedTime = _formatTimeForApi(selectedTime!);
+      // final formattedTime = _formatTimeForApi(selectedTime!);
 
-      final repo = OpenMatchRepository();
-      final response = await repo.getMatchesByDateTime(
+      final response = await repository.getMatchesByDateTime(
         matchDate: formattedDate,
         matchTime: '',
         cubId: argument.id ?? "",
+        search: selectedGameLevel.value == 'Game Level' ? '' : selectedGameLevel.value,
       );
       matchesBySelection.value = response;
     } catch (e) {
@@ -281,8 +284,7 @@ class OpenMatchesController extends GetxController {
       isLoadingRequests.value = true;
       joinRequests.clear();
       
-      final repo = OpenMatchRepository();
-      final response = await repo.getRequestPlayersOpenMatch(matchId: matchId);
+      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId);
       
       if (response != null && response.requests != null) {
         joinRequests.value = response.requests!.map((request) => {
@@ -309,8 +311,7 @@ class OpenMatchesController extends GetxController {
         "requestId": requestId,
         "action": "accept"
       };
-      final repo = OpenMatchRepository();
-      await repo.acceptOrRejectRequestPlayer(body: body);
+      await repository.acceptOrRejectRequestPlayer(body: body);
       
       // Remove from requests list
       joinRequests.removeWhere((request) => request['id'] == requestId);
@@ -335,8 +336,7 @@ class OpenMatchesController extends GetxController {
         "action": "reject"
       };
       
-      final repo = OpenMatchRepository();
-      await repo.acceptOrRejectRequestPlayer(body: body);
+      await repository.acceptOrRejectRequestPlayer(body: body);
       
       // Remove from requests list
       joinRequests.removeWhere((request) => request['id'] == requestId);
@@ -345,6 +345,29 @@ class OpenMatchesController extends GetxController {
       CustomLogger.logMessage(msg: "Error rejecting request: $e", level: LogLevel.error);
     } finally {
       rejectingRequestId.value = '';
+    }
+  }
+  /// Find Near By Players Api--------------------------------------------------
+  Future<void> fetchNearByPlayers() async {
+    try {
+      isLoadingNearbyPlayers.value = true;
+      nearbyPlayers.clear();
+      
+      final response = await repository.findNearByPlayer();
+      if(response.status == 200 && response.players != null){
+        nearbyPlayers.value = response.players!.map((player) => {
+          'id': player.id ?? '',
+          'name': player.name ?? '',
+          // 'lastName': player.lastName ?? '',
+          'profilePic': player.profilePic ?? '',
+          'city': player.city ?? '',
+          'level': player.level ?? '',
+        }).toList();
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error fetching nearby players: $e", level: LogLevel.error);
+    } finally {
+      isLoadingNearbyPlayers.value = false;
     }
   }
 }

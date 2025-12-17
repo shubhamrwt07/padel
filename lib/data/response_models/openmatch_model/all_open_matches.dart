@@ -45,6 +45,7 @@ class MatchData {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  int? pendingRequestsCount;
 
   MatchData({
     this.sId,
@@ -67,6 +68,7 @@ class MatchData {
     this.createdAt,
     this.updatedAt,
     this.iV,
+    this.pendingRequestsCount
   });
 
   static String? _asJoinedString(dynamic value) {
@@ -120,6 +122,7 @@ class MatchData {
     createdAt = _asJoinedString(json['createdAt']);
     updatedAt = _asJoinedString(json['updatedAt']);
     iV = json['__v'];
+    pendingRequestsCount = json['pendingRequestsCount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -152,6 +155,7 @@ class MatchData {
     map['createdAt'] = createdAt;
     map['updatedAt'] = updatedAt;
     map['__v'] = iV;
+    map['pendingRequestsCount'] = pendingRequestsCount;
     return map;
   }
 }

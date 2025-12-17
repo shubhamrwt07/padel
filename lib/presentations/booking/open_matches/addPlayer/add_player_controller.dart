@@ -217,14 +217,21 @@ class AddPlayerController extends GetxController {
   }
 
   ///Request Player For Open Match Api-----------------------------------------------
-  Future<bool> requestPlayerForOpenMatch() async {
+  Future<bool> requestPlayerForOpenMatch({String? type}) async {
     try {
       final body = {
         "matchId": matchId.value,
         "preferredTeam": selectedTeam.value,
-        "level": playerLevel.value,
-        "requesterId": playerId.value
       };
+      
+      if (type != null) {
+        body["type"] = type;
+        body["playerId"] = playerId.value;
+      } else {
+        body["level"] = playerLevel.value;
+        body["requesterId"] = playerId.value;
+      }
+      
       final response = await repository.requestPlayerForOpenMatch(body: body);
 
       if (response != null) {
@@ -347,38 +354,40 @@ class AddPlayerController extends GetxController {
   void onInit() {
     final args = Get.arguments;
 
-    matchId.value = args["matchId"] ?? "";
-    selectedTeam.value = args["team"] ?? "";
-    scoreboardId.value = args["scoreBoardId"] ?? "";
-    matchLevel.value = args["matchLevel"] ?? "";
-    isMatchCreator.value = args["isMatchCreator"] ?? false;
+    if (args != null) {
+      matchId.value = args["matchId"] ?? "";
+      selectedTeam.value = args["team"] ?? "";
+      scoreboardId.value = args["scoreBoardId"] ?? "";
+      matchLevel.value = args["matchLevel"] ?? "";
+      isMatchCreator.value = args["isMatchCreator"] ?? false;
 
-    if (args["needAllOpenMatches"] == true &&
-        Get.isRegistered<AllOpenMatchController>()) {
-      allOpenMatchController = Get.find<AllOpenMatchController>();
-    }
-    if (args["needBottomAllOpenMatches"] == true &&
-        Get.isRegistered<OpenMatchBookingController>()) {
-      openMatchBookingController = Get.find<OpenMatchBookingController>();
-    }
+      if (args["needAllOpenMatches"] == true &&
+          Get.isRegistered<AllOpenMatchController>()) {
+        allOpenMatchController = Get.find<AllOpenMatchController>();
+      }
+      if (args["needBottomAllOpenMatches"] == true &&
+          Get.isRegistered<OpenMatchBookingController>()) {
+        openMatchBookingController = Get.find<OpenMatchBookingController>();
+      }
 
-    if (args["needOpenMatches"] == true &&
-        Get.isRegistered<OpenMatchesController>()) {
-      openMatchesController = Get.find<OpenMatchesController>();
-    }
+      if (args["needOpenMatches"] == true &&
+          Get.isRegistered<OpenMatchesController>()) {
+        openMatchesController = Get.find<OpenMatchesController>();
+      }
 
-    if (args["needAsGuest"] == true &&
-        Get.isRegistered<ScoreBoardController>()) {
-      scoreBoardController = Get.find<ScoreBoardController>();
-    }
+      if (args["needAsGuest"] == true &&
+          Get.isRegistered<ScoreBoardController>()) {
+        scoreBoardController = Get.find<ScoreBoardController>();
+      }
 
-    // Check if login user wants to add themselves
-    final userId = storage.read('userId');
-    if (args["isLoginUser"] == true && userId != null) {
-      preloadLoginUserData();
-    }
+      // Check if login user wants to add themselves
+      final userId = storage.read('userId');
+      if (args["isLoginUser"] == true && userId != null) {
+        preloadLoginUserData();
+      }
 
-    fetchPlayerLevels();
+      fetchPlayerLevels();
+    }
     super.onInit();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject_request_players_model.dart';
 import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
 import 'package:padel_mobile/data/response_models/get_players_level_model.dart';
+import 'package:padel_mobile/data/response_models/openmatch_model/find_near_by_player_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
@@ -88,14 +89,15 @@ class OpenMatchRepository {
   Future<AllOpenMatches> getMatchesByDateTime({
     required String matchDate,
     String? matchTime,
-    required String cubId
+    required String cubId,
+    String? search
   }) async {
     try {
       // Encode matchTime properly (space → %20)
       final encodedTime = Uri.encodeComponent(matchTime!);
 
       final url =
-          "${AppEndpoints.getOpenMatches}?clubId=$cubId&matchDate=$matchDate&matchTime=$encodedTime";
+          "${AppEndpoints.getOpenMatches}?clubId=$cubId&matchDate=$matchDate&matchTime=$encodedTime&search=$search";
 
       final response = await dioClient.get(url);
 
@@ -103,6 +105,22 @@ class OpenMatchRepository {
         return AllOpenMatches.fromJson(response.data);
       } else {
         throw Exception("Failed to fetch matches. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+  Future<FindNearByPlayerModel> findNearByPlayer() async {
+    try {
+      final response = await dioClient.get(AppEndpoints.findNearByPlayer);
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Find Near By Players fetched successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return FindNearByPlayerModel.fromJson(response.data);
+      } else {
+        throw Exception("Failed to fetch Near By Players Status: ${response.statusCode}");
       }
     } catch (e) {
       rethrow;
