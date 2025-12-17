@@ -5,7 +5,7 @@ import '../cart/cart_controller.dart';
 class BookingBinding implements Bindings{
   @override
   void dependencies() {
-   Get.put(BookingController());
+   Get.lazyPut(() => BookingController(), fenix: true);
    Get.lazyPut(() => CartController());
 
   }

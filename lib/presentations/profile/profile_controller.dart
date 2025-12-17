@@ -77,8 +77,8 @@ var profileModel = Rxn<ProfileModel>();
                       // Disconnect details controller socket if exists
                       if (Get.isRegistered<DetailsController>()) {
                         log("🔍 LOGOUT: DetailsController found, disconnecting socket");
-                        final detailsCtrl = Get.find<DetailsController>();
-                        detailsCtrl.disconnectSocket();
+                        // final detailsCtrl = Get.find<DetailsController>();
+                        // detailsCtrl.disconnectSocket();
                         log("✅ LOGOUT: Details socket disconnected");
                       }
                       

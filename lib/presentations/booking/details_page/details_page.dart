@@ -55,15 +55,6 @@ class DetailsScreen extends StatelessWidget {
         player['userId'] == loggedInUserId);
 
     if (isUserInTeamA || isUserInTeamB) {
-      // Check socket connection status
-      if (!controller.isSocketConnected.value) {
-        SnackBarUtils.showWarningSnackBar("Connecting to chat...");
-        // Try to reconnect
-        controller.connectSocketIfEligible();
-        return;
-      }
-      // Mark all messages as read when chat button is clicked
-      controller.markAllMessagesAsReadFromDetails();
       Get.toNamed(RoutesName.chat, arguments: {"matchID": matchID});
     } else {
       SnackBarUtils.showErrorSnackBar("Only match players can access the chat");
@@ -235,53 +226,24 @@ class DetailsScreen extends StatelessWidget {
               _shouldShowChatButton() && fromOpenMatch && !isCompleted ?
               Align(
                 alignment: AlignmentGeometry.center,
-                child: GestureDetector(
-                  onTap: () => _handleChatAccess(matchID),
-                  child: Obx(() => Stack(
-                    children: [
-                      Container(
-                        height: 30,
-                        width: 70,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(15)
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.chat_outlined,color: Colors.white,size: 16,).paddingOnly(right: 4),
-                            Text("Chat",style: Get.textTheme.headlineLarge!.copyWith(color: Colors.white,fontSize: 12),)
-                          ],
-                        ),
+                  child: GestureDetector(
+                    onTap: () => _handleChatAccess(matchID),
+                    child: Container(
+                      height: 30,
+                      width: 70,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(15)
                       ),
-                      if (controller.unreadCount.value > 0)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            constraints: BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              controller.unreadCount.value > 99 ? '99+' : controller.unreadCount.value.toString(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  )),
-                ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.chat_outlined,color: Colors.white,size: 16,).paddingOnly(right: 4),
+                          Text("Chat",style: Get.textTheme.headlineLarge!.copyWith(color: Colors.white,fontSize: 12),)
+                        ],
+                      ),
+                    ),
+                  ),
               ).paddingOnly(top: Get.height*0.01,bottom: Get.height*0.01) : SizedBox.shrink(),
 
               // club info card

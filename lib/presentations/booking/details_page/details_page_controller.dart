@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
-import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:padel_mobile/data/response_models/detail_page/details_model.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
@@ -11,7 +10,6 @@ import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:get_storage/get_storage.dart';
 import '../../../configs/app_colors.dart';
 import '../../../configs/components/loader_widgets.dart';
@@ -32,10 +30,6 @@ class DetailsController extends GetxController {
   CartController get cartController => Get.find<CartController>();
   final storage = GetStorage();
   
-  // Socket connection variables
-  IO.Socket? socket;
-  final RxBool isSocketConnected = false.obs;
-  final RxInt unreadCount = 0.obs;
   String get userId {
     final id = storage.read("userId")?.toString() ?? '';
     CustomLogger.logMessage(
@@ -973,231 +967,6 @@ class DetailsController extends GetxController {
     );
   }
 
-  /// Disconnect socket when user logs out or changes
-  void disconnectSocket() {
-    CustomLogger.logMessage(
-      msg: '🔌 DETAILS: disconnectSocket() called',
-      level: LogLevel.info,
-    );
-    try {
-      if (socket?.connected == true) {
-        CustomLogger.logMessage(
-          msg: '🔌 DETAILS: Socket is connected, leaving matches and disconnecting...',
-          level: LogLevel.info,
-        );
-        
-        // Leave current match before disconnecting
-        final args = Get.arguments;
-        if (args is Map && args['matchId'] != null) {
-          final matchId = args['matchId'].toString();
-          socket!.emit('leaveMatch', matchId);
-          CustomLogger.logMessage(
-            msg: '📝 DETAILS: Left match $matchId',
-            level: LogLevel.info,
-          );
-        }
-        
-        socket!.disconnect();
-        CustomLogger.logMessage(
-          msg: '✅ DETAILS: Socket disconnected successfully',
-          level: LogLevel.info,
-        );
-      } else {
-        CustomLogger.logMessage(
-          msg: 'ℹ️ DETAILS: Socket was not connected or null',
-          level: LogLevel.info,
-        );
-      }
-    } catch (e) {
-      CustomLogger.logMessage(
-        msg: '❌ DETAILS: Error during socket disconnect: $e',
-        level: LogLevel.error,
-      );
-    } finally {
-      socket = null;
-      isSocketConnected.value = false;
-      unreadCount.value = 0;
-      CustomLogger.logMessage(
-        msg: '🔴 DETAILS: Socket variables reset',
-        level: LogLevel.info,
-      );
-    }
-  }
-
-  /// Mark messages as read from details page
-  void markAllMessagesAsReadFromDetails() {
-    final args = Get.arguments;
-    if (args is Map && args['matchId'] != null) {
-      final matchId = args['matchId'].toString();
-      
-      if (socket != null && socket!.connected) {
-        socket!.emit('markMessageRead', {'matchId': matchId});
-        CustomLogger.logMessage(
-          msg: '📖 Marking messages as read from details page for match: $matchId',
-          level: LogLevel.info,
-        );
-        
-        // Reset unread count immediately for better UX
-        unreadCount.value = 0;
-      } else {
-        CustomLogger.logMessage(
-          msg: '⚠️ Cannot mark messages as read - socket not connected',
-          level: LogLevel.warning,
-        );
-      }
-    }
-  }
-
-  /// Connect socket if user is part of the match and fromOpenMatch is true
-  void connectSocketIfEligible() {
-    // Only connect socket if coming from open match
-    if (!isFromOpenMatch) return;
-    
-    final args = Get.arguments;
-    if (args == null || args is! Map) return;
-    
-    final matchId = args['matchId']?.toString();
-    if (matchId == null || matchId.isEmpty) return;
-    
-    final loggedInUserId = profileController.profileModel.value?.response?.sId;
-    if (loggedInUserId == null || loggedInUserId.isEmpty) return;
-
-    // Check if user is in either team
-    bool isUserInTeamA = teamA.any((player) => player['userId'] == loggedInUserId);
-    bool isUserInTeamB = teamB.any((player) => player['userId'] == loggedInUserId);
-
-    if (isUserInTeamA || isUserInTeamB) {
-      _connectSocket(matchId);
-    }
-  }
-
-  /// Connect to socket for match chat
-  void _connectSocket(String matchId) {
-    try {
-      // Disconnect existing socket if it exists
-      if (socket != null) {
-        CustomLogger.logMessage(
-          msg: '🔌 DETAILS: Disconnecting existing socket before creating new one',
-          level: LogLevel.info,
-        );
-        socket!.disconnect();
-        socket = null;
-      }
-      
-      final currentUserId = userId; // Get fresh userId
-      CustomLogger.logMessage(
-        msg: '🔌 DETAILS: Creating new socket connection for user: $currentUserId',
-        level: LogLevel.info,
-      );
-      
-      socket = IO.io(
-        AppEndpoints.socketUrl,
-        IO.OptionBuilder()
-            .setTransports(['websocket'])
-            .disableAutoConnect()
-            .enableForceNew()
-            .setAuth({'userId': currentUserId})
-            .build(),
-      );
-
-      socket!.connect();
-
-      socket!.on('connect', (_) {
-        CustomLogger.logMessage(
-          msg: '✅ Socket connected in detail page for match: $matchId with userId: $currentUserId',
-          level: LogLevel.info,
-        );
-        isSocketConnected.value = true;
-        socket!.emit('joinMatch', matchId);
-        socket!.emit('getUnreadCount', {'matchId': matchId});
-      });
-
-      socket!.on('unreadCount', (data) {
-        final count = data['count'] ?? 0;
-        CustomLogger.logMessage(
-          msg: '💡 🔔 Received unreadCount in details: $count for match: $matchId',
-          level: LogLevel.info,
-        );
-        unreadCount.value = count;
-      });
-
-      socket!.on('disconnect', (reason) {
-        CustomLogger.logMessage(
-          msg: '❌ Socket disconnected in detail page: $reason',
-          level: LogLevel.error,
-        );
-        isSocketConnected.value = false;
-      });
-
-      socket!.on('connect_error', (error) {
-        CustomLogger.logMessage(
-          msg: '🔥 Socket connection error in detail page: $error',
-          level: LogLevel.error,
-        );
-        isSocketConnected.value = false;
-      });
-
-      socket!.on('newMessage', (data) {
-        final senderId = data['senderId']?.toString() ?? '';
-        final messageMatchId = data['matchId']?.toString() ?? '';
-        final args = Get.arguments;
-        
-        // Only increment if message is for this match and not from current user
-        if (args is Map && 
-            messageMatchId == args['matchId']?.toString() && 
-            senderId != userId) {
-          unreadCount.value = unreadCount.value + 1;
-          CustomLogger.logMessage(
-            msg: '📨 New message received, incrementing unread count to ${unreadCount.value}',
-            level: LogLevel.info,
-          );
-        }
-      });
-
-      // Listen for message read updates to reset unread count
-      socket!.on('messageReadUpdate', (data) {
-        // Check if the read update is for our user
-        final readBy = data['readBy'] as List?;
-        if (readBy != null && readBy.contains(userId)) {
-          unreadCount.value = 0;
-        }
-      });
-
-      // Listen for all messages marked as read
-      socket!.on('allMessagesRead', (data) {
-        final matchIdFromEvent = data['matchId']?.toString();
-        final userIdFromEvent = data['userId']?.toString();
-        final args = Get.arguments;
-        if (args is Map && 
-            matchIdFromEvent == args['matchId']?.toString() && 
-            userIdFromEvent == userId) {
-          CustomLogger.logMessage(
-            msg: '📖 All messages marked as read, resetting unread count',
-            level: LogLevel.info,
-          );
-          unreadCount.value = 0;
-        }
-      });
-
-      // Listen for markMessageRead acknowledgment
-      socket!.on('messageReadAck', (data) {
-        final matchIdFromEvent = data['matchId']?.toString();
-        final args = Get.arguments;
-        if (args is Map && matchIdFromEvent == args['matchId']?.toString()) {
-          CustomLogger.logMessage(
-            msg: '✅ Message read acknowledgment received, resetting unread count',
-            level: LogLevel.info,
-          );
-          unreadCount.value = 0;
-        }
-      });
-    } catch (e) {
-      CustomLogger.logMessage(
-        msg: '❌ Error connecting socket in detail page: $e',
-        level: LogLevel.error,
-      );
-    }
-  }
 
 
 
@@ -1263,38 +1032,16 @@ class DetailsController extends GetxController {
       teamA.first.addAll(profileData);
     }
 
-    // Connect socket after initialization
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      connectSocketIfEligible();
-    });
-
     super.onInit();
   }
 
-
-  /// Mark all messages as read for this match
-  void markAllMessagesAsRead() {
-    final args = Get.arguments;
-    if (args is Map && socket?.connected == true) {
-      final matchId = args['matchId']?.toString();
-      if (matchId != null) {
-        socket!.emit('markMessageRead', {'matchId': matchId});
-        // Don't reset count immediately - wait for backend confirmation
-      }
-    }
-  }
-
-
-
-  /// Handle back navigation - disconnect socket
+  /// Handle back navigation
   void handleBackNavigation() {
-    disconnectSocket();
+    // Navigation handled by UI
   }
 
   @override
   void onClose() {
-    // Disconnect socket when leaving detail page
-    disconnectSocket();
     // Dispose payment service
     _paymentService.dispose();
     super.onClose();

@@ -1,14 +1,15 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/core/endpoitns.dart';
 import 'package:padel_mobile/presentations/booking/details_page/details_page_controller.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:get_storage/get_storage.dart';
 
 class ChatController extends GetxController {
   static IO.Socket? _sharedSocket;
   IO.Socket get socket => _sharedSocket!;
+  final storage = GetStorage();
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
@@ -64,27 +65,43 @@ class ChatController extends GetxController {
   /// Get formatted player names with "You" always first, then other players
   List<String> get formattedPlayersForTitle {
     final result = <String>['You'];
+    final currentUserId = userId;
     
     // Always prioritize all match players if available
     if (allMatchPlayers.isNotEmpty) {
+      CustomLogger.logMessage(
+        msg: '👥 formattedPlayersForTitle: allMatchPlayers has ${allMatchPlayers.length} players, current userId: $currentUserId',
+        level: LogLevel.debug,
+      );
+      
       final otherPlayers = allMatchPlayers
           .where((player) {
             final playerId = player['userId']?.toString() ?? player['_id']?.toString() ?? '';
-            return playerId != userId; // Exclude logged-in user
+            final isNotCurrentUser = playerId != currentUserId && playerId.isNotEmpty;
+            CustomLogger.logMessage(
+              msg: '👥 Checking player: id=$playerId, name=${player['name']}, isNotCurrentUser=$isNotCurrentUser',
+              level: LogLevel.debug,
+            );
+            return isNotCurrentUser;
           })
           .map((player) {
             final firstName = player['name']?.toString() ?? '';
             final lastName = player['lastName']?.toString() ?? '';
             final fullName = '$firstName $lastName'.trim();
-            return _toTitleCase(fullName);
+            final formatted = _toTitleCase(fullName);
+            CustomLogger.logMessage(
+              msg: '👥 Formatted name: "$fullName" -> "$formatted"',
+              level: LogLevel.debug,
+            );
+            return formatted;
           })
           .where((name) => name.isNotEmpty)
           .toList();
       
       result.addAll(otherPlayers);
       CustomLogger.logMessage(
-        msg: '👥 Using ${otherPlayers.length} other players for title: $otherPlayers',
-        level: LogLevel.debug,
+        msg: '👥 Using ${otherPlayers.length} other players for title: $otherPlayers (Total: ${result.length})',
+        level: LogLevel.info,
       );
     } else {
       // Fallback: add other players after "You"
@@ -93,8 +110,8 @@ class ChatController extends GetxController {
           : playersFromMessages;
       result.addAll(players.take(3));
       CustomLogger.logMessage(
-        msg: '👥 Using fallback players for title: $result',
-        level: LogLevel.debug,
+        msg: '👥 Using fallback players for title (allMatchPlayers is empty): $result',
+        level: LogLevel.info,
       );
     }
     
@@ -279,6 +296,9 @@ class ChatController extends GetxController {
     if (createdAt != null) {
       matchCreatedAt.value = _parseDateTime(createdAt) ?? DateTime.now();
     }
+    
+    // Try to load players from arguments first (if passed from open matches screen)
+    _loadPlayersFromArguments();
     
     // Get all match players from DetailsController
     _loadAllMatchPlayers();
@@ -576,8 +596,91 @@ class ChatController extends GetxController {
     );
   }
 
+  /// Load players from navigation arguments (if passed from open matches screen)
+  void _loadPlayersFromArguments() {
+    try {
+      final args = Get.arguments;
+      if (args is Map && (args['teamA'] != null || args['teamB'] != null)) {
+        final allPlayers = <Map<String, dynamic>>[];
+        
+        // Load teamA players from arguments
+        if (args['teamA'] is List) {
+          final teamA = args['teamA'] as List;
+          for (final player in teamA) {
+            if (player is Map) {
+              final playerMap = Map<String, dynamic>.from(player);
+              final userId = playerMap['userId']?.toString() ?? '';
+              final name = playerMap['name']?.toString() ?? '';
+              final lastName = playerMap['lastName']?.toString() ?? '';
+              
+              // Only add if we have at least userId or name
+              if (userId.isNotEmpty || name.isNotEmpty) {
+                allPlayers.add({
+                  '_id': userId,
+                  'userId': userId,
+                  'name': name,
+                  'lastName': lastName,
+                });
+              }
+            }
+          }
+        }
+        
+        // Load teamB players from arguments
+        if (args['teamB'] is List) {
+          final teamB = args['teamB'] as List;
+          for (final player in teamB) {
+            if (player is Map) {
+              final playerMap = Map<String, dynamic>.from(player);
+              final userId = playerMap['userId']?.toString() ?? '';
+              final name = playerMap['name']?.toString() ?? '';
+              final lastName = playerMap['lastName']?.toString() ?? '';
+              
+              // Only add if we have at least userId or name
+              if (userId.isNotEmpty || name.isNotEmpty) {
+                allPlayers.add({
+                  '_id': userId,
+                  'userId': userId,
+                  'name': name,
+                  'lastName': lastName,
+                });
+              }
+            }
+          }
+        }
+        
+        if (allPlayers.isNotEmpty) {
+          allMatchPlayers.assignAll(allPlayers);
+          CustomLogger.logMessage(
+            msg: '📥 Loaded ${allPlayers.length} players from arguments: ${allPlayers.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
+            level: LogLevel.info,
+          );
+        } else {
+          CustomLogger.logMessage(
+            msg: '⚠️ No valid players found in arguments',
+            level: LogLevel.warning,
+          );
+        }
+      }
+    } catch (e) {
+      CustomLogger.logMessage(
+        msg: '❌ Error loading players from arguments: $e',
+        level: LogLevel.error,
+      );
+    }
+  }
+
   /// Load all match players from DetailsController
   void _loadAllMatchPlayers() {
+    // Only load from DetailsController if we don't already have players
+    if (allMatchPlayers.isNotEmpty) {
+      CustomLogger.logMessage(
+        msg: '✅ Players already loaded, skipping DetailsController load',
+        level: LogLevel.debug,
+      );
+      return;
+    }
+    
     try {
       // Try to get DetailsController if it exists
       if (Get.isRegistered<DetailsController>()) {
@@ -612,14 +715,16 @@ class ChatController extends GetxController {
           }
         }
         
-        allMatchPlayers.assignAll(allPlayers);
-        CustomLogger.logMessage(
-          msg: '📥 Loaded ${allPlayers.length} players from DetailsController: ${allPlayers.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
-          level: LogLevel.info,
-        );
+        if (allPlayers.isNotEmpty) {
+          allMatchPlayers.assignAll(allPlayers);
+          CustomLogger.logMessage(
+            msg: '📥 Loaded ${allPlayers.length} players from DetailsController: ${allPlayers.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
+            level: LogLevel.info,
+          );
+        }
       } else {
         CustomLogger.logMessage(
-          msg: '⚠️ DetailsController not found, will try to get players from backend',
+          msg: '⚠️ DetailsController not found, will try to get players from backend or messages',
           level: LogLevel.warning,
         );
       }
@@ -718,6 +823,8 @@ class ChatController extends GetxController {
           'team': _normalizeTeam(map['senderTeam'] ?? map['team'] ?? ''),
           // Prefer explicit senderName, then build from senderId object, then fallback
           'sender': _toTitleCase(rawSenderName),
+          // Preserve senderId for player extraction
+          'senderId': senderId,
           // Backend example uses `createdAt` – format to time-only
           'timestamp': _formatTimestamp(rawTimestamp),
           'dateTime': dateTime,
@@ -740,17 +847,28 @@ class ChatController extends GetxController {
       if (allMatchPlayers.isEmpty && messages.isNotEmpty) {
         final uniquePlayerIds = <String>{};
         final playersFromMsgs = <Map<String, dynamic>>[];
+        final currentUserId = userId;
         
         for (final message in messages) {
-          final senderId = message['senderId']?.toString();
-          final senderName = message['sender']?.toString();
+          final senderId = message['senderId']?.toString() ?? message['userId']?.toString();
+          final senderName = message['sender']?.toString() ?? '';
           
-          if (senderId != null && senderId.isNotEmpty && !uniquePlayerIds.contains(senderId)) {
-            uniquePlayerIds.add(senderId);
+          // Skip if no senderId, if it's the current user, or if we already added this player
+          if (senderId == null || senderId.isEmpty || senderId == currentUserId || uniquePlayerIds.contains(senderId)) {
+            continue;
+          }
+          
+          uniquePlayerIds.add(senderId);
+          final nameParts = senderName.trim().split(' ');
+          final firstName = nameParts.isNotEmpty ? nameParts.first : 'Player';
+          final lastName = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
+          
+          if (firstName.isNotEmpty && firstName != 'Player') {
             playersFromMsgs.add({
               '_id': senderId,
-              'name': senderName?.split(' ').first ?? 'Player',
-              'lastName': senderName?.split(' ').skip(1).join(' ') ?? '',
+              'userId': senderId,
+              'name': firstName,
+              'lastName': lastName,
             });
           }
         }
@@ -758,8 +876,13 @@ class ChatController extends GetxController {
         if (playersFromMsgs.isNotEmpty) {
           allMatchPlayers.assignAll(playersFromMsgs);
           CustomLogger.logMessage(
-            msg: '📥 Extracted ${playersFromMsgs.length} players from messages',
+            msg: '📥 Extracted ${playersFromMsgs.length} players from messages: ${playersFromMsgs.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
             level: LogLevel.info,
+          );
+        } else {
+          CustomLogger.logMessage(
+            msg: '⚠️ No players extracted from messages. Total messages: ${messages.length}, Current userId: $currentUserId',
+            level: LogLevel.warning,
           );
         }
       }
@@ -857,6 +980,28 @@ class ChatController extends GetxController {
         connectedPlayers.add(senderName);
       }
       
+      // Also add to allMatchPlayers if not already present
+      final existingPlayerIndex = allMatchPlayers.indexWhere((p) => 
+        (p['userId']?.toString() ?? p['_id']?.toString()) == senderId
+      );
+      
+      if (existingPlayerIndex == -1 && senderId.isNotEmpty && senderId != userId) {
+        final nameParts = senderName.split(' ');
+        final firstName = nameParts.isNotEmpty ? nameParts.first : 'Player';
+        final lastName = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
+        
+        allMatchPlayers.add({
+          '_id': senderId,
+          'userId': senderId,
+          'name': firstName,
+          'lastName': lastName,
+        });
+        CustomLogger.logMessage(
+          msg: '📥 Added new player to allMatchPlayers from message: $firstName $lastName',
+          level: LogLevel.info,
+        );
+      }
+      
       // Mark new message as read since chat is open
       Future.delayed(const Duration(milliseconds: 500), () {
         if (isChatScreenActive.value) {
@@ -926,6 +1071,11 @@ class ChatController extends GetxController {
           playersList = data['data'] as List;
         } else if (data['users'] is List) {
           playersList = data['users'] as List;
+        } else if (data['teamA'] is List || data['teamB'] is List) {
+          // Handle team-based structure
+          final teamA = (data['teamA'] as List?) ?? [];
+          final teamB = (data['teamB'] as List?) ?? [];
+          playersList = [...teamA, ...teamB];
         }
       } else if (data is List) {
         playersList = data;
@@ -939,13 +1089,56 @@ class ChatController extends GetxController {
         return;
       }
       
-      final players = playersList.map((p) => Map<String, dynamic>.from(p as Map)).toList();
-      allMatchPlayers.assignAll(players);
+      final players = playersList.map((p) {
+        final playerMap = Map<String, dynamic>.from(p as Map);
+        
+        // Handle different possible structures
+        // Structure 1: Direct fields
+        if (playerMap.containsKey('name')) {
+          return {
+            '_id': playerMap['_id'] ?? playerMap['userId'] ?? playerMap['sId'] ?? '',
+            'userId': playerMap['userId'] ?? playerMap['_id'] ?? playerMap['sId'] ?? '',
+            'name': playerMap['name'] ?? '',
+            'lastName': playerMap['lastName'] ?? '',
+          };
+        }
+        
+        // Structure 2: Nested userId object
+        if (playerMap.containsKey('userId') && playerMap['userId'] is Map) {
+          final userIdObj = playerMap['userId'] as Map;
+          return {
+            '_id': userIdObj['_id'] ?? userIdObj['sId'] ?? playerMap['_id'] ?? '',
+            'userId': userIdObj['_id'] ?? userIdObj['sId'] ?? playerMap['_id'] ?? '',
+            'name': userIdObj['name'] ?? '',
+            'lastName': userIdObj['lastName'] ?? '',
+          };
+        }
+        
+        // Fallback
+        return {
+          '_id': playerMap['_id'] ?? playerMap['userId'] ?? playerMap['sId'] ?? '',
+          'userId': playerMap['userId'] ?? playerMap['_id'] ?? playerMap['sId'] ?? '',
+          'name': playerMap['name'] ?? '',
+          'lastName': playerMap['lastName'] ?? '',
+        };
+      }).where((p) => 
+        p['_id'] != null && p['_id'].toString().isNotEmpty &&
+        (p['name'] != null && p['name'].toString().isNotEmpty || 
+         p['lastName'] != null && p['lastName'].toString().isNotEmpty)
+      ).toList();
       
-      CustomLogger.logMessage(
-        msg: '✅ Updated allMatchPlayers: ${allMatchPlayers.length} players - ${players.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
-        level: LogLevel.info,
-      );
+      if (players.isNotEmpty) {
+        allMatchPlayers.assignAll(players);
+        CustomLogger.logMessage(
+          msg: '✅ Updated allMatchPlayers: ${allMatchPlayers.length} players - ${players.map((p) => '${p['name']} ${p['lastName']}').join(', ')}',
+          level: LogLevel.info,
+        );
+      } else {
+        CustomLogger.logMessage(
+          msg: '⚠️ No valid players parsed from response',
+          level: LogLevel.warning,
+        );
+      }
     } catch (e) {
       CustomLogger.logMessage(
         msg: '❌ Error parsing match players: $e',
@@ -960,11 +1153,29 @@ class ChatController extends GetxController {
       msg: '🚪 Chat screen closed, stopping message read marking',
       level: LogLevel.info,
     );
+    // Leave the match when chat screen closes
+    if (_sharedSocket != null && _sharedSocket!.connected && matchId.value.isNotEmpty) {
+      _sharedSocket!.emit('leaveMatch', matchId.value);
+      CustomLogger.logMessage(
+        msg: '📝 Left match ${matchId.value} when chat screen closed',
+        level: LogLevel.info,
+      );
+    }
   }
 
   @override
   void onClose() {
     isChatScreenActive.value = false;
+    
+    // Leave the match when controller is disposed
+    if (_sharedSocket != null && _sharedSocket!.connected && matchId.value.isNotEmpty) {
+      _sharedSocket!.emit('leaveMatch', matchId.value);
+      CustomLogger.logMessage(
+        msg: '📝 Left match ${matchId.value} when chat controller closed',
+        level: LogLevel.info,
+      );
+    }
+    
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
