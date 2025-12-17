@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 class ArrowAnimation extends StatefulWidget {
   final bool isUpward; // true = upward, false = downward
-
+  final Color? color;
   const ArrowAnimation({
     super.key,
     this.isUpward = true, // default upward
+    this.color
   });
 
   @override
@@ -68,10 +69,10 @@ class _ArrowAnimationState extends State<ArrowAnimation>
             child: Transform.rotate(
               // rotate arrow based on direction
               angle: widget.isUpward ? -math.pi / 2 : math.pi / 2,
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Colors.grey,
+                color:widget.color?? Colors.grey,
               ),
             ),
           ),

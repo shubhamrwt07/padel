@@ -649,7 +649,7 @@ class BookSession extends StatelessWidget {
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    const blueColor = Color(0xff1F41BB);
+    const blueColor = Color(0xff053CFF);
     const radius = 5.0;
 
     return GestureDetector(

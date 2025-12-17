@@ -5,7 +5,9 @@ class CustomButton extends StatelessWidget {
   final double width;
   final double height;
   final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final List<Color>? gradientColors;
+  final Color? circleColor;
 
   static const double _defaultWidth = 250;
   static const double _defaultHeight = 60;
@@ -16,6 +18,8 @@ class CustomButton extends StatelessWidget {
     this.height = _defaultHeight,
     required this.child,
     required this.onTap,
+    this.gradientColors,
+    this.circleColor,
   });
 
   @override
@@ -29,7 +33,10 @@ class CustomButton extends StatelessWidget {
           children: [
             CustomPaint(
               size: Size(width, height),
-              painter: RPSCustomPainter(),
+              painter: RPSCustomPainter(
+                gradientColors: gradientColors,
+                circleColor: circleColor,
+              ),
             ),
             Center(child: child),
           ],
@@ -40,6 +47,11 @@ class CustomButton extends StatelessWidget {
 }
 
 class RPSCustomPainter extends CustomPainter {
+  final List<Color>? gradientColors;
+  final Color? circleColor;
+
+  RPSCustomPainter({this.gradientColors, this.circleColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     Path path_0 = Path();
@@ -148,7 +160,7 @@ class RPSCustomPainter extends CustomPainter {
     paint0Fill.shader = ui.Gradient.linear(
       Offset(0, 0),
       Offset(size.width, 0),
-      [
+      gradientColors ?? [
         Color(0xff3DBE64),
         Color(0xff1F41BB),
         Color(0xff1F41BB),
@@ -159,7 +171,7 @@ class RPSCustomPainter extends CustomPainter {
     canvas.drawPath(path_0, paint0Fill);
 
     Paint paint1Fill = Paint()..style = PaintingStyle.fill;
-    paint1Fill.color = Color(0xff3DBE64).withValues(alpha: 1.0);
+    paint1Fill.color = circleColor ?? Color(0xff3DBE64).withValues(alpha: 1.0);
     canvas.drawCircle(
       Offset(size.width * 0.9251497, size.height * 0.5),
       size.width * 0.06586826,

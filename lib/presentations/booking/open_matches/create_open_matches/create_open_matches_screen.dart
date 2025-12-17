@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/primary_button.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/court_slots_shimmer.dart';
@@ -24,7 +25,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
       backgroundColor: AppColors.whiteColor,
       bottomNavigationBar: _bottomBar(context),
 
-      appBar: primaryAppBar(title: Text("Create match"), centerTitle: true, context: context),
+      appBar: primaryAppBar(title: Text("Create Open matches"), centerTitle: true, context: context),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
@@ -808,96 +809,111 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           ],
         ),
         child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onVerticalDragEnd: hasSelections
-              ? (details) {
-            if ((details.primaryVelocity ?? 0) < -300) {
-              _openSelectedSlotsBottomSheet(context);
-            }
-          }
-              : null,
+          // behavior: HitTestBehavior.opaque,
+          // onVerticalDragEnd: hasSelections
+          //     ? (details) {
+          //   if ((details.primaryVelocity ?? 0) < -300) {
+          //     _openSelectedSlotsBottomSheet(context);
+          //   }
+          // }
+          //     : null,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hasSelections)
-                Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.topCenter,
-                  children: [
-                    GestureDetector(
-                      onTap: ()=>_openSelectedSlotsBottomSheet(context),
-                      child: Row(
-                        children: [
-                          Text(
-                            "$totalSelections slot${totalSelections > 1 ? 's' : ''} selected",
-                            style: Get.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.blackColor,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            "₹ ${controller.totalAmount.value}",
-                            style: Get.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                        ],
-                      ).paddingOnly(left: 18,right: 18,),
-                    ),
-                    Positioned(
-                      top: -24,
-                      child: InkWell(
-                        onTap: () {
-                          if (controller.isBottomSheetOpen.value) {
-                            Get.back();
-                          } else {
-                            _openSelectedSlotsBottomSheet(context);
-                          }
-                        },
-                        customBorder: const CircleBorder(),
-                        child: ClipRect(
-                          child: Align(
-                            alignment: Alignment.topCenter,        // show only top part
-                            heightFactor: 0.7,
-                            child: Container(
-                              height: 55,
-                              width: 55,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withValues(alpha: 0.1),
-                                    blurRadius: 1,
-                                    spreadRadius: -2,
-                                    offset: Offset(0, -5),
-                                  ),
-                                ],
-                              ),
-                              child: Transform.translate(offset: Offset(0, -5),child: ArrowAnimation(isUpward: true,)),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              SizedBox(
-                width: Get.width * 0.9,
-                child: PrimaryButton(
-                  onTap: () {
-                    if (!hasSelections) {
-                      SnackBarUtils.showInfoSnackBar("Please select at least one slot to continue.");
-                      return;
-                    }
-                    controller.onNext();
-                  },
-                  text: "Next",
-                ),
-              ),
+              // if (hasSelections)
+              //   Stack(
+              //     clipBehavior: Clip.none,
+              //     alignment: Alignment.topCenter,
+              //     children: [
+              //       GestureDetector(
+              //         onTap: ()=>_openSelectedSlotsBottomSheet(context),
+              //         child: Row(
+              //           children: [
+              //             Text(
+              //               "$totalSelections slot${totalSelections > 1 ? 's' : ''} selected",
+              //               style: Get.textTheme.bodyMedium?.copyWith(
+              //                 fontWeight: FontWeight.w600,
+              //                 color: AppColors.blackColor,
+              //               ),
+              //             ),
+              //             const Spacer(),
+              //             Text(
+              //               "₹ ${controller.totalAmount.value}",
+              //               style: Get.textTheme.titleMedium?.copyWith(
+              //                 fontWeight: FontWeight.w700,
+              //                 color: AppColors.primaryColor,
+              //               ),
+              //             ),
+              //           ],
+              //         ).paddingOnly(left: 18,right: 18,),
+              //       ),
+              //       Positioned(
+              //         top: -24,
+              //         child: InkWell(
+              //           onTap: () {
+              //             if (controller.isBottomSheetOpen.value) {
+              //               Get.back();
+              //             } else {
+              //               _openSelectedSlotsBottomSheet(context);
+              //             }
+              //           },
+              //           customBorder: const CircleBorder(),
+              //           child: ClipRect(
+              //             child: Align(
+              //               alignment: Alignment.topCenter,        // show only top part
+              //               heightFactor: 0.7,
+              //               child: Container(
+              //                 height: 55,
+              //                 width: 55,
+              //                 decoration: BoxDecoration(
+              //                   color: Colors.white,
+              //                   shape: BoxShape.circle,
+              //                   boxShadow: [
+              //                     BoxShadow(
+              //                       color: Colors.grey.withValues(alpha: 0.1),
+              //                       blurRadius: 1,
+              //                       spreadRadius: -2,
+              //                       offset: Offset(0, -5),
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 child: Transform.translate(offset: Offset(0, -5),child: ArrowAnimation(isUpward: true,)),
+              //               ),
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // SizedBox(
+              //   width: Get.width * 0.9,
+              //   child: PrimaryButton(
+              //     onTap: () {
+              //       if (!hasSelections) {
+              //         SnackBarUtils.showInfoSnackBar("Please select at least one slot to continue.");
+              //         return;
+              //       }
+              //       controller.onNext();
+              //     },
+              //     text: "Next",
+              //   ),
+              // ),
+              CustomButton(
+                  width: Get.width*0.9,
+                  child: Text("Next",style:  Get.textTheme.headlineMedium!.copyWith(
+                    color: AppColors.whiteColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),).paddingOnly(right: 40),
+                onTap: () {
+                  if (!hasSelections) {
+                    SnackBarUtils.showInfoSnackBar("Please select at least one slot to continue.");
+                    return;
+                  }
+                  controller.onNext();
+                },
+              )
             ],
           ),
         ),
@@ -1133,6 +1149,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
   /// Build individual slot tile with new modern UI design
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
+    final isDisabled = controller.isSlotDisabled(slot, courtId);
 
     final isUnavailable = controller.isPastAndUnavailable(slot) ||
         (slot.status?.toLowerCase() == 'booked') ||
@@ -1140,11 +1157,11 @@ class CreateOpenMatchesScreen extends StatelessWidget {
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
         (slot.availabilityStatus?.toLowerCase() == 'staff unavailability');
 
-    const blueColor = Color(0xff1F41BB);
+    const blueColor = Color(0xff053CFF);
     const radius = 5.0;
 
     return GestureDetector(
-      onTap: isUnavailable
+      onTap: (isUnavailable || isDisabled)
           ? null
           : () {
         controller.toggleSlotSelection(
@@ -1159,7 +1176,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
-            color: isUnavailable ? Colors.grey.shade100 : Colors.white,
+            color: (isUnavailable || isDisabled) ? Colors.grey.shade100 : Colors.white,
             gradient: isSelected
                 ? const LinearGradient(
               colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
@@ -1168,15 +1185,15 @@ class CreateOpenMatchesScreen extends StatelessWidget {
             )
                 : null,
             border: Border.all(
-              color: isUnavailable
+              color: (isUnavailable || isDisabled)
                   ? Colors.grey.shade300
                   : Colors.grey.shade300,
             ),
           ),
           child: Stack(
             children: [
-              /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE)
-              if (!isUnavailable && !isSelected)
+              /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE AND NOT DISABLED)
+              if (!isUnavailable && !isDisabled && !isSelected)
                 Positioned.fill(
                   left: 0,
                   child: Align(
@@ -1201,7 +1218,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: isUnavailable
+                    color: (isUnavailable || isDisabled)
                         ? Colors.grey.shade500
                         : isSelected
                         ? Colors.white
