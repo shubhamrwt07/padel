@@ -219,6 +219,13 @@ class OpenMatchesController extends GetxController {
     return DateFormat('h a').format(parsed).toLowerCase();
   }
 
+  /// Format time range from list of times
+  String formatTimeRange(List<String>? times) {
+    if (times == null || times.isEmpty) return '';
+    if (times.length == 1) return times.first;
+    return '${times.first} - ${times.last}';
+  }
+
   bool isPastTime(String slotLabel) {
     try {
       final targetDate = selectedDate.value;

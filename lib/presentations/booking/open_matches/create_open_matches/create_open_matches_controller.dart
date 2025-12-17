@@ -9,6 +9,10 @@ import '../../../../data/request_models/home_models/get_club_name_model.dart';
 import '../../../../repositories/cart/cart_repository.dart';
 import '../../../../repositories/home_repository/home_repository.dart';
 import '../../../cart/cart_controller.dart';
+import '../../../../configs/routes/routes_name.dart';
+import '../../../booking/details_page/details_page_controller.dart';
+import '../questions_bottomsheet/questions_bottomsheet_controller.dart';
+import '../questions_bottomsheet/questions_bottomsheet_screen.dart';
 
 class CreateOpenMatchesController extends GetxController {
   final selectedDate = Rxn<DateTime>();
@@ -151,12 +155,18 @@ class CreateOpenMatchesController extends GetxController {
     log("Selected Courts: ${courtIds.length}");
     log("Court IDs: $courtIds");
     log("Court Names: $courtNames");
-      final exists = storage.read('existsOpenMatchData') ?? false;
-      if (exists == false) {
-       Get.toNamed(RoutesName.createQuestions);
-      } else {
-        Get.to(() => DetailsScreen()); // change to your route
-      }
+      // Show QuestionsBottomsheetScreen as bottom sheet with match data
+      Get.put(QuestionsBottomsheetController(), tag: 'questions');
+      Get.find<QuestionsBottomsheetController>(tag: 'questions').localMatchData = detailsController.localMatchData;
+      
+      Get.bottomSheet(
+        QuestionsBottomsheetScreen(),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+      );
   } 
    void _autoSelectTab() {
     final now = DateTime.now();
@@ -279,6 +289,12 @@ class CreateOpenMatchesController extends GetxController {
       selectedSlots.removeWhere((s) => s.sId == slotId);
       selectedSlotsWithCourtInfo.remove(compositeKey);
     } else {
+      // CHECK: Limit to maximum 3 slots
+      if (multiDateSelections.length >= 3) {
+        SnackBarUtils.showErrorSnackBar("You can only select up to 3 slots");
+        return;
+      }
+
       // CHECK: Prevent multi-date selection
       if (multiDateSelections.isNotEmpty) {
         final firstSelectionDate = multiDateSelections.values.first['date'] as String;
@@ -359,48 +375,100 @@ class CreateOpenMatchesController extends GetxController {
     return false;
   }
 
-  // Validate that with the candidate slot included, all selected slots
-  // for a given (date, court) form a contiguous block in the court's
-  // base slot list (post availability filtering but pre time-of-day filter).
+  // Validate that all selected slots across ALL courts form one continuous time block
   bool _isConsecutiveSelectionAllowed(String courtId, String slotId, String dateString) {
-    // Gather existing selections for same date and court
-    final List<String> existingSlotIds = [];
+    // Get all existing selections for the same date (across all courts)
+    final List<Map<String, dynamic>> existingSelections = [];
     multiDateSelections.forEach((key, selection) {
-      final sameDate = selection['date'] == dateString;
-      final sameCourt = selection['courtId'] == courtId;
-      if (sameDate && sameCourt) {
-        final Slots s = selection['slot'] as Slots;
-        if (s.sId != null) existingSlotIds.add(s.sId!);
+      if (selection['date'] == dateString) {
+        existingSelections.add(selection);
       }
     });
 
-    // If none selected yet for this court/date, always allow
-    if (existingSlotIds.isEmpty) return true;
+    // If no existing selections, allow first selection
+    if (existingSelections.isEmpty) return true;
 
-    // Build index list from the base cache
-    final List<int> indices = [];
-    for (final id in existingSlotIds) {
-      final idx = _getSlotIndexInCourt(courtId, id);
-      if (idx == -1) {
-        // If we cannot resolve index, fail open (allow) to avoid blocking due to data inconsistencies
-        return true;
-      }
-      indices.add(idx);
+    // Get the candidate slot details
+    final candidateSlot = _getSlotById(courtId, slotId);
+    if (candidateSlot == null) return false;
+
+    // Create a list of all slot times (existing + candidate)
+    final List<String> allTimes = [];
+    for (final selection in existingSelections) {
+      final slot = selection['slot'] as Slots;
+      if (slot.time != null) allTimes.add(slot.time!);
     }
-    // Add candidate index
-    final candidateIdx = _getSlotIndexInCourt(courtId, slotId);
-    if (candidateIdx == -1) return true; // fail open
+    if (candidateSlot.time != null) allTimes.add(candidateSlot.time!);
 
-    indices.add(candidateIdx);
-    indices.sort();
+    // Convert times to comparable format and sort
+    final List<int> timeMinutes = [];
+    for (final timeStr in allTimes) {
+      final minutes = _convertTimeToMinutes(timeStr);
+      if (minutes != null) timeMinutes.add(minutes);
+    }
+    
+    if (timeMinutes.length != allTimes.length) return false; // Some times couldn't be parsed
+    
+    timeMinutes.sort();
 
-    // Check contiguity: no gaps between sorted indices
-    for (int i = 1; i < indices.length; i++) {
-      if (indices[i] != indices[i - 1] + 1) {
-        return false;
+    // Check if all times are consecutive (assuming 1-hour slots)
+    for (int i = 1; i < timeMinutes.length; i++) {
+      if (timeMinutes[i] - timeMinutes[i - 1] != 60) {
+        return false; // Gap found
       }
     }
+    
     return true;
+  }
+
+  // Helper method to get slot by ID from a specific court
+  Slots? _getSlotById(String courtId, String slotId) {
+    final courts = slots.value?.data ?? [];
+    for (final court in courts) {
+      if (court.sId == courtId) {
+        final courtSlots = _originalSlotsCache[courtId] ?? court.slots ?? [];
+        for (final slot in courtSlots) {
+          if (slot.sId == slotId) return slot;
+        }
+      }
+    }
+    return null;
+  }
+
+  // Helper method to convert time string to minutes since midnight
+  int? _convertTimeToMinutes(String timeStr) {
+    try {
+      final cleanTime = timeStr.trim().toLowerCase();
+      
+      // Try parsing with DateFormat first
+      DateTime? parsed;
+      for (final pattern in const ['h:mm a', 'h a', 'HH:mm', 'H:mm']) {
+        try {
+          parsed = DateFormat(pattern).parseStrict(cleanTime);
+          break;
+        } catch (_) {}
+      }
+      
+      if (parsed != null) {
+        return parsed.hour * 60 + parsed.minute;
+      }
+      
+      // Fallback manual parsing
+      final parts = cleanTime.split(' ');
+      String timePart = parts[0];
+      String? meridiem = parts.length > 1 ? parts[1] : null;
+      
+      final timePieces = timePart.split(':');
+      int hour = int.tryParse(timePieces[0]) ?? 0;
+      int minute = timePieces.length > 1 ? int.tryParse(timePieces[1]) ?? 0 : 0;
+      
+      if (meridiem == 'pm' && hour != 12) hour += 12;
+      if (meridiem == 'am' && hour == 12) hour = 0;
+      
+      return hour * 60 + minute;
+    } catch (_) {
+      return null;
+    }
   }
 
   // Get the index of a slot within the base slot list for a court
@@ -813,6 +881,14 @@ class CreateOpenMatchesController extends GetxController {
     final multiDateKey = '${dateString}_${courtId}_${slot.sId}';
 
     return multiDateSelections.containsKey(multiDateKey);
+  }
+
+  bool isSlotDisabled(Slots slot, String courtId) {
+    // If slot is already selected, it's not disabled
+    if (isSlotSelected(slot, courtId)) return false;
+    
+    // If 3 slots are already selected, disable all other slots
+    return multiDateSelections.length >= 3;
   }
 
   int getSelectedSlotsCountForCourt(String courtId) {

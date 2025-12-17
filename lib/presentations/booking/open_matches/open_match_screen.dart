@@ -133,39 +133,39 @@ class OpenMatchesScreen extends StatelessWidget {
               "Select Date",
               style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
             ),
-            Obx(() => PopupMenuButton<String>(
-              offset: Offset(0, 30),
-              splashRadius: 0,
-              padding: EdgeInsets.zero,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  border: Border.all(color: AppColors.blackColor.withAlpha(20)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.selectedGameLevel.value,
-                      style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down, size: 16,color: Colors.white,),
-                  ],
-                ),
-              ),
-              itemBuilder: (context) => [
-                PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
-              ],
-              onSelected: (value) {
-                controller.selectedGameLevel.value = value;
-              },
-            )),
+            // Obx(() => PopupMenuButton<String>(
+            //   offset: Offset(0, 30),
+            //   splashRadius: 0,
+            //   padding: EdgeInsets.zero,
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+            //     decoration: BoxDecoration(
+            //       color: AppColors.primaryColor,
+            //       border: Border.all(color: AppColors.blackColor.withAlpha(20)),
+            //       borderRadius: BorderRadius.circular(4),
+            //     ),
+            //     child: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Text(
+            //           controller.selectedGameLevel.value,
+            //           style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
+            //         ),
+            //         SizedBox(width: 4),
+            //         Icon(Icons.keyboard_arrow_down, size: 16,color: Colors.white,),
+            //       ],
+            //     ),
+            //   ),
+            //   itemBuilder: (context) => [
+            //     PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
+            //   ],
+            //   onSelected: (value) {
+            //     controller.selectedGameLevel.value = value;
+            //   },
+            // )),
           ],
         ),
         Obx(
@@ -505,7 +505,13 @@ class OpenMatchesScreen extends StatelessWidget {
   Widget _buildMatchCardFromData(BuildContext context, MatchData data, int index) {
     final dayStr = controller.getDay(data.matchDate);
     final dateOnlyStr = controller.getDate(data.matchDate);
-    final timeStr = (data.matchTime ?? '').toLowerCase();
+    
+    // Get all slot times and format as range
+    final slotTimes = data.slot?.expand((slot) => 
+        slot.slotTimes?.map((st) => st.time ?? '') ?? <String>[]
+    ).where((time) => time.isNotEmpty).toList() ?? [];
+    final timeStr = controller.formatTimeRange(slotTimes);
+    
     final clubName = data.clubId?.clubName ?? '-';
     final address = data.clubId?.address ?? "N/A";
     final price = (data.slot?.isNotEmpty == true &&
@@ -555,7 +561,7 @@ class OpenMatchesScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color:index % 2 == 0? Color(0xffC8D6FB):Color(0xff3DBE64).withValues(alpha: 0.5)),
         gradient: LinearGradient(
-            colors: index % 2 == 0 
+            colors: index % 2 == 0
               ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)]
               : [Color(0xffBFEECD).withValues(alpha: 0.3),Color(0xffBFEECD).withValues(alpha: 0.2)],
         )
@@ -748,7 +754,7 @@ class OpenMatchesScreen extends StatelessWidget {
                                     ),
                                   ),
                                   TextSpan(
-                                    text: '3',
+                                    text: '0',
                                     style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
                                   ),
                                   TextSpan(
@@ -913,17 +919,17 @@ class OpenMatchesScreen extends StatelessWidget {
   bool _isLoginUserInMatch(MatchData? match) {
     final userId = storage.read('userId');
     if (userId == null || match == null) return false;
-    
+
     // Check in teamA
     for (final player in match.teamA ?? []) {
       if (player.userId?.sId == userId) return true;
     }
-    
+
     // Check in teamB
     for (final player in match.teamB ?? []) {
       if (player.userId?.sId == userId) return true;
     }
-    
+
     return false;
   }
 
@@ -931,7 +937,7 @@ class OpenMatchesScreen extends StatelessWidget {
   bool _isMatchCreator(MatchData? match) {
     final userId = storage.read('userId');
     if (userId == null || match == null) return false;
-    
+
     // createdBy is a UserId object, so we need to check the sId field
     return match.createdBy == userId.toString();
   }
