@@ -253,10 +253,11 @@ class OpenMatchRepository {
 
   ///Get Request Players Open Match --------------------------------------------
   Future<GetRequestPlayersOpenMatchModel?> getRequestPlayersOpenMatch({
-    required String matchId,
+    String? matchId,
+    String? type
   }) async {
     try {
-      final url = "${AppEndpoints.getRequestUserForOpenMatch}matchId=$matchId";
+      final url = "${AppEndpoints.getRequestUserForOpenMatch}matchId=$matchId&type=$type";
 
       CustomLogger.logMessage(
         msg: "Get Request Player For Open Match Bookings: $url",

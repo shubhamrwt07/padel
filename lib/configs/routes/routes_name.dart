@@ -59,5 +59,6 @@ class RoutesName {
 
   //ScoreBoard------------------------------------------------------------------
   static const String scoreBoard = '/scoreBoard';
+  static const String yourMatchRequest = '/yourMatchRequest';
 
 }

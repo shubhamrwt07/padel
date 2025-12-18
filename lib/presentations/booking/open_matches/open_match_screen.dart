@@ -6,10 +6,17 @@ import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:get_storage/get_storage.dart';
 import '../widgets/booking_exports.dart';
 
-class OpenMatchesScreen extends StatelessWidget {
+class OpenMatchesScreen extends StatefulWidget {
+  OpenMatchesScreen({super.key});
+
+  @override
+  State<OpenMatchesScreen> createState() => _OpenMatchesScreenState();
+}
+
+class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
   final OpenMatchesController controller = Get.put(OpenMatchesController());
   final storage = GetStorage();
-  OpenMatchesScreen({super.key});
+  final List<bool> _expandedStates = [];
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +81,12 @@ class OpenMatchesScreen extends StatelessWidget {
                           ).paddingOnly(top: Get.height * 0.1),
                         );
                       }
+                      // Initialize expanded states if needed
+                      if (_expandedStates.length != matches.data!.length) {
+                        _expandedStates.clear();
+                        _expandedStates.addAll(List.filled(matches.data!.length, false));
+                      }
+                      
                       return Column(
                         children: matches.data!.asMap().entries.map((entry) =>
                           _buildMatchCardFromData(context, entry.value, entry.key)).toList(),
@@ -652,12 +665,21 @@ class OpenMatchesScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.black,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _expandedStates[index] = !_expandedStates[index];
+                    });
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      _expandedStates.length > index && _expandedStates[index]
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               )
@@ -666,196 +688,11 @@ class OpenMatchesScreen extends StatelessWidget {
           const SizedBox(height: 10),
 
           // 🧑‍🧑‍ Players Row
-          Container(
-            width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, -2),
-                ),
-              ]
-            ),
-            child: SizedBox(
-              height: 50,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // TEAM A PLAYERS
-                  for (int i = 0; i < teamAPlayers.length; i++)
-                    Positioned(
-                      left: i * 35, // overlap amount
-                      child: teamAPlayers[i],
-                    ),
+          // Show expanded or collapsed content
+          _expandedStates.length > index && _expandedStates[index]
+              ? _expandedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price)
+              : _collapsedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price,pendingRequestsCount),
 
-                  // TEAM B PLAYERS (start AFTER Team A)
-                  for (int i = 0; i < teamBPlayers.length; i++)
-                    Positioned(
-                      left: (teamAPlayers.length * 35) + (i * 35),
-                      child: teamBPlayers[i],
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-
-          const SizedBox(height: 16),
-
-          // 💬 Start Chat + Players Request
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (_isLoginUserInMatch(data))
-                GestureDetector(
-                  onTap: (){
-                    // Convert team data to map format for passing to chat
-                    final teamAData = (data.teamA ?? []).map((p) => {
-                      'userId': p.userId?.sId ?? '',
-                      'name': p.userId?.name ?? '',
-                      'lastName': p.userId?.lastName ?? '',
-                    }).toList();
-                    final teamBData = (data.teamB ?? []).map((p) => {
-                      'userId': p.userId?.sId ?? '',
-                      'name': p.userId?.name ?? '',
-                      'lastName': p.userId?.lastName ?? '',
-                    }).toList();
-                    
-                    Get.toNamed(RoutesName.chat, arguments: {
-                      "matchID": data.sId ?? "",
-                      "teamA": teamAData,
-                      "teamB": teamBData,
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 5,right: 1),
-                    // height: 46,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Start Chat with Players",
-                          style: TextStyle(color: Colors.grey,fontSize: 12),
-                        ).paddingOnly(right: 5),
-                        Container(
-                          height: 30,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
-                            ),
-                            child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              if (!_isLoginUserInMatch(data)) const SizedBox.shrink(),
-              Row(
-                children: [
-                  if (_isMatchCreator(data)) ...[
-                    GestureDetector(
-                      onTap: () => _showRequestsBottomSheet(context, data.sId ?? ''),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Row(
-                          children: [
-                            const Icon(Icons.notifications, color: AppColors.primaryColor,size: 18,),
-                            RichText(
-                              text: TextSpan(
-                                text: 'Players Requests ',
-                                style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
-                                children: [
-                                  TextSpan(
-                                    text: '(',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "$pendingRequestsCount",
-                                    style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
-                                  ),
-                                  TextSpan(
-                                    text: ')',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  if (_isLoginUserInMatch(data))
-                    const Icon(Icons.share, size: 20,color: AppColors.darkGreyColor,),
-                ],
-              ),
-            ],
-          ).paddingOnly(bottom: Get.height*0.01),
-
-          // 📍 Location & Price
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      clubName,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Transform.translate(
-                            offset: Offset(0, -1),
-                            child: Image.asset(Assets.imagesIcLocation, scale: 2, color: AppColors.primaryColor)),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            address,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Transform.translate(
-                offset: Offset(0, 2),
-                child: Text(
-                  "₹ ${formatAmount(price)}",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xff1c46a0),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -1502,6 +1339,308 @@ class OpenMatchesScreen extends StatelessWidget {
   //     ),
   //   );
   // }
+
+  Widget _collapsedCard(BuildContext context, int index, MatchData data, List<Widget> teamAPlayers, List<Widget> teamBPlayers, String clubName, String address, String price, int pendingRequestsCount) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -2),
+              ),
+            ]
+          ),
+          child: SizedBox(
+            height: 50,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (int i = 0; i < teamAPlayers.length; i++)
+                  Positioned(
+                    left: i * 35,
+                    child: teamAPlayers[i],
+                  ),
+                for (int i = 0; i < teamBPlayers.length; i++)
+                  Positioned(
+                    left: (teamAPlayers.length * 35) + (i * 35),
+                    child: teamBPlayers[i],
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (_isLoginUserInMatch(data))
+              GestureDetector(
+                onTap: (){
+                  final teamAData = (data.teamA ?? []).map((p) => {
+                    'userId': p.userId?.sId ?? '',
+                    'name': p.userId?.name ?? '',
+                    'lastName': p.userId?.lastName ?? '',
+                  }).toList();
+                  final teamBData = (data.teamB ?? []).map((p) => {
+                    'userId': p.userId?.sId ?? '',
+                    'name': p.userId?.name ?? '',
+                    'lastName': p.userId?.lastName ?? '',
+                  }).toList();
+
+                  Get.toNamed(RoutesName.chat, arguments: {
+                    "matchID": data.sId ?? "",
+                    "teamA": teamAData,
+                    "teamB": teamBData,
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(left: 5,right: 1),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Start Chat with Players",
+                        style: TextStyle(color: Colors.grey,fontSize: 12),
+                      ).paddingOnly(right: 5),
+                      Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                          ),
+                          child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            if (!_isLoginUserInMatch(data)) const SizedBox.shrink(),
+            Row(
+              children: [
+                if (_isMatchCreator(data)) ...[
+                  GestureDetector(
+                    onTap: () => _showRequestsBottomSheet(context, data.sId ?? ''),
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.notifications, color: AppColors.primaryColor,size: 18,),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Players Requests ',
+                              style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
+                              children: [
+                                TextSpan(
+                                  text: '(',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "$pendingRequestsCount",
+                                  style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
+                                ),
+                                TextSpan(
+                                  text: ')',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                if (_isLoginUserInMatch(data))
+                  const Icon(Icons.share, size: 20,color: AppColors.darkGreyColor,),
+              ],
+            ),
+          ],
+        ).paddingOnly(bottom: Get.height*0.01),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    clubName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Transform.translate(
+                          offset: Offset(0, -1),
+                          child: Image.asset(Assets.imagesIcLocation, scale: 2, color: AppColors.primaryColor)),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        child: Text(
+                          address,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, 2),
+              child: Text(
+                "₹ ${formatAmount(price)}",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xff1c46a0),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _expandedCard(BuildContext context, int index, MatchData data, List<Widget> teamAPlayers, List<Widget> teamBPlayers, String clubName, String address, String price) {
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.access_time, size: 18),
+                  SizedBox(width: 8),
+                  Text(
+                    "${controller.getDate(data.matchDate)} | ${controller.formatTimeRange(data.slot?.expand((slot) => slot.slotTimes?.map((st) => st.time ?? '') ?? <String>[]).where((time) => time.isNotEmpty).toList() ?? [])}",
+                    style: Get.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.group, size: 18),
+              SizedBox(width: 8),
+              Text("${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} attendee (${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} confirmed)", style: Get.textTheme.bodySmall),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: AppColors.greyColor),
+            ),
+            child: SizedBox(
+              height: 50,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (int i = 0; i < teamAPlayers.length; i++)
+                    Positioned(
+                      left: i * 35,
+                      child: teamAPlayers[i],
+                    ),
+                  for (int i = 0; i < teamBPlayers.length; i++)
+                    Positioned(
+                      left: (teamAPlayers.length * 35) + (i * 35),
+                      child: teamBPlayers[i],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      clubName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Transform.translate(
+                            offset: Offset(0, -1),
+                            child: Image.asset(Assets.imagesIcLocation, scale: 2, color: AppColors.primaryColor)),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            address,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, 2),
+                child: Text(
+                  "₹ ${formatAmount(price)}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xff1c46a0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
 }
 class AppPlayersBottomSheet extends StatelessWidget {

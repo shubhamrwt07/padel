@@ -149,6 +149,9 @@ class _NotificationTile extends StatelessWidget {
     return InkWell(
       onTap: () {
         // controller.markNotificationAsRead(id);
+        if (payload.isNotEmpty) {
+          controller.handleNotificationRoute(payload);
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
