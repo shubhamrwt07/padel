@@ -22,7 +22,8 @@ class NotificationScreen extends StatelessWidget {
                   ? IconButton(
                 icon: const Icon(Icons.mark_email_read),
                 tooltip: "Mark all as read",
-                onPressed: controller.markAllNotificationsAsRead,
+                // onPressed: controller.markAllNotificationsAsRead,
+                onPressed: (){},
               )
                   : const SizedBox.shrink();
             }),
@@ -147,7 +148,7 @@ class _NotificationTile extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        controller.markNotificationAsRead(id);
+        // controller.markNotificationAsRead(id);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
