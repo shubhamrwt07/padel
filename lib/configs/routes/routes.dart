@@ -14,6 +14,8 @@ import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches
 import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_screen.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/create_open_matches/create_open_matches_binding.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/create_open_matches/create_open_matches_screen.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/your_match_requests/your_match_requests_binding.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/your_match_requests/your_match_requests_screen.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_binding.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/booking/booking_binding.dart';
@@ -298,6 +300,13 @@ class Routes {
       name: RoutesName.scoreBoard,
       page: () => ScoreBoardScreen(),
       binding: ScoreBoardBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.yourMatchRequest,
+      page: () => YourMatchRequestsScreen(),
+      binding: YourMatchRequestsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

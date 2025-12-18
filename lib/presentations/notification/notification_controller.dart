@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/data/response_models/get_notification_model.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/repositories/notification_repo/notification_repository.dart';
@@ -243,6 +244,36 @@ class NotificationController extends GetxController {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling notification tap: $e');
+      }
+    }
+  }
+
+  /// Handle notification URL routing
+  void handleNotificationRoute(String notificationUrl) {
+    if (kDebugMode) {
+      print('🔔 Handling notification URL: $notificationUrl');
+    }
+
+    try {
+      switch (notificationUrl) {
+        case '/yourMatchRequest':
+          Get.toNamed(RoutesName.yourMatchRequest);
+          break;
+        case '/BookingConfirmed':
+          Get.toNamed('/booking-confirmed');
+          break;
+        case '/PaymentSuccess':
+          Get.toNamed('/payment-success');
+          break;
+        default:
+          if (kDebugMode) {
+            print('⚠️ Unknown notification URL: $notificationUrl');
+          }
+          break;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error handling notification route: $e');
       }
     }
   }

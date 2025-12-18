@@ -8,6 +8,7 @@ class OpenMatchesController extends GetxController {
   RxList<String> selectedSlots = <String>[].obs;
   RxString selectedTimeFilter = 'morning'.obs; // New: for tab selection
   RxString selectedGameLevel = 'Game Level'.obs; // New: for game level selection
+  RxInt expandedIndex = (-1).obs; // Add expanded index for card expansion
 
   String? selectedTime;
   Rx<DateTime> selectedDate = DateTime.now().obs;
@@ -284,14 +285,14 @@ class OpenMatchesController extends GetxController {
       isLoadingRequests.value = true;
       joinRequests.clear();
       
-      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId);
+      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId,type: "MatchCreator");
       
       if (response != null && response.requests != null) {
         joinRequests.value = response.requests!.map((request) => {
           'id': request.id ?? '',
-          'name': request.requesterId?.name ?? '',
-          'lastName': request.requesterId?.lastName ?? '',
-          'profilePic': request.requesterId?.profilePic ?? '',
+          'name': request.requester?.name ?? '',
+          'lastName': request.requester?.lastName ?? '',
+          'profilePic': request.requester?.profilePic ?? '',
           'level': request.level ?? '',
         }).toList();
       }

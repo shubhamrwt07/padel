@@ -4,6 +4,7 @@ import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_co
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/your_match_requests/your_match_requests_controller.dart';
 import '../../widgets/booking_exports.dart';
 
 class AddPlayerController extends GetxController {
@@ -12,6 +13,7 @@ class AddPlayerController extends GetxController {
   AllOpenMatchController? allOpenMatchController;
   OpenMatchBookingController? openMatchBookingController;
   ScoreBoardController? scoreBoardController;
+  YourMatchRequestsController? yourMatchRequestsController;
 
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
@@ -108,6 +110,14 @@ class AddPlayerController extends GetxController {
               level: LogLevel.info,
             );
           }
+        } else if (yourMatchRequestsController != null) {
+          final requested = await requestPlayerForOpenMatch();
+          if (requested) {
+            CustomLogger.logMessage(
+              msg: "User Created & Player Requested from Your Match Requests $body",
+              level: LogLevel.info,
+            );
+          }
         }
 
         // ---------- Add Player As Guest ----------
@@ -170,6 +180,14 @@ class AddPlayerController extends GetxController {
           if (requested) {
             CustomLogger.logMessage(
               msg: "Login User Requested Directly",
+              level: LogLevel.info,
+            );
+          }
+        } else if (yourMatchRequestsController != null) {
+          final requested = await requestPlayerForOpenMatch();
+          if (requested) {
+            CustomLogger.logMessage(
+              msg: "Login User Requested Directly from Your Match Requests",
               level: LogLevel.info,
             );
           }
@@ -236,6 +254,7 @@ class AddPlayerController extends GetxController {
 
       if (response != null) {
         await openMatchBookingController?.fetchOpenMatchesBooking(type: "upcoming");
+        await yourMatchRequestsController?.fetchJoinRequests();
         Get.back(result: true);
         SnackBarUtils.showSuccessSnackBar(
             "Player request sent successfully");
@@ -378,6 +397,11 @@ class AddPlayerController extends GetxController {
       if (args["needAsGuest"] == true &&
           Get.isRegistered<ScoreBoardController>()) {
         scoreBoardController = Get.find<ScoreBoardController>();
+      }
+
+      if (args["needYourMatchRequests"] == true &&
+          Get.isRegistered<YourMatchRequestsController>()) {
+        yourMatchRequestsController = Get.find<YourMatchRequestsController>();
       }
 
       // Check if login user wants to add themselves

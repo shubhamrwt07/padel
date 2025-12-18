@@ -307,15 +307,15 @@ class OpenMatchBookingController extends GetxController
     try {
       isLoadingRequests.value = true;
 
-      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId);
+      final response = await repository.getRequestPlayersOpenMatch(matchId: matchId,type: "MatchCreator");
 
       if (response != null && response.requests != null) {
         joinRequests.value = response.requests!.map((request) => {
           'id': request.id ?? '',
-          'name': request.requesterId?.name ?? 'Unknown',
-          'profilePic': request.requesterId?.profilePic?? '',
+          'name': request.requester?.name ?? 'Unknown',
+          'profilePic': request.requester?.profilePic?? '',
           'level': request.level ?? '',
-          'lastName': request.requesterId?.lastName ?? '',
+          'lastName': request.requester?.lastName ?? '',
           'requestedAt': request.createdAt ?? DateTime.now(),
         }).toList();
       } else {
