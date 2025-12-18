@@ -312,6 +312,12 @@ class EditProfileController extends GetxController{
       isLocationLoading.value = false;
     }
   }
+  Future<void> refreshProfile() async {
+    await profileController.fetchUserProfile();
+    setValues();
+    await fetchLocations();
+  }
+
   @override
   void onInit()async {
     setValues();

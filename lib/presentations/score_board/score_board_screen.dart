@@ -95,11 +95,11 @@ class ScoreBoardScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.secondaryColor,
+                      color: controller.isCompleted.value ? Colors.grey : AppColors.secondaryColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      allPlayersAdded ? "▶ Start Game" : "🕒 Waiting",
+                      controller.isCompleted.value ? "🏁 Match Ended" : (allPlayersAdded ? "▶ Start Game" : "🕒 Waiting"),
                       style: Get.textTheme.labelSmall!.copyWith(color: Colors.white),
                     ),
                   ),
@@ -265,14 +265,14 @@ class ScoreBoardScreen extends StatelessWidget {
           ).paddingOnly(left: 10),
 
           // Score (always centered)
-          Text(
-            "0:0",
+          Obx(() => Text(
+            "${controller.teamAWins.value}:${controller.teamBWins.value}",
             style: Get.textTheme.displaySmall!.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textColor,
               fontSize: 24
             ),
-          ).paddingOnly(left: 30),
+          ).paddingOnly(left: 30)),
 
           // RIGHT side (same fixed width)
           SizedBox(
@@ -501,26 +501,37 @@ class ScoreBoardScreen extends StatelessWidget {
   }
 
   Widget _buildAddScoreButton() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    return Obx(() {
+      final teamAPlayers = controller.teams.isNotEmpty
+          ? controller.teams[0]["players"] as List
+          : [];
+      final teamBPlayers = controller.teams.length > 1
+          ? controller.teams[1]["players"] as List
+          : [];
+      bool allPlayersAdded = teamAPlayers.length == 2 && teamBPlayers.length == 2;
+      bool isDisabled = controller.isCompleted.value || !allPlayersAdded;
+      
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDisabled ? Colors.grey : AppColors.primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 14),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          onPressed: isDisabled ? null : () {
+            _showAddScoreDialog();
+          },
+          child: const Text(
+            "+ Add Score",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
         ),
-        onPressed: () {
-          _showAddScoreDialog();
-        },
-        child: const Text(
-          "+ Add Score",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   void _showAddScoreDialog() {
@@ -612,7 +623,7 @@ class ScoreBoardScreen extends StatelessWidget {
                 });
               },
               text: controller.isAddingScore.value ? "" : "Add",
-              child: controller.isAddingScore.value 
+              child: controller.isAddingScore.value
                   ? SizedBox(
                       height: 20,
                       width: 20,
@@ -689,22 +700,26 @@ class ScoreBoardScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              () {
-                                final teamAScore = set["teamAScore"] ?? 0;
-                                final teamBScore = set["teamBScore"] ?? 0;
-                                final bothZero = teamAScore == 0 && teamBScore == 0;
-                                
-                                return (set["teamAScore"] != null && !bothZero)
-                                    ? Text(
-                                        "${set["teamAScore"]}",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                          fontSize: 16,
-                                        ),
-                                      )
-                                    : const Icon(Icons.remove, color: Colors.black54, size: 16);
-                              }(),
+                              SizedBox(
+                                width: 40,
+                                child: () {
+                                  final teamAScore = set["teamAScore"] ?? 0;
+                                  final teamBScore = set["teamBScore"] ?? 0;
+                                  final bothZero = teamAScore == 0 && teamBScore == 0;
+                                  
+                                  return (set["teamAScore"] != null && !bothZero)
+                                      ? Text(
+                                          "${set["teamAScore"]}",
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        )
+                                      : const Icon(Icons.remove, color: Colors.black54, size: 16);
+                                }(),
+                              ),
                               Text(
                                 "Set ${set["setNumber"] ?? index + 1}",
                                 style: const TextStyle(
@@ -713,22 +728,26 @@ class ScoreBoardScreen extends StatelessWidget {
                                   fontSize: 15,
                                 ),
                               ),
-                              () {
-                                final teamAScore = set["teamAScore"] ?? 0;
-                                final teamBScore = set["teamBScore"] ?? 0;
-                                final bothZero = teamAScore == 0 && teamBScore == 0;
-                                
-                                return (set["teamBScore"] != null && !bothZero)
-                                    ? Text(
-                                        "${set["teamBScore"]}",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                          fontSize: 16,
-                                        ),
-                                      )
-                                    : const Icon(Icons.remove, color: Colors.black54, size: 16);
-                              }(),
+                              SizedBox(
+                                width: 40,
+                                child: () {
+                                  final teamAScore = set["teamAScore"] ?? 0;
+                                  final teamBScore = set["teamBScore"] ?? 0;
+                                  final bothZero = teamAScore == 0 && teamBScore == 0;
+                                  
+                                  return (set["teamBScore"] != null && !bothZero)
+                                      ? Text(
+                                          "${set["teamBScore"]}",
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        )
+                                      : const Icon(Icons.remove, color: Colors.black54, size: 16);
+                                }(),
+                              ),
                             ],
                           ),
                         ),
@@ -741,8 +760,7 @@ class ScoreBoardScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 10),
                   // Show only if less than 8 sets
-                // In _buildSetSection(), update the "+ Add Set" button:
-                if (controller.sets.length < 10)
+                if (controller.sets.length < 10 && !controller.isCompleted.value)
                   Obx(() => GestureDetector(
                     onTap: controller.isAddingSet.value ? null : () {
                       controller.addSet();
@@ -777,6 +795,53 @@ class ScoreBoardScreen extends StatelessWidget {
                             ),
                     ).paddingOnly(left: 10, right: 10),
                   )),
+                  // End Game button - show only if more than 2 sets and 3rd set has both scores
+                  if (controller.sets.length > 2 && !controller.isCompleted.value && _shouldShowEndGameButton())
+                    const SizedBox(height: 10),
+                  if (controller.sets.length > 2 && !controller.isCompleted.value && _shouldShowEndGameButton())
+                    Obx(() => GestureDetector(
+                      onTap: controller.isEndGame.value ? null : () {
+                        // Check if any set is empty
+                        bool hasEmptySet = controller.sets.any((set) {
+                          final teamAScore = set["teamAScore"] ?? 0;
+                          final teamBScore = set["teamBScore"] ?? 0;
+                          return teamAScore == 0 && teamBScore == 0;
+                        });
+                        
+                        if (hasEmptySet) {
+                          SnackBarUtils.showErrorSnackBar("Cannot end game with empty sets. Please add scores first.");
+                          return;
+                        }
+                        
+                        controller.endGame();
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: controller.isEndGame.value ? Colors.red.withOpacity(0.6) : Colors.red,
+                          borderRadius: BorderRadius.circular(5),
+                          boxShadow: controller.isEndGame.value ? [] : [
+                            BoxShadow(
+                              color: AppColors.greyColor,
+                              blurRadius: 0.5,
+                              spreadRadius: 0.6,
+                              offset: Offset(0, 2)
+                            )
+                          ]
+                        ),
+                        child: controller.isEndGame.value
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: LoadingWidget(color: Colors.white),
+                              )
+                            : const Text(
+                                "End Game",
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                              ),
+                      ).paddingOnly(left: 10, right: 10),
+                    )),
                   const SizedBox(height: 20),
                   Divider(color: AppColors.greyColor,height: 0.1,),
                   buildMatchSummary(),
@@ -789,6 +854,30 @@ class ScoreBoardScreen extends StatelessWidget {
     });
   }
   // Shimmer loader for Set Section
+  bool _shouldShowEndGameButton() {
+    if (controller.sets.length < 3) return false;
+    
+    final thirdSet = controller.sets.firstWhere(
+      (set) => set["setNumber"] == 3,
+      orElse: () => {},
+    );
+    
+    if (thirdSet.isEmpty) return false;
+    
+    final teamAScore = thirdSet["teamAScore"] ?? 0;
+    final teamBScore = thirdSet["teamBScore"] ?? 0;
+    
+    // Check if third set has scores and at least one set has non-zero scores
+    bool thirdSetHasScores = teamAScore > 0 && teamBScore > 0;
+    bool hasAnyScores = controller.sets.any((set) {
+      final aScore = set["teamAScore"] ?? 0;
+      final bScore = set["teamBScore"] ?? 0;
+      return aScore > 0 || bScore > 0;
+    });
+    
+    return thirdSetHasScores && hasAnyScores;
+  }
+
   Widget buildMatchSummary() {
     return Obx(() {
       return Container(

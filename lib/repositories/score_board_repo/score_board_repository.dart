@@ -29,7 +29,7 @@ class ScoreBoardRepository {
         AppEndpoints.createScoreBoard,
         data: data,
       );
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         CustomLogger.logMessage(
           msg: "created ScoreBoard successfully: ${response.data}",
           level: LogLevel.info,

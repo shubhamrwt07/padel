@@ -54,6 +54,17 @@ class Response {
   String? playerLevel;
   String? level;
 
+  int? currentLoseStreak;
+  int? currentWinStreak;
+  double? xpPoints;
+
+  int? americanMatchCount;
+  int? openMatchCount;
+  int? rank;
+  int? simpleMatchCount;
+  int? totalMatchesPlayed;
+  int? totalWins;
+
   Response({
     this.location,
     this.sId,
@@ -77,12 +88,20 @@ class Response {
     this.profilePic,
     this.playerLevel,
     this.level,
+    this.currentLoseStreak,
+    this.currentWinStreak,
+    this.xpPoints,
+    this.americanMatchCount,
+    this.openMatchCount,
+    this.rank,
+    this.simpleMatchCount,
+    this.totalMatchesPlayed,
+    this.totalWins,
   });
 
   Response.fromJson(Map<String, dynamic> json) {
-    location = json['location'] != null
-        ? Location.fromJson(json['location'])
-        : null;
+    location =
+    json['location'] != null ? Location.fromJson(json['location']) : null;
     sId = json['_id'];
     email = json['email'];
     countryCode = json['countryCode'];
@@ -104,6 +123,17 @@ class Response {
     profilePic = json['profilePic'];
     playerLevel = json['playerLevel'];
     level = json['level'];
+
+    currentLoseStreak = json['currentLoseStreak'];
+    currentWinStreak = json['currentWinStreak'];
+    xpPoints = (json['xpPoints'] as num?)?.toDouble();
+
+    americanMatchCount = json['americanMatchCount'];
+    openMatchCount = json['openMatchCount'];
+    rank = json['rank'];
+    simpleMatchCount = json['simpleMatchCount'];
+    totalMatchesPlayed = json['totalMatchesPlayed'];
+    totalWins = json['totalWins'];
   }
 
   Map<String, dynamic> toJson() {
@@ -130,6 +160,15 @@ class Response {
       'profilePic': profilePic,
       'playerLevel': playerLevel,
       'level': level,
+      'currentLoseStreak': currentLoseStreak,
+      'currentWinStreak': currentWinStreak,
+      'xpPoints': xpPoints,
+      'americanMatchCount': americanMatchCount,
+      'openMatchCount': openMatchCount,
+      'rank': rank,
+      'simpleMatchCount': simpleMatchCount,
+      'totalMatchesPlayed': totalMatchesPlayed,
+      'totalWins': totalWins,
     };
   }
 }

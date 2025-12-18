@@ -13,6 +13,7 @@ class ScoreBoardController extends GetxController {
   RxString matchTime = "".obs;
   RxString clubName = "".obs;
   RxString courtName = "".obs;
+  RxBool isCompleted = false.obs;
 
   final _uuid = Uuid();
 
@@ -142,6 +143,7 @@ class ScoreBoardController extends GetxController {
         teamAWins.value = item.totalScore?.teamA ?? 0;
         teamBWins.value = item.totalScore?.teamB ?? 0;
         winner.value = item.winner?.toString() ?? "None";
+        isCompleted.value = item.isCompleted ?? false;
 
         CustomLogger.logMessage(msg: "=== FINAL TEAMS ===", level: LogLevel.info);
         for (int i = 0; i < teams.length; i++) {
@@ -165,7 +167,7 @@ class ScoreBoardController extends GetxController {
     }
   }
 
-  Future<void> createSets(int setNumber) async {
+  Future<void> createSets(int setNumber, {String? type}) async {
     isAddingSet.value = true;
     try {
       final body = {
@@ -174,7 +176,6 @@ class ScoreBoardController extends GetxController {
           {"setNumber": setNumber}
         ]
       };
-
       final response = await repository.updateScoreBoard(data: body);
 
       if (response.success == true) {
@@ -310,6 +311,44 @@ class ScoreBoardController extends GetxController {
       SnackBarUtils.showErrorSnackBar("Failed to add score. Please try again.");
     } finally {
       isAddingScore.value = false;
+    }
+  }
+
+  ///End Game------------------------------------------------------------------
+  var isEndGame = false.obs;
+  Future<void> endGame() async {
+    // Check if any set is empty (no scores)
+    bool hasEmptySet = sets.any((set) {
+      final teamAScore = set["teamAScore"] ?? 0;
+      final teamBScore = set["teamBScore"] ?? 0;
+      return teamAScore == 0 && teamBScore == 0;
+    });
+
+    if (hasEmptySet) {
+      SnackBarUtils.showErrorSnackBar("Cannot end game with empty sets. Please add scores first.");
+      return;
+    }
+
+    isEndGame.value = true;
+    try {
+      final body = {
+        "scoreboardId": scoreboardId.value,
+        "type": "completed"
+      };
+
+      final response = await repository.updateScoreBoard(data: body);
+      
+      if (response.success == true) {
+        SnackBarUtils.showInfoSnackBar("Game Ended Successfully!");
+        await fetchScoreBoard(showLoader: false);
+      }else{
+        SnackBarUtils.showErrorSnackBar(response.message??"");
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "ERROR-> $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to end game. Please try again.");
+    } finally {
+      isEndGame.value = false;
     }
   }
 

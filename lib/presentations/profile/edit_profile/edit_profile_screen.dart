@@ -19,44 +19,52 @@ class EditProfileUi extends StatelessWidget {
           title: Text(" Edit Profile").paddingOnly(left: Get.width * 0.02),
           context: context,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _profileImage(context),
-              _textFieldWithLabel(
-                "First Name",
-                controller.nameController,
-                context,
-              ),
-              _textFieldWithLabel(
-                "Last Name",
-                controller.lastNameController,
-                context,
-              ),
-              _textFieldWithLabel(
-                "Email",
-                controller.emailController,
-                context,
-               ),
-              _textFieldWithLabel(
-                "Phone",
-                controller.phoneController,
-                context,
-                 keyboardType: TextInputType.phone,
-              ),
-              _genderSelection(context),
-              _dobField(context),
-                 Text(
-          "Location / City",
-          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.labelBlackColor,
+        body: RefreshIndicator(
+          color: Colors.white,
+          onRefresh: () async {
+            await controller.refreshProfile();
+          },
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _profileImage(context),
+                _textFieldWithLabel(
+                  "First Name",
+                  controller.nameController,
+                  context,
+                ),
+                _textFieldWithLabel(
+                  "Last Name",
+                  controller.lastNameController,
+                  context,
+                ),
+                _textFieldWithLabel(
+                  "Email",
+                  controller.emailController,
+                  context,
+                 ),
+                _textFieldWithLabel(
+                  "Phone",
+                  controller.phoneController,
+                  context,
+                   keyboardType: TextInputType.phone,
+                ),
+                _genderSelection(context),
+                _dobField(context),
+                   Text(
+            "Location / City",
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.labelBlackColor,
+            ),
+          ).paddingOnly(top: Get.height * .02,bottom: Get.height*0.01),
+                locationField(),
+                _statisticsContainer(context)
+              ],
+            ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
           ),
-        ).paddingOnly(top: Get.height * .02,bottom: Get.height*0.01),
-              locationField()
-            ],
-          ).paddingOnly(top: 10, left: Get.width * 0.05, right: Get.width * 0.05),
         ),
       ),
     );
@@ -373,6 +381,97 @@ class EditProfileUi extends StatelessWidget {
               ),
             );
 
-          }).paddingOnly(bottom: Get.height * 0.05);
+          }).paddingOnly(bottom: Get.height * 0.01);
+  }
+
+  Widget _statisticsContainer(BuildContext context) {
+    return Obx(() {
+      final response = controller.profileController.profileModel.value?.response;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Player Statistics",
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.labelBlackColor,
+            ),
+          ).paddingOnly(top: Get.height * .02),
+          Container(
+            margin: EdgeInsets.only(top: 10),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.textFieldColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.containerBorderColor),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _statItem("XP Points", "${response?.xpPoints ?? 0}")),
+                    // Expanded(child: _statItem("Rank", "${response?.rank ?? 0}")),
+                    Expanded(child: _statItem("Win Streak", "${response?.currentWinStreak ?? 0}")),
+
+                  ],
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _statItem("Lose Streak", "${response?.currentLoseStreak ?? 0}")),
+                    Expanded(child: _statItem("Total Matches", "${response?.totalMatchesPlayed ?? 0}")),
+
+                  ],
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _statItem("Total Wins", "${response?.totalWins ?? 0}")),
+                  ],
+                ),
+                SizedBox(height: 12),
+                // Row(
+                //   children: [
+                //     Expanded(child: _statItem("Open Matches", "${response?.openMatchCount ?? 0}")),
+                //     Expanded(child: _statItem("American Matches", "${response?.americanMatchCount ?? 0}")),
+                //   ],
+                // ),
+                SizedBox(height: 12),
+                // Row(
+                //   children: [
+                //     Expanded(child: _statItem("Simple Matches", "${response?.simpleMatchCount ?? 0}")),
+                //     SizedBox(width: Get.width * 0.45),
+                //   ],
+                // ),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _statItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textHintColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            color: AppColors.textColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }

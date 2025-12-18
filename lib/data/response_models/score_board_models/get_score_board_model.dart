@@ -39,6 +39,7 @@ class Data {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  bool? isCompleted;
 
   Data({
     this.sId,
@@ -56,6 +57,7 @@ class Data {
     this.createdAt,
     this.updatedAt,
     this.iV,
+    this.isCompleted
   });
 
   Data.fromJson(Map<String, dynamic> json) {
@@ -77,6 +79,7 @@ class Data {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    isCompleted = json['isCompleted'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -95,6 +98,7 @@ class Data {
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         '__v': iV,
+        'isCompleted': isCompleted,
       };
 }
 
