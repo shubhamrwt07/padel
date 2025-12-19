@@ -28,6 +28,8 @@ import 'package:padel_mobile/presentations/home/home_binding.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
 import 'package:padel_mobile/presentations/leaderBoard/leader_board_binding.dart';
 import 'package:padel_mobile/presentations/leaderBoard/leader_board_screen.dart';
+import 'package:padel_mobile/presentations/main_home_page/main_home_binding.dart';
+import 'package:padel_mobile/presentations/main_home_page/main_home_screen.dart';
 import 'package:padel_mobile/presentations/notification/notification_binding.dart';
 import 'package:padel_mobile/presentations/notification/notification_ui.dart';
 import 'package:padel_mobile/presentations/packages/packages_binding.dart';
@@ -52,6 +54,8 @@ import 'package:padel_mobile/presentations/scoreview/score_view_binding.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
+import 'package:padel_mobile/presentations/wallet/wallet_binding.dart';
+import 'package:padel_mobile/presentations/wallet/wallet_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
 import '../../presentations/auth/login/login_screen.dart';
 import '../../presentations/booking/open_matches/open_match_screen.dart';
@@ -111,6 +115,13 @@ class Routes {
       name: RoutesName.home,
       page: () => HomeScreen(),
       binding: HomeBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.mainHomePage,
+      page: () => MainHomeScreen(),
+      binding: MainHomeBinding(),
       transition: Transition.fadeIn,
       transitionDuration: defaultDuration,
     ),
@@ -307,6 +318,13 @@ class Routes {
       name: RoutesName.yourMatchRequest,
       page: () => YourMatchRequestsScreen(),
       binding: YourMatchRequestsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.wallet,
+      page: () => WalletScreen(),
+      binding: WalletBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

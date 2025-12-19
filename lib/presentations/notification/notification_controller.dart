@@ -526,6 +526,8 @@ class NotificationController extends GetxController {
               'bookingId': notif.bookingId?.id ?? '',
               'isRead': notif.isRead ?? false,
               'bookingStatus': notif.bookingId?.bookingStatus ?? '',
+              'notificationType': notif.notificationType ?? '',
+              'profileImage': notif.profileImage ?? '',
             };
           }).toList(),
         );

@@ -29,7 +29,6 @@ class AppThemes {
         fontSize: 26,
       ),
       titleMedium: TextStyle(
-
         fontWeight: FontWeight.w600,
         fontFamily: "Lato",
         color: AppColors.blackColor,

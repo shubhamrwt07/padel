@@ -14,17 +14,24 @@ AppBar primaryAppBar({
   SystemUiOverlayStyle? systemOverlayStyle,
   Color? titleTextColor,
   Color? leadingButtonColor,
-  bool? showLeading, // if null, determine via Navigator.canPop
+  bool? showLeading,
+  BorderRadius? borderRadius,
+  double? toolbarHeight,
+  Widget? flexibleSpace
+
 }) {
   final bool shouldShowLeading = showLeading ?? Navigator.canPop(context);
   return AppBar(
     systemOverlayStyle: systemOverlayStyle,
     bottom: bottom,
-    toolbarHeight: 50,
+    toolbarHeight:toolbarHeight?? 50,
     leadingWidth: leadingWidth ?? Get.width * 0.15,
     centerTitle: centerTitle ?? false,
     automaticallyImplyLeading: false,
-
+    shape: RoundedRectangleBorder(
+      borderRadius: borderRadius ??
+          BorderRadius.zero,
+    ),
     leading: shouldShowLeading
         ? leading ??
         GestureDetector(
@@ -54,5 +61,7 @@ AppBar primaryAppBar({
     elevation: 3,
     actionsPadding: EdgeInsets.only(right: Get.width * 0.03),
     actions: action,
+    flexibleSpace: flexibleSpace,
+
   );
 }

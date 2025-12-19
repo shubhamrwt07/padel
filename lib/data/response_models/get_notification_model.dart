@@ -28,6 +28,7 @@ class GetNotificationResponse {
   final String? userId;
   final String? adminId;
   final String? notificationType;
+  final String? profileImage;
   final BookingId? bookingId;
   final String? notificationUrl;
   final String? title;
@@ -42,6 +43,7 @@ class GetNotificationResponse {
     required this.userId,
     required this.adminId,
     required this.notificationType,
+    required this.profileImage,
     required this.bookingId,
     required this.notificationUrl,
     required this.title,
@@ -58,6 +60,7 @@ class GetNotificationResponse {
       userId: json['userId'] ?? '',
       adminId: json['adminId'] ?? '',
       notificationType: json['notificationType'] ?? '',
+      profileImage: json['profileImage'] ?? '',
       bookingId: json['bookingId'] != null
           ? BookingId.fromJson(json['bookingId'])
           : null,
@@ -76,6 +79,7 @@ class GetNotificationResponse {
     'userId': userId,
     'adminId': adminId,
     'notificationType': notificationType,
+    'profileImage': profileImage,
     if (bookingId != null) 'bookingId': bookingId!.toJson(),
     'notificationUrl': notificationUrl,
     'title': title,

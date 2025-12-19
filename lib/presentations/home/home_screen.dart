@@ -29,80 +29,82 @@ class HomeScreen extends GetView<HomeController> {
       child: PopScope(
         canPop: false,
         child: Scaffold(
+          // appBar: primaryAppBar(
+          //   showLeading: false,
+          //   title: Row(
+          //     children: [
+          //       // Drawer menu icon
+          //       IconButton(
+          //         icon: const Icon(Icons.menu),
+          //         onPressed: () {
+          //           final drawerController = Get.find<CustomZoomDrawerController>();
+          //           drawerController.toggleDrawer();
+          //         },
+          //       ),
+          //
+          //
+          //       // Space between icon and title
+          //       const SizedBox(width: 0),
+          //
+          //       // Existing title widget
+          //       Expanded(child: _buildAppBarTitle(context)),
+          //     ],
+          //   ),
+          //   action: [
+          //     GestureDetector(
+          //       onTap: () {
+          //         Get.toNamed(RoutesName.notification);
+          //       },
+          //       child: Stack(
+          //         clipBehavior: Clip.none,
+          //         children: [
+          //           Container(
+          //             height: 35,
+          //             width: 35,
+          //             decoration: BoxDecoration(
+          //               color: AppColors.textFieldColor,
+          //               borderRadius: BorderRadius.circular(10),
+          //             ),
+          //             child: Icon(
+          //               Icons.notifications_none_rounded,
+          //               color: AppColors.blackColor,
+          //             ),
+          //           ),
+          //           Positioned(
+          //             top: -2,
+          //             right: -2,
+          //             child: Obx(() {
+          //               final count = Get.find<NotificationController>().unreadNotificationCount.value;
+          //               if (count == 0) return const SizedBox.shrink();
+          //
+          //               return Container(
+          //                 height: 16,
+          //                 width: 16,
+          //                 alignment: Alignment.center,
+          //                 decoration: const BoxDecoration(
+          //                   color: Colors.red,
+          //                   shape: BoxShape.circle,
+          //                 ),
+          //                 child: Text(
+          //                   count > 99 ? '99+' : '$count',
+          //                   style: const TextStyle(
+          //                     color: Colors.white,
+          //                     fontSize: 8,
+          //                     fontWeight: FontWeight.bold,
+          //                   ),
+          //                 ),
+          //               );
+          //             }),
+          //           ),
+          //         ],
+          //       ),
+          //     ).paddingOnly(right: 5),
+          //   ],
+          //   context: context,
+          // ),
           appBar: primaryAppBar(
-            showLeading: false,
-            title: Row(
-              children: [
-                // Drawer menu icon
-                IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {
-                    final drawerController = Get.find<CustomZoomDrawerController>();
-                    drawerController.toggleDrawer();
-                  },
-                ),
-
-
-                // Space between icon and title
-                const SizedBox(width: 0),
-
-                // Existing title widget
-                Expanded(child: _buildAppBarTitle(context)),
-              ],
-            ),
-            action: [
-              GestureDetector(
-                onTap: () {
-                  Get.toNamed(RoutesName.notification);
-                },
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      height: 35,
-                      width: 35,
-                      decoration: BoxDecoration(
-                        color: AppColors.textFieldColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: AppColors.blackColor,
-                      ),
-                    ),
-                    Positioned(
-                      top: -2,
-                      right: -2,
-                      child: Obx(() {
-                        final count = Get.find<NotificationController>().unreadNotificationCount.value;
-                        if (count == 0) return const SizedBox.shrink();
-
-                        return Container(
-                          height: 16,
-                          width: 16,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            count > 99 ? '99+' : '$count',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ).paddingOnly(right: 5),
-            ],
-            context: context,
-          ),
-
+              centerTitle: true,
+              title: Text("Courts"), context: context),
           body: Padding(
             padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
             child: Column(

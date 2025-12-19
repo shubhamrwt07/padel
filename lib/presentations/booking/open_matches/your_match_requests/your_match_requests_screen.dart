@@ -48,7 +48,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
           left: i * 35.0,
           child: i < teamAPlayers.length
               ? _buildPlayerAvatar(teamAPlayers[i], index, isAdd: false)
-              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamA", matchId: matchId),
+              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamA", matchId: matchId, request: request),
         ),
       );
     }
@@ -60,7 +60,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
           left: (2 + i) * 35.0,
           child: i < teamBPlayers.length
               ? _buildPlayerAvatar(teamBPlayers[i], index, isAdd: false)
-              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamB", matchId: matchId),
+              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamB", matchId: matchId, request: request),
         ),
       );
     }
@@ -391,7 +391,9 @@ class YourMatchRequestsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(club?.clubName ?? 'N/A',style:Get.textTheme.labelLarge),
-                  Text("${club?.address ?? ''}, ${club?.city ?? ''} ${club?.zipCode ?? ''}",style:Get.textTheme.bodySmall),
+                  SizedBox(
+                      width: Get.width*0.5,
+                      child: Text("${club?.address ?? ''}, ${club?.city ?? ''} ${club?.zipCode ?? ''}",style:Get.textTheme.bodySmall,overflow: TextOverflow.clip,)),
                 ],
               ),
             ],
@@ -457,13 +459,13 @@ class YourMatchRequestsScreen extends StatelessWidget {
     return '${times.first} - ${times.last}';
   }
 
-  Widget _buildPlayerAvatar(RequesterId? player, int index, {bool isAdd = false, String? team, String? matchId}) {
+  Widget _buildPlayerAvatar(RequesterId? player, int index, {bool isAdd = false, String? team, String? matchId, Requests? request}) {
     return GestureDetector(
       onTap: isAdd ? () {
         Get.toNamed(
           '/addPlayer',
           arguments: {
-            "team": team ?? "teamA",
+            "team": request?.preferredTeam ?? team,
             "matchId": matchId ?? "",
             "needYourMatchRequests": true,
             "matchLevel": "",

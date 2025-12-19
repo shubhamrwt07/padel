@@ -4,6 +4,7 @@ import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/booking_exports.dart';
 
 class OpenMatchesScreen extends StatefulWidget {
@@ -147,40 +148,45 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               "Select Date",
               style: Get.textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
             ),
-            Obx(() => PopupMenuButton<String>(
-              offset: Offset(0, 30),
-              splashRadius: 0,
-              padding: EdgeInsets.zero,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  border: Border.all(color: AppColors.blackColor.withAlpha(20)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.selectedGameLevel.value,
-                      style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down, size: 16,color: Colors.white,),
-                  ],
-                ),
-              ),
-              itemBuilder: (context) => [
-                PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
-                PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
-              ],
-              onSelected: (value) {
-                controller.selectedGameLevel.value = value;
-                controller.fetchMatchesForSelection();
-              },
-            )),
+            // Obx(() => PopupMenuButton<String>(
+            //   offset: Offset(0, 30),
+            //   splashRadius: 0,
+            //   padding: EdgeInsets.zero,
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+            //     decoration: BoxDecoration(
+            //       color: AppColors.primaryColor,
+            //       border: Border.all(color: AppColors.blackColor.withAlpha(20)),
+            //       borderRadius: BorderRadius.circular(4),
+            //     ),
+            //     child: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Text(
+            //           controller.selectedGameLevel.value,
+            //           style: Get.textTheme.labelMedium!.copyWith(color: Colors.white),
+            //         ),
+            //         SizedBox(width: 4),
+            //         Icon(
+            //           controller.isGameLevelSelected.value ? Icons.close : Icons.keyboard_arrow_down,
+            //           size: 16,
+            //           color: Colors.white,
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            //   itemBuilder: (context) => [
+            //     PopupMenuItem(height: 40,value: "Beginner", child: Text("Beginner",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Intermediate", child: Text("Intermediate",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Advanced", child: Text("Advanced",style: Get.textTheme.labelMedium)),
+            //     PopupMenuItem(height: 40,value: "Professional", child: Text("Professional",style: Get.textTheme.labelMedium)),
+            //   ],
+            //   onSelected: (value) {
+            //     controller.selectedGameLevel.value = value;
+            //     controller.isGameLevelSelected.value = true;
+            //     controller.fetchMatchesForSelection();
+            //   },
+            // )),
           ],
         ),
         Obx(
@@ -700,7 +706,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
 
   Widget _buildFilledPlayer(String? imageUrl, String name, String level,int index,String lastName, {MatchData? matchData}) {
     final firstLetter = name.trim().isNotEmpty
-        ? '${name.trim()[0]}${lastName.trim().isNotEmpty ? lastName.trim()[0] : ''}'
+        ? '${name.trim()[0].toUpperCase()}${lastName.trim().isNotEmpty ? lastName.trim()[0].toUpperCase() : ''}'
         : '?';
 
     return GestureDetector(
@@ -821,6 +827,18 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
     return match.createdBy == userId.toString();
   }
 
+  void _makeCall(String phoneNumber) async {
+    if (phoneNumber.isNotEmpty) {
+      try {
+        final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+        final Uri launchUri = Uri.parse('tel:$cleanNumber');
+        await launchUrl(launchUri);
+      } catch (e) {
+        print('Error making call: $e');
+      }
+    }
+  }
+
   void _showPlayerDetailsDialog(MatchData matchData) {
     Get.dialog(
       Dialog(
@@ -857,7 +875,8 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
 
 
   List<Widget> _buildPlayers(List<dynamic> players) {
-    return players.map((p) {
+    final userId = storage.read('userId');
+    return players.where((p) => p.userId?.sId != userId).map((p) {
       final name = [
         p.userId?.name,
         p.userId?.lastName,
@@ -865,6 +884,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
           .where((e) => e != null && e!.isNotEmpty)
           .map((e) => e![0].toUpperCase() + e.substring(1).toLowerCase())
           .join(' ');
+      final countryCode = p.userId?.countryCode;
       final phoneNumber = p.userId?.phoneNumber;
 
       return Padding(
@@ -876,6 +896,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               children: [
                 CircleAvatar(
                   backgroundColor: AppColors.secondaryColor,
+                  radius: 28,
                   child: CircleAvatar(
                     radius: 26,
                     backgroundImage:
@@ -891,20 +912,20 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                         : null,
                   ),
                 ),
-                Positioned(
-                  bottom: -2,
-                  right: 0,
-                  left: 0,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.green,
-                    child: Text(
-                      'A',
-                      style: const TextStyle(
-                          fontSize: 10, color: Colors.white),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   bottom: -2,
+                //   right: 0,
+                //   left: 0,
+                //   child: CircleAvatar(
+                //     radius: 10,
+                //     backgroundColor: Colors.green,
+                //     child: Text(
+                //       'A',
+                //       style: const TextStyle(
+                //           fontSize: 10, color: Colors.white),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
 
@@ -918,40 +939,51 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                   Text(name,
                       style: Get.textTheme.labelLarge),
                   const SizedBox(height: 4),
-                  Text(
-                    '⭐ 0 XP Points | $phoneNumber',
-                    style: Get.textTheme.bodySmall
-                        ?.copyWith(color: Colors.orange),
+                  Row(
+                    children: [
+                      Text(
+                        '⭐ 0 XP Points ',
+                        style: Get.textTheme.bodySmall
+                            ?.copyWith(color: Colors.orange),
+                      ),Text(
+                        '| $countryCode-$phoneNumber',
+                        style: Get.textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 6),
-                  SizedBox(
-                    height: 30,
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.sync, size: 16,color: Colors.white,),
-                      label: const Text('Replace',style: TextStyle(color: Colors.white),),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 12),
-                        textStyle:
-                        const TextStyle(fontSize: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   height: 30,
+                  //   child: ElevatedButton.icon(
+                  //     onPressed: () {},
+                  //     icon: const Icon(Icons.sync, size: 16,color: Colors.white,),
+                  //     label: const Text('Replace',style: TextStyle(color: Colors.white),),
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: Colors.green,
+                  //       padding:
+                  //       const EdgeInsets.symmetric(horizontal: 12),
+                  //       textStyle:
+                  //       const TextStyle(fontSize: 12),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(8),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
 
             /// Call button
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: AppColors.primaryColor,
-              child: const Icon(Icons.call,
-                  color: Colors.white, size: 20),
+            GestureDetector(
+              onTap: () => _makeCall('$countryCode$phoneNumber'),
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primaryColor,
+                child: const Icon(Icons.call,
+                    color: Colors.white, size: 20),
+              ),
             ),
           ],
         ),
@@ -1777,17 +1809,17 @@ class AppPlayersBottomSheet extends StatelessWidget {
                             height: 44,
                             placeholder: (context, url) => Text(
                               '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor),
                             ),
                             errorWidget: (context, url, error) => Text(
                               '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor),
                             ),
                           ),
                         )
                       : Text(
                           '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold,color: AppColors.primaryColor),
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -1798,7 +1830,8 @@ class AppPlayersBottomSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${player['name'] ?? ''} ${player['lastName'] ?? ''}',
+                        '${(player['name'] ?? '').toString().capitalizeFirst} '
+                            '${(player['lastName'] ?? '').toString().capitalizeFirst}',
                         style: Get.textTheme.labelLarge!
                             .copyWith(fontWeight: FontWeight.w500),
                       ),
@@ -1813,7 +1846,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
                 ),
 
                 /// Button
-                _requestButton(isRequested, player['id'] ?? ''),
+                _requestButton(isRequested, player['id'] ?? '', player['preferredTeam'] ?? 'teamA'),
               ],
             ),
           );
@@ -1824,28 +1857,66 @@ class AppPlayersBottomSheet extends StatelessWidget {
   }
 
 
-  Widget _requestButton(bool sent, String playerId) {
-    return GestureDetector(
-      onTap: sent ? null : () async {
-        final addPlayerController = Get.put(AddPlayerController());
-        addPlayerController.matchId.value = matchId;
-        addPlayerController.playerId.value = playerId;
-        addPlayerController.selectedTeam.value = 'teamA';
-        addPlayerController.openMatchesController = Get.find<OpenMatchesController>();
-        await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: sent ? const Color(0xffE9ECF5) : const Color(0xffEEF1FF),
-          borderRadius: BorderRadius.circular(8),
+  Widget _requestButton(bool sent, String playerId, String team) {
+    final controller = Get.find<OpenMatchesController>();
+    return Obx(() {
+      final isRequesting = controller.requestingPlayerId.value == playerId;
+      final isRequested = sent || controller.requestedPlayerIds.contains(playerId);
+      
+      return GestureDetector(
+        onTap: (isRequested || isRequesting) ? null : () async {
+          controller.requestingPlayerId.value = playerId;
+          
+          final addPlayerController = Get.put(AddPlayerController());
+          addPlayerController.matchId.value = matchId;
+          addPlayerController.playerId.value = playerId;
+          addPlayerController.selectedTeam.value = team;
+          addPlayerController.openMatchesController = controller;
+          
+          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
+          
+          if (success) {
+            controller.requestedPlayerIds.add(playerId);
+          }
+          
+          controller.requestingPlayerId.value = '';
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isRequested ? const Color(0xffE9ECF5) : const Color(0xffEEF1FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: isRequesting
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+                  ),
+                )
+              : Text(
+                  isRequested ? 'Request Sent' : 'Send Request',
+                  style: Get.textTheme.bodyLarge!.copyWith(
+                    color: isRequested ? Colors.grey : AppColors.primaryColor,
+                  ),
+                ),
         ),
-        child: Text(
-          sent ? 'Request Sent' : 'Send Request',
-          style: Get.textTheme.bodyLarge!.copyWith(color: sent ? Colors.grey : AppColors.primaryColor,)
-        ),
-      ),
-    );
+      );
+    });
+  }
+
+  void _makeCall(String phoneNumber) async {
+    if (phoneNumber.isNotEmpty) {
+      try {
+        final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+        final Uri launchUri = Uri.parse('tel:$cleanNumber');
+        await launchUrl(launchUri);
+      } catch (e) {
+        print('Error making call: $e');
+      }
+    }
   }
 
   Widget _actionButtons() {

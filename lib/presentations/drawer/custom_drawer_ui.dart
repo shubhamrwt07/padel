@@ -300,7 +300,20 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
 
 
-          ProfileRow(
+          Obx(
+            () => ProfileRow(
+              icon: Icon(Icons.wallet,color: controller.selectedIndex.value == 13
+      ? AppColors.primaryColor
+          : AppColors.labelBlackColor,
+      ).paddingOnly(left: 3),
+              title: "Wallet",
+              isSelected: controller.selectedIndex.value == 13,
+              onTap: (){
+                controller.selectedIndex.value = 13;
+                Get.toNamed(RoutesName.wallet);
+              },
+            ),
+          ),ProfileRow(
             icon: SvgPicture.asset(Assets.imagesIcLogOut, height: 15, width: 17).paddingOnly(left: 3),
             title: AppStrings.logout,
             textColor: Colors.red,
