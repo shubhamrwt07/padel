@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
@@ -14,20 +15,20 @@ class NotificationScreen extends StatelessWidget {
     controller.fetchNotifications();
     return Scaffold(
       appBar: primaryAppBar(title: Text("Notification"), context: context,centerTitle: true,
-          action: [
-            Obx(() {
-              final hasUnread = controller.notifications
-                  .any((n) => n['isRead'] == false);
-              return hasUnread
-                  ? IconButton(
-                icon: const Icon(Icons.mark_email_read),
-                tooltip: "Mark all as read",
-                // onPressed: controller.markAllNotificationsAsRead,
-                onPressed: (){},
-              )
-                  : const SizedBox.shrink();
-            }),
-          ]
+          // action: [
+          //   Obx(() {
+          //     final hasUnread = controller.notifications
+          //         .any((n) => n['isRead'] == false);
+          //     return hasUnread
+          //         ? IconButton(
+          //       icon: const Icon(Icons.mark_email_read),
+          //       tooltip: "Mark all as read",
+          //       // onPressed: controller.markAllNotificationsAsRead,
+          //       onPressed: (){},
+          //     )
+          //         : const SizedBox.shrink();
+          //   }),
+          // ]
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -85,7 +86,10 @@ class NotificationScreen extends StatelessWidget {
                   icon: n['icon'],
                   payload: n['payload'],
                   bookingId: n['bookingId'],
-                  isRead: n['isRead'] ?? false, bookingStatus: n['bookingStatus'],
+                  isRead: n['isRead'] ?? false, 
+                  bookingStatus: n['bookingStatus'],
+                  notificationType: n['notificationType'] ?? '',
+                  profileImage: n['profileImage'] ?? '',
                 )),
                 const SizedBox(height: 16),
               ],
@@ -130,6 +134,8 @@ class _NotificationTile extends StatelessWidget {
   final String bookingStatus;
   final String bookingId;
   final bool isRead;
+  final String notificationType;
+  final String profileImage;
   const _NotificationTile({
     required this.id,
     required this.title,
@@ -139,7 +145,9 @@ class _NotificationTile extends StatelessWidget {
     required this.payload,
     required this.bookingId,
     required this.isRead,
-    required this.bookingStatus
+    required this.bookingStatus,
+    required this.notificationType,
+    required this.profileImage,
   });
 
   @override
@@ -148,7 +156,7 @@ class _NotificationTile extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        // controller.markNotificationAsRead(id);
+        controller.markNotificationAsRead(id);
         if (payload.isNotEmpty) {
           controller.handleNotificationRoute(payload);
         }
@@ -165,10 +173,23 @@ class _NotificationTile extends StatelessWidget {
               backgroundColor: isRead
                   ? Colors.grey.withValues(alpha: 0.1)
                   : AppColors.primaryColor.withValues(alpha: 0.1),
-              child: Icon(
-                icon,
-                color: isRead ? Colors.grey : AppColors.primaryColor,
-              ),
+              child: notificationType == 'match_invitation' && profileImage.isNotEmpty
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: profileImage,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Icon(
+                          icon,
+                          color: isRead ? Colors.grey : AppColors.primaryColor,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      color: isRead ? Colors.grey : AppColors.primaryColor,
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -176,7 +197,7 @@ class _NotificationTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    title.isNotEmpty ? title[0].toUpperCase() + title.substring(1).toLowerCase() : title,
                     style: TextStyle(
                       fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
                       fontSize: 16,

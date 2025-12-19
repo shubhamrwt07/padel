@@ -8,6 +8,7 @@ class OpenMatchesController extends GetxController {
   RxList<String> selectedSlots = <String>[].obs;
   RxString selectedTimeFilter = 'morning'.obs; // New: for tab selection
   RxString selectedGameLevel = 'Game Level'.obs; // New: for game level selection
+  RxBool isGameLevelSelected = false.obs; // Track if game level is selected
   RxInt expandedIndex = (-1).obs; // Add expanded index for card expansion
 
   String? selectedTime;
@@ -26,6 +27,8 @@ class OpenMatchesController extends GetxController {
   // Nearby players
   RxList<Map<String, dynamic>> nearbyPlayers = <Map<String, dynamic>>[].obs;
   RxBool isLoadingNearbyPlayers = false.obs;
+  RxString requestingPlayerId = ''.obs; // Track which player request is in progress
+  RxList<String> requestedPlayerIds = <String>[].obs; // Track requested players
 
   final List<String> timeSlots = [
     "6:00 am",

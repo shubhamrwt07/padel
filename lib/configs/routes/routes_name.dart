@@ -11,6 +11,7 @@ class RoutesName {
   static const String forgotPassword = '/forgotPassword';
 
   //Home routes name
+  static const String mainHomePage = '/mainHomePage';
   static const String home = '/home_models';
 
   static const String bottomNav = '/bottomNav';
@@ -61,4 +62,6 @@ class RoutesName {
   static const String scoreBoard = '/scoreBoard';
   static const String yourMatchRequest = '/yourMatchRequest';
 
+  //Wallet----------------------------------------------------------------------
+  static const String wallet = '/wallet';
 }

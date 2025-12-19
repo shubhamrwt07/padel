@@ -46,6 +46,7 @@ dependencies:
   url_launcher:
   socket_io_client:
   flutter_cache_manager:
+  carousel_slider:
 
 dev_dependencies:
   flutter_test:

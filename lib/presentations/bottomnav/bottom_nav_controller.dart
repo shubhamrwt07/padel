@@ -1,13 +1,16 @@
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_controller.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/main_home_page/main_home_controller.dart';
+import 'package:padel_mobile/presentations/main_home_page/main_home_screen.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_screen.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../home/home_controller.dart';
 
 class BottomNavigationController extends GetxController {
-  HomeController homeController = Get.put(HomeController());
+  // HomeController homeController = Get.put(HomeController());
+  MainHomeController mainHomeController = Get.put(MainHomeController());
   BookingHistoryController bookingHistoryController= Get.put(BookingHistoryController());
   OpenMatchBookingController openMatchBookingController= Get.put(OpenMatchBookingController());
   final List<Map<String, dynamic>> tabs = [
@@ -24,7 +27,8 @@ class BottomNavigationController extends GetxController {
 
   // List of pages (you can expand this as needed)
   final List<Widget> pages = [
-    HomeScreen(),
+    // HomeScreen(),
+    MainHomeScreen(),
     BookingHistoryUi(),
     OpenMatchBookingScreen(),
     SizedBox(

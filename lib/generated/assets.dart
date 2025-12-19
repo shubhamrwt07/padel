@@ -37,6 +37,7 @@ class Assets {
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBackgroundBottomBar = 'assets/images/img_background_bottomBar.png';
   static const String imagesImgBackgroundScoreView = 'assets/images/img_background_score_view.svg';
+  static const String imagesImgBookNow = 'assets/images/img_book_now.jpg';
   static const String imagesImgBookingConfirm = 'assets/images/img_booking_confirm.svg';
   static const String imagesImgBookingSuccessful = 'assets/images/img_booking_successful.png';
   static const String imagesImgCrown = 'assets/images/img_crown.png';

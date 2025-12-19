@@ -7,6 +7,7 @@ import 'package:padel_mobile/presentations/score_board/score_board_controller.da
 import 'package:padel_mobile/presentations/score_board/widgets/add_player_bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/score_board/widgets/shimmer_widgets.dart';
+import 'package:padel_mobile/presentations/score_board/widgets/app_players_bottomsheet.dart';
 
 class ScoreBoardScreen extends StatelessWidget {
   final ScoreBoardController controller = Get.put(ScoreBoardController());
@@ -415,9 +416,11 @@ class ScoreBoardScreen extends StatelessWidget {
       onTap: () {
         if (!hasPlayer) {
           Get.bottomSheet(
-            AddPlayerBottomSheet(teamName: teamName,scoreBoardId: controller.scoreboardId.value,),
+            AppPlayersBottomSheet(
+              matchId: controller.scoreboardId.value,
+              teamName: teamName,
+            ),
             isScrollControlled: true,
-            backgroundColor: Colors.transparent,
           );
         }
       },
