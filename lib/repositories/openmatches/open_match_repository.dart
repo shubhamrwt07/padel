@@ -2,6 +2,7 @@ import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject
 import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
 import 'package:padel_mobile/data/response_models/get_players_level_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/find_near_by_player_model.dart';
+import 'package:padel_mobile/data/response_models/openmatch_model/get_customer_data_by_phone_number_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
@@ -354,6 +355,32 @@ class OpenMatchRepository {
       rethrow;
     }
   }
+  ///Get Customer Name By Phone Number------------------------------------------
+  Future<GetCustomerDataByPhoneNumberModel> getCustomerNameByPhoneNumber({
+    required String phoneNumber,
+  }) async {
+    try {
+      final response = await dioClient.get(
+        "${AppEndpoints.getCustomerNameByPhoneNumber}phoneNumber=$phoneNumber",
+      );
 
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Get-Customer Name By Phone Number Data: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetCustomerDataByPhoneNumberModel.fromJson(response.data);
+      } else {
+        throw Exception("Get-Customer Name By Phone Number failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Get-Customer Name By Phone Number failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
 
 }

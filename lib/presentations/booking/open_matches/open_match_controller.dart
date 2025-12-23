@@ -313,7 +313,8 @@ class OpenMatchesController extends GetxController {
       acceptingRequestId.value = requestId;
       final body = {
         "requestId": requestId,
-        "action": "accept"
+        "action": "accept",
+        "type": "MatchCreator"
       };
       await repository.acceptOrRejectRequestPlayer(body: body);
       

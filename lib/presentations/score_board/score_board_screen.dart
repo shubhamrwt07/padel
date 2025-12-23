@@ -512,7 +512,15 @@ class ScoreBoardScreen extends StatelessWidget {
           ? controller.teams[1]["players"] as List
           : [];
       bool allPlayersAdded = teamAPlayers.length == 2 && teamBPlayers.length == 2;
-      bool isDisabled = controller.isCompleted.value || !allPlayersAdded;
+      
+      // Check if all existing sets have scores
+      bool allSetsHaveScores = controller.sets.every((set) {
+        final teamAScore = set["teamAScore"] ?? 0;
+        final teamBScore = set["teamBScore"] ?? 0;
+        return teamAScore > 0 || teamBScore > 0;
+      });
+      
+      bool isDisabled = controller.isCompleted.value || !allPlayersAdded || allSetsHaveScores;
       
       return Container(
         width: double.infinity,
@@ -526,7 +534,7 @@ class ScoreBoardScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
           onPressed: isDisabled ? null : () {
-            _showAddScoreDialog();
+            Get.dialog(const SetScoreDialog());
           },
           child: const Text(
             "+ Add Score",
@@ -924,3 +932,249 @@ class ScoreBoardScreen extends StatelessWidget {
     });
   }
 }
+
+class SetScoreDialog extends StatefulWidget {
+  const SetScoreDialog({super.key});
+
+  @override
+  State<SetScoreDialog> createState() => _SetScoreDialogState();
+}
+
+class _SetScoreDialogState extends State<SetScoreDialog> {
+  final ScoreBoardController controller = Get.find<ScoreBoardController>();
+  final teamAController = TextEditingController();
+  final teamBController = TextEditingController();
+  int currentSetNumber = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _determineCurrentSet();
+  }
+
+  void _determineCurrentSet() {
+    // Find the first set without scores
+    for (var set in controller.sets) {
+      final teamAScore = set["teamAScore"] ?? 0;
+      final teamBScore = set["teamBScore"] ?? 0;
+      if (teamAScore == 0 && teamBScore == 0) {
+        currentSetNumber = set["setNumber"];
+        return;
+      }
+    }
+    // If all sets have scores, don't show dialog (button should be disabled)
+    currentSetNumber = controller.sets.isNotEmpty ? controller.sets.last["setNumber"] : 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _header(),
+          _scoreSection(),
+          Divider(height: 1,color: Colors.grey.shade300,),
+          _goButton(),
+        ],
+      ),
+    );
+  }
+
+  /// HEADER
+  Widget _header() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: const BoxDecoration(
+        color: Color(0xFF263FA3),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Row(
+        children: [
+          const Text("🏆", style: TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
+          Text(
+            "Set $currentSetNumber",
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: Get.back,
+            child: const Icon(Icons.close, color: Colors.white),
+          )
+        ],
+      ),
+    );
+  }
+
+  /// SCORE SECTION
+  Widget _scoreSection() {
+    return SizedBox(
+      height: 190,
+      child: Row(
+        children: [
+          _teamCard(
+            title: "Team A",
+            bgColor: const Color(0xFFF2F5FF),
+            avatars: const [],
+          ),
+          Container(width: 1, color: Colors.grey.shade300),
+          _teamCard(
+            title: "Team B",
+            bgColor: const Color(0xFFFFFEF6),
+            avatars: const [],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _teamCard({
+    required String title,
+    required Color bgColor,
+    required List<String> avatars,
+  }) {
+    final teamPlayers = title == "Team A" 
+        ? (controller.teams.isNotEmpty ? controller.teams[0]["players"] as List : [])
+        : (controller.teams.length > 1 ? controller.teams[1]["players"] as List : []);
+    
+    return Expanded(
+      child: Container(
+        color: bgColor,
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _avatars(teamPlayers),
+            Text(
+              title,
+              style: Get.textTheme.headlineSmall!.copyWith(color: AppColors.labelBlackColor),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: title == "Team A" ? teamAController : teamBController,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(2),
+                ],
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
+                  height: 1,
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "00",
+                  filled: true,
+                  fillColor: bgColor,
+                  hintStyle: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _avatars(List players) {
+    return Stack(
+      children: List.generate(
+        players.length,
+        (i) => Container(
+          margin: EdgeInsets.only(left: i * 22),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.white,
+            child: (players[i]["pic"] != null && players[i]["pic"].toString().isNotEmpty)
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: players[i]["pic"],
+                      fit: BoxFit.cover,
+                      width: 32,
+                      height: 32,
+                      placeholder: (context, url) => const Center(
+                        child: SizedBox(
+                          height: 12,
+                          width: 12,
+                          child: LoadingWidget(color: AppColors.primaryColor),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => CircleAvatar(
+                        radius: 18,
+                        backgroundColor: AppColors.textFieldColor,
+                        child: Text(
+                          getNameInitials(players[i]["name"], players[i]["lastName"]),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : CircleAvatar(
+                    radius: 18,
+                    backgroundColor: AppColors.textFieldColor,
+                    child: Text(
+                      getNameInitials(players[i]["name"], players[i]["lastName"]),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// GO BUTTON
+  Widget _goButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Obx(() => ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: controller.isAddingScore.value ? Colors.grey : const Color(0xFF6BC172),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+        ),
+        onPressed: controller.isAddingScore.value ? null : () {
+          final teamAScore = int.tryParse(teamAController.text) ?? 0;
+          final teamBScore = int.tryParse(teamBController.text) ?? 0;
+          
+          controller.addScore(currentSetNumber, teamAScore, teamBScore).then((_) {
+            if (!controller.isAddingScore.value) {
+              Get.back();
+            }
+          });
+        },
+        child: controller.isAddingScore.value
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: LoadingWidget(color: Colors.white),
+              )
+            : Text(
+                "GO",
+                style: Get.textTheme.labelLarge!.copyWith(color: Colors.white),
+              ),
+      )),
+    );
+  }
+}
+

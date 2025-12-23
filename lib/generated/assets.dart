@@ -7,6 +7,7 @@ class Assets {
   static const String imagesGirls = 'assets/images/girls.png';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
+  static const String imagesIcBookACourt = 'assets/images/ic_book_a_court.png';
   static const String imagesIcBookingcancellation = 'assets/images/ic_bookingcancellation.svg';
   static const String imagesIcBookings = 'assets/images/ic_bookings.svg';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';

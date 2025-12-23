@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
+import 'package:padel_mobile/presentations/home/home_controller.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:get_storage/get_storage.dart';
@@ -29,6 +30,7 @@ class QuestionsBottomsheetController extends GetxController {
   
   OpenMatchBookingController openMatchBookingController = Get.put(OpenMatchBookingController());
   ProfileController profileController = Get.put(ProfileController());
+  HomeController homeController = Get.put(HomeController());
   
   // Local match data from create open matches controller
   Map<String, dynamic> localMatchData = {};
@@ -116,6 +118,7 @@ class QuestionsBottomsheetController extends GetxController {
   }
 
   // Create match after payment success
+  var openMatchId = ''.obs;
   Future<void> createMatchAfterPayment() async {
     try {
       final matchDateValue = localMatchData["matchDate"];
@@ -206,6 +209,7 @@ class QuestionsBottomsheetController extends GetxController {
 
       final response = await repository.createMatch(data: cleanedBody);
       log("🎯 Match Created -> ${response.toJson()}");
+      openMatchId.value = response.matches?[0].id??"";
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
 
       await createBooking();
@@ -261,11 +265,15 @@ class QuestionsBottomsheetController extends GetxController {
             .toList(),
         "register_club_id": localMatchData["clubId"] ?? "",
         "ownerId": ownerId,
+        "openMatchId":openMatchId.value
       }
     ];
 
     log("🎯 Booking Payload: $payload");
     await cartController.bookCart(data: payload);
+    
+    // Refresh bookings in home controller
+    await homeController.fetchBookings();
   }
 
   Map<String, dynamic> removeEmpty(Map<String, dynamic> json) {

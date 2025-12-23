@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/widgets/custom_match_shimmer.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../configs/app_colors.dart';
@@ -406,7 +407,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMatchHeader(context, match, completed: completed),
-            _buildPlayerRow(completed: completed, match: match),
+            _buildPlayerRow(completed: completed, match: match,context: context),
             Divider(
               thickness: 1.5,
               height: 0,
@@ -529,6 +530,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
   Widget _buildPlayerRow({
     required bool completed,
     required OpenMatchBookingData? match,
+    required BuildContext context
   }) {
     final teamAPlayers = match?.teamA ?? [];
     final teamBPlayers = match?.teamB ?? [];
@@ -616,10 +618,10 @@ class OpenMatchBookingScreen extends StatelessWidget {
               isLoginUserInMatch: isLoginUserInMatch,
               onTap: () {
                 final id = match?.sId;
-                Get.toNamed(
-                  RoutesName.addPlayer,
+                AddPlayerBottomSheet.show(
+                  context,
                   arguments: {
-                    "matchId": id, 
+                    "matchId": id,
                     "team": "teamA",
                     "needBottomAllOpenMatches": true,
                     "isLoginUser": !isLoginUserInMatch,
@@ -627,6 +629,17 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     "isMatchCreator": _isMatchCreator(match),
                   },
                 );
+                // Get.toNamed(
+                //   RoutesName.addPlayer,
+                //   arguments: {
+                //     "matchId": id,
+                //     "team": "teamA",
+                //     "needBottomAllOpenMatches": true,
+                //     "isLoginUser": !isLoginUserInMatch,
+                //     "matchLevel":match?.skillLevel??"",
+                //     "isMatchCreator": _isMatchCreator(match),
+                //   },
+                // );
               },
             ),
           );
@@ -704,10 +717,10 @@ class OpenMatchBookingScreen extends StatelessWidget {
               isLoginUserInMatch: isLoginUserInMatch,
               onTap: () {
                 final id = match?.sId;
-                Get.toNamed(
-                  RoutesName.addPlayer,
+                AddPlayerBottomSheet.show(
+                  context,
                   arguments: {
-                    "matchId": id, 
+                    "matchId": id,
                     "team": "teamB",
                     "needBottomAllOpenMatches": true,
                     "isLoginUser": !isLoginUserInMatch,
@@ -715,6 +728,17 @@ class OpenMatchBookingScreen extends StatelessWidget {
                     "isMatchCreator": _isMatchCreator(match),
                   },
                 );
+                // Get.toNamed(
+                //   RoutesName.addPlayer,
+                //   arguments: {
+                //     "matchId": id,
+                //     "team": "teamB",
+                //     "needBottomAllOpenMatches": true,
+                //     "isLoginUser": !isLoginUserInMatch,
+                //     "matchLevel":match?.skillLevel??"",
+                //     "isMatchCreator": _isMatchCreator(match),
+                //   },
+                // );
               },
             ),
           );

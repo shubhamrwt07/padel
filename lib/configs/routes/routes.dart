@@ -276,13 +276,14 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
+    // GetPage(
+    //   name: RoutesName.addPlayer,
+    //   page: () => AddPlayerScreen(),
+    //   binding: AddPlayerBinding(),
+    //   transition: Transition.rightToLeft,
+    //   transitionDuration: defaultDuration,
+    // ),
     GetPage(
-      name: RoutesName.addPlayer,
-      page: () => AddPlayerScreen(),
-      binding: AddPlayerBinding(),
-      transition: Transition.rightToLeft,
-      transitionDuration: defaultDuration,
-    ), GetPage(
       name: RoutesName.createOpenMatch,
       page: () => CreateOpenMatchesScreen(),
       binding: CreateOpenMatchesBinding(),

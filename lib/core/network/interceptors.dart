@@ -48,12 +48,12 @@ class LoggerInterceptor extends Interceptor {
     } else if (err.response != null) {
       if (err.response?.statusCode != 404) {
         SnackBarUtils.showErrorSnackBar(
-          err.response?.data?['message'] ?? 'An error occurred',
+          err.response?.data?['message'] ?? 'Api takes to much time to load',
         );
       }
     } else {
       SnackBarUtils.showErrorSnackBar(
-        err.response?.data?['message'] ?? 'An error occurred',
+        err.response?.data?['message'] ?? 'Api takes to much time to load',
       );
     }
 

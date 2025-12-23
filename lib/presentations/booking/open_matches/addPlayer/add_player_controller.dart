@@ -15,8 +15,9 @@ class AddPlayerController extends GetxController {
   ScoreBoardController? scoreBoardController;
   YourMatchRequestsController? yourMatchRequestsController;
 
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
+  // final firstNameController = TextEditingController();
+  // final lastNameController = TextEditingController();
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
 
@@ -31,6 +32,7 @@ class AddPlayerController extends GetxController {
   var playerId = "".obs;
   var selectedTeam = "".obs;
   var matchId = "".obs;
+  var requestId = "".obs;
   var isLoginUserAdding = false.obs;
   var isMatchCreator = false.obs;
 
@@ -42,32 +44,22 @@ class AddPlayerController extends GetxController {
       await addLoginUserDirectly();
       return;
     }
-
-    if (firstNameController.text.isEmpty) {
-      return SnackBarUtils.showWarningSnackBar("Please Enter Full Name");
-    } else if (emailController.text.isEmpty) {
-      return SnackBarUtils.showWarningSnackBar("Please Enter Email Address");
-    } else if (!GetUtils.isEmail(emailController.text.trim())) {
-      return SnackBarUtils.showWarningSnackBar(
-          "Please Enter a Valid Email Address");
-    } else if (phoneController.text.isEmpty) {
+    if (phoneController.text.isEmpty) {
       return SnackBarUtils.showWarningSnackBar("Please Enter Phone Number");
-    } else if (gender.value.isEmpty) {
-      return SnackBarUtils.showWarningSnackBar("Please Select the Gender");
-    } else if (playerLevel.value.isEmpty) {
-      return SnackBarUtils.showWarningSnackBar(
-          "Please Select the Player Level");
+    }
+    else if (nameController.text.isEmpty) {
+      return SnackBarUtils.showWarningSnackBar("Please Enter Full Name");
     }
 
     isLoading.value = true;
     try {
       final body = {
-        "name": firstNameController.text.trim(),
-        "lastName": lastNameController.text.trim(),
+        "name": nameController.text.trim(),
+        // "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "phoneNumber": phoneController.text.trim(),
-        "gender": gender.value,
-        "level": playerLevel.value,
+        // "gender": gender.value,
+        // "level": playerLevel.value,
       };
 
       final response = await repository.createUserForOpenMatch(body: body);
@@ -111,10 +103,10 @@ class AddPlayerController extends GetxController {
             );
           }
         } else if (yourMatchRequestsController != null) {
-          final requested = await requestPlayerForOpenMatch();
-          if (requested) {
+          final accepted = await acceptRequest();
+          if (accepted) {
             CustomLogger.logMessage(
-              msg: "User Created & Player Requested from Your Match Requests $body",
+              msg: "User Created & Request Accepted from Your Match Requests $body",
               level: LogLevel.info,
             );
           }
@@ -184,10 +176,10 @@ class AddPlayerController extends GetxController {
             );
           }
         } else if (yourMatchRequestsController != null) {
-          final requested = await requestPlayerForOpenMatch();
-          if (requested) {
+          final accepted = await acceptRequest();
+          if (accepted) {
             CustomLogger.logMessage(
-              msg: "Login User Requested Directly from Your Match Requests",
+              msg: "Login User Request Accepted Directly from Your Match Requests",
               level: LogLevel.info,
             );
           }
@@ -274,6 +266,36 @@ class AddPlayerController extends GetxController {
     }
   }
 
+  ///Accept Request For Open Match Api-----------------------------------------------
+  Future<bool> acceptRequest() async {
+    try {
+      final body = {
+        "requestId": requestId.value,
+        "action": "accept"
+      };
+      final response = await repository.acceptOrRejectRequestPlayer(body: body);
+
+      if (response != null) {
+        await yourMatchRequestsController?.fetchJoinRequests();
+        Get.back(result: true);
+        SnackBarUtils.showSuccessSnackBar(
+            "Request accepted successfully");
+        CustomLogger.logMessage(
+          msg: "Request Accepted $body",
+          level: LogLevel.info,
+        );
+        return true;
+      } else {
+        SnackBarUtils.showInfoSnackBar(
+            "Failed to accept request");
+        return false;
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error :-> $e", level: LogLevel.error);
+      return false;
+    }
+  }
+
   ///Add Guest Player in the Simple Match---------------------------------------
   ScoreBoardRepository scoreBoardRepository = Get.put(ScoreBoardRepository());
   var scoreboardId = ''.obs;
@@ -322,8 +344,8 @@ class AddPlayerController extends GetxController {
       
       if (profile?.response != null) {
         final user = profile!.response!;
-        firstNameController.text = user.name?.capitalizeFirst ?? '';
-        lastNameController.text = user.lastName?.capitalizeFirst ?? '';
+        nameController.text = user.name?.capitalizeFirst ?? '';
+        // lastNameController.text = user.lastName?.capitalizeFirst ?? '';
         emailController.text = user.email ?? '';
         phoneController.text = "${user.phoneNumber ?? ''}";
         gender.value = user.gender ?? '';
@@ -345,6 +367,42 @@ class AddPlayerController extends GetxController {
     return code;
   }
 
+  ////
+  var numberLoader = false.obs;
+  var isNameFromApi = false.obs;
+  void resetNameField() {
+    if (isNameFromApi.value) {
+      nameController.clear();
+      isNameFromApi.value = false;
+    }
+  }
+
+  Future<void> getUserDataFromNumber(String phoneNumber) async {
+    if (phoneNumber.length != 10) return;
+
+    try {
+      numberLoader.value = true;
+      final result = await repository.getCustomerNameByPhoneNumber(
+          phoneNumber: phoneNumber);
+      
+      if (result?.result?.name != null && result.result!.name!.isNotEmpty) {
+        nameController.text = result.result?.name ??"";
+        isNameFromApi.value = true;
+      } else {
+        isNameFromApi.value = false;
+      }
+
+    } catch (e, st) {
+        CustomLogger.logMessage(
+          msg: "Failed to fetch user data: ${e.toString()}",
+          level: LogLevel.error,
+          st: st,
+        );
+        isNameFromApi.value = false;
+      } finally {
+    numberLoader.value = false;
+    }
+  }
 
   ///Get Players Level Api------------------------------------------------------
   var matchLevel = ''.obs;
@@ -369,48 +427,60 @@ class AddPlayerController extends GetxController {
       isLoadingLevels.value = false;
     }
   }
+  void initializeWithArguments(Map<String, dynamic> args) {
+    matchId.value = args["matchId"] ?? "";
+    selectedTeam.value = args["team"] ?? "";
+    scoreboardId.value = args["scoreBoardId"] ?? "";
+    matchLevel.value = args["matchLevel"] ?? "";
+    requestId.value = args["requestId"] ?? "";
+    isMatchCreator.value = args["isMatchCreator"] ?? false;
+
+    if (args["needAllOpenMatches"] == true &&
+        Get.isRegistered<AllOpenMatchController>()) {
+      allOpenMatchController = Get.find<AllOpenMatchController>();
+    }
+    if (args["needBottomAllOpenMatches"] == true &&
+        Get.isRegistered<OpenMatchBookingController>()) {
+      openMatchBookingController = Get.find<OpenMatchBookingController>();
+    }
+
+    if (args["needOpenMatches"] == true &&
+        Get.isRegistered<OpenMatchesController>()) {
+      openMatchesController = Get.find<OpenMatchesController>();
+    }
+
+    if (args["needAsGuest"] == true &&
+        Get.isRegistered<ScoreBoardController>()) {
+      scoreBoardController = Get.find<ScoreBoardController>();
+    }
+
+    if (args["needYourMatchRequests"] == true &&
+        Get.isRegistered<YourMatchRequestsController>()) {
+      yourMatchRequestsController = Get.find<YourMatchRequestsController>();
+    }
+
+    // Check if login user wants to add themselves
+    final userId = storage.read('userId');
+    if (args["isLoginUser"] == true && userId != null) {
+      preloadLoginUserData();
+    }
+
+    fetchPlayerLevels();
+  }
+
+  void clearTextFields() {
+    nameController.clear();
+    emailController.clear();
+    phoneController.clear();
+    isNameFromApi.value = false;
+    isLoginUserAdding.value = false;
+  }
+
   @override
   void onInit() {
     final args = Get.arguments;
-
     if (args != null) {
-      matchId.value = args["matchId"] ?? "";
-      selectedTeam.value = args["team"] ?? "";
-      scoreboardId.value = args["scoreBoardId"] ?? "";
-      matchLevel.value = args["matchLevel"] ?? "";
-      isMatchCreator.value = args["isMatchCreator"] ?? false;
-
-      if (args["needAllOpenMatches"] == true &&
-          Get.isRegistered<AllOpenMatchController>()) {
-        allOpenMatchController = Get.find<AllOpenMatchController>();
-      }
-      if (args["needBottomAllOpenMatches"] == true &&
-          Get.isRegistered<OpenMatchBookingController>()) {
-        openMatchBookingController = Get.find<OpenMatchBookingController>();
-      }
-
-      if (args["needOpenMatches"] == true &&
-          Get.isRegistered<OpenMatchesController>()) {
-        openMatchesController = Get.find<OpenMatchesController>();
-      }
-
-      if (args["needAsGuest"] == true &&
-          Get.isRegistered<ScoreBoardController>()) {
-        scoreBoardController = Get.find<ScoreBoardController>();
-      }
-
-      if (args["needYourMatchRequests"] == true &&
-          Get.isRegistered<YourMatchRequestsController>()) {
-        yourMatchRequestsController = Get.find<YourMatchRequestsController>();
-      }
-
-      // Check if login user wants to add themselves
-      final userId = storage.read('userId');
-      if (args["isLoginUser"] == true && userId != null) {
-        preloadLoginUserData();
-      }
-
-      fetchPlayerLevels();
+      initializeWithArguments(args);
     }
     super.onInit();
   }

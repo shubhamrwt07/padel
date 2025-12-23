@@ -4,6 +4,7 @@ import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/configs/components/search_field.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/booking_exports.dart';
 
@@ -773,10 +774,10 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
     return GestureDetector(
       onTap: () {
         if (isMatchCreator) {
-          Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId), isScrollControlled: true);
+          Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId, selectedTeam: team), isScrollControlled: true);
         } else {
-          Get.toNamed(
-            RoutesName.addPlayer,
+          AddPlayerBottomSheet.show(
+            context,
             arguments: {
               "team": team,
               "matchId": matchId,
@@ -786,6 +787,17 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               "isMatchCreator": isMatchCreator,
             },
           );
+          // Get.toNamed(
+          //   RoutesName.addPlayer,
+          //   arguments: {
+          //     "team": team,
+          //     "matchId": matchId,
+          //     "needOpenMatches": true,
+          //     "matchLevel": skillLevel,
+          //     "isLoginUser": !isLoginUserInMatch,
+          //     "isMatchCreator": isMatchCreator,
+          //   },
+          // );
         }
       },
       child: CircleAvatar(
@@ -1677,7 +1689,8 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
 }
 class AppPlayersBottomSheet extends StatelessWidget {
   final String matchId;
-  const AppPlayersBottomSheet({super.key, required this.matchId});
+  final String? selectedTeam;
+  const AppPlayersBottomSheet({super.key, required this.matchId, this.selectedTeam});
 
   @override
   Widget build(BuildContext context) {
@@ -1708,7 +1721,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
             const SizedBox(height: 12),
             _playersList(),
             const SizedBox(height: 12),
-            _actionButtons(),
+            _actionButtons(context),
           ],
         ),
       ),
@@ -1919,7 +1932,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
     }
   }
 
-  Widget _actionButtons() {
+  Widget _actionButtons(BuildContext context) {
     final style =  Get.textTheme.labelLarge!.copyWith(color: Colors.white);
     return Column(
       children: [
@@ -1952,10 +1965,10 @@ class AppPlayersBottomSheet extends StatelessWidget {
         const SizedBox(height: 4),
         ElevatedButton(
           onPressed: () {
-            Get.toNamed(
-              RoutesName.addPlayer,
+            AddPlayerBottomSheet.show(
+              context,
               arguments: {
-                "team": "teamA",
+                "team": selectedTeam ?? "teamA",
                 "matchId": matchId,
                 "needOpenMatches": true,
                 "matchLevel": "",
@@ -1963,6 +1976,18 @@ class AppPlayersBottomSheet extends StatelessWidget {
                 "isMatchCreator": true,
               },
             );
+
+            // Get.toNamed(
+            //   RoutesName.addPlayer,
+            //   arguments: {
+            //     "team": "teamA",
+            //     "matchId": matchId,
+            //     "needOpenMatches": true,
+            //     "matchLevel": "",
+            //     "isLoginUser": false,
+            //     "isMatchCreator": true,
+            //   },
+            // );
           },
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(40),

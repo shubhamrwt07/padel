@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/app_strings.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
@@ -11,6 +12,14 @@ import 'package:padel_mobile/presentations/main_home_page/main_home_controller.d
 import 'package:padel_mobile/presentations/notification/notification_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/presentations/home/widget/custom_skelton_loader.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import '../../data/request_models/home_models/get_club_name_model.dart';
+import 'dart:developer';
 class MainHomeScreen extends StatelessWidget {
   final MainHomeController controller = Get.put(MainHomeController());
    MainHomeScreen({super.key});
@@ -116,24 +125,32 @@ class MainHomeScreen extends StatelessWidget {
         ],
         context: context,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _banner(),
-            const SizedBox(height: 20),
-            _quickActions(),
-            const SizedBox(height: 15),
-            _sectionTitle("Courts Near you",(){Get.toNamed(RoutesName.home);}),
-            _courtCard(),
-            const SizedBox(height: 15),
-            _sectionTitle("Top players near you",(){}),
-            _players(),
-            // const SizedBox(height: 24),
-            // _sectionTitle("Upcoming Tournaments"),
-            // _tournamentCard(),
-          ],
+      body: RefreshIndicator(
+        color: Colors.white,
+        onRefresh: () async {
+          await controller.homeController.retryFetch();
+          await controller.profileController.fetchUserProfile();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _bookingSection(),
+              const SizedBox(height: 20),
+              _quickActions(),
+              const SizedBox(height: 15),
+              _sectionTitle("Courts Near you",(){Get.toNamed(RoutesName.home);}),
+              _courtCard(),
+              const SizedBox(height: 15),
+              _sectionTitle("Top players near you",(){}),
+              _players(),
+              // const SizedBox(height: 24),
+              // _sectionTitle("Upcoming Tournaments"),
+              // _tournamentCard(),
+            ],
+          ),
         ),
       ),
     );
@@ -146,7 +163,7 @@ class MainHomeScreen extends StatelessWidget {
           width: 120,
           height: 20,
           decoration: BoxDecoration(
-            color: AppColors.textFieldColor.withValues(alpha: 0.8),
+            color: AppColors.primaryColor.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(6),
           ),
         );
@@ -203,12 +220,247 @@ class MainHomeScreen extends StatelessWidget {
   }
 
 
+  /// BOOKING SECTION
+  Widget _bookingSection() {
+    return Obx(() {
+      final homeController = controller.homeController;
+      
+      if (homeController.isLoadingBookings.value) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: bookingShimmer(),
+        );
+      }
+      
+      final bookings = homeController.bookings.value?.data ?? [];
+      
+      if (bookings.isEmpty) {
+        return _banner();
+      } else {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text(
+                    AppStrings.yourBooking,
+                    style: Get.textTheme.headlineMedium,
+                  ),
+                  // const Spacer(),
+                  // GestureDetector(
+                  //   onTap: () => Get.toNamed(RoutesName.home),
+                  //   child: Container(
+                  //     color: Colors.transparent,
+                  //     child: Text(
+                  //       "See all",
+                  //       style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _clubTicketList(),
+          ],
+        );
+      }
+    });
+  }
+
+  Widget _clubTicketList() {
+    final booking = controller.homeController.bookings.value?.data ?? [];
+    return SizedBox(
+      height: 80,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(left: 16),
+        itemCount: booking.length,
+        itemBuilder: (context, index) => _buildBookingCard(context, booking[index]),
+      ),
+    );
+  }
+
+  Widget _buildBookingCard(BuildContext context, dynamic b) {
+    final club = b.registerClubId;
+    return GestureDetector(
+      onTap: () {
+        if (b.sId != null && b.sId!.isNotEmpty) {
+          Get.toNamed(RoutesName.bookingConfirmAndCancel, arguments: {"id": b.sId!});
+        } else {
+          Get.snackbar("Error", "Booking ID not available");
+        }
+      },
+      child: Container(
+        width: 235,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.tabColor),
+          gradient:LinearGradient(
+            colors: [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            const SizedBox(height: 1),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _bookingImage(club),
+                _bookingInfo(context, club),
+                _bookingRatingArrow(context),
+              ],
+            ),
+            _bookingTimeInfo(context, b),
+          ],
+        ),
+      ).paddingOnly(right: 10),
+    );
+  }
+
+  Widget _bookingImage(dynamic club) {
+    return Container(
+      height: 34,
+      width: 34,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.greyColor),
+      ),
+      child: ClipOval(
+        child: (club?.courtImage != null &&
+            club!.courtImage!.isNotEmpty &&
+            club.courtImage![0].isNotEmpty)
+            ? CachedNetworkImage(
+          imageUrl: club.courtImage![0],
+          fit: BoxFit.cover,
+          placeholder: (_, __) => LoadingWidget(color: AppColors.primaryColor),
+          errorWidget: (_, __, ___) => Image.asset(Assets.imagesImgHomeLogo),
+        )
+            : Image.asset(
+          Assets.imagesImgHomeLogo,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _bookingInfo(BuildContext context, dynamic club) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: Get.width * 0.3,
+          child: Text(
+            club?.clubName ?? "N/A",
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.blackColor),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Row(
+          children: [
+            Image.asset(Assets.imagesIcLocation, scale: 3, color: AppColors.blackColor),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: Get.width * 0.3,
+              child: Text(
+                club?.city ?? "N/A",
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ).paddingOnly(left: 6);
+  }
+
+  Widget _bookingRatingArrow(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.star, color: AppColors.secondaryColor, size: 13),
+            Text("4.9", style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ).paddingOnly(bottom: 20),
+      ],
+    );
+  }
+
+  Widget _bookingTimeInfo(BuildContext context, dynamic b) {
+    return Container(
+      color: Colors.transparent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Text(
+                controller.homeController.formatDate(b.bookingDate),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.blackColor,
+                ),
+              ),
+              if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
+                Text(
+                  formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? ""),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
+                ).paddingOnly(left: 5),
+            ],
+          ),
+          Transform.translate(
+            offset: const Offset(0, -3),
+            child: GestureDetector(
+              onTap: () {
+                if (!controller.homeController.isCheckingScoreboard.value) {
+                  if (b.sId != null && b.sId!.isNotEmpty) {
+                    controller.homeController.createScoreBoard(bookingId: b.sId!);
+                  }
+                }
+              },
+              child: Obx(() {
+                final isLoading = controller.homeController.loadingBookingId.value == b.sId;
+                return Container(
+                  height: 23,
+                  width: 55,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.secondaryColor,
+                  ),
+                  child: isLoading
+                      ? LoadingAnimationWidget.waveDots(
+                    color: AppColors.whiteColor,
+                    size: 20,
+                  )
+                      : Text(
+                    "Play Now",
+                    style: Get.textTheme.headlineSmall!
+                        .copyWith(color: Colors.white, fontSize: 10),
+                  ),
+                );
+              }),
+            ),
+          )
+        ],
+      ),
+    ).paddingOnly(bottom: 2);
+  }
+
   /// BANNER
   Widget _banner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        height: 150,
+        height: 140,
         width: Get.width,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -241,26 +493,31 @@ class MainHomeScreen extends StatelessWidget {
                     .copyWith(color: Colors.white),
               ),
               const Spacer(),
-              Container(
-                width: Get.width * 0.4,
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(40),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "BOOK NOW!",
-                      style: Get.textTheme.titleSmall!
-                          .copyWith(fontSize: 15),
-                    ).paddingOnly(left: 10),
-                    CircleAvatar(
-                      backgroundColor: AppColors.primaryColor,
-                      child: const Icon(Icons.arrow_forward, color: Colors.white),
-                    ),
-                  ],
+              GestureDetector(
+                onTap: (){
+                  Get.toNamed(RoutesName.home);
+                },
+                child: Container(
+                  width: Get.width * 0.4,
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "BOOK NOW!",
+                        style: Get.textTheme.titleSmall!
+                            .copyWith(fontSize: 15),
+                      ).paddingOnly(left: 10),
+                      CircleAvatar(
+                        backgroundColor: AppColors.primaryColor,
+                        child: const Icon(Icons.arrow_forward, color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -283,22 +540,28 @@ class MainHomeScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: items
           .map(
-            (e) => Column(
-          children: [
-            Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: AppColors.primaryColor,
+            (e) => GestureDetector(
+              onTap: (){
+                if(Get.isSnackbarOpen)return;
+                SnackBarUtils.showInfoSnackBar("Coming Soon!");
+              },
+              child: Column(
+                        children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.primaryColor,
+                ),
+                child: Icon(e["icon"] as IconData,
+                    color: Colors.white),
               ),
-              child: Icon(e["icon"] as IconData,
-                  color: Colors.white),
+              const SizedBox(height: 6),
+              Text(e["title"] as String,style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),),
+                        ],
+                      ),
             ),
-            const SizedBox(height: 6),
-            Text(e["title"] as String,style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),),
-          ],
-        ),
       )
           .toList(),
     );
@@ -329,129 +592,200 @@ class MainHomeScreen extends StatelessWidget {
 
   /// COURT CARD
   Widget _courtCard() {
-    final courts = List.generate(5, (i) => {
-      "name": "Padel Haus",
-      "location": "Chandigarh",
-      "rating": "4.9",
-      "price": "₹ 2000",
-      "image": Assets.imagesImgBookNow, // replace with network if needed
-    });
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: CarouselSlider.builder(
-        itemCount: courts.length,
-        itemBuilder: (context, index, realIndex) {
-          final court = courts[index];
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: Stack(
-                children: [
-                  /// IMAGE
-                  Positioned.fill(
-                    child: Image.asset(
-                      court["image"]!,
-                      fit: BoxFit.cover,
-                    ),
+    return Obx(() {
+      final homeController = controller.homeController;
+      
+      if (homeController.isLoadingClub.value) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CarouselSlider.builder(
+            itemCount: 3,
+            itemBuilder: (context, index, realIndex) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26),
+                    color: Colors.grey[300],
                   ),
-
-                  /// BLACK GRADIENT
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.15),
-                            Colors.black.withOpacity(0.35),
-                            Colors.black.withOpacity(0.75),
-                          ],
+                  child: const Center(
+                    child: LoadingWidget(color: AppColors.primaryColor),
+                  ),
+                ),
+              );
+            },
+            options: CarouselOptions(
+              height: 260,
+              viewportFraction: 0.78,
+              enlargeCenterPage: true,
+              enableInfiniteScroll: false,
+              autoPlay: false,
+            ),
+          ),
+        );
+      }
+      
+      final courts = homeController.courtsList;
+      
+      if (courts.isEmpty) {
+        return const SizedBox(height: 260);
+      }
+      
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: CarouselSlider.builder(
+          itemCount: courts.length > 5 ? 5 : courts.length,
+          itemBuilder: (context, index, realIndex) {
+            final court = courts[index];
+            return _buildCourtCarouselCard(context, court);
+          },
+          options: CarouselOptions(
+            height: 260,
+            viewportFraction: 0.78,
+            enlargeCenterPage: true,
+            enlargeStrategy: CenterPageEnlargeStrategy.scale,
+            enableInfiniteScroll: true,
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 3),
+          ),
+        ),
+      );
+    });
+  }
+  
+  Widget _buildCourtCarouselCard(BuildContext context, Courts court) {
+    return GestureDetector(
+      onTap: () {
+        log("CLUB ID -> ${court.id}");
+        if (court.id != null) {
+          Get.delete<BookingController>();
+          Get.toNamed(RoutesName.booking, arguments: {"data": court, "clubId": court.id});
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: Stack(
+            children: [
+              /// IMAGE
+              Positioned.fill(
+                child: court.courtImage != null && court.courtImage!.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: court.courtImage![0],
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: LoadingWidget(color: AppColors.primaryColor),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.photo, color: Colors.grey, size: 40),
                         ),
                       ),
-                    ),
-                  ),
+              ),
 
-                  /// CONTENT
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          court["name"]!,
-                          style: Get.textTheme.titleMedium!
-                              .copyWith(color: Colors.white),
-                        ),
-                        const SizedBox(height: 4),
-
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on,
-                                color: Colors.green, size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              court["location"]!,
-                              style: Get.textTheme.bodySmall!
-                                  .copyWith(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        Text(
-                          "4 Courts | Free parking | Shed",
-                          style: Get.textTheme.bodySmall!
-                              .copyWith(color: Colors.white70),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Row(
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.star,
-                                    color: Colors.green, size: 16),
-                                const SizedBox(width: 4),
-                                Text(
-                                  court["rating"]!,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Text(
-                              court["price"]!,
-                              style: Get.textTheme.titleMedium!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        ),
+              /// BLACK GRADIENT
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.15),
+                        Colors.black.withOpacity(0.35),
+                        Colors.black.withOpacity(0.75),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
-        options: CarouselOptions(
-          height: 260,
-          viewportFraction: 0.78, // 👈 overlap effect
-          enlargeCenterPage: true,
-          enlargeStrategy: CenterPageEnlargeStrategy.scale,
-          enableInfiniteScroll: true,
-          autoPlay: true,
-          autoPlayInterval: const Duration(seconds: 3),
+
+              /// CONTENT
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      court.clubName ?? "N/A",
+                      style: Get.textTheme.titleMedium!
+                          .copyWith(color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            color: Colors.green, size: 14),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            "${court.address}, ${court.city}",
+                            style: Get.textTheme.bodySmall!
+                                .copyWith(color: Colors.white70),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "${court.courtCount ?? 0} Courts | ${court.features?.join(' | ') ?? 'Available'}",
+                      style: Get.textTheme.bodySmall!
+                          .copyWith(color: Colors.white70),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.star,
+                                color: Colors.green, size: 16),
+                            const SizedBox(width: 4),
+                            const Text(
+                              "4.9",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          "₹ ${formatAmount(court.totalAmount ?? 0)}",
+                          style: Get.textTheme.titleMedium!
+                              .copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
