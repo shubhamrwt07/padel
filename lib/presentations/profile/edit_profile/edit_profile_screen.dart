@@ -31,15 +31,15 @@ class EditProfileUi extends StatelessWidget {
               children: [
                 _profileImage(context),
                 _textFieldWithLabel(
-                  "First Name",
+                  "Name",
                   controller.nameController,
                   context,
                 ),
-                _textFieldWithLabel(
-                  "Last Name",
-                  controller.lastNameController,
-                  context,
-                ),
+                // _textFieldWithLabel(
+                //   "Last Name",
+                //   controller.lastNameController,
+                //   context,
+                // ),
                 _textFieldWithLabel(
                   "Email",
                   controller.emailController,

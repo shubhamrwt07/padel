@@ -5,6 +5,7 @@ import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
+import 'package:padel_mobile/presentations/auth/otp/otp_controller.dart';
 import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
 
 import '../../../configs/components/snack_bars.dart';
@@ -15,7 +16,8 @@ class LoginController extends GetxController {
   final LoginRepository loginRepository = LoginRepository();
 
   // Text Controllers
-  TextEditingController emailController = TextEditingController();
+  // TextEditingController emailController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   // Focus Nodes
@@ -56,6 +58,32 @@ class LoginController extends GetxController {
     }
     return null;
   }
+  Future<void> sendOTP() async {
+    FocusManager.instance.primaryFocus!.unfocus();
+    try {
+      if (isLoading.value) return;
+      isLoading.value = true;
+      final Map<String, dynamic> body = {
+        "phoneNumber": phoneController.text.trim(),
+        "type": "Signup",
+      };
+
+      var result = await loginRepository.sendOTP(body: body);
+      if (result.status == "200") {
+        Get.toNamed(RoutesName.otp, arguments: {
+          'phoneNumber': phoneController.text.trim(),
+          'type': OtpScreenType.login,
+        });
+      } else {
+        SnackBarUtils.showErrorSnackBar(result.message!);
+      }
+    } catch (e) {
+      log(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> onLogin() async {
     FocusManager.instance.primaryFocus!.unfocus();
     try {
@@ -71,8 +99,7 @@ class LoginController extends GetxController {
       }
       isLoading.value = true;
       final Map<String, dynamic> body = {
-        "email": emailController.text.trim(),
-        "password": passwordController.text.trim(),
+        "phoneNumber": phoneController.text.trim(),
       };
       // Only include fcmToken if we have a non-empty value
       if (firebaseToken != null && firebaseToken.isNotEmpty) {
@@ -83,7 +110,6 @@ class LoginController extends GetxController {
       if (result.status == "200") {
         storage.write('token', result.response!.token);
         storage.write('userId', result.response!.user!.id);
-        // storage.write('existsOpenMatchData', result.response!.existsOpenMatchData);
         Get.offAllNamed(RoutesName.bottomNav);
       }
     }on DioException catch (e) {
@@ -91,7 +117,6 @@ class LoginController extends GetxController {
       final message = e.response?.data?['message'] ?? 'Login failed';
 
       if (code == 404) {
-        // ✅ Show snackbar only here for login 404
         SnackBarUtils.showErrorSnackBar(message);
       }
     }  catch (e) {

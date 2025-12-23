@@ -30,6 +30,7 @@ class PrimaryTextField extends StatelessWidget {
   final EdgeInsets? scrollPadding;
   final bool? obscureText;
   final TextStyle? hintStyle;
+  final TextStyle? labelStyle;
   final EdgeInsetsGeometry? contentPadding;
   final TextCapitalization? textCapitalization;
   final String? labelText;
@@ -59,7 +60,7 @@ class PrimaryTextField extends StatelessWidget {
     this.prefixText,
     this.prefix,this.prefixIcon,
     this.scrollPadding, this.obscureText,
-    this.hintStyle, this.contentPadding,
+    this.hintStyle,this.labelStyle, this.contentPadding,
     this.textCapitalization,this.labelText
   });
 
@@ -101,22 +102,23 @@ class PrimaryTextField extends StatelessWidget {
         hintText: hintText,
         labelText: labelText,
         hintStyle:hintStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
+        labelStyle:labelStyle?? Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500),
         border:  OutlineInputBorder(
           borderSide: BorderSide(color: Colors.transparent,width: 2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(5),
 
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.primaryColor,width: 2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.textFieldColor,width: 2),
-          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey,width: 1),
+          borderRadius: BorderRadius.circular(5),
         ),
         errorBorder: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.redColor,width: 2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(5),
         ),
         filled: true,
         fillColor: color??AppColors.textFieldColor,

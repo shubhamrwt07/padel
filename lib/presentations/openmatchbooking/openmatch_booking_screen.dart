@@ -545,7 +545,7 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final level = _extractLevelCode(
           (player.userId?.playerLevel?.isNotEmpty == true)
               ? player.userId!.playerLevel!
-              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+              : (player.userId?.level?.isNotEmpty == true ? player.userId!.level! : "-"),
         );
         if (!completed && user == null) {
           if (i == 0) {
@@ -654,9 +654,11 @@ class OpenMatchBookingScreen extends StatelessWidget {
         final player = teamBPlayers[i];
         final user = player.userId;
         final level = _extractLevelCode(
-          (player.userId?.playerLevel?.isNotEmpty == true)
+          player.userId?.playerLevel?.isNotEmpty == true
               ? player.userId!.playerLevel!
-              : (player.userId!.level?.isNotEmpty == true ? player.userId!.level! : "-"),
+              : player.userId?.level?.isNotEmpty == true 
+                  ? player.userId!.level! 
+                  : "-",
         );
 
         if (!completed && user == null) {

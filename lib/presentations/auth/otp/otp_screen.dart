@@ -98,9 +98,7 @@ class OtpScreen extends GetView<OtpController> {
               style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ).paddingOnly(
-              bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                  ? Get.height * 0.03
-                  : Get.height * 0.25,
+              bottom: Get.height * 0.25,
             );
           }),
 

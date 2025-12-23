@@ -5,17 +5,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/forgot_password_controller.dart';
 import 'package:padel_mobile/presentations/auth/forgot_password/widgets/reset_password_screen.dart';
+import 'package:padel_mobile/presentations/auth/login/login_controller.dart';
 import 'package:padel_mobile/repositories/authentication_repository/sign_up_repository.dart';
 
 import '../../../configs/components/snack_bars.dart';
 import '../sign_up/sign_up_controller.dart';
 
-enum OtpScreenType { createAccount, forgotPassword }
+enum OtpScreenType { createAccount, forgotPassword, login }
 
 class OtpController extends GetxController {
   SignUpRepository signUpRepository = SignUpRepository();
   SignUpController signUpController = Get.put(SignUpController());
   ForgotPasswordController forgotPasswordController = Get.put(ForgotPasswordController());
+  LoginController loginController = Get.put(LoginController());
 
   final TextEditingController valueController = TextEditingController();
   final arguments = Get.arguments;
@@ -27,7 +29,8 @@ class OtpController extends GetxController {
       if (isLoading.value) return;
       isLoading.value = true;
       Map<String, dynamic> body = {
-        "email": arguments['email'],
+        // "email": arguments['email'],
+        "phoneNumber": arguments['phoneNumber'],
         "otp": valueController.text.trim(),
       };
       var result = await signUpRepository.verifyOTP(body: body);
@@ -44,6 +47,8 @@ class OtpController extends GetxController {
   void getPurpose() async {
     if (OtpScreenType.createAccount == arguments['type']) {
       await signUpController.createAccount();
+    } else if (OtpScreenType.login == arguments['type']) {
+      await loginController.onLogin();
     } else {
      Get.to(()=>ResetPasswordScreen());
     }
@@ -56,6 +61,8 @@ class OtpController extends GetxController {
     isResending.value = true;
     if (arguments['type'] == OtpScreenType.createAccount) {
       await signUpController.sendOTP();
+    } else if (arguments['type'] == OtpScreenType.login) {
+      await loginController.sendOTP();
     } else {
       await forgotPasswordController.sendOTP();
     }
