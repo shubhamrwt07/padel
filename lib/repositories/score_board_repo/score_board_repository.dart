@@ -147,7 +147,7 @@ class ScoreBoardRepository {
       );
 
       final response = await dioClient.put(
-        AppEndpoints.addGuestPlayer,
+        AppEndpoints.updateScoreBoard,
         data: body,
       );
 

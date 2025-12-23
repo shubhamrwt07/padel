@@ -110,24 +110,31 @@ class WalletScreen extends StatelessWidget {
     ],
   );
   Widget _actionButton(IconData icon, String text) {
-    return Container(
-      height: 40,
-      width: Get.width*0.3,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white),
-          Text(
-            text,
-            style: Get.textTheme.headlineMedium!.copyWith(color: Colors.white),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () {
+        if (text == 'Add') {
+          controller.showAddBalanceDialog();
+        }
+      },
+      child: Container(
+        height: 40,
+        width: Get.width*0.3,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white),
+            Text(
+              text,
+              style: Get.textTheme.headlineMedium!.copyWith(color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }

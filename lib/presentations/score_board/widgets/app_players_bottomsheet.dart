@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/primary_text_feild.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_controller.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
 
 import '../../../repositories/openmatches/open_match_repository.dart';
 
@@ -11,6 +13,7 @@ class AppPlayersController extends GetxController {
   RxList<Map<String, dynamic>> nearbyPlayers = <Map<String, dynamic>>[].obs;
   RxBool isLoadingNearbyPlayers = false.obs;
   RxString requestingPlayerId = ''.obs;
+  RxList<String> requestedPlayerIds = <String>[].obs;
   final OpenMatchRepository repository = OpenMatchRepository();
 
   Future<void> fetchNearByPlayers() async {
@@ -23,9 +26,11 @@ class AppPlayersController extends GetxController {
         nearbyPlayers.value = response.players!.map((player) => {
           'id': player.id ?? '',
           'name': player.name ?? '',
+          // 'lastName': player.lastName ?? '',
           'profilePic': player.profilePic ?? '',
           'city': player.city ?? '',
           'level': player.level ?? '',
+          // 'preferredTeam': player.preferredTeam ?? 'teamA',
         }).toList();
       }
     } catch (e) {
@@ -73,7 +78,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
             const SizedBox(height: 12),
             _playersList(),
             const SizedBox(height: 12),
-            _actionButtons(),
+            _actionButtons(context),
           ],
         ),
       ),
@@ -152,14 +157,14 @@ class AppPlayersBottomSheet extends StatelessWidget {
                               width: 44,
                               height: 44,
                               placeholder: (context, url) => Text(
-                                '${player['name']?[0] ?? ''}',
+                                '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryColor,
                                 ),
                               ),
                               errorWidget: (context, url, error) => Text(
-                                '${player['name']?[0] ?? ''}',
+                                '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryColor,
@@ -168,7 +173,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            '${player['name']?[0] ?? ''}',
+                            '${player['name']?[0] ?? ''}${player['lastName']?[0] ?? ''}',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryColor,
@@ -181,43 +186,21 @@ class AppPlayersBottomSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          player['name'] ?? '',
-                          style: Get.textTheme.labelLarge,
+                          '${(player['name'] ?? '').toString().capitalizeFirst} '
+                              '${(player['lastName'] ?? '').toString().capitalizeFirst}',
+                          style: Get.textTheme.labelLarge!
+                              .copyWith(fontWeight: FontWeight.w500),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           player['city'] ?? '',
-                          style: Get.textTheme.bodySmall?.copyWith(
-                            color: AppColors.darkGrey,
-                          ),
+                          style: Get.textTheme.bodyLarge!
+                              .copyWith(fontSize: 11),
                         ),
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: isRequested ? null : () {
-                      // Handle send request
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isRequested
-                            ? AppColors.greyColor.withOpacity(0.3)
-                            : AppColors.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isRequested ? 'Requested' : 'Send Request',
-                        style: Get.textTheme.labelSmall?.copyWith(
-                          color: isRequested
-                              ? AppColors.darkGrey
-                              : AppColors.primaryColor,
-                        ),
-                      ),
-                    ),
-                  ),
+                  _requestButton(isRequested, player['id'] ?? '', player['preferredTeam'] ?? 'teamA'),
                 ],
               ),
             );
@@ -227,7 +210,55 @@ class AppPlayersBottomSheet extends StatelessWidget {
     });
   }
 
-  Widget _actionButtons() {
+  Widget _requestButton(bool sent, String playerId, String team) {
+    return Obx(() {
+      final isRequesting = controller.requestingPlayerId.value == playerId;
+      final isRequested = sent || controller.requestedPlayerIds.contains(playerId);
+      
+      return GestureDetector(
+        onTap: (isRequested || isRequesting) ? null : () async {
+          controller.requestingPlayerId.value = playerId;
+          
+          final addPlayerController = Get.put(AddPlayerController());
+          addPlayerController.matchId.value = matchId;
+          addPlayerController.playerId.value = playerId;
+          addPlayerController.selectedTeam.value = team;
+          
+          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
+          
+          if (success) {
+            controller.requestedPlayerIds.add(playerId);
+          }
+          
+          controller.requestingPlayerId.value = '';
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isRequested ? const Color(0xffE9ECF5) : const Color(0xffEEF1FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: isRequesting
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+                  ),
+                )
+              : Text(
+                  isRequested ? 'Request Sent' : 'Send Request',
+                  style: Get.textTheme.bodyLarge!.copyWith(
+                    color: isRequested ? Colors.grey : AppColors.primaryColor,
+                  ),
+                ),
+        ),
+      );
+    });
+  }
+
+  Widget _actionButtons(BuildContext context) {
     final style = Get.textTheme.labelLarge!.copyWith(color: Colors.white);
     return Column(
       children: [
@@ -260,8 +291,8 @@ class AppPlayersBottomSheet extends StatelessWidget {
         const SizedBox(height: 4),
         ElevatedButton(
           onPressed: () {
-            Get.toNamed(
-              RoutesName.addPlayer,
+            AddPlayerBottomSheet.show(
+              context,
               arguments: {
                 "team": teamName,
                 "matchId": matchId,
@@ -269,6 +300,15 @@ class AppPlayersBottomSheet extends StatelessWidget {
                 "scoreBoardId": matchId,
               },
             );
+            // Get.toNamed(
+            //   RoutesName.addPlayer,
+            //   arguments: {
+            //     "team": teamName,
+            //     "matchId": matchId,
+            //     "needAsGuest": true,
+            //     "scoreBoardId": matchId,
+            //   },
+            // );
           },
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(40),
