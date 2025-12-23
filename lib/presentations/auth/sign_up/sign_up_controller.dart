@@ -4,6 +4,7 @@ import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/sign_up_model.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/presentations/notification/notification_controller.dart';
+import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 
 class SignUpController extends GetxController {
   SignUpRepository signUpRepository = SignUpRepository();
@@ -11,12 +12,13 @@ class SignUpController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
 
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
+  // final firstNameController = TextEditingController();
+  // final lastNameController = TextEditingController();
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
+  // final passwordController = TextEditingController();
+  // final confirmPasswordController = TextEditingController();
 
   final emailFocusNode = FocusNode();
   final phoneFocusNode = FocusNode();
@@ -44,14 +46,14 @@ class SignUpController extends GetxController {
     return null;
   }
 
-  String? validatePassword() {
-    if (passwordController.text.isEmpty) {
-      return "Password is required";
-    } else if (!passwordController.text.isValidPassword) {
-      return "Invalid password format";
-    }
-    return null;
-  }
+  // String? validatePassword() {
+  //   if (passwordController.text.isEmpty) {
+  //     return "Password is required";
+  //   } else if (!passwordController.text.isValidPassword) {
+  //     return "Invalid password format";
+  //   }
+  //   return null;
+  // }
   void onFieldSubmit() async {
     if (phoneFocusNode.hasFocus) {
       phoneFocusNode.unfocus();
@@ -89,7 +91,7 @@ class SignUpController extends GetxController {
     phoneFocusNode.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
-    passwordController.dispose();
+    // passwordController.dispose();
     super.onClose();
   }
 
@@ -103,7 +105,13 @@ class SignUpController extends GetxController {
 
         isLoading.value = true;
 
-        await sendOTP();
+        bool userExists = await getUserDataFromNumber(phoneController.text.trim());
+        
+        if (!userExists) {
+          await sendOTP();
+        } else {
+          SnackBarUtils.showErrorSnackBar("Phone number ${phoneController.text.trim()} already exists");
+        }
       } catch (e) {
         log(e.toString());
       } finally {
@@ -114,7 +122,8 @@ class SignUpController extends GetxController {
 
   Future<void> sendOTP() async {
     Map<String, dynamic> body = {
-      "email": emailController.text.trim(),
+      // "email": emailController.text.trim(),
+      "phoneNumber": phoneController.text.trim(),
       "type": "Signup",
     };
     var result = await signUpRepository.sendOTP(body: body);
@@ -122,7 +131,8 @@ class SignUpController extends GetxController {
       Get.toNamed(
         RoutesName.otp,
         arguments: {
-          "email": emailController.text.trim(),
+          // "email": emailController.text.trim(),
+          "phoneNumber": phoneController.text.trim(),
           "type": OtpScreenType.createAccount,
           // "name": firstNameController.text.trim(),
           // "lastName": lastNameController.text.trim(),
@@ -136,17 +146,19 @@ class SignUpController extends GetxController {
   Future<void> createAccount() async {
     final body = {
       "email": emailController.text.trim(),
-      "name": firstNameController.text.trim(),
-      "lastName": lastNameController.text.trim(),
+      "name": nameController.text.trim(),
+      // "name": firstNameController.text.trim(),
+      // "lastName": lastNameController.text.trim(),
       "countryCode": "+91",
       "phoneNumber": phoneController.text.trim(),
-      "password": passwordController.text.trim(),
+      // "password": passwordController.text.trim(),
       "city": selectedLocation.value,
-      "agreeTermsAndCondition": true,
-      "location": {
-        "type": "Point",
-        "coordinates": [77.5946, 12.9716],
-      },
+      "gender": selectedGender.value,
+      // "agreeTermsAndCondition": true,
+      // "location": {
+      //   "type": "Point",
+      //   "coordinates": [77.5946, 12.9716],
+      // },
     };
 
     log("Signup Body: $body");
@@ -158,13 +170,16 @@ class SignUpController extends GetxController {
       final firebaseToken = await getFcmToken();
 
       /// Auto-login after signup
-      LoginModel loginResult = await loginRepository.loginUser(
-        body: {
-          "email": emailController.text.trim(),
-          "password": passwordController.text.trim(),
-          "fcmToken": firebaseToken ?? "",
-        },
-      );
+      final loginBody = {
+        "phoneNumber": phoneController.text.trim(),
+        // "password": passwordController.text.trim(),
+      };
+      
+      if (firebaseToken != null && firebaseToken.isNotEmpty) {
+        loginBody["fcmToken"] = firebaseToken;
+      }
+      
+      LoginModel loginResult = await loginRepository.loginUser(body: loginBody);
 
       if (loginResult.status == "200") {
         storage.write('token', loginResult.response!.token);
@@ -190,7 +205,39 @@ class SignUpController extends GetxController {
 
     return firebaseToken;
   }
+
+  var numberLoader = false.obs;
+  OpenMatchRepository openMatchRepository = Get.put(OpenMatchRepository());
+  Future<bool> getUserDataFromNumber(String phoneNumber) async {
+    if (phoneNumber.length != 10) return false;
+
+    try {
+      numberLoader.value = true;
+      final result = await openMatchRepository.getCustomerNameByPhoneNumber(
+          phoneNumber: phoneNumber);
+
+      if (result.result != null && result.result?.name != null && result.result!.name!.isNotEmpty) {
+        return true; // User found
+      } else {
+        return false; // User not found
+      }
+
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Failed to fetch user data: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      return false; // Error means user not found
+    } finally {
+      numberLoader.value = false;
+    }
+  }
   
+  ///Gender field----------------------------------------------------
+  var selectedGender = ''.obs;
+  final List<String> genderOptions = ['Male', 'Female', 'Others'];
+
   ///Get Location Api----------------------------------------------------
   var isLocationLoading = false.obs;
   var locations = <GetLocationData>[].obs;

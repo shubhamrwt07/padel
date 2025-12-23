@@ -18,6 +18,7 @@ class SignUpScreen extends GetView<SignUpController> {
               children: [
                 topTexts(context),
                 formFields(),
+                genderField(),
                 locationField(),
                 bottomButtonAndContent(context),
               ],
@@ -46,131 +47,132 @@ class SignUpScreen extends GetView<SignUpController> {
   }
 
   Widget formFields() {
-    return Obx(
-          () => Form(
-        key: controller.formKey,
-        child: Column(
-          children: [
-            PrimaryTextField(
-              keyboardType: TextInputType.name,
-              action: TextInputAction.next,
-              onFieldSubmitted: (v) => controller.onFieldSubmit(),
-              controller: controller.firstNameController,
-              hintText: "First Name",
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) {
-                  return "First name is required";
-                }
-                return null;
-              },
-            ).paddingOnly(bottom: Get.height * 0.03),
+    return Form(
+      key: controller.formKey,
+      child: Column(
+        children: [
+          PrimaryTextField(
+            keyboardType: TextInputType.phone,
+            action: TextInputAction.next,
+            maxLength: 10,
+            onFieldSubmitted: (v) => controller.onFieldSubmit(),
+            controller: controller.phoneController,
+            focusNode: controller.phoneFocusNode,
+            validator: (v) => controller.validatePhone(),
+            hintText: "Enter Phone Number",
+            labelText: "Phone Number *",
+          ).paddingOnly(bottom: Get.height * 0.03),
+          PrimaryTextField(
+            keyboardType: TextInputType.name,
+            action: TextInputAction.next,
+            onFieldSubmitted: (v) => controller.onFieldSubmit(),
+            controller: controller.nameController,
+            hintText: "Enter Name",
+            labelText: "Name *",
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return "Name is required";
+              }
+              return null;
+            },
+          ).paddingOnly(bottom: Get.height * 0.03),
 
-            PrimaryTextField(
-              keyboardType: TextInputType.name,
-              action: TextInputAction.next,
-              onFieldSubmitted: (v) => controller.onFieldSubmit(),
-              controller: controller.lastNameController,
-              hintText: "Last Name",
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) {
-                  return "Last name is required";
-                }
-                return null;
-              },
-            ).paddingOnly(bottom: Get.height * 0.03),
+          // PrimaryTextField(
+          //   keyboardType: TextInputType.name,
+          //   action: TextInputAction.next,
+          //   onFieldSubmitted: (v) => controller.onFieldSubmit(),
+          //   controller: controller.lastNameController,
+          //   hintText: "Last Name",
+          //   validator: (v) {
+          //     if (v == null || v.trim().isEmpty) {
+          //       return "Last name is required";
+          //     }
+          //     return null;
+          //   },
+          // ).paddingOnly(bottom: Get.height * 0.03),
 
-            PrimaryTextField(
-              keyboardType: TextInputType.phone,
-              action: TextInputAction.next,
-              maxLength: 10,
-              onFieldSubmitted: (v) => controller.onFieldSubmit(),
-              controller: controller.phoneController,
-              focusNode: controller.phoneFocusNode,
-              validator: (v) => controller.validatePhone(),
-              hintText: "Phone Number",
-            ).paddingOnly(bottom: Get.height * 0.03),
 
-            PrimaryTextField(
-              keyboardType: TextInputType.emailAddress,
-              action: TextInputAction.next,
-              onFieldSubmitted: (v) => controller.onFieldSubmit(),
-              validator: (v) => controller.validateEmail(),
-              controller: controller.emailController,
-              focusNode: controller.emailFocusNode,
-              hintText: "Email",
-            ).paddingOnly(bottom: Get.height * 0.03),
+          PrimaryTextField(
+            keyboardType: TextInputType.emailAddress,
+            action: TextInputAction.next,
+            onFieldSubmitted: (v) => controller.onFieldSubmit(),
+            // validator: (v) => controller.validateEmail(),
+            controller: controller.emailController,
+            focusNode: controller.emailFocusNode,
+            hintText: "Enter Email",
+            labelText: "Email (Optional)",
+          ).paddingOnly(bottom: Get.height * 0.03),
 
-            Focus(
-              onFocusChange: (hasFocus) {
-                controller.isPasswordFocused.value = hasFocus;
-              },
-              child: PrimaryTextField(
-                keyboardType: TextInputType.visiblePassword,
-                action: TextInputAction.next,
-                onChanged: (v) => controller.checkPasswordConditions(v),
-                onFieldSubmitted: (v) => controller.onFieldSubmit(),
-                validator: (v) => controller.validatePassword(),
-                controller: controller.passwordController,
-                hintText: "Password",
-                obscureText: controller.isVisiblePassword.value,
-                maxLine: 1,
-                suffixIcon: IconButton(
-                  onPressed: () => controller.passwordToggle(),
-                  icon: Image.asset(
-                    controller.isVisiblePassword.value
-                        ? Assets.imagesIcEyeOff
-                        : Assets.imagesIcEye,
-                    color: AppColors.textColor,
-                    height: 20,
-                    width: 20,
+          // Focus(
+          //   onFocusChange: (hasFocus) {
+          //     controller.isPasswordFocused.value = hasFocus;
+          //   },
+          //   child: PrimaryTextField(
+          //     keyboardType: TextInputType.visiblePassword,
+          //     action: TextInputAction.next,
+          //     onChanged: (v) => controller.checkPasswordConditions(v),
+          //     onFieldSubmitted: (v) => controller.onFieldSubmit(),
+          //     validator: (v) => controller.validatePassword(),
+          //     controller: controller.passwordController,
+          //     hintText: "Password",
+          //     obscureText: controller.isVisiblePassword.value,
+          //     maxLine: 1,
+          //     suffixIcon: IconButton(
+          //       onPressed: () => controller.passwordToggle(),
+          //       icon: Image.asset(
+          //         controller.isVisiblePassword.value
+          //             ? Assets.imagesIcEyeOff
+          //             : Assets.imagesIcEye,
+          //         color: AppColors.textColor,
+          //         height: 20,
+          //         width: 20,
+          //       ),
+          //     ),
+          //   ),
+          // ).paddingOnly(bottom: controller.isPasswordFocused.value? 0: Get.height * 0.03),
+
+          Obx(() {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                // Fade + slight slide from top
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, -0.1),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
-                ),
+                );
+              },
+              child: controller.isPasswordFocused.value
+                  ? Column(
+                key: const ValueKey("conditions"),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPasswordCondition(
+                    "At least 1 Capital Letter",
+                    controller.hasCapitalLetter.value,
+                  ),
+                  _buildPasswordCondition(
+                    "At least 1 Special Character",
+                    controller.hasSpecialChar.value,
+                  ),
+                  _buildPasswordCondition(
+                    "At least 1 Number",
+                    controller.hasNumber.value,
+                  ),
+                ],
+              )
+                  : const SizedBox.shrink(
+                key: ValueKey("empty"),
               ),
-            ).paddingOnly(bottom: controller.isPasswordFocused.value? 0: Get.height * 0.03),
+            );
+          }),
 
-            Obx(() {
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  // Fade + slight slide from top
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, -0.1),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
-                child: controller.isPasswordFocused.value
-                    ? Column(
-                  key: const ValueKey("conditions"),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPasswordCondition(
-                      "At least 1 Capital Letter",
-                      controller.hasCapitalLetter.value,
-                    ),
-                    _buildPasswordCondition(
-                      "At least 1 Special Character",
-                      controller.hasSpecialChar.value,
-                    ),
-                    _buildPasswordCondition(
-                      "At least 1 Number",
-                      controller.hasNumber.value,
-                    ),
-                  ],
-                )
-                    : const SizedBox.shrink(
-                  key: ValueKey("empty"),
-                ),
-              );
-            }),
-
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -210,7 +212,9 @@ class SignUpScreen extends GetView<SignUpController> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.textFieldColor,
-                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey,width: 1),
+                  borderRadius: BorderRadius.circular(5),
+
                 ),
                 child: Row(
                   children: [
@@ -228,7 +232,8 @@ class SignUpScreen extends GetView<SignUpController> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.textFieldColor,
-                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey,width: 1),
+                  borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text("No Location found",style: style,),
               );
@@ -240,7 +245,8 @@ class SignUpScreen extends GetView<SignUpController> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: AppColors.textFieldColor,
-                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey,width: 1),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: DropdownButtonHideUnderline(
                 child: Obx(
@@ -269,7 +275,45 @@ class SignUpScreen extends GetView<SignUpController> {
               ),
             );
 
-          }).paddingOnly(bottom: Get.height * 0.05);
+          }).paddingOnly(bottom: Get.height * 0.12);
+  }
+
+  Widget genderField() {
+    final style = Get.textTheme.headlineMedium!.copyWith(color: AppColors.textColor,fontWeight: FontWeight.w500);
+    return Container(
+      height: 52,
+      width: Get.width,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColors.textFieldColor,
+        border: Border.all(color: Colors.grey,width: 1),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: Obx(
+          () => DropdownButton<String>(
+            value: controller.selectedGender.value.isEmpty
+                ? null
+                : controller.selectedGender.value,
+            hint: Text("Select Gender", style: style),
+            dropdownColor: Colors.white,
+            isExpanded: true,
+            items: controller.genderOptions
+                .map((gender) => DropdownMenuItem<String>(
+              value: gender,
+              child: Text(
+                gender,
+                style: style,
+              ),
+            ))
+                .toList(),
+            onChanged: (value) {
+              controller.selectedGender.value = value ?? "";
+            },
+          ),
+        ),
+      ),
+    ).paddingOnly(bottom: Get.height * 0.03);
   }
   Widget bottomButtonAndContent(BuildContext context) {
     return Column(

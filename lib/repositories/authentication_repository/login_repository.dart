@@ -1,6 +1,7 @@
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/authentication_models/login_model.dart';
+import '../../data/request_models/authentication_models/otp_model.dart';
 import '../../handler/logger.dart';
 
 class LoginRepository {
@@ -12,6 +13,32 @@ class LoginRepository {
   }
 
   LoginRepository._internal();
+
+  Future<OTPModel> sendOTP({required Map<String, dynamic> body}) async {
+    try {
+      CustomLogger.logMessage(msg: "LOGIN OTP BODY:-> $body", level: LogLevel.info);
+      final response = await dioClient.post(AppEndpoints.sendOTP, data: body);
+
+      if (response.statusCode == 200) {
+        CustomLogger.logMessage(
+          msg: "Login OTP send successfully: ${response.data}",
+          level: LogLevel.info,
+        );
+        return OTPModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          "Login OTP send failed with status code: ${response.statusCode}",
+        );
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Login OTP send failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
 
 
   Future<LoginModel> loginUser({required Map<String,dynamic> body}) async {
