@@ -55,17 +55,25 @@ class OpenMatchRepository {
     required String type, // "upcoming" or "completed"
     int page = 1,
     int limit = 10,
+    String? matchDate,
   }) async {
     try {
-      final url =
-          "${AppEndpoints.openMatchBooking}?type=$type&page=$page&limit=$limit";
+      final queryParams = <String, dynamic>{
+        'type': type,
+        'page': page,
+        'limit': limit,
+        if (matchDate != null) 'matchDate': matchDate,
+      };
 
       CustomLogger.logMessage(
-        msg: "Fetching Open Match Bookings: $url",
+        msg: "Fetching Open Match Bookings: $queryParams",
         level: LogLevel.info,
       );
 
-      final response = await dioClient.get(url);
+      final response = await dioClient.get(
+        AppEndpoints.openMatchBooking,
+        queryParameters: queryParams,
+      );
 
       if (response.statusCode == 200) {
         CustomLogger.logMessage(
@@ -75,7 +83,8 @@ class OpenMatchRepository {
         return OpenMatchBookingModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Failed to fetch open match bookings. Status: ${response.statusCode}");
+          "Failed to fetch open match bookings. Status: ${response.statusCode}",
+        );
       }
     } catch (e, st) {
       CustomLogger.logMessage(
@@ -86,6 +95,7 @@ class OpenMatchRepository {
       rethrow;
     }
   }
+
 
   Future<AllOpenMatches> getMatchesByDateTime({
     required String matchDate,

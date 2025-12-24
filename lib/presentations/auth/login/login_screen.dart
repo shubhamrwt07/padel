@@ -153,7 +153,7 @@ class LoginScreen extends GetView<LoginController> {
               }
             },
             text: AppStrings.signIn,
-            child: controller.isLoading.value
+            child: (controller.isLoading.value || controller.numberLoader.value)
                 ? AppLoader(size: 35, strokeWidth: 4)
                 : null,
           ),

@@ -3,10 +3,12 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/data/request_models/authentication_models/login_model.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/auth/login/widgets/login_exports.dart';
 import 'package:padel_mobile/presentations/auth/otp/otp_controller.dart';
 import 'package:padel_mobile/repositories/authentication_repository/login_repository.dart';
+import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
 
 import '../../../configs/components/snack_bars.dart';
 import '../../notification/notification_controller.dart';
@@ -14,6 +16,7 @@ import '../../notification/notification_controller.dart';
 class LoginController extends GetxController {
   //Login Repository
   final LoginRepository loginRepository = LoginRepository();
+  OpenMatchRepository openMatchRepository = Get.put(OpenMatchRepository());
 
   // Text Controllers
   // TextEditingController emailController = TextEditingController();
@@ -27,6 +30,7 @@ class LoginController extends GetxController {
   // Observable variables
   RxBool isVisible = true.obs;
   RxBool isLoading = false.obs;
+  var numberLoader = false.obs;
 
   // Toggle password visibility
   void eyeToggle() {
@@ -63,19 +67,26 @@ class LoginController extends GetxController {
     try {
       if (isLoading.value) return;
       isLoading.value = true;
-      final Map<String, dynamic> body = {
-        "phoneNumber": phoneController.text.trim(),
-        "type": "Signup",
-      };
 
-      var result = await loginRepository.sendOTP(body: body);
-      if (result.status == "200") {
-        Get.toNamed(RoutesName.otp, arguments: {
-          'phoneNumber': phoneController.text.trim(),
-          'type': OtpScreenType.login,
-        });
+      bool userExists = await getUserDataFromNumber(phoneController.text.trim());
+      
+      if (userExists) {
+        final Map<String, dynamic> body = {
+          "phoneNumber": phoneController.text.trim(),
+          "type": "Signup",
+        };
+
+        var result = await loginRepository.sendOTP(body: body);
+        if (result.status == "200") {
+          Get.toNamed(RoutesName.otp, arguments: {
+            'phoneNumber': phoneController.text.trim(),
+            'type': OtpScreenType.login,
+          });
+        } else {
+          SnackBarUtils.showErrorSnackBar(result.message!);
+        }
       } else {
-        SnackBarUtils.showErrorSnackBar(result.message!);
+        SnackBarUtils.showErrorSnackBar("Phone number ${phoneController.text.trim()} not found. Please sign up first.");
       }
     } catch (e) {
       log(e.toString());
@@ -123,6 +134,32 @@ class LoginController extends GetxController {
       log(e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<bool> getUserDataFromNumber(String phoneNumber) async {
+    if (phoneNumber.length != 10) return false;
+
+    try {
+      numberLoader.value = true;
+      final result = await openMatchRepository.getCustomerNameByPhoneNumber(
+          phoneNumber: phoneNumber);
+
+      if (result.result != null && result.result?.name != null && result.result!.name!.isNotEmpty) {
+        return true; // User found
+      } else {
+        return false; // User not found
+      }
+
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Failed to fetch user data: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      return false; // Error means user not found
+    } finally {
+      numberLoader.value = false;
     }
   }
 

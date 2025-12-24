@@ -530,10 +530,10 @@ class MainHomeScreen extends StatelessWidget {
   /// QUICK ACTIONS
   Widget _quickActions() {
     final items = [
-      {"icon": Icons.sports_tennis, "title": "Book a Court"},
-      {"icon": Icons.groups, "title": "Open Match"},
-      {"icon": Icons.emoji_events, "title": "Americano"},
-      {"icon": Icons.sports, "title": "Challenge"},
+      {"icon": Icons.sports_tennis, "title": "Book a Court", "action": "book"},
+      {"icon": Icons.groups, "title": "Open Match", "action": "match"},
+      {"icon": Icons.emoji_events, "title": "Americano", "action": "americano"},
+      {"icon": Icons.sports, "title": "Challenge", "action": "challenge"},
     ];
 
     return Row(
@@ -541,10 +541,7 @@ class MainHomeScreen extends StatelessWidget {
       children: items
           .map(
             (e) => GestureDetector(
-              onTap: (){
-                if(Get.isSnackbarOpen)return;
-                SnackBarUtils.showInfoSnackBar("Coming Soon!");
-              },
+              onTap: () => _handleQuickAction(e["action"] as String),
               child: Column(
                         children: [
               Container(
@@ -565,6 +562,26 @@ class MainHomeScreen extends StatelessWidget {
       )
           .toList(),
     );
+  }
+
+  void _handleQuickAction(String action) {
+    if(Get.isSnackbarOpen) return;
+    
+    switch(action) {
+      case 'book':
+        Get.toNamed(RoutesName.home);
+        break;
+      case 'match':
+        // SnackBarUtils.showInfoSnackBar("Open Match feature coming soon!");
+        Get.toNamed(RoutesName.openMatchForAllCourts);
+        break;
+      case 'americano':
+        SnackBarUtils.showInfoSnackBar("Americano tournaments coming soon!");
+        break;
+      case 'challenge':
+        SnackBarUtils.showInfoSnackBar("Challenge feature coming soon!");
+        break;
+    }
   }
 
   /// SECTION TITLE

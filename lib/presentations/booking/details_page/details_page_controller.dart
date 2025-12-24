@@ -1020,12 +1020,12 @@ class DetailsController extends GetxController {
       }
 
       Map<String, dynamic> profileData = <String, dynamic>{
-        "name": profileController.profileModel.value?.response!.name ?? "",
+        "name": profileController.profileModel.value?.response?.name ?? "",
         "lastName": profileController.profileModel.value?.response?.lastName??"",
-        "image": profileController.profileModel.value?.response!.profilePic ?? "",
-        "userId": profileController.profileModel.value?.response!.sId ?? "",
+        "image": profileController.profileModel.value?.response?.profilePic ?? "",
+        "userId": profileController.profileModel.value?.response?.sId ?? "",
         // Store both label and short code where possible
-        "level": profileController.profileModel.value?.response!.playerLevel?.split(' ').first??"",
+        "level": profileController.profileModel.value?.response?.playerLevel?.split(' ').first??"",
         "levelLabel": skillLevel,
      };
 

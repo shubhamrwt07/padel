@@ -1,5 +1,6 @@
 import 'package:get_storage/get_storage.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/all_open_matches/all_open_match_controller.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/open_match_for_all_court_controller.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
@@ -14,6 +15,7 @@ class AddPlayerController extends GetxController {
   OpenMatchBookingController? openMatchBookingController;
   ScoreBoardController? scoreBoardController;
   YourMatchRequestsController? yourMatchRequestsController;
+  OpenMatchForAllCourtController? openMatchForAllCourtController;
 
   // final firstNameController = TextEditingController();
   // final lastNameController = TextEditingController();
@@ -102,6 +104,24 @@ class AddPlayerController extends GetxController {
               level: LogLevel.info,
             );
           }
+        } else if (openMatchForAllCourtController != null) {
+          if (isMatchCreator.value) {
+            final added = await addPlayer();
+            if (added) {
+              CustomLogger.logMessage(
+                msg: "User Created & Player Added $body",
+                level: LogLevel.info,
+              );
+            }
+          } else {
+            final requested = await requestPlayerForOpenMatch();
+            if (requested) {
+              CustomLogger.logMessage(
+                msg: "User Created & Player Requested $body",
+                level: LogLevel.info,
+              );
+            }
+          }
         } else if (yourMatchRequestsController != null) {
           final accepted = await acceptRequest();
           if (accepted) {
@@ -175,6 +195,24 @@ class AddPlayerController extends GetxController {
               level: LogLevel.info,
             );
           }
+        } else if (openMatchForAllCourtController != null) {
+          if (isMatchCreator.value) {
+            final added = await addPlayer();
+            if (added) {
+              CustomLogger.logMessage(
+                msg: "Login User Added Directly",
+                level: LogLevel.info,
+              );
+            }
+          } else {
+            final requested = await requestPlayerForOpenMatch();
+            if (requested) {
+              CustomLogger.logMessage(
+                msg: "Login User Requested Directly",
+                level: LogLevel.info,
+              );
+            }
+          }
         } else if (yourMatchRequestsController != null) {
           final accepted = await acceptRequest();
           if (accepted) {
@@ -206,6 +244,7 @@ class AddPlayerController extends GetxController {
         await openMatchesController?.fetchMatchesForSelection();
         await allOpenMatchController?.fetchOpenMatches();
         await openMatchBookingController?.fetchOpenMatchesBooking(type: "upcoming");
+        await openMatchForAllCourtController?.fetchMatchesForSelection();
         // Return success to caller so it can refresh immediately
         Get.back(result: true);
         SnackBarUtils.showSuccessSnackBar(
@@ -238,7 +277,7 @@ class AddPlayerController extends GetxController {
         body["type"] = type;
         body["playerId"] = playerId.value;
       } else {
-        body["level"] = playerLevel.value;
+        // body["level"] = playerLevel.value;
         body["requesterId"] = playerId.value;
       }
       
@@ -457,6 +496,10 @@ class AddPlayerController extends GetxController {
     if (args["needYourMatchRequests"] == true &&
         Get.isRegistered<YourMatchRequestsController>()) {
       yourMatchRequestsController = Get.find<YourMatchRequestsController>();
+    }
+    if (args["needOpenMatchesForAllCourts"] == true &&
+        Get.isRegistered<OpenMatchForAllCourtController>()) {
+      openMatchForAllCourtController = Get.find<OpenMatchForAllCourtController>();
     }
 
     // Check if login user wants to add themselves

@@ -32,6 +32,8 @@ import 'package:padel_mobile/presentations/main_home_page/main_home_binding.dart
 import 'package:padel_mobile/presentations/main_home_page/main_home_screen.dart';
 import 'package:padel_mobile/presentations/notification/notification_binding.dart';
 import 'package:padel_mobile/presentations/notification/notification_ui.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/open_match_for_all_court_binding.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/open_match_for_all_court_screen.dart';
 import 'package:padel_mobile/presentations/packages/packages_binding.dart';
 import 'package:padel_mobile/presentations/packages/packages_screen.dart';
 import 'package:padel_mobile/presentations/payment_filter/payment_filter.dart';
@@ -287,6 +289,13 @@ class Routes {
       name: RoutesName.createOpenMatch,
       page: () => CreateOpenMatchesScreen(),
       binding: CreateOpenMatchesBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.openMatchForAllCourts,
+      page: () => OpenMatchForAllCourtScreen(),
+      binding: OpenMatchForAllCourtBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
