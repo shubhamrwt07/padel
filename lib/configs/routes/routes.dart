@@ -117,7 +117,7 @@ class Routes {
       name: RoutesName.home,
       page: () => HomeScreen(),
       binding: HomeBinding(),
-      transition: Transition.fadeIn,
+      transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
     GetPage(

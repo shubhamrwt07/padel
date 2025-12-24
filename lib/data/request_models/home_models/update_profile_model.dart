@@ -1,61 +1,64 @@
 class UpdateProfileModel {
-  final String status;
-  final String message;
-  final UserResponse response;
+  final String? status;
+  final String? message;
+  final UserResponse? response;
 
   UpdateProfileModel({
-    required this.status,
-    required this.message,
-    required this.response,
+    this.status,
+    this.message,
+    this.response,
   });
 
   factory UpdateProfileModel.fromJson(Map<String, dynamic> json) {
     return UpdateProfileModel(
       status: json['status'],
       message: json['message'],
-      response: UserResponse.fromJson(json['response']),
+      response: json['response'] != null
+          ? UserResponse.fromJson(json['response'])
+          : null,
     );
   }
 }
 
 class UserResponse {
-  final Location location;
-  final String id;
-  final String email;
-  final String countryCode;
-  final int phoneNumber;
-  final String password;
-  final String city;
-  final bool agreeTermsAndCondition;
-  final String category;
-  final String createdAt;
-  final String updatedAt;
-  final int v;
-  final String name;
-  final String dob;
-  final String gender;
+  final Location? location;
+  final String? id;
+  final String? email;
+  final String? countryCode;
+  final int? phoneNumber;
+  final String? password;
+  final String? city;
+  final bool? agreeTermsAndCondition;
+  final String? category;
+  final String? createdAt;
+  final String? updatedAt;
+  final int? v;
+  final String? name;
+  final String? dob;
+  final String? gender;
 
   UserResponse({
-    required this.location,
-    required this.id,
-    required this.email,
-    required this.countryCode,
-    required this.phoneNumber,
-    required this.password,
-    required this.city,
-    required this.agreeTermsAndCondition,
-    required this.category,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.v,
-    required this.name,
-    required this.dob,
-    required this.gender,
+    this.location,
+    this.id,
+    this.email,
+    this.countryCode,
+    this.phoneNumber,
+    this.password,
+    this.city,
+    this.agreeTermsAndCondition,
+    this.category,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+    this.name,
+    this.dob,
+    this.gender,
   });
 
   factory UserResponse.fromJson(Map<String, dynamic> json) {
     return UserResponse(
-      location: Location.fromJson(json['location']),
+      location:
+      json['location'] != null ? Location.fromJson(json['location']) : null,
       id: json['_id'],
       email: json['email'],
       countryCode: json['countryCode'],
@@ -75,18 +78,22 @@ class UserResponse {
 }
 
 class Location {
-  final String type;
-  final List<double> coordinates;
+  final String? type;
+  final List<double>? coordinates;
 
   Location({
-    required this.type,
-    required this.coordinates,
+    this.type,
+    this.coordinates,
   });
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
       type: json['type'],
-      coordinates: List<double>.from(json['coordinates'].map((x) => x.toDouble())),
+      coordinates: json['coordinates'] != null
+          ? List<double>.from(
+        json['coordinates'].map((x) => x.toDouble()),
+      )
+          : null,
     );
   }
 }
