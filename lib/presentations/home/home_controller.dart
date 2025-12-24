@@ -258,6 +258,7 @@ class HomeController extends GetxController {
       BookingHistoryRepository());
   RxBool isLoadingBookings = false.obs;
 
+  final openMatchId = "".obs;
   Future<void> fetchBookings() async {
     isLoadingBookings.value = true;
     try {
@@ -265,6 +266,14 @@ class HomeController extends GetxController {
           type: "upcoming");
       bookings.value = response;
       if (response.success == true) {
+        final bookingWithOpenMatch = response.data
+            ?.where((e) => e.openMatchId?.sId?.isNotEmpty == true)
+            .toList();
+
+        openMatchId.value =
+        bookingWithOpenMatch != null && bookingWithOpenMatch.isNotEmpty
+            ? bookingWithOpenMatch.first.openMatchId!.sId!
+            : "";
         CustomLogger.logMessage(msg: "Booking fetched", level: LogLevel.debug);
       }
     } catch (e) {
@@ -437,6 +446,7 @@ class HomeController extends GetxController {
         "userId": storage.read("userId") ?? "",
         "courtName": booking.slot?[0].courtName ?? "",
         "clubName": booking.registerClubId?.clubName ?? "",
+        "openMatchId":openMatchId.value,
         "teams": [
           {
             "name": "Team A",

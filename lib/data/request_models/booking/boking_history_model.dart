@@ -62,6 +62,9 @@ class BookingHistoryData {
   int? iV;
   dynamic customerReview;
 
+  /// ✅ NEW
+  OpenMatchId? openMatchId;
+
   BookingHistoryData({
     this.sId,
     this.userId,
@@ -76,6 +79,7 @@ class BookingHistoryData {
     this.updatedAt,
     this.iV,
     this.customerReview,
+    this.openMatchId,
   });
 
   BookingHistoryData.fromJson(Map<String, dynamic> json) {
@@ -88,17 +92,24 @@ class BookingHistoryData {
     bookingDate = json['bookingDate']?.toString();
     bookingStatus = json['bookingStatus']?.toString();
     bookingType = json['bookingType']?.toString();
+
     if (json['slot'] != null) {
       slot = <Slot>[];
       json['slot'].forEach((v) {
         slot!.add(Slot.fromJson(v));
       });
     }
+
     createdAt = json['createdAt']?.toString();
     ownerId = json['ownerId']?.toString();
     updatedAt = json['updatedAt']?.toString();
     iV = json['__v'];
     customerReview = json['customerReview'];
+
+    /// ✅ PARSE openMatchId
+    openMatchId = json['openMatchId'] != null
+        ? OpenMatchId.fromJson(json['openMatchId'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -120,9 +131,151 @@ class BookingHistoryData {
     data['updatedAt'] = updatedAt;
     data['__v'] = iV;
     data['customerReview'] = customerReview;
+
+    /// ✅ TO JSON
+    if (openMatchId != null) {
+      data['openMatchId'] = openMatchId!.toJson();
+    }
+
     return data;
   }
 }
+class OpenMatchId {
+  String? sId;
+  String? clubId;
+  List<Slot>? slot;
+  String? matchType;
+  String? skillLevel;
+  List<dynamic>? skillDetails;
+  String? matchDate;
+  List<String>? matchTime;
+  String? matchStatus;
+  List<TeamPlayer>? teamA;
+  List<TeamPlayer>? teamB;
+  String? createdBy;
+  String? gender;
+  bool? status;
+  bool? adminStatus;
+  bool? isActive;
+  bool? isDeleted;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+
+  OpenMatchId({
+    this.sId,
+    this.clubId,
+    this.slot,
+    this.matchType,
+    this.skillLevel,
+    this.skillDetails,
+    this.matchDate,
+    this.matchTime,
+    this.matchStatus,
+    this.teamA,
+    this.teamB,
+    this.createdBy,
+    this.gender,
+    this.status,
+    this.adminStatus,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
+
+  OpenMatchId.fromJson(Map<String, dynamic> json) {
+    sId = json['_id']?.toString();
+    clubId = json['clubId']?.toString();
+
+    if (json['slot'] != null) {
+      slot = <Slot>[];
+      json['slot'].forEach((v) {
+        slot!.add(Slot.fromJson(v));
+      });
+    }
+
+    matchType = json['matchType']?.toString();
+    skillLevel = json['skillLevel']?.toString();
+    skillDetails = json['skillDetails'] ?? [];
+    matchDate = json['matchDate']?.toString();
+    matchTime = json['matchTime'] != null
+        ? List<String>.from(json['matchTime'].map((e) => e.toString()))
+        : [];
+
+    matchStatus = json['matchStatus']?.toString();
+
+    teamA = json['teamA'] != null
+        ? (json['teamA'] as List)
+        .map((e) => TeamPlayer.fromJson(e))
+        .toList()
+        : [];
+
+    teamB = json['teamB'] != null
+        ? (json['teamB'] as List)
+        .map((e) => TeamPlayer.fromJson(e))
+        .toList()
+        : [];
+
+    createdBy = json['createdBy']?.toString();
+    gender = json['gender']?.toString();
+    status = json['status'];
+    adminStatus = json['adminStatus'];
+    isActive = json['isActive'];
+    isDeleted = json['isDeleted'];
+    createdAt = json['createdAt']?.toString();
+    updatedAt = json['updatedAt']?.toString();
+    iV = json['__v'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['_id'] = sId;
+    data['clubId'] = clubId;
+    data['slot'] = slot?.map((v) => v.toJson()).toList();
+    data['matchType'] = matchType;
+    data['skillLevel'] = skillLevel;
+    data['skillDetails'] = skillDetails;
+    data['matchDate'] = matchDate;
+    data['matchTime'] = matchTime;
+    data['matchStatus'] = matchStatus;
+    data['teamA'] = teamA?.map((v) => v.toJson()).toList();
+    data['teamB'] = teamB?.map((v) => v.toJson()).toList();
+    data['createdBy'] = createdBy;
+    data['gender'] = gender;
+    data['status'] = status;
+    data['adminStatus'] = adminStatus;
+    data['isActive'] = isActive;
+    data['isDeleted'] = isDeleted;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['__v'] = iV;
+    return data;
+  }
+}
+class TeamPlayer {
+  String? userId;
+  String? joinedAt;
+  String? sId;
+
+  TeamPlayer({this.userId, this.joinedAt, this.sId});
+
+  TeamPlayer.fromJson(Map<String, dynamic> json) {
+    userId = json['userId']?.toString();
+    joinedAt = json['joinedAt']?.toString();
+    sId = json['_id']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'joinedAt': joinedAt,
+      '_id': sId,
+    };
+  }
+}
+
 
 class RegisterClubId {
   String? sId;

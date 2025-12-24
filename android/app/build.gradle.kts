@@ -1,3 +1,12 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+val hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -35,19 +44,28 @@ android {
         // Enable multidex if needed
         multiDexEnabled = true
     }
-
+    signingConfigs {
+        if (hasKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"]?.toString()
+                    ?: error("keyAlias missing from key.properties")
+                keyPassword = keystoreProperties["keyPassword"]?.toString()
+                    ?: error("keyPassword missing from key.properties")
+                storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+                    ?: error("storeFile missing from key.properties")
+                storePassword = keystoreProperties["storePassword"]?.toString()
+                    ?: error("storePassword missing from key.properties")
+            }
+        }
+    }
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
-
-            // ✅ FIXED for Kotlin DSL
-            isMinifyEnabled = true
-            isShrinkResources = true
-
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // Fall back to debug signing when no release keystore is provided.
+            signingConfig = if (hasKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
