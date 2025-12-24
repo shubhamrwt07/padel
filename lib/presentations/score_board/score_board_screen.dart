@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/widgets/sign_up_exports.dart';
 import 'package:padel_mobile/presentations/score_board/score_board_controller.dart';
-import 'package:padel_mobile/presentations/score_board/widgets/add_player_bottomsheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:padel_mobile/presentations/score_board/widgets/shimmer_widgets.dart';
 import 'package:padel_mobile/presentations/score_board/widgets/app_players_bottomsheet.dart';
@@ -25,6 +24,20 @@ class ScoreBoardScreen extends StatelessWidget {
           title: Text("Scoreboard"),
           centerTitle: true,
           action: [
+            Obx(() => IconButton(
+              icon: Icon(
+                controller.isShuffleMode.value ? Icons.check : Icons.swap_horiz,
+                color: Colors.white,
+                size: 25,
+              ),
+              onPressed: () {
+                if (controller.isShuffleMode.value) {
+                  controller.savePlayerSwaps();
+                } else {
+                  _showShuffleDialog();
+                }
+              },
+            )),
             IconButton(
               icon: const Icon(Icons.share_outlined, color: Colors.white,size: 20,),
               onPressed: () => controller.shareScoreboard(context),
@@ -256,10 +269,10 @@ class ScoreBoardScreen extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                _buildOverlappingAvatar(teamAPlayers[0], 0),
+                _buildOverlappingAvatar(teamAPlayers[0], 0, 'Team A'),
                 Positioned(
                   left: 35,
-                  child: _buildOverlappingAvatar(teamAPlayers[1], 1),
+                  child: _buildOverlappingAvatar(teamAPlayers[1], 1, 'Team A'),
                 ),
               ],
             ),
@@ -281,10 +294,10 @@ class ScoreBoardScreen extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                _buildOverlappingAvatar(teamBPlayers[0], 0),
+                _buildOverlappingAvatar(teamBPlayers[0], 0, 'Team B'),
                 Positioned(
                   left: 35,
-                  child: _buildOverlappingAvatar(teamBPlayers[1], 1),
+                  child: _buildOverlappingAvatar(teamBPlayers[1], 1, 'Team B'),
                 ),
               ],
             ),
@@ -361,13 +374,52 @@ class ScoreBoardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOverlappingAvatar(Map<String, dynamic> player, int index) {
+  Widget _buildOverlappingAvatar(Map<String, dynamic> player, int index, String team) {
+    return Obx(() => controller.isShuffleMode.value
+        ? Draggable<Map<String, dynamic>>(
+            data: {'player': player, 'team': team, 'index': index},
+            feedback: Container(
+              height: 55,
+              width: 55,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.textFieldColor,
+                border: Border.all(color: AppColors.whiteColor, width: 2),
+              ),
+              child: const Icon(Icons.shuffle, color: AppColors.primaryColor, size: 25),
+            ),
+            childWhenDragging: Container(
+              height: 55,
+              width: 55,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.3),
+                border: Border.all(color: AppColors.whiteColor, width: 2),
+              ),
+            ),
+            child: DragTarget<Map<String, dynamic>>(
+              onAccept: (data) {
+                if (data['player']['playerId'] != player['playerId']) {
+                  controller.swapPlayers(data['player']['playerId'], team, index);
+                }
+              },
+              builder: (context, candidateData, rejectedData) {
+                return _buildAvatarContainer(player, candidateData.isNotEmpty);
+              },
+            ),
+          )
+        : _buildAvatarContainer(player, false));
+  }
+
+  Widget _buildAvatarContainer(Map<String, dynamic> player, bool isHovered) {
     return Container(
       height: 55,
       width: 55,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.textFieldColor,
+        color: isHovered
+            ? AppColors.primaryColor.withOpacity(0.3)
+            : AppColors.textFieldColor,
         border: Border.all(color: AppColors.whiteColor, width: 2),
         boxShadow: [
           BoxShadow(
@@ -377,35 +429,99 @@ class ScoreBoardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: (player["pic"] != null && player["pic"].toString().isNotEmpty)
-          ? ClipOval(
-        child: CachedNetworkImage(
-          imageUrl: player["pic"],
-          fit: BoxFit.cover,
-          placeholder: (context, url) => const Center(
-            child: SizedBox(
-              height: 20,
-              width: 20,
-              child: LoadingWidget(color: AppColors.primaryColor),
-            ),
-          ),
-          errorWidget: (context, url, error) => const Icon(
-            Icons.person,
-            color: AppColors.primaryColor,
-            size: 30,
-          ),
-        ),
-      )
-          : Center(
-        child: Text(
-          getNameInitials(player["name"], player["lastName"]),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor,
-          ),
-        ),
-      ),
+      child: Obx(() => controller.isShuffleMode.value
+          ? Stack(
+              children: [
+                if (player["pic"] != null && player["pic"].toString().isNotEmpty)
+                  ClipOval(
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.5),
+                        BlendMode.darken,
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: player["pic"],
+                        fit: BoxFit.cover,
+                        width: 55,
+                        height: 55,
+                        placeholder: (context, url) => const Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: LoadingWidget(color: AppColors.primaryColor),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: AppColors.primaryColor,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    width: 55,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black.withOpacity(0.5),
+                    ),
+                    child: Center(
+                      child: Text(
+                        getNameInitials(player["name"], player["lastName"]),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                const Center(
+                  child: Icon(
+                    Icons.shuffle,
+                    color: Colors.white,
+                    size: 25,
+                  ),
+                ),
+              ],
+            )
+          : (player["pic"] != null && player["pic"].toString().isNotEmpty)
+              ? ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: player["pic"],
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const Center(
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: LoadingWidget(color: AppColors.primaryColor),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => const Icon(
+                      Icons.person,
+                      color: AppColors.primaryColor,
+                      size: 30,
+                    ),
+                  ),
+                )
+              : Center(
+                  child: Text(
+                    getNameInitials(player["name"], player["lastName"]),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                )),
     );
   }
 
@@ -426,50 +542,40 @@ class ScoreBoardScreen extends StatelessWidget {
       },
       child: Column(
         children: [
-          Container(
-            height: 50,
-            width: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color:hasPlayer? AppColors.primaryColor.withValues(alpha: 0.1):Colors.white,
-              border: Border.all(color:hasPlayer?Colors.transparent: AppColors.primaryColor),
-            ),
-            child: hasPlayer
-                ? (players[index]["pic"] != null && players[index]["pic"].toString().isNotEmpty)
-                ? ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: players[index]["pic"],
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: LoadingWidget(color: AppColors.primaryColor,),
+          Obx(() => controller.isShuffleMode.value && hasPlayer
+              ? Draggable<Map<String, dynamic>>(
+                  data: {'player': players[index], 'team': teamName, 'index': index},
+                  feedback: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.textFieldColor,
+                      border: Border.all(color: AppColors.primaryColor),
+                    ),
+                    child: const Icon(Icons.shuffle, color: AppColors.primaryColor, size: 20),
                   ),
-                ),
-                errorWidget: (context, url, error) => const Icon(
-                  Icons.person,
-                  color: AppColors.primaryColor,
-                  size: 30,
-                ),
-              ),
-            )
-                : Center(
-              child: Text(
-                getNameInitials(players[index]["name"], players[index]["lastName"]),
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
-                ),
-              ),
-            )
-                : const Icon(
-              Icons.add,
-              size: 24,
-              color: AppColors.primaryColor,
-            ),
-          ),
+                  childWhenDragging: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey.withOpacity(0.3),
+                      border: Border.all(color: AppColors.primaryColor),
+                    ),
+                  ),
+                  child: DragTarget<Map<String, dynamic>>(
+                    onAccept: (data) {
+                      if (data['player']['playerId'] != players[index]['playerId']) {
+                        controller.swapPlayers(data['player']['playerId'], teamName, index);
+                      }
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return _buildPlayerSlotContainer(players, index, hasPlayer, candidateData.isNotEmpty);
+                    },
+                  ),
+                )
+              : _buildPlayerSlotContainer(players, index, hasPlayer, false)),
           SizedBox(
             width: Get.width * 0.13,
             child: Text(
@@ -500,6 +606,123 @@ class ScoreBoardScreen extends StatelessWidget {
           ).paddingOnly(top: 4):SizedBox.shrink()
         ],
       ),
+    );
+  }
+
+  Widget _buildPlayerSlotContainer(List players, int index, bool hasPlayer, bool isHovered) {
+    return Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isHovered
+            ? AppColors.primaryColor.withOpacity(0.3)
+            : hasPlayer
+                ? AppColors.primaryColor.withValues(alpha: 0.1)
+                : Colors.white,
+        border: Border.all(
+          color: hasPlayer ? Colors.transparent : AppColors.primaryColor,
+        ),
+      ),
+      child: hasPlayer
+          ? Obx(() => controller.isShuffleMode.value
+              ? Stack(
+                  children: [
+                    if (players[index]["pic"] != null && players[index]["pic"].toString().isNotEmpty)
+                      ClipOval(
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withOpacity(0.5),
+                            BlendMode.darken,
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: players[index]["pic"],
+                            fit: BoxFit.cover,
+                            width: 50,
+                            height: 50,
+                            placeholder: (context, url) => const Center(
+                              child: SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: LoadingWidget(color: AppColors.primaryColor),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withOpacity(0.5),
+                              ),
+                              child: const Icon(
+                                Icons.person,
+                                color: AppColors.primaryColor,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        child: Center(
+                          child: Text(
+                            getNameInitials(players[index]["name"], players[index]["lastName"]),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const Center(
+                      child: Icon(
+                        Icons.shuffle,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                )
+              : (players[index]["pic"] != null && players[index]["pic"].toString().isNotEmpty)
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: players[index]["pic"],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: LoadingWidget(color: AppColors.primaryColor),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Icon(
+                          Icons.person,
+                          color: AppColors.primaryColor,
+                          size: 30,
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        getNameInitials(players[index]["name"], players[index]["lastName"]),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ))
+          : const Icon(
+              Icons.add,
+              size: 24,
+              color: AppColors.primaryColor,
+            ),
     );
   }
 
@@ -544,6 +767,116 @@ class ScoreBoardScreen extends StatelessWidget {
       );
     });
   }
+
+  void _showShuffleDialog() {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// Top Icon
+              Container(
+                height: 56,
+                width: 56,
+                decoration:  BoxDecoration(
+                  color: Color(0xFF2F49C6),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                ),
+                child: const Icon(
+                  Icons.swap_horiz,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Title
+              Text(
+                "Shuffle Teams?",
+                style: Get.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// Description
+              Text(
+                "If you shuffle the teams, the score will reset to zero and XP points will be calculated from the beginning.",
+                textAlign: TextAlign.center,
+                style: Get.textTheme.bodyLarge?.copyWith(
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.white),
+                        backgroundColor:Colors.grey.shade100 ,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        "Cancel",
+                          style: Get.textTheme.labelLarge!.copyWith(color: Colors.black87)
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        controller.isShuffleMode.value = true;
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2F49C6),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text("Ok",style: Get.textTheme.labelLarge!.copyWith(color: Colors.white),),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
 
   void _showAddScoreDialog() {
     final teamAController = TextEditingController();

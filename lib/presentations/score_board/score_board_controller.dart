@@ -33,6 +33,8 @@ class ScoreBoardController extends GetxController {
   final isLoading = true.obs;
   final isAddingSet = false.obs;
   final isAddingScore = false.obs;
+  final isShuffleMode = false.obs;
+  final hasPlayerSwaps = false.obs;
   Future<void> fetchScoreBoard({bool showLoader = true}) async {
     if (showLoader) {
       isLoading.value = true;
@@ -81,6 +83,7 @@ class ScoreBoardController extends GetxController {
                     : fullLevel;
 
                 final playerData = {
+                  "playerId": p.playerId?.sId ?? p.playerId?.sId ?? "",
                   "name": p.playerId?.name ?? "Unknown",
                   "lastName": p.playerId?.lastName ?? "",
                   "pic": p.playerId?.profilePic ?? "",
@@ -168,6 +171,7 @@ class ScoreBoardController extends GetxController {
   }
 
   Future<void> createSets(int setNumber, {String? type}) async {
+    CustomLogger.logMessage(msg: 'createSets API call - setNumber: $setNumber', level: LogLevel.info);
     isAddingSet.value = true;
     try {
       final body = {
@@ -201,6 +205,7 @@ class ScoreBoardController extends GetxController {
 
   ///Remove Sets Api------------------------------------------------------------
   Future<void> removeSetsFromAPI(int setNumber) async {
+    CustomLogger.logMessage(msg: 'removeSetsFromAPI call - setNumber: $setNumber', level: LogLevel.info);
     // 🔥 FIXED: Store the removed set data for potential rollback
     final removedSet = sets.firstWhere(
           (s) => s["setNumber"] == setNumber,
@@ -274,6 +279,7 @@ class ScoreBoardController extends GetxController {
 
   ///Add Score------------------------------------------------------------------
   Future<void> addScore(int setNumber, int teamAScore, int teamBScore) async {
+    CustomLogger.logMessage(msg: 'addScore API call - set: $setNumber, scores: $teamAScore-$teamBScore', level: LogLevel.info);
     if (teamAScore == 0 && teamBScore == 0) {
       SnackBarUtils.showErrorSnackBar("Both team scores cannot be zero.");
       return;
@@ -317,6 +323,7 @@ class ScoreBoardController extends GetxController {
   ///End Game------------------------------------------------------------------
   var isEndGame = false.obs;
   Future<void> endGame() async {
+    CustomLogger.logMessage(msg: 'endGame API call', level: LogLevel.info);
     // Check if any set is empty (no scores)
     bool hasEmptySet = sets.any((set) {
       final teamAScore = set["teamAScore"] ?? 0;
@@ -349,6 +356,107 @@ class ScoreBoardController extends GetxController {
       SnackBarUtils.showErrorSnackBar("Failed to end game. Please try again.");
     } finally {
       isEndGame.value = false;
+    }
+  }
+
+  ///Swap Players---------------------------------------------------------------
+  void swapPlayers(String draggedPlayerId, String targetTeam, int targetIndex) {
+    CustomLogger.logMessage(msg: 'swapPlayers called - LOCAL UPDATE ONLY', level: LogLevel.info);
+    try {
+      // Find dragged player and remove from current position
+      Map<String, dynamic>? draggedPlayer;
+      int draggedTeamIndex = -1;
+      int draggedPlayerIndex = -1;
+      
+      for (int teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+        final teamPlayers = teams[teamIndex]['players'] as List;
+        for (int playerIndex = 0; playerIndex < teamPlayers.length; playerIndex++) {
+          if (teamPlayers[playerIndex]['playerId'] == draggedPlayerId) {
+            draggedPlayer = Map<String, dynamic>.from(teamPlayers[playerIndex]);
+            draggedTeamIndex = teamIndex;
+            draggedPlayerIndex = playerIndex;
+            break;
+          }
+        }
+        if (draggedPlayer != null) break;
+      }
+      
+      if (draggedPlayer == null) return;
+      
+      // Get target team index
+      int targetTeamIndex = targetTeam == 'Team A' ? 0 : 1;
+      
+      // Get target player if exists
+      Map<String, dynamic>? targetPlayer;
+      final targetTeamPlayers = teams[targetTeamIndex]['players'] as List;
+      if (targetIndex < targetTeamPlayers.length) {
+        targetPlayer = Map<String, dynamic>.from(targetTeamPlayers[targetIndex]);
+      }
+      
+      // Perform the swap in local data only - NO API CALL
+      final draggedTeamPlayers = teams[draggedTeamIndex]['players'] as List;
+      
+      if (targetPlayer != null) {
+        // Swap players
+        draggedTeamPlayers[draggedPlayerIndex] = targetPlayer;
+        targetTeamPlayers[targetIndex] = draggedPlayer;
+      } else {
+        // Move player to empty slot
+        draggedTeamPlayers.removeAt(draggedPlayerIndex);
+        targetTeamPlayers.add(draggedPlayer);
+      }
+      
+      hasPlayerSwaps.value = true; // Mark that swaps occurred
+      teams.refresh();
+      CustomLogger.logMessage(msg: 'Local swap completed - NO API CALL MADE', level: LogLevel.info);
+    } catch (e) {
+      CustomLogger.logMessage(msg: 'Swap error: $e', level: LogLevel.error);
+    }
+  }
+
+  ///Save Player Swaps---------------------------------------------------------
+  Future<void> savePlayerSwaps() async {
+    if (!hasPlayerSwaps.value) {
+      CustomLogger.logMessage(msg: 'No swaps made - exiting shuffle mode without API call', level: LogLevel.info);
+      isShuffleMode.value = false;
+      return;
+    }
+    
+    CustomLogger.logMessage(msg: 'savePlayerSwaps called - API CALL STARTING', level: LogLevel.info);
+    try {
+      // Build API body
+      final updatedTeams = [];
+      for (int i = 0; i < teams.length; i++) {
+        final teamPlayers = teams[i]['players'] as List;
+        final playerIds = teamPlayers.map((p) => {'playerId': p['playerId']}).toList();
+        
+        updatedTeams.add({
+          'name': teams[i]['name'],
+          'players': playerIds,
+        });
+      }
+      
+      final body = {
+        'scoreboardId': scoreboardId.value,
+        'teams': updatedTeams,
+      };
+      
+      CustomLogger.logMessage(msg: 'Making API call to save player swaps', level: LogLevel.info);
+      final response = await repository.updateScoreBoard(data: body);
+      if (response.success == true) {
+        hasPlayerSwaps.value = false; // Reset swap flag
+        isShuffleMode.value = false;
+        SnackBarUtils.showInfoSnackBar('Players updated successfully!');
+        CustomLogger.logMessage(msg: 'API call successful - shuffle mode disabled', level: LogLevel.info);
+      } else {
+        // Revert changes on API failure
+        await fetchScoreBoard(showLoader: false);
+        SnackBarUtils.showErrorSnackBar('Failed to update players');
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: 'Save error: $e', level: LogLevel.error);
+      await fetchScoreBoard(showLoader: false);
+      SnackBarUtils.showErrorSnackBar('Failed to update players');
     }
   }
 

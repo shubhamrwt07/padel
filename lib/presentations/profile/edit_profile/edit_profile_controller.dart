@@ -206,7 +206,7 @@ class EditProfileController extends GetxController{
       if (updatedProfile.status == "200") {
         await profileController.fetchUserProfile();
         Get.back();
-        SnackBarUtils.showSuccessSnackBar(updatedProfile.message);
+        SnackBarUtils.showSuccessSnackBar(updatedProfile.message??"");
       } else {
         CustomLogger.logMessage(msg: "UPDATE PROFILE ERROR",level: LogLevel.error);
       }
