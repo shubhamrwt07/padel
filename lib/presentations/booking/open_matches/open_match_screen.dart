@@ -196,7 +196,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 30,
+                  width: 25,
                   height: 55,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(

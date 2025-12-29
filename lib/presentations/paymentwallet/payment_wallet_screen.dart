@@ -73,77 +73,80 @@ class PaymentWalletScreen extends StatelessWidget {
     );
   }
   Widget myWallet(){
-    return Container(
-      width: Get.width,
-      padding: EdgeInsets.symmetric(vertical: 10,horizontal: Get.width*0.03),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Color(0x99d5dcf1),
-            Color(0x99dbf1e3),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.lightBlueColor.withValues(alpha: 0.2),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Image.asset(
-                    Assets.imagesIcBalanceWallet,
-                    scale: 5,
-                  ),
-                  Text(
-                    "My Wallet",
-                    style: Get.textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      color: AppColors.labelBlackColor,
-                    ),
-                  ).paddingOnly(left: 5),
-                ],
-              ),
-              Text(
-                "Available balance",
-                style: Get.textTheme.bodyLarge!.copyWith(
-
-                  color: AppColors.labelBlackColor,
-                ),
-              ).paddingOnly(top: 5),
+    return GestureDetector(
+      onTap: ()=>Get.toNamed(RoutesName.wallet),
+      child: Container(
+        width: Get.width,
+        padding: EdgeInsets.symmetric(vertical: 10,horizontal: Get.width*0.03),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0x99d5dcf1),
+              Color(0x99dbf1e3),
             ],
           ),
-         Row(
-           children: [
-             Text(
-               "₹ ",
-               style: Get.textTheme.titleMedium!.copyWith(
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.lightBlueColor.withValues(alpha: 0.2),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      Assets.imagesIcBalanceWallet,
+                      scale: 5,
+                    ),
+                    Text(
+                      "My Wallet",
+                      style: Get.textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                        color: AppColors.labelBlackColor,
+                      ),
+                    ).paddingOnly(left: 5),
+                  ],
+                ),
+                Text(
+                  "Available balance",
+                  style: Get.textTheme.bodyLarge!.copyWith(
+      
+                    color: AppColors.labelBlackColor,
+                  ),
+                ).paddingOnly(top: 5),
+              ],
+            ),
+           Row(
+             children: [
+               Text(
+                 "₹ ",
+                 style: Get.textTheme.titleMedium!.copyWith(
+                     color: AppColors.primaryColor,
+                     fontFamily: "Roboto"
+                 ),
+               ).paddingOnly(top: 2),
+               Text(
+                 "0",
+                 style: Get.textTheme.titleMedium!.copyWith(
                    color: AppColors.primaryColor,
-                   fontFamily: "Roboto"
+                 ),
                ),
-             ).paddingOnly(top: 2),
-             Text(
-               "0",
-               style: Get.textTheme.titleMedium!.copyWith(
-                 color: AppColors.primaryColor,
-               ),
-             ),
-           ],
-         )
-        ],
+             ],
+           )
+          ],
+        ),
       ),
     );
   }

@@ -282,8 +282,8 @@ class EditProfileUi extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: AppColors.textFieldColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.containerBorderColor),
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.grey,width: 1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -322,7 +322,8 @@ class EditProfileUi extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.textFieldColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.grey,width: 1),
                 ),
                 child: Row(
                   children: [
@@ -340,7 +341,8 @@ class EditProfileUi extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.textFieldColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.grey,width: 1),
                 ),
                 child: Text("No Location found",style: style,),
               );
@@ -352,7 +354,8 @@ class EditProfileUi extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: AppColors.textFieldColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.grey,width: 1),
               ),
               child: DropdownButtonHideUnderline(
                 child: Obx(
@@ -402,8 +405,8 @@ class EditProfileUi extends StatelessWidget {
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.textFieldColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.containerBorderColor),
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(color: Colors.grey,width: 1),
             ),
             child: Column(
               children: [

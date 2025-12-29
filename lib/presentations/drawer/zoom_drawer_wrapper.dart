@@ -18,7 +18,7 @@ class ZoomDrawerWrapper extends StatelessWidget {
 
     return ZoomDrawer(
       controller: drawerController.zoomDrawerController,
-      menuScreen: const CustomDrawerUi(),
+      menuScreen: CustomDrawerUi(),
       mainScreen: child,
       borderRadius: 20.0,
       showShadow: true,

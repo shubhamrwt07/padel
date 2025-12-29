@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -7,6 +6,7 @@ import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
@@ -16,14 +16,13 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
 
   @override
   Widget build(BuildContext context) {
-    // Get CartController instance
     final CartController cartController = Get.find<CartController>();
 
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       appBar: primaryAppBar(
         centerTitle: true,
-        title: Text("Payment Method"),
+        title: Text("Direct Payment"),
         // action: [
         //   Container(
         //     alignment: Alignment.center,
@@ -38,158 +37,399 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
         // ],
         context: context,
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Text(
-              "Select the payment method which you want\nto use",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w400),
-              textAlign: TextAlign.center,
-            ).paddingOnly(top: Get.height * 0.02),
-          ),
-          SizedBox(
-            height: Get.height * 0.7,
-            child: ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: controller.paymentList.length,
-              itemBuilder: (context, index) {
-                final payment = controller.paymentList[index];
-                return paymentOptions(
-                  context,
-                  payment['icon']!,
-                  payment['name']!,
-                  payment['value']!,
-                );
-              },
-            ),
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Payment Summary Section
+            _buildPaymentSummary(context, cartController),
 
-          // Updated payment button with dynamic data from cart
-          Obx(() => CustomButton(
-            width: Get.width * 0.9,
-            onTap: () async {
-              // Check if payment method is selected
-              if (controller.option.value.isEmpty) {
-                SnackBarUtils.showWarningSnackBar("Please select payment method");
-                return;
-              }
+            // UPI Section
+            Text(
+              "UPI",
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ).paddingSymmetric(horizontal: Get.width * 0.05),
 
-              // Check if cart has items
-              if (cartController.cartItems.isEmpty) {
-                SnackBarUtils.showWarningSnackBar("Cart is empty");
-                return;
-              }
-              // Start payment process
-              await controller.startPayment();
-            },
-            child: controller.isProcessing.value || cartController.isBooking.value
-                ? LoadingAnimationWidget.waveDots(
-              color: AppColors.whiteColor,
-              size: 45,
-            ).paddingOnly(right: 30)
-                : Row(
-              children: [
-                Text(
-                  "₹",
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: AppColors.whiteColor,
-                    fontFamily: "Roboto",
-                    fontWeight: FontWeight.w600,
-                  ),
-                ).paddingOnly(left: 30, right: 5),
-                Text(
-                  formatAmount(cartController.totalPrice.value.toString()),
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: AppColors.whiteColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ).paddingOnly(
-                  right: Get.width * 0.3,
-                ),
-                Text(
-                  controller.isProcessing.value ? "Processing..." : "Payment",
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: AppColors.whiteColor,
-                  ),
-                ),
-              ],
-            ),
-          )),
-        ],
+            _buildUPIOptions(context),
+
+            SizedBox(height: Get.height * 0.03),
+
+            // Credit & Debit Cards Section
+            Text(
+              "Credit & Debit Cards",
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ).paddingSymmetric(horizontal: Get.width * 0.05),
+
+            SizedBox(height: Get.height * 0.02),
+
+            _buildCardOptions(context),
+
+            SizedBox(height: Get.height * 0.03),
+          ],
+        ),
       ),
+      // bottomNavigationBar: _buildPaymentButton(context, cartController),
     );
   }
 
-  Widget paymentOptions(
-      BuildContext context,
-      String iconPath,
-      String title,
-      String value,
-      ) {
-    return GestureDetector(
-      onTap: () {
-        controller.option.value = value;
-      },
-      child: Container(
-        height: Get.height * 0.1,
-        width: Get.width,
+  Widget _buildPaymentSummary(BuildContext context, CartController cartController) {
+    return Obx(() {
+      final totalAmount = cartController.totalPrice.value;
+      final walletBalance = 0; // Replace with actual wallet balance
+      final amountToPay = totalAmount - walletBalance;
+
+      return Container(
+        margin: EdgeInsets.all(Get.width * 0.05),
+        padding: EdgeInsets.all(Get.width * 0.05),
         decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFF5F5F5),
-              spreadRadius: 1.2,
-              blurRadius: 3.2,
-              offset: const Offset(2, 5),
-            )
-          ],
+          color: Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                if (title == "ApplePay")
-                  SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: SvgPicture.asset(iconPath),
-                  ).paddingOnly(right: Get.width * 0.03)
-                else
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: SvgPicture.asset(iconPath),
-                  ).paddingOnly(right: Get.width * 0.05),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                )
-              ],
+            Text(
+              "Payment Summary",
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            Obx(
-                  () => RadioGroup<String>(
-                groupValue: controller.option.value,
-                onChanged: (val) {
-                  controller.option.value = val!;
-                },
-                child: Radio<String>(
-                  value: value,
-                  activeColor: AppColors.primaryColor,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  focusColor: AppColors.primaryColor,
-                  overlayColor: WidgetStateProperty.all(AppColors.primaryColor),
-                  fillColor: WidgetStateProperty.all(AppColors.primaryColor),
-                ),
+            SizedBox(height: Get.height * 0.02),
+            _buildSummaryRow(context, "Total Amount", "₹${formatAmount(totalAmount.toString())}", false),
+            SizedBox(height: Get.height * 0.015),
+            _buildSummaryRow(context, "Less: Wallet Balance", "- ₹${formatAmount(walletBalance.toString())}", true),
+            SizedBox(height: Get.height * 0.015),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Amount To Pay",
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "₹${formatAmount(amountToPay.toString())}",
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ).paddingSymmetric(horizontal: Get.width * 0.05),
-      ).paddingSymmetric(
-        horizontal: Get.width * 0.05,
-        vertical: Get.height * 0.01,
+        ),
+      );
+    });
+  }
+
+  Widget _buildSummaryRow(BuildContext context, String label, String value, bool isDeduction) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+            color: isDeduction ? Colors.red : AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUPIOptions(BuildContext context) {
+    final upiOptions = [
+      {
+        "name": "Google Pay",
+        "icon": Assets.imagesImgGooglePay,
+        "value": "google_pay",
+        "hasButton": true,
+      },
+      {
+        "name": "Paytm",
+        "icon": Assets.imagesImgPaytm, // Add this asset
+        "value": "paytm",
+        "hasButton": true,
+      },
+      {
+        "name": "PhonePe",
+        "icon": Assets.imagesImgPhonePay, // Add this asset
+        "value": "phonepe",
+        "hasButton": true,
+      },
+      {
+        "name": "Other Ways",
+        "icon": Assets.imagesImgOtherUpi, // Add this asset
+        "value": "other_ways",
+        "hasButton": true,
+      },
+    ];
+
+    return Column(
+      children: upiOptions.map((option) {
+        return _buildPaymentOption(
+          context,
+          option['icon']! as String,
+          option['name']! as String,
+          option['value']! as String,
+          hasButton: option['hasButton']! as bool,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCardOptions(BuildContext context) {
+    return Column(
+      children: [
+        _buildPaymentOption(
+          context,
+          "", // Add this asset
+          "Visa",
+          "visa_1324",
+          subtitle: "**1324 | Vikram Kumar",
+        ),
+        SizedBox(height: Get.height * 0.015),
+        GestureDetector(
+          onTap: () {
+            // Navigate to add card screen
+          },
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.primaryColor,
+                  size: 24,
+                ),
+                SizedBox(width: 12),
+                Text(
+                  "Add a new credit or debit card",
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentOption(
+      BuildContext context,
+      String iconPath,
+      String title,
+      String value, {
+        String? subtitle,
+        bool hasButton = false,
+      }) {
+    return GestureDetector(
+      onTap: () {
+        if (value.startsWith('visa') || value.contains('card')) {
+          SnackBarUtils.showInfoSnackBar("Coming Soon");
+        } else {
+          controller.option.value = value;
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: Get.width * 0.05,
+          vertical: Get.height * 0.008,
+        ),
+        padding: EdgeInsets.all(Get.width * 0.04),
+        decoration: BoxDecoration(
+          color: AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFFE0E0E0),
+            width: 1,
+          ),
+        ),
+        child: Obx(() {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: iconPath.isEmpty
+                        ? Center(
+                            child: Text(
+                              title[0].toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                          )
+                        : Image.asset(
+                            iconPath,
+                            fit: BoxFit.contain,
+                          ),
+                  ),
+                  SizedBox(width: Get.width * 0.03),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle,
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Radio<String>(
+                    value: value,
+                    groupValue: controller.option.value,
+                    onChanged: (val) {
+                      controller.option.value = val!;
+                    },
+                    activeColor: AppColors.primaryColor,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ],
+              ),
+              AnimatedSize(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: hasButton && controller.option.value == value
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 12),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final CartController cartController = Get.find<CartController>();
+                              if (cartController.totalPrice.value <= 0) {
+                                SnackBarUtils.showWarningSnackBar("Amount cannot be zero");
+                                return;
+                              }
+                              await controller.startPayment();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              "Pay using ${title}",
+                              style: TextStyle(
+                                color: AppColors.whiteColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+              ),
+            ],
+          );
+        }),
+    ));
+  }
+
+  Widget _buildPaymentButton(BuildContext context, CartController cartController) {
+    return Container(
+      padding: EdgeInsets.all(Get.width * 0.05),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, -5),
+          ),
+        ],
       ),
+      child: Obx(() => CustomButton(
+        width: Get.width,
+        onTap: () async {
+          if (controller.option.value.isEmpty) {
+            SnackBarUtils.showWarningSnackBar("Please select payment method");
+            return;
+          }
+
+          if (cartController.cartItems.isEmpty) {
+            SnackBarUtils.showWarningSnackBar("Cart is empty");
+            return;
+          }
+
+          await controller.startPayment();
+        },
+        child: controller.isProcessing.value || cartController.isBooking.value
+            ? LoadingAnimationWidget.waveDots(
+          color: AppColors.whiteColor,
+          size: 45,
+        )
+            : Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "₹",
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: AppColors.whiteColor,
+                fontFamily: "Roboto",
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              formatAmount(cartController.totalPrice.value.toString()),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: AppColors.whiteColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 20),
+            Text(
+              "Payment",
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                color: AppColors.whiteColor,
+              ),
+            ),
+          ],
+        ),
+      )),
     );
   }
 }

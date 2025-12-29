@@ -157,39 +157,39 @@ class CustomDrawerUi extends GetView<ProfileController> {
             ),
           ),
 
-          Obx(
-                () => ProfileRow(
-              icon: Icon(Icons.shopping_cart_outlined, size: 20, color: controller.selectedIndex.value == 5 ? AppColors.primaryColor : AppColors.labelBlackColor),
-              title: AppStrings.cart,
-              isSelected: controller.selectedIndex.value == 5,
-              onTap: () {
-                controller.selectedIndex.value = 5;
-                Get.to(() => CartScreen(buttonType: "true"), transition: Transition.rightToLeft);
-              },
-
-            ),
-          ),
-          Obx(
-                () => ProfileRow(
-              icon: SvgPicture.asset(
-                  Assets.imagesIconLeaderBoard,
-                  height: 22,
-                  width: 22,
-                  colorFilter: ColorFilter.mode(
-                    controller.selectedIndex.value == 6
-                        ? AppColors.primaryColor
-                        : AppColors.labelBlackColor,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              title: "LeaderBoard",
-              isSelected: controller.selectedIndex.value == 6,
-              onTap: () {
-                controller.selectedIndex.value = 6;
-                Get.toNamed(RoutesName.leaderBoard);
-              },
-            ),
-          ),
+          // Obx(
+          //       () => ProfileRow(
+          //     icon: Icon(Icons.shopping_cart_outlined, size: 20, color: controller.selectedIndex.value == 5 ? AppColors.primaryColor : AppColors.labelBlackColor),
+          //     title: AppStrings.cart,
+          //     isSelected: controller.selectedIndex.value == 5,
+          //     onTap: () {
+          //       controller.selectedIndex.value = 5;
+          //       Get.to(() => CartScreen(buttonType: "true"), transition: Transition.rightToLeft);
+          //     },
+          //
+          //   ),
+          // ),
+          // Obx(
+          //       () => ProfileRow(
+          //     icon: SvgPicture.asset(
+          //         Assets.imagesIconLeaderBoard,
+          //         height: 22,
+          //         width: 22,
+          //         colorFilter: ColorFilter.mode(
+          //           controller.selectedIndex.value == 6
+          //               ? AppColors.primaryColor
+          //               : AppColors.labelBlackColor,
+          //           BlendMode.srcIn,
+          //         ),
+          //       ),
+          //     title: "LeaderBoard",
+          //     isSelected: controller.selectedIndex.value == 6,
+          //     onTap: () {
+          //       controller.selectedIndex.value = 6;
+          //       Get.toNamed(RoutesName.leaderBoard);
+          //     },
+          //   ),
+          // ),
           Obx(
             () => ProfileRow(
               icon: SvgPicture.asset(
@@ -300,20 +300,21 @@ class CustomDrawerUi extends GetView<ProfileController> {
           ),
 
 
-          Obx(
-            () => ProfileRow(
-              icon: Icon(Icons.wallet,color: controller.selectedIndex.value == 13
-      ? AppColors.primaryColor
-          : AppColors.labelBlackColor,
-      ).paddingOnly(left: 3),
-              title: "Wallet",
-              isSelected: controller.selectedIndex.value == 13,
-              onTap: (){
-                controller.selectedIndex.value = 13;
-                Get.toNamed(RoutesName.wallet);
-              },
-            ),
-          ),ProfileRow(
+      //     Obx(
+      //       () => ProfileRow(
+      //         icon: Icon(Icons.wallet,color: controller.selectedIndex.value == 13
+      // ? AppColors.primaryColor
+      //     : AppColors.labelBlackColor,
+      // ).paddingOnly(left: 3),
+      //         title: "Wallet",
+      //         isSelected: controller.selectedIndex.value == 13,
+      //         onTap: (){
+      //           controller.selectedIndex.value = 13;
+      //           Get.toNamed(RoutesName.wallet);
+      //         },
+      //       ),
+      //     ),
+          ProfileRow(
             icon: SvgPicture.asset(Assets.imagesIcLogOut, height: 15, width: 17).paddingOnly(left: 3),
             title: AppStrings.logout,
             textColor: Colors.red,

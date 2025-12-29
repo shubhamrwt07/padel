@@ -24,7 +24,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // bottomNavigationBar: _bottomButton(context),
+      bottomNavigationBar: _bottomButton(context),
       appBar: primaryAppBar(
           title: Text("Open Matches"), context: context,centerTitle: true,
         action: [
@@ -153,8 +153,8 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
         ).paddingOnly(right: Get.width * 0.14),
         onTap: () {
-          // Get.toNamed(RoutesName.createOpenMatch,);
-          SnackBarUtils.showInfoSnackBar("Create an Open Match Coming Soon!");
+          Get.toNamed(RoutesName.createOpenMatchForAllCourts,);
+          // SnackBarUtils.showInfoSnackBar("Create an Open Match Coming Soon!");
         },
       ).paddingOnly(bottom: 0),
     );
