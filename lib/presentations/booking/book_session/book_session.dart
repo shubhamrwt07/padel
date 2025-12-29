@@ -60,7 +60,7 @@ class BookSession extends StatelessWidget {
               Transform.translate(
                 offset: const Offset(0, 0),
                 child: Container(
-                  width: 30,
+                  width: 25,
                   height: 55,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(

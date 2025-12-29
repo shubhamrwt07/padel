@@ -6,6 +6,8 @@ import 'package:padel_mobile/presentations/auth/otp/otp_binding.dart';
 import 'package:padel_mobile/presentations/auth/otp/otp_screen.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_binding.dart';
 import 'package:padel_mobile/presentations/auth/sign_up/sign_up_screen.dart';
+import 'package:padel_mobile/presentations/book_a_court/book_a_court_binding.dart';
+import 'package:padel_mobile/presentations/book_a_court/book_a_court_screen.dart';
 import 'package:padel_mobile/presentations/booking/americano/americano_binding.dart';
 import 'package:padel_mobile/presentations/booking/americano/americano_screen.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_binding.dart';
@@ -32,6 +34,8 @@ import 'package:padel_mobile/presentations/main_home_page/main_home_binding.dart
 import 'package:padel_mobile/presentations/main_home_page/main_home_screen.dart';
 import 'package:padel_mobile/presentations/notification/notification_binding.dart';
 import 'package:padel_mobile/presentations/notification/notification_ui.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/create_open_match_for_all_courts/create_open_match_for_all_courts_binding.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/create_open_match_for_all_courts/create_open_match_for_all_courts_screen.dart';
 import 'package:padel_mobile/presentations/open_match_for_all_court/open_match_for_all_court_binding.dart';
 import 'package:padel_mobile/presentations/open_match_for_all_court/open_match_for_all_court_screen.dart';
 import 'package:padel_mobile/presentations/packages/packages_binding.dart';
@@ -278,13 +282,6 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
-    // GetPage(
-    //   name: RoutesName.addPlayer,
-    //   page: () => AddPlayerScreen(),
-    //   binding: AddPlayerBinding(),
-    //   transition: Transition.rightToLeft,
-    //   transitionDuration: defaultDuration,
-    // ),
     GetPage(
       name: RoutesName.createOpenMatch,
       page: () => CreateOpenMatchesScreen(),
@@ -292,10 +289,25 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
+    ///New UI-------------------------------------------------------------------
     GetPage(
       name: RoutesName.openMatchForAllCourts,
       page: () => OpenMatchForAllCourtScreen(),
       binding: OpenMatchForAllCourtBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.createOpenMatchForAllCourts,
+      page: () => CreateOpenMatchForAllCourtsScreen(),
+      binding: CreateOpenMatchForAllCourtsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
+    ),
+    GetPage(
+      name: RoutesName.bookACourt,
+      page: () => BookACourtScreen(),
+      binding: BookACourtBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),

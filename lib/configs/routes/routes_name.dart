@@ -54,7 +54,10 @@ class RoutesName {
   static const String addPlayer = '/addPlayer';
   static const String createOpenMatch = '/createOpenMatch';
   static const String matchBooking = '/matchBooking';
+  ///New UI---------------------------------------------------------------------
   static const String openMatchForAllCourts = '/openMatchForAllCourts';
+  static const String createOpenMatchForAllCourts = '/createOpenMatchForAllCourts';
+  static const String bookACourt = '/bookACourt';
 
   //LeaderBoard-----------------------------------------------------------------
   static const String leaderBoard = '/leaderBoard';

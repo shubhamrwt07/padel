@@ -1,6 +1,8 @@
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_controller.dart';
 import 'package:padel_mobile/presentations/bookinghistory/booking_history_screen.dart';
 import 'package:padel_mobile/presentations/home/home_screen.dart';
+import 'package:padel_mobile/presentations/leaderBoard/leader_board_controller.dart';
+import 'package:padel_mobile/presentations/leaderBoard/leader_board_screen.dart';
 import 'package:padel_mobile/presentations/main_home_page/main_home_controller.dart';
 import 'package:padel_mobile/presentations/main_home_page/main_home_screen.dart';
 import 'package:padel_mobile/presentations/openmatchbooking/openmatch_booking_controller.dart';
@@ -12,11 +14,12 @@ class BottomNavigationController extends GetxController {
   // HomeController homeController = Get.put(HomeController());
   MainHomeController mainHomeController = Get.put(MainHomeController());
   BookingHistoryController bookingHistoryController= Get.put(BookingHistoryController());
-  OpenMatchBookingController openMatchBookingController= Get.put(OpenMatchBookingController());
+  // OpenMatchBookingController openMatchBookingController= Get.put(OpenMatchBookingController());
+  LeaderboardController leaderboardController = Get.put(LeaderboardController());
   final List<Map<String, dynamic>> tabs = [
     {'icon': Assets.imagesIcHomeBottomBar, 'label': 'Home','isSvg': true, 'size': 18.0},
     {'icon': Assets.imagesIcBookings, 'label': 'Bookings','isSvg': true, 'size': 22.0},
-    {'icon':  Assets.imagesIcPadelIconBottomNav, 'label': 'Open Matches', 'isSvg': true, 'size': 18.0},
+    {'icon':  Icons.bar_chart, 'label': 'LeaderBoard', 'isSvg': false, 'size': 24.0},
     {'icon': Assets.imagesIcCap, 'label': 'Coach', 'isSvg': true, 'size': 18.0},
 
   ];
@@ -30,7 +33,8 @@ class BottomNavigationController extends GetxController {
     // HomeScreen(),
     MainHomeScreen(),
     BookingHistoryUi(),
-    OpenMatchBookingScreen(),
+    // OpenMatchBookingScreen(),
+    LeaderboardScreen(),
     SizedBox(
       height: Get.height,
       width: Get.width,

@@ -25,6 +25,7 @@ class Assets {
   static const String imagesIcMixedGender = 'assets/images/ic_mixed_gender.svg';
   static const String imagesIcMyClub = 'assets/images/ic_my_club.svg';
   static const String imagesIcPackages = 'assets/images/ic_packages.svg';
+  static const String imagesIcPadelBall = 'assets/images/ic_padel_ball.svg';
   static const String imagesIcPadelIcon = 'assets/images/ic_padel_icon.svg';
   static const String imagesIcPadelIconBottomNav = 'assets/images/ic_padel_icon_bottomNav.svg';
   static const String imagesIcPaypal = 'assets/images/ic_paypal.svg';
@@ -34,9 +35,11 @@ class Assets {
   static const String imagesIcShareBooking = 'assets/images/ic_share_booking.svg';
   static const String imagesIcTradingDown = 'assets/images/ic_trading_down.svg';
   static const String imagesIcTreadingUp = 'assets/images/ic_treading_up.svg';
+  static const String imagesIcWallet = 'assets/images/ic_wallet.svg';
   static const String imagesIconLeaderBoard = 'assets/images/icon_leaderBoard.svg';
   static const String imagesImgBackground = 'assets/images/img_background.svg';
   static const String imagesImgBackgroundBottomBar = 'assets/images/img_background_bottomBar.png';
+  static const String imagesImgBackgroundPlayedMatch = 'assets/images/img_background_played_match.svg';
   static const String imagesImgBackgroundScoreView = 'assets/images/img_background_score_view.svg';
   static const String imagesImgBookNow = 'assets/images/img_book_now.jpg';
   static const String imagesImgBookingConfirm = 'assets/images/img_booking_confirm.svg';
@@ -48,7 +51,11 @@ class Assets {
   static const String imagesImgDummy3 = 'assets/images/img_dummy_3.png';
   static const String imagesImgDummy4 = 'assets/images/img_dummy_4.png';
   static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
+  static const String imagesImgGooglePay = 'assets/images/img_google_pay.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesImgOtherUpi = 'assets/images/img_other_upi.png';
+  static const String imagesImgPaytm = 'assets/images/img_paytm.png';
+  static const String imagesImgPhonePay = 'assets/images/img_phone_pay.png';
   static const String imagesImgRoundBackground = 'assets/images/img_round_background.svg';
   static const String imagesImgScoreView = 'assets/images/img_score_view.svg';
   static const String imagesImgVsRounds = 'assets/images/img_vs_rounds.svg';

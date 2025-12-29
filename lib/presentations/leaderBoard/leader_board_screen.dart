@@ -411,7 +411,7 @@ class LeaderboardScreen extends StatelessWidget {
 
 
   Widget _buildLeaderboardSheet(BuildContext context, List<Map<String, dynamic>> data) {
-    const double minSize = 0.5;
+    const double minSize = 0.44;
     const double maxSize = 1.0;
     const double maxRadius = 24.0;
 

@@ -2,22 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/presentations/wallet/wallet_controller.dart';
-class WalletScreen extends StatelessWidget {
-  final WalletController controller = Get.put(WalletController());
-   WalletScreen({super.key});
+class WalletScreen extends StatefulWidget {
+  const WalletScreen({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+  State<WalletScreen> createState() => _WalletScreenState();
+}
+
+class _WalletScreenState extends State<WalletScreen> {
+  final WalletController controller = Get.put(WalletController());
+
+  @override
+  void initState() {
+    super.initState();
     controller.fetchTransaction();
     controller.fetchWallet();
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _header(),
-          Expanded(child: _transactionList()),
-        ],
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            _header(),
+            Expanded(child: _transactionList()),
+          ],
+        ),
       ),
     );
   }
@@ -114,6 +129,8 @@ class WalletScreen extends StatelessWidget {
       onTap: () {
         if (text == 'Add') {
           controller.showAddBalanceDialog();
+        }else if (text=="Withdraw"){
+          SnackBarUtils.showInfoSnackBar("Withdraw option coming soon!");
         }
       },
       child: Container(

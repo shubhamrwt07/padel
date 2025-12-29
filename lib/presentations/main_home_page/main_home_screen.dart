@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,8 @@ import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
+import 'package:padel_mobile/presentations/open_match_for_all_court/widgets/semi_circle_progress_bar.dart';
+import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import 'dart:developer';
 class MainHomeScreen extends StatelessWidget {
@@ -140,6 +143,8 @@ class MainHomeScreen extends StatelessWidget {
               _bookingSection(),
               const SizedBox(height: 20),
               _quickActions(),
+              const SizedBox(height: 15),
+              statsDashboard(),
               const SizedBox(height: 15),
               _sectionTitle("Courts Near you",(){Get.toNamed(RoutesName.home);}),
               _courtCard(),
@@ -544,17 +549,46 @@ class MainHomeScreen extends StatelessWidget {
               onTap: () => _handleQuickAction(e["action"] as String),
               child: Column(
                         children: [
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: AppColors.primaryColor,
-                ),
-                child: Icon(e["icon"] as IconData,
-                    color: Colors.white),
-              ),
-              const SizedBox(height: 6),
+                          Container(
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFF3F56D6),
+                                  Color(0xFF2B44C4),
+                                ],
+                              ),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  top: -20,
+                                  left: -20,
+                                  child: Container(
+                                    height: 80,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(alpha: 0.04),
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Icon(
+                                    e["icon"] as IconData,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
               Text(e["title"] as String,style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),),
                         ],
                       ),
@@ -569,7 +603,7 @@ class MainHomeScreen extends StatelessWidget {
     
     switch(action) {
       case 'book':
-        Get.toNamed(RoutesName.home);
+        Get.toNamed(RoutesName.bookACourt);
         break;
       case 'match':
         // SnackBarUtils.showInfoSnackBar("Open Match feature coming soon!");
@@ -918,4 +952,238 @@ class MainHomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  ///
+  Widget statsDashboard() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _matchPlayedCard()),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  children: [
+                    _leaderboardCard(),
+                    SizedBox(height: 10,),
+                    _xpCard(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _recentMatches(),
+        ],
+      ),
+    );
+  }
+  Widget _matchPlayedCard() {
+    return Container(
+      height: 180,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.1)),
+        gradient: LinearGradient(
+          colors: [Color(0xffE9EFFF), Color(0xffE6EBFF)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Transform.translate(
+              offset: Offset(-15, -16),
+              child: SvgPicture.asset(Assets.imagesImgBackgroundPlayedMatch)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Match\nPlayed',
+                    style: Get.textTheme.titleSmall!.copyWith(color: AppColors.primaryColor,fontWeight: FontWeight.w600,fontSize: 17),
+                  ),
+                  Spacer(),
+                  Text(
+                    '88',
+                    style: Get.textTheme.titleLarge!.copyWith(color: Color(0xff0E1E55),fontSize: 30),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 170,
+                      height: 100,
+                      child: CustomPaint(
+                        painter: BlockSemiCirclePainter(
+                          progress: 0.6, // 60%
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Transform.translate(
+                              offset: Offset(0, 4),
+                              child: Text('60%', style: Get.textTheme.titleLarge)),
+                          Text(
+                            'Win Ratio',
+                            style: Get.textTheme.headlineSmall!.copyWith(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          
+          
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _leaderboardCard() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.secondaryColor.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xffE7F8EA), Color(0xffF1FFF4)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.bar_chart, color: Color(0xff2947C7),size: 30,),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                    '42',
+                    style: Get.textTheme.titleLarge!.copyWith(color: Color(0xff0E1E55))
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'Leaderboard\nPosition',
+            style: Get.textTheme.titleSmall!.copyWith(color: AppColors.primaryColor,fontWeight: FontWeight.w600)
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _xpCard() {
+    return Container(
+      // height: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xffEDF1FF), Color(0xffE6EBFF)],
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'XP',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Color(0xffDDE3FF),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                children: [
+                  Transform.translate(
+                      offset: Offset(0, 2),
+                      child: Icon(Icons.star, color: Colors.green, size: 22)),
+                  Text(
+                    '350',
+                      style: Get.textTheme.titleLarge!.copyWith(color: Color(0xff0E1E55))
+                  ),
+                ],
+              ),
+              Text(
+                'XP Points',
+                style: Get.textTheme.headlineLarge!.copyWith(color: Colors.grey),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _recentMatches() {
+    final results = ['W', 'W', 'L', 'W', 'W'];
+
+    return Row(
+      children: [
+        SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(right: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF003AFF),Color(0xFF07289A),],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          ),
+          child: Row(
+            children: [
+               Text(
+                'Recent Matches',
+                style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white)
+              ),
+              const SizedBox(width: 8),
+              ...results.map(
+                    (e) => Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Text(
+                    e,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: e == 'W' ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(left: 10),
+      ],
+    );
+  }
+
 }
+
+

@@ -135,7 +135,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
               Transform.translate(
                 offset: Offset(0, 0),
                 child: Container(
-                  width: 30,
+                  width: 25,
                   height: 55,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
