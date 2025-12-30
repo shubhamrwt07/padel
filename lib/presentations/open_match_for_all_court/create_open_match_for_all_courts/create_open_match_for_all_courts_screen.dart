@@ -610,6 +610,7 @@ class CreateOpenMatchForAllCourtsScreen extends StatelessWidget {
                     return;
                   }
                   // SnackBarUtils.showInfoSnackBar("coming soon");
+                  SnackBarUtils.showInfoSnackBar("Note\nYou’ll be refunded for all players except your own share once players are added.",duration: Duration(seconds: 4));
                   controller.onNext();
                 },
               )

@@ -46,22 +46,22 @@ class LoginController extends GetxController {
       await onLogin();
     }
   }
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppStrings.emailRequired;
-    } else if (!value.isValidEmail) {
-      return AppStrings.invalidEmail;
-    }
-    return null;
-  }
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppStrings.passwordRequired;
-    } else if (!value.isValidPassword) {
-      return AppStrings.invalidPassword;
-    }
-    return null;
-  }
+  // String? validateEmail(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return AppStrings.emailRequired;
+  //   } else if (!value.isValidEmail) {
+  //     return AppStrings.invalidEmail;
+  //   }
+  //   return null;
+  // }
+  // String? validatePassword(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return AppStrings.passwordRequired;
+  //   } else if (!value.isValidPassword) {
+  //     return AppStrings.invalidPassword;
+  //   }
+  //   return null;
+  // }
   Future<void> sendOTP() async {
     FocusManager.instance.primaryFocus!.unfocus();
     try {

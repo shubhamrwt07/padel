@@ -139,6 +139,7 @@ class BookingId {
   String? createdAt;
   String? ownerId;
   String? updatedAt;
+  String? openMatchId;
   int? iV;
 
   BookingId({
@@ -152,6 +153,7 @@ class BookingId {
     this.createdAt,
     this.ownerId,
     this.updatedAt,
+    this.openMatchId,
     this.iV,
   });
 
@@ -166,6 +168,7 @@ class BookingId {
     createdAt = json['createdAt'];
     ownerId = json['ownerId'];
     updatedAt = json['updatedAt'];
+    openMatchId = json['openMatchId'];
     iV = json['__v'];
   }
 
@@ -180,6 +183,7 @@ class BookingId {
         'createdAt': createdAt,
         'ownerId': ownerId,
         'updatedAt': updatedAt,
+        'openMatchId': openMatchId,
         '__v': iV,
       };
 }

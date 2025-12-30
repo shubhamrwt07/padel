@@ -1,4 +1,5 @@
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
+import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:share_plus/share_plus.dart';
@@ -29,6 +30,7 @@ class ScoreBoardController extends GetxController {
   RxList<Map<String, dynamic>> teams = <Map<String, dynamic>>[].obs;
   var bookingId = ''.obs;
   var scoreboardId = ''.obs;
+  var openMatchId = ''.obs;
   ScoreBoardRepository repository = Get.put(ScoreBoardRepository());
   final isLoading = true.obs;
   final isAddingSet = false.obs;
@@ -46,8 +48,11 @@ class ScoreBoardController extends GetxController {
       if (response.status == 200 && response.data!.isNotEmpty) {
         final item = response.data!.first;
         scoreboardId.value = item.sId ?? "";
+        openMatchId.value = item.bookingId?.openMatchId ?? "";
         CustomLogger.logMessage(
             msg: "Using scoreboard ID: ${item.sId}", level: LogLevel.info);
+        CustomLogger.logMessage(
+            msg: "Open Match ID from API: ${item.bookingId?.openMatchId}", level: LogLevel.info);
         CustomLogger.logMessage(
             msg: "Teams count in response: ${item.teams?.length ?? 0}",
             level: LogLevel.info);
@@ -273,7 +278,9 @@ class ScoreBoardController extends GetxController {
   void onInit() async {
     super.onInit();
     bookingId.value = Get.arguments["bookingId"];
+    openMatchId.value = Get.arguments["openMatchId"] ?? "";
     CustomLogger.logMessage(msg: "BOOKING ID-> ${bookingId.value}", level: LogLevel.info);
+    CustomLogger.logMessage(msg: "OPEN MATCH ID-> ${openMatchId.value}", level: LogLevel.info);
     await fetchScoreBoard();
   }
 
@@ -322,6 +329,7 @@ class ScoreBoardController extends GetxController {
 
   ///End Game------------------------------------------------------------------
   var isEndGame = false.obs;
+  ProfileController profileController = Get.put(ProfileController());
   Future<void> endGame() async {
     CustomLogger.logMessage(msg: 'endGame API call', level: LogLevel.info);
     // Check if any set is empty (no scores)
@@ -348,6 +356,7 @@ class ScoreBoardController extends GetxController {
       if (response.success == true) {
         SnackBarUtils.showInfoSnackBar("Game Ended Successfully!");
         await fetchScoreBoard(showLoader: false);
+        await profileController.fetchUserProfile();
       }else{
         SnackBarUtils.showErrorSnackBar(response.message??"");
       }
@@ -357,6 +366,30 @@ class ScoreBoardController extends GetxController {
     } finally {
       isEndGame.value = false;
     }
+  }
+
+  ///Check if swapping is allowed----------------------------------------------
+  bool get canSwapPlayers => !isCompleted.value;
+
+  ///Check user's team and scoring permissions----------------------------------
+  String get currentUserId => profileController.profileModel.value?.response?.sId ?? '';
+  
+  bool get isUserInTeamA {
+    if (teams.isEmpty) return false;
+    final teamAPlayers = teams[0]['players'] as List;
+    return teamAPlayers.any((player) => player['playerId'] == currentUserId);
+  }
+  
+  bool get isUserInTeamB {
+    if (teams.length < 2) return false;
+    final teamBPlayers = teams[1]['players'] as List;
+    return teamBPlayers.any((player) => player['playerId'] == currentUserId);
+  }
+  
+  bool canScoreForTeam(String team) {
+    if (team == 'Team A') return isUserInTeamA;
+    if (team == 'Team B') return isUserInTeamB;
+    return false;
   }
 
   ///Swap Players---------------------------------------------------------------
@@ -403,7 +436,11 @@ class ScoreBoardController extends GetxController {
       } else {
         // Move player to empty slot
         draggedTeamPlayers.removeAt(draggedPlayerIndex);
-        targetTeamPlayers.add(draggedPlayer);
+        if (targetIndex < targetTeamPlayers.length) {
+          targetTeamPlayers[targetIndex] = draggedPlayer;
+        } else {
+          targetTeamPlayers.add(draggedPlayer);
+        }
       }
       
       hasPlayerSwaps.value = true; // Mark that swaps occurred
@@ -411,6 +448,53 @@ class ScoreBoardController extends GetxController {
       CustomLogger.logMessage(msg: 'Local swap completed - NO API CALL MADE', level: LogLevel.info);
     } catch (e) {
       CustomLogger.logMessage(msg: 'Swap error: $e', level: LogLevel.error);
+    }
+  }
+
+  ///Move Player to Empty Slot-------------------------------------------------
+  void movePlayerToEmptySlot(String playerId, String targetTeam, int targetIndex) {
+    CustomLogger.logMessage(msg: 'movePlayerToEmptySlot called', level: LogLevel.info);
+    try {
+      // Find the player to move
+      Map<String, dynamic>? playerToMove;
+      int sourceTeamIndex = -1;
+      int sourcePlayerIndex = -1;
+      
+      for (int teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+        final teamPlayers = teams[teamIndex]['players'] as List;
+        for (int playerIndex = 0; playerIndex < teamPlayers.length; playerIndex++) {
+          if (teamPlayers[playerIndex]['playerId'] == playerId) {
+            playerToMove = Map<String, dynamic>.from(teamPlayers[playerIndex]);
+            sourceTeamIndex = teamIndex;
+            sourcePlayerIndex = playerIndex;
+            break;
+          }
+        }
+        if (playerToMove != null) break;
+      }
+      
+      if (playerToMove == null) return;
+      
+      // Get target team index
+      int targetTeamIndex = targetTeam == 'Team A' ? 0 : 1;
+      
+      // Remove player from source team
+      final sourceTeamPlayers = teams[sourceTeamIndex]['players'] as List;
+      sourceTeamPlayers.removeAt(sourcePlayerIndex);
+      
+      // Add player to target team at specific index
+      final targetTeamPlayers = teams[targetTeamIndex]['players'] as List;
+      if (targetIndex < targetTeamPlayers.length) {
+        targetTeamPlayers[targetIndex] = playerToMove;
+      } else {
+        targetTeamPlayers.add(playerToMove);
+      }
+      
+      hasPlayerSwaps.value = true;
+      teams.refresh();
+      CustomLogger.logMessage(msg: 'Player moved to empty slot successfully', level: LogLevel.info);
+    } catch (e) {
+      CustomLogger.logMessage(msg: 'Move player error: $e', level: LogLevel.error);
     }
   }
 
@@ -439,6 +523,7 @@ class ScoreBoardController extends GetxController {
       final body = {
         'scoreboardId': scoreboardId.value,
         'teams': updatedTeams,
+        'action': 'swap',
       };
       
       CustomLogger.logMessage(msg: 'Making API call to save player swaps', level: LogLevel.info);
@@ -446,6 +531,7 @@ class ScoreBoardController extends GetxController {
       if (response.success == true) {
         hasPlayerSwaps.value = false; // Reset swap flag
         isShuffleMode.value = false;
+        await fetchScoreBoard();
         SnackBarUtils.showInfoSnackBar('Players updated successfully!');
         CustomLogger.logMessage(msg: 'API call successful - shuffle mode disabled', level: LogLevel.info);
       } else {
