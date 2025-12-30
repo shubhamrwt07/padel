@@ -44,8 +44,9 @@ class AppPlayersController extends GetxController {
 class AppPlayersBottomSheet extends StatelessWidget {
   final String matchId;
   final String teamName;
+  final String? openMatchId;
   
-  AppPlayersBottomSheet({super.key, required this.matchId, required this.teamName});
+  AppPlayersBottomSheet({super.key, required this.matchId, required this.teamName, this.openMatchId});
   
   final AppPlayersController controller = Get.put(AppPlayersController());
 
@@ -298,6 +299,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
                 "matchId": matchId,
                 "needAsGuest": true,
                 "scoreBoardId": matchId,
+                "openMatchId": openMatchId ?? "",
               },
             );
             // Get.toNamed(

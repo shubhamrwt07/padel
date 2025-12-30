@@ -27,16 +27,16 @@ class ScoreBoardScreen extends StatelessWidget {
             Obx(() => IconButton(
               icon: Icon(
                 controller.isShuffleMode.value ? Icons.check : Icons.swap_horiz,
-                color: Colors.white,
+                color: controller.canSwapPlayers ? Colors.white : Colors.grey,
                 size: 25,
               ),
-              onPressed: () {
+              onPressed: controller.canSwapPlayers ? () {
                 if (controller.isShuffleMode.value) {
                   controller.savePlayerSwaps();
                 } else {
                   _showShuffleDialog();
                 }
-              },
+              } : null,
             )),
             IconButton(
               icon: const Icon(Icons.share_outlined, color: Colors.white,size: 20,),
@@ -375,7 +375,7 @@ class ScoreBoardScreen extends StatelessWidget {
   }
 
   Widget _buildOverlappingAvatar(Map<String, dynamic> player, int index, String team) {
-    return Obx(() => controller.isShuffleMode.value
+    return Obx(() => controller.isShuffleMode.value && controller.canSwapPlayers
         ? Draggable<Map<String, dynamic>>(
             data: {'player': player, 'team': team, 'index': index},
             feedback: Container(
@@ -535,6 +535,7 @@ class ScoreBoardScreen extends StatelessWidget {
             AppPlayersBottomSheet(
               matchId: controller.scoreboardId.value,
               teamName: teamName,
+              openMatchId: controller.openMatchId.value,
             ),
             isScrollControlled: true,
           );
@@ -542,7 +543,7 @@ class ScoreBoardScreen extends StatelessWidget {
       },
       child: Column(
         children: [
-          Obx(() => controller.isShuffleMode.value && hasPlayer
+          Obx(() => controller.isShuffleMode.value && hasPlayer && controller.canSwapPlayers
               ? Draggable<Map<String, dynamic>>(
                   data: {'player': players[index], 'team': teamName, 'index': index},
                   feedback: Container(
@@ -575,7 +576,16 @@ class ScoreBoardScreen extends StatelessWidget {
                     },
                   ),
                 )
-              : _buildPlayerSlotContainer(players, index, hasPlayer, false)),
+              : controller.isShuffleMode.value && !hasPlayer && controller.canSwapPlayers
+                  ? DragTarget<Map<String, dynamic>>(
+                      onAccept: (data) {
+                        controller.movePlayerToEmptySlot(data['player']['playerId'], teamName, index);
+                      },
+                      builder: (context, candidateData, rejectedData) {
+                        return _buildPlayerSlotContainer(players, index, hasPlayer, candidateData.isNotEmpty);
+                      },
+                    )
+                  : _buildPlayerSlotContainer(players, index, hasPlayer, false)),
           SizedBox(
             width: Get.width * 0.13,
             child: Text(
@@ -619,9 +629,18 @@ class ScoreBoardScreen extends StatelessWidget {
             ? AppColors.primaryColor.withOpacity(0.3)
             : hasPlayer
                 ? AppColors.primaryColor.withValues(alpha: 0.1)
-                : Colors.white,
+                : controller.isShuffleMode.value
+                    ? AppColors.secondaryColor.withOpacity(0.1)
+                    : Colors.white,
         border: Border.all(
-          color: hasPlayer ? Colors.transparent : AppColors.primaryColor,
+          color: hasPlayer 
+              ? Colors.transparent 
+              : controller.isShuffleMode.value
+                  ? AppColors.secondaryColor
+                  : AppColors.primaryColor,
+          style: controller.isShuffleMode.value && !hasPlayer
+              ? BorderStyle.solid
+              : BorderStyle.solid,
         ),
       ),
       child: hasPlayer
@@ -718,11 +737,37 @@ class ScoreBoardScreen extends StatelessWidget {
                         ),
                       ),
                     ))
-          : const Icon(
-              Icons.add,
-              size: 24,
-              color: AppColors.primaryColor,
-            ),
+          : Obx(() => controller.isShuffleMode.value
+              ? Stack(
+                  children: [
+                    Center(
+                      child: const Icon(
+                        Icons.add,
+                        size: 24,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    if (isHovered)
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.secondaryColor.withOpacity(0.3),
+                        ),
+                        child: const Icon(
+                          Icons.move_down,
+                          color: AppColors.secondaryColor,
+                          size: 20,
+                        ),
+                      ),
+                  ],
+                )
+              : const Icon(
+                  Icons.add,
+                  size: 24,
+                  color: AppColors.primaryColor,
+                )),
     );
   }
 
@@ -1373,6 +1418,8 @@ class _SetScoreDialogState extends State<SetScoreDialog> {
         ? (controller.teams.isNotEmpty ? controller.teams[0]["players"] as List : [])
         : (controller.teams.length > 1 ? controller.teams[1]["players"] as List : []);
     
+    final canScore = controller.canScoreForTeam(title);
+    
     return Expanded(
       child: Container(
         color: bgColor,
@@ -1383,7 +1430,9 @@ class _SetScoreDialogState extends State<SetScoreDialog> {
             _avatars(teamPlayers),
             Text(
               title,
-              style: Get.textTheme.headlineSmall!.copyWith(color: AppColors.labelBlackColor),
+              style: Get.textTheme.headlineSmall!.copyWith(
+                color: canScore ? AppColors.labelBlackColor : Colors.grey,
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -1392,14 +1441,15 @@ class _SetScoreDialogState extends State<SetScoreDialog> {
                 controller: title == "Team A" ? teamAController : teamBController,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
+                enabled: canScore,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(2),
                 ],
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey,
+                  color: canScore ? Colors.grey : Colors.grey.withOpacity(0.5),
                   height: 1,
                 ),
                 decoration: InputDecoration(
@@ -1407,10 +1457,10 @@ class _SetScoreDialogState extends State<SetScoreDialog> {
                   hintText: "00",
                   filled: true,
                   fillColor: bgColor,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey,
+                    color: canScore ? Colors.grey : Colors.grey.withOpacity(0.3),
                   ),
                 ),
               ),
@@ -1489,6 +1539,16 @@ class _SetScoreDialogState extends State<SetScoreDialog> {
         onPressed: controller.isAddingScore.value ? null : () {
           final teamAScore = int.tryParse(teamAController.text) ?? 0;
           final teamBScore = int.tryParse(teamBController.text) ?? 0;
+          
+          // Validate that user can only score for their team
+          if (controller.isUserInTeamA && teamBScore > 0) {
+            SnackBarUtils.showErrorSnackBar("You can only add scores for Team A");
+            return;
+          }
+          if (controller.isUserInTeamB && teamAScore > 0) {
+            SnackBarUtils.showErrorSnackBar("You can only add scores for Team B");
+            return;
+          }
           
           controller.addScore(currentSetNumber, teamAScore, teamBScore).then((_) {
             if (!controller.isAddingScore.value) {

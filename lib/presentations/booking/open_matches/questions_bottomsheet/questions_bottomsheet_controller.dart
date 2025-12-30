@@ -177,14 +177,14 @@ class QuestionsBottomsheetController extends GetxController {
         "matchDate": formattedMatchDate,
         // "skillLevel": localMatchData["skillLevel"] ?? "",
         "skillLevel": selectedGameLevel.value,
-        "skillDetails": localMatchData["skillDetails"] ?? [],
-        "customerScale": localMatchData["customerScale"] ?? "",
-        "customerRacketSport": localMatchData["customerRacketSport"] ?? "",
-        "receivingTP": localMatchData["receivingTP"] ?? "",
-        "customerAge": localMatchData["customerAge"] ?? "",
-        "volleyNetPositioning": localMatchData["volleyNetPositioning"] ?? "",
-        "playerLevel": localMatchData["playerLevel"] ?? "",
-        "reboundSkills": localMatchData["reboundSkills"] ?? "",
+        // "skillDetails": localMatchData["skillDetails"] ?? [],
+        // "customerScale": localMatchData["customerScale"] ?? "",
+        // "customerRacketSport": localMatchData["customerRacketSport"] ?? "",
+        // "receivingTP": localMatchData["receivingTP"] ?? "",
+        // "customerAge": localMatchData["customerAge"] ?? "",
+        // "volleyNetPositioning": localMatchData["volleyNetPositioning"] ?? "",
+        // "playerLevel": localMatchData["playerLevel"] ?? "",
+        // "reboundSkills": localMatchData["reboundSkills"] ?? "",
         "matchStatus": "open",
         "matchTime": localMatchData["matchTime"] ?? "",
         "gender":selectedGameType.value,
@@ -211,10 +211,10 @@ class QuestionsBottomsheetController extends GetxController {
       log("🎯 Match Created -> ${response.toJson()}");
       openMatchId.value = response.matches?[0].id??"";
       SnackBarUtils.showSuccessSnackBar("Match created successfully!");
+      CustomLogger.logMessage(msg: "MEWW-> ${response.message??""}", level: LogLevel.debug);
+      // await createBooking();
 
-      await createBooking();
-
-      Get.toNamed(RoutesName.bottomNav);
+      Get.offAllNamed(RoutesName.bottomNav);
       openMatchBookingController.fetchOpenMatchesBooking(type: 'upcoming');
     } catch (e, st) {
       log("❌ Match creation error: $e\n$st");

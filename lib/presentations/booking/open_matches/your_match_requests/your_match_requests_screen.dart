@@ -1,5 +1,6 @@
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/your_match_requests/your_match_requests_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
     return players;
   }
 
-  List<Widget> _buildAvatarList(MatchId? match, Requests request, int index) {
+  List<Widget> _buildAvatarList(MatchId? match, Requests request, int index,BuildContext context) {
     final teamAPlayers = match?.teamA?.map((player) => player.user).where((user) => user != null).cast<RequesterId>().toList() ?? [];
     final teamBPlayers = match?.teamB?.map((player) => player.user).where((user) => user != null).cast<RequesterId>().toList() ?? [];
     final matchId = match?.id ?? "";
@@ -47,8 +48,8 @@ class YourMatchRequestsScreen extends StatelessWidget {
         Positioned(
           left: i * 35.0,
           child: i < teamAPlayers.length
-              ? _buildPlayerAvatar(teamAPlayers[i], index, isAdd: false)
-              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamA", matchId: matchId, request: request),
+              ? _buildPlayerAvatar(teamAPlayers[i], index,context, isAdd: false)
+              : _buildPlayerAvatar(null, index,context, isAdd: true, team: "teamA", matchId: matchId, request: request),
         ),
       );
     }
@@ -59,8 +60,8 @@ class YourMatchRequestsScreen extends StatelessWidget {
         Positioned(
           left: (2 + i) * 35.0,
           child: i < teamBPlayers.length
-              ? _buildPlayerAvatar(teamBPlayers[i], index, isAdd: false)
-              : _buildPlayerAvatar(null, index, isAdd: true, team: "teamB", matchId: matchId, request: request),
+              ? _buildPlayerAvatar(teamBPlayers[i], index,context, isAdd: false)
+              : _buildPlayerAvatar(null, index,context, isAdd: true, team: "teamB", matchId: matchId, request: request),
         ),
       );
     }
@@ -264,7 +265,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
             height: 50,
             child: Stack(
               clipBehavior: Clip.none,
-              children: _buildAvatarList(match, request, index),
+              children: _buildAvatarList(match, request, index,context),
             ),
           ),
         ),
@@ -378,7 +379,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
               height: 50,
               child: Stack(
                 clipBehavior: Clip.none,
-                children: _buildAvatarList(match, request, index),
+                children: _buildAvatarList(match, request, index,context),
               ),
             ),
           ),
@@ -459,11 +460,11 @@ class YourMatchRequestsScreen extends StatelessWidget {
     return '${times.first} - ${times.last}';
   }
 
-  Widget _buildPlayerAvatar(RequesterId? player, int index, {bool isAdd = false, String? team, String? matchId, Requests? request}) {
+  Widget _buildPlayerAvatar(RequesterId? player, int index,BuildContext context, {bool isAdd = false, String? team, String? matchId, Requests? request}) {
     return GestureDetector(
       onTap: isAdd ? () {
-        Get.toNamed(
-          '/addPlayer',
+        AddPlayerBottomSheet.show(
+          context,
           arguments: {
             "team": request?.preferredTeam ?? team,
             "matchId": matchId ?? "",
@@ -474,6 +475,18 @@ class YourMatchRequestsScreen extends StatelessWidget {
             "requestId":request?.id??""
           },
         );
+        // Get.toNamed(
+        //   '/addPlayer',
+        //   arguments: {
+        //     "team": request?.preferredTeam ?? team,
+        //     "matchId": matchId ?? "",
+        //     "needYourMatchRequests": true,
+        //     "matchLevel": "",
+        //     "isLoginUser": true,
+        //     "isMatchCreator": false,
+        //     "requestId":request?.id??""
+        //   },
+        // );
       } : null,
       child: CircleAvatar(
         radius: 26,

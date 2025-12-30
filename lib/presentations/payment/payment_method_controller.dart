@@ -312,7 +312,7 @@ class PaymentMethodController extends GetxController {
                         ),
                       ),
                       onPressed: () {
-                        Get.toNamed(RoutesName.bottomNav);
+                        Get.offAllNamed(RoutesName.bottomNav);
                       },
                       child: const Text(
                         "Go to Home",

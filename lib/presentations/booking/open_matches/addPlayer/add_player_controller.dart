@@ -338,10 +338,12 @@ class AddPlayerController extends GetxController {
   ///Add Guest Player in the Simple Match---------------------------------------
   ScoreBoardRepository scoreBoardRepository = Get.put(ScoreBoardRepository());
   var scoreboardId = ''.obs;
+  var openMatchId = ''.obs;
   Future<bool> addGuestPlayer() async {
     try {
       final body = {
         "scoreboardId": scoreboardId.value,
+        if (openMatchId.value.isNotEmpty) "openMatchId": openMatchId.value,
         "teams": [
           {
             "name": selectedTeam.value,
@@ -470,6 +472,7 @@ class AddPlayerController extends GetxController {
     matchId.value = args["matchId"] ?? "";
     selectedTeam.value = args["team"] ?? "";
     scoreboardId.value = args["scoreBoardId"] ?? "";
+    openMatchId.value = args["openMatchId"] ?? "";
     matchLevel.value = args["matchLevel"] ?? "";
     requestId.value = args["requestId"] ?? "";
     isMatchCreator.value = args["isMatchCreator"] ?? false;

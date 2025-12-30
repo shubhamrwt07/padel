@@ -19,16 +19,21 @@ class SnackBarUtils {
   static const int _duplicateMessageCooldown = 3000; // milliseconds
 
   // Success
-  static void showSuccessSnackBar(String message) {
+  static void showSuccessSnackBar(String message,{
+    Duration? duration,
+  }) {
     _showSnackBar(
       title: message,
       backgroundColor: Colors.green,
       icon: Icons.check_circle,
+      duration: duration
     );
   }
 
   // Error with duplicate prevention
-  static void showErrorSnackBar(String message) {
+  static void showErrorSnackBar(String message,{
+    Duration? duration,
+  }) {
     final now = DateTime.now();
     
     // Check if the same message was recently shown
@@ -47,24 +52,31 @@ class SnackBarUtils {
       title: message,
       backgroundColor: Colors.red,
       icon: Icons.error_outline,
+      duration: duration
     );
   }
 
   // Info
-  static void showInfoSnackBar(String message) {
+  static void showInfoSnackBar(String message,{
+    Duration? duration,
+  }) {
     _showSnackBar(
       title: message,
       backgroundColor: Colors.blue,
       icon: Icons.info_outline,
+      duration: duration
     );
   }
 
   // Warning
-  static void showWarningSnackBar(String message) {
+  static void showWarningSnackBar(String message,{
+    Duration? duration,
+  }) {
     _showSnackBar(
       title: message,
       backgroundColor: Colors.orange,
       icon: Icons.warning_amber_rounded,
+      duration: duration
     );
   }
 
@@ -72,6 +84,7 @@ class SnackBarUtils {
     required String title,
     required Color backgroundColor,
     required IconData icon,
+    Duration? duration,
   }) {
     Future.delayed(Duration(milliseconds: 100), () {
       Get.snackbar(
@@ -92,7 +105,7 @@ class SnackBarUtils {
         backgroundColor: backgroundColor,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
-        duration: Duration(seconds: 2),
+        duration: duration ?? const Duration(seconds: 2),
         margin: EdgeInsets.all(15),
         borderRadius: 8,
         icon: Icon(

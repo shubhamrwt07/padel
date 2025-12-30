@@ -911,6 +911,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                     SnackBarUtils.showInfoSnackBar("Please select at least one slot to continue.");
                     return;
                   }
+                  SnackBarUtils.showInfoSnackBar("Note\nYou’ll be refunded for all players except your own share once players are added.",duration: Duration(seconds: 4));
                   controller.onNext();
                 },
               )
