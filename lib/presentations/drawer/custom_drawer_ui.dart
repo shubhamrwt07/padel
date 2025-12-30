@@ -157,18 +157,18 @@ class CustomDrawerUi extends GetView<ProfileController> {
             ),
           ),
 
-          // Obx(
-          //       () => ProfileRow(
-          //     icon: Icon(Icons.shopping_cart_outlined, size: 20, color: controller.selectedIndex.value == 5 ? AppColors.primaryColor : AppColors.labelBlackColor),
-          //     title: AppStrings.cart,
-          //     isSelected: controller.selectedIndex.value == 5,
-          //     onTap: () {
-          //       controller.selectedIndex.value = 5;
-          //       Get.to(() => CartScreen(buttonType: "true"), transition: Transition.rightToLeft);
-          //     },
-          //
-          //   ),
-          // ),
+          Obx(
+                () => ProfileRow(
+              icon: Icon(Icons.person_add_alt_1, size: 20, color: controller.selectedIndex.value == 5 ? AppColors.primaryColor : AppColors.labelBlackColor),
+              title: "Requests",
+              isSelected: controller.selectedIndex.value == 5,
+              onTap: () {
+                controller.selectedIndex.value = 5;
+                Get.toNamed(RoutesName.requests);
+              },
+
+            ),
+          ),
           // Obx(
           //       () => ProfileRow(
           //     icon: SvgPicture.asset(

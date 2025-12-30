@@ -1304,9 +1304,17 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               Container(
                 height: 70,
                 width: 70,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.secondaryColor,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.check_rounded,

@@ -60,6 +60,8 @@ import 'package:padel_mobile/presentations/scoreview/score_view_binding.dart';
 import 'package:padel_mobile/presentations/splash/splash_screen.dart';
 import 'package:padel_mobile/presentations/support/support_binding.dart';
 import 'package:padel_mobile/presentations/support/support_screen.dart';
+import 'package:padel_mobile/presentations/user_requests/requests_binding.dart';
+import 'package:padel_mobile/presentations/user_requests/requests_screen.dart';
 import 'package:padel_mobile/presentations/wallet/wallet_binding.dart';
 import 'package:padel_mobile/presentations/wallet/wallet_screen.dart';
 import '../../presentations/auth/login/login_binding.dart';
@@ -336,13 +338,22 @@ class Routes {
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
     ),
+    ///Requests-----------------------------------------------------------------
     GetPage(
       name: RoutesName.yourMatchRequest,
       page: () => YourMatchRequestsScreen(),
       binding: YourMatchRequestsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: defaultDuration,
+    ),   GetPage(
+      name: RoutesName.requests,
+      page: () => RequestsScreen(),
+      binding: RequestsBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: defaultDuration,
     ),
+
+    ///Wallet-------------------------------------------------------------------
     GetPage(
       name: RoutesName.wallet,
       page: () => WalletScreen(),

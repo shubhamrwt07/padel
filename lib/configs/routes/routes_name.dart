@@ -64,7 +64,9 @@ class RoutesName {
 
   //ScoreBoard------------------------------------------------------------------
   static const String scoreBoard = '/scoreBoard';
+  //New---
   static const String yourMatchRequest = '/yourMatchRequest';
+  static const String requests = '/requests';
 
   //Wallet----------------------------------------------------------------------
   static const String wallet = '/wallet';
