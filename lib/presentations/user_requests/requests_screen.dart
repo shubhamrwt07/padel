@@ -88,7 +88,26 @@ class RequestsScreen extends StatelessWidget {
                   ? controller.joinRequests
                   : controller.myRequests;
 
-              return ListView.builder(
+              if (controller.isLoadingRequests.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (list.isEmpty) {
+                return Center(
+                  child: Text(
+                    controller.selectedTab.value == 0
+                        ? "No join requests found"
+                        : "No match requests found",
+                    style: Get.textTheme.bodyMedium,
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: controller.refreshData,
+                child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: list.length,
                 itemBuilder: (context, index) {
@@ -135,9 +154,8 @@ class RequestsScreen extends StatelessWidget {
                     return cardWidget;
                   });
                 },
-              );
-            }),
-          ),
+              ));
+            }),),
         ],
       )
       ,
@@ -257,7 +275,19 @@ class RequestsScreen extends StatelessWidget {
                     radius: 22,
                     child: CircleAvatar(
                       radius: 20,
-                      child: Text("A"),
+                      backgroundImage: (request.requester?.profilePic?.isNotEmpty ?? false)
+                          ? CachedNetworkImageProvider(request.requester!.profilePic!)
+                          : null,
+                      child: (request.requester?.profilePic?.isEmpty ?? true)
+                          ? Text(
+                              _getInitials("${request.requester?.name ?? ''} ${request.requester?.lastName ?? ''}".trim()),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
                     ),
                   ),
 
@@ -271,17 +301,17 @@ class RequestsScreen extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Abhishek Balyani",
+                            Text("${request.requester?.name ?? 'Unknown'} ${request.requester?.lastName ?? ''}".trim(),
                                 style: Get.textTheme.labelLarge),
                             const SizedBox(height: 4),
                             Row(
                               children: [
                                 Text(
-                                  '⭐ 0 XP Points ',
+                                  '⭐ ${request.requester?.xpPoints ?? 0} XP Points ',
                                   style: Get.textTheme.bodySmall
                                       ?.copyWith(color: Colors.orange),
                                 ),Text(
-                                  '| Male',
+                                  '| ${request.requester?.gender ?? 'N/A'}',
                                   style: Get.textTheme.bodySmall
                                       ?.copyWith(fontWeight: FontWeight.w500),
                                 ),
@@ -291,7 +321,7 @@ class RequestsScreen extends StatelessWidget {
                         ),
                         OutlinedButton(
                           onPressed: (){
-                            _showAcceptConfirmation();
+                            _showAcceptConfirmation(context, request.match?.id ?? "", request.preferredTeam ?? "", request.match?.skillLevel ?? "", request.id ?? "");
                           },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 6,horizontal: 15),
@@ -413,41 +443,43 @@ class RequestsScreen extends StatelessWidget {
         )
     );
   }
-  void _showAcceptConfirmation() {
+  void _showAcceptConfirmation(BuildContext context, String matchId, String team, String skillLevel, String requestId) {
     Get.dialog(
       Dialog(
-        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Close button
-              Align(
-                alignment: Alignment.topRight,
-                child: InkWell(
-                  onTap: () => Get.back(),
-                  child: const Icon(Icons.close, size: 22),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Confirm Request',
+                    style: Get.textTheme.titleMedium?.copyWith(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: Get.back,
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 8),
-
-              // Green check icon
+              const Divider(thickness: 0.6),
+              const SizedBox(height: 16),
               Container(
                 height: 60,
                 width: 60,
-                decoration:  BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.secondaryColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withValues(alpha: 0.4),
+                      color: AppColors.secondaryColor.withValues(alpha: 0.3),
                       blurRadius: 12,
                       spreadRadius: 2,
                       offset: const Offset(0, 6),
@@ -457,52 +489,79 @@ class RequestsScreen extends StatelessWidget {
                 child: const Icon(
                   Icons.check_rounded,
                   color: Colors.white,
-                  size: 40,
+                  size: 30,
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Message
               Text(
-                'Add Abhishek Balyani to your open match? You won\'t be able to remove him later.',
+                'Accept this player request?',
                 textAlign: TextAlign.center,
-                style: Get.textTheme.bodyMedium?.copyWith(
+                style: Get.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-
-              const SizedBox(height: 24),
-
-              // Accept button
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: const Text(
-                    'Accept',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                'Once accepted, the player will be added to your match and you won\'t be able to remove them.',
+                textAlign: TextAlign.center,
+                style: Get.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade600,
                 ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Get.back(),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.back();
+                        controller.acceptPlayerRequest(requestId, matchId, team);
+                      },
+                      child: const Text(
+                        'Accept',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-      barrierDismissible: false,
+      barrierDismissible: true,
     );
   }
 

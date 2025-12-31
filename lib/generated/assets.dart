@@ -53,6 +53,7 @@ class Assets {
   static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
   static const String imagesImgGooglePay = 'assets/images/img_google_pay.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesImgOpenMatchBg = 'assets/images/img_open_match_bg.svg';
   static const String imagesImgOtherUpi = 'assets/images/img_other_upi.png';
   static const String imagesImgPaytm = 'assets/images/img_paytm.png';
   static const String imagesImgPhonePay = 'assets/images/img_phone_pay.png';

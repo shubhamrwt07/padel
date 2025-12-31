@@ -28,7 +28,7 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
 
   @override
   void onInit() {
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
 
     // Add tab listener to fetch data when switching tabs
     tabController.addListener(() {
@@ -37,16 +37,16 @@ class BookingHistoryController extends GetxController with GetSingleTickerProvid
       final currentIndex = tabController.index;
       String type = "upcoming";
       if (currentIndex == 1) type = "completed";
-      if (currentIndex == 2) type = "cancelled";
+      // if (currentIndex == 2) type = "cancelled";
       
       // Fetch data for the tab if not already loaded
       switch (type) {
         case "completed":
           if (completedBookings.value == null) fetchBookings("completed");
           break;
-        case "cancelled":
-          if (cancelledBookings.value == null) fetchBookings("cancelled");
-          break;
+        // case "cancelled":
+        //   if (cancelledBookings.value == null) fetchBookings("cancelled");
+        //   break;
       }
     });
 

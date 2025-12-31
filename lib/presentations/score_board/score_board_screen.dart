@@ -533,7 +533,7 @@ class ScoreBoardScreen extends StatelessWidget {
         if (!hasPlayer) {
           Get.bottomSheet(
             AppPlayersBottomSheet(
-              matchId: controller.scoreboardId.value,
+              matchId: controller.openMatchId.value,
               teamName: teamName,
               openMatchId: controller.openMatchId.value,
             ),
@@ -781,14 +781,20 @@ class ScoreBoardScreen extends StatelessWidget {
           : [];
       bool allPlayersAdded = teamAPlayers.length == 2 && teamBPlayers.length == 2;
       
-      // Check if all existing sets have scores
-      bool allSetsHaveScores = controller.sets.every((set) {
-        final teamAScore = set["teamAScore"] ?? 0;
-        final teamBScore = set["teamBScore"] ?? 0;
-        return teamAScore > 0 || teamBScore > 0;
+      // Check if logged-in user is part of any team
+      bool isUserInMatch = controller.isUserInTeamA || controller.isUserInTeamB;
+      
+      // Check if user's team can still score in any set
+      bool canUserTeamScore = controller.sets.any((set) {
+        if (controller.isUserInTeamA) {
+          return (set["teamAScore"] ?? 0) == 0;
+        } else if (controller.isUserInTeamB) {
+          return (set["teamBScore"] ?? 0) == 0;
+        }
+        return false;
       });
       
-      bool isDisabled = controller.isCompleted.value || !allPlayersAdded || allSetsHaveScores;
+      bool isDisabled = controller.isCompleted.value || !allPlayersAdded || !isUserInMatch || !canUserTeamScore;
       
       return Container(
         width: double.infinity,
@@ -1093,12 +1099,10 @@ class ScoreBoardScreen extends StatelessWidget {
                                 width: 40,
                                 child: () {
                                   final teamAScore = set["teamAScore"] ?? 0;
-                                  final teamBScore = set["teamBScore"] ?? 0;
-                                  final bothZero = teamAScore == 0 && teamBScore == 0;
                                   
-                                  return (set["teamAScore"] != null && !bothZero)
+                                  return teamAScore > 0
                                       ? Text(
-                                          "${set["teamAScore"]}",
+                                          "$teamAScore",
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
@@ -1120,13 +1124,11 @@ class ScoreBoardScreen extends StatelessWidget {
                               SizedBox(
                                 width: 40,
                                 child: () {
-                                  final teamAScore = set["teamAScore"] ?? 0;
                                   final teamBScore = set["teamBScore"] ?? 0;
-                                  final bothZero = teamAScore == 0 && teamBScore == 0;
                                   
-                                  return (set["teamBScore"] != null && !bothZero)
+                                  return teamBScore > 0
                                       ? Text(
-                                          "${set["teamBScore"]}",
+                                          "$teamBScore",
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,

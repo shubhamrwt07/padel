@@ -1,6 +1,8 @@
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
+import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/open_match_booking_model.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
@@ -443,7 +445,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
     final timeStr = controller.formatTimeRange(data.matchTime ?? []);
 
     final clubName = data.clubId?.clubName ?? '-';
-    final address = data.clubId?.address ?? "N/A";
+    final address = "${data.clubId?.city ?? ""}${data.clubId?.zipCode??""}";
     final price = (data.slot?.isNotEmpty == true &&
         data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '${data.slot!.first.slotTimes!.first.amount ?? ''}'
@@ -499,115 +501,122 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                 : [Color(0xffBFEECD).withValues(alpha: 0.3),Color(0xffBFEECD).withValues(alpha: 0.2)],
           )
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          // 🔵 TOP SECTION (Day + Date + Time + Level Badge + Arrow)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Align(
+              alignment: AlignmentGeometry.centerRight,
+              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height: 150,width: 150,).paddingOnly(right: 20)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // 🔵 TOP SECTION (Day + Date + Time + Level Badge + Arrow)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '$dayStr ',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xff1c46a0),
-                              ),
+                      Row(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '$dayStr ',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff1c46a0),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '$dateOnlyStr | $timeStr',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
                             ),
-                            TextSpan(
-                              text: '$dateOnlyStr | $timeStr',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black87,
-                              ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.secondaryColor,
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          ],
-                        ),
+                            child: const Text(
+                              "A",
+                              style: TextStyle(color: Colors.white,fontSize: 9),
+                            ),
+                          ).paddingOnly(left: 5),
+                        ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Text(
-                          "A",
-                          style: TextStyle(color: Colors.white,fontSize: 9),
-                        ),
-                      ).paddingOnly(left: 5),
+                      // ⭐ Professional | Mixed
+                      Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Text(
+                            " ${data.skillLevel?.capitalizeFirst ?? 'Professional'} | ",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          genderIcon(data.gender),
+                          const SizedBox(width: 4),
+                          Text(
+                            data.gender?.capitalizeFirst ?? "Mixed",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  // ⭐ Professional | Mixed
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 18),
-                      Text(
-                        " ${data.skillLevel?.capitalizeFirst ?? 'Professional'} | ",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _expandedStates[index] = !_expandedStates[index];
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          _expandedStates.length > index && _expandedStates[index]
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.black,
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      genderIcon(data.gender),
-                      const SizedBox(width: 4),
-                      Text(
-                        data.gender?.capitalizeFirst ?? "Mixed",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
+                    ),
+                  )
                 ],
               ),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _expandedStates[index] = !_expandedStates[index];
-                    });
-                  },
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      _expandedStates.length > index && _expandedStates[index]
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              )
+              const SizedBox(height: 10),
+
+              // 🧑‍🧑‍ Players Row
+              // Show expanded or collapsed content
+              _expandedStates.length > index && _expandedStates[index]
+                  ? _expandedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price)
+                  : _collapsedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price,pendingRequestsCount),
+
             ],
           ),
-          const SizedBox(height: 10),
-
-          // 🧑‍🧑‍ Players Row
-          // Show expanded or collapsed content
-          _expandedStates.length > index && _expandedStates[index]
-              ? _expandedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price)
-              : _collapsedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price,pendingRequestsCount),
-
         ],
       ),
     );
@@ -682,11 +691,12 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
     return GestureDetector(
       onTap: () {
         if (isMatchCreator) {
-          Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId, selectedTeam: team), isScrollControlled: true);
+          Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId, selectedTeam: team,bookingId: match?.bookingId??"",), isScrollControlled: true);
         } else {
           AddPlayerBottomSheet.show(
             context,
             arguments: {
+              "bookingId":match?.bookingId??'',
               "team": team,
               "matchId": matchId,
               "needOpenMatchesForAllCourts": true,
@@ -933,7 +943,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Player Requests',
+                        'Requests',
                         style: Get.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,color: AppColors.primaryColor
                         ),
@@ -1274,40 +1284,97 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
-          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, -2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, -2),
+                    ),
+                  ]
+              ),
+              child: SizedBox(
+                height: 50,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    for (int i = 0; i < teamAPlayers.length; i++)
+                      Positioned(
+                        left: i * 35,
+                        child: teamAPlayers[i],
+                      ),
+                    for (int i = 0; i < teamBPlayers.length; i++)
+                      Positioned(
+                        left: (teamAPlayers.length * 35) + (i * 35),
+                        child: teamBPlayers[i],
+                      ),
+                  ],
                 ),
-              ]
-          ),
-          child: SizedBox(
-            height: 50,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (int i = 0; i < teamAPlayers.length; i++)
-                  Positioned(
-                    left: i * 35,
-                    child: teamAPlayers[i],
-                  ),
-                for (int i = 0; i < teamBPlayers.length; i++)
-                  Positioned(
-                    left: (teamAPlayers.length * 35) + (i * 35),
-                    child: teamBPlayers[i],
-                  ),
-              ],
+              ),
             ),
-          ),
+            if (_isLoginUserInMatch(data))
+              Container(
+                color: Colors.transparent,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+
+                    Transform.translate(
+                      offset: const Offset(0, -3),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Only allow if user is in the match
+                          if (!_isLoginUserInMatch(data)) {
+                            SnackBarUtils.showInfoSnackBar("You must be part of the match to play");
+                            return;
+                          }
+
+                          if (!controller.isCheckingScoreboard.value) {
+                            if (data.sId != null && data.sId!.isNotEmpty) {
+                              controller.createScoreBoardForOpenMatch(matchData: data);
+                            }
+                          }
+                        },
+                        child: Obx(() {
+                          final isLoading = controller.loadingMatchId.value == data.sId;
+                          return Container(
+                            height: 23,
+                            width: 55,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: AppColors.secondaryColor,
+                            ),
+                            child: isLoading
+                                ? LoadingAnimationWidget.waveDots(
+                              color: AppColors.whiteColor,
+                              size: 20,
+                            )
+                                : Text(
+                              "Play Now",
+                              style: Get.textTheme.headlineSmall!
+                                  .copyWith(color: Colors.white, fontSize: 10),
+                            ),
+                          );
+                        }),
+                      ),
+                    )
+                  ],
+                ),
+              ).paddingOnly(bottom: 12),
+          ],
         ),
         const SizedBox(height: 16),
+        // Play Now button row (similar to booking card)
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1342,8 +1409,8 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                     children: [
                       Text(
                         "Start Chat with Players",
-                        style: TextStyle(color: Colors.grey,fontSize: 12),
-                      ).paddingOnly(right: 5),
+                        style: TextStyle(color: Colors.grey,fontSize: 10),
+                      ).paddingOnly(right: 10,left: 10),
                       Container(
                           height: 30,
                           width: 30,
@@ -1370,7 +1437,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                           const Icon(Icons.notifications, color: AppColors.primaryColor,size: 18,),
                           RichText(
                             text: TextSpan(
-                              text: 'Players Requests ',
+                              text: 'Requests ',
                               style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
                               children: [
                                 TextSpan(
@@ -1405,7 +1472,8 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
               ],
             ),
           ],
-        ).paddingOnly(bottom: Get.height*0.01),
+        ).paddingOnly(bottom: Get.height*0.005),
+        Divider(color: Colors.grey,thickness: 0.1,),
         Row(
           children: [
             Expanded(
@@ -1430,7 +1498,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                           address,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Colors.grey,
                           ),
                         ),
@@ -1544,7 +1612,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                             address,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 12,
                               color: Colors.grey,
                             ),
                           ),
@@ -1575,8 +1643,9 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
 }
 class AppPlayersBottomSheet extends StatelessWidget {
   final String matchId;
+  final String bookingId;
   final String? selectedTeam;
-  const AppPlayersBottomSheet({super.key, required this.matchId, this.selectedTeam});
+  const AppPlayersBottomSheet({super.key, required this.matchId, this.selectedTeam,required this.bookingId});
 
   @override
   Widget build(BuildContext context) {
@@ -1772,7 +1841,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
           addPlayerController.selectedTeam.value = team;
           addPlayerController.openMatchForAllCourtController = controller;
 
-          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
+          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest',bookingId: bookingId);
 
           if (success) {
             controller.requestedPlayerIds.add(playerId);
@@ -1854,6 +1923,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
             AddPlayerBottomSheet.show(
               context,
               arguments: {
+                "bookingId": bookingId,
                 "team": selectedTeam ?? "teamA",
                 "matchId": matchId,
                 "needOpenMatchesForAllCourts": true,

@@ -71,6 +71,7 @@ class OpenMatchBookingData {
   bool? isDeleted;
   String? createdAt;
   String? updatedAt;
+  String? bookingId;
   int? iV;
 
   OpenMatchBookingData({
@@ -100,6 +101,7 @@ class OpenMatchBookingData {
     this.isDeleted,
     this.createdAt,
     this.updatedAt,
+    this.bookingId,
     this.iV,
   });
 
@@ -131,6 +133,7 @@ class OpenMatchBookingData {
     isDeleted = json['isDeleted'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    bookingId = json['bookingId'];
     iV = json['__v'];
   }
 
@@ -161,6 +164,7 @@ class OpenMatchBookingData {
         'isDeleted': isDeleted,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
+        'bookingId': bookingId,
         '__v': iV,
       };
 }
