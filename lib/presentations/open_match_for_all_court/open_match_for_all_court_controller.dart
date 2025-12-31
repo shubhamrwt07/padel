@@ -1,12 +1,15 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
+import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/data/request_models/home_models/get_club_name_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/all_open_matches.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/open_match_booking_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/open_match_model.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import 'package:padel_mobile/repositories/openmatches/open_match_repository.dart';
+import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 
 class OpenMatchForAllCourtController extends GetxController {
   Rx<bool> viewUnavailableSlots = false.obs;
@@ -35,6 +38,12 @@ class OpenMatchForAllCourtController extends GetxController {
   RxString requestingPlayerId = ''.obs; // Track which player request is in progress
   RxList<String> requestedPlayerIds = <String>[].obs; // Track requested players
 
+  // Scoreboard
+  final ScoreBoardRepository scoreBoardRepository = Get.put(ScoreBoardRepository());
+  final GetStorage storage = GetStorage();
+  RxBool isCheckingScoreboard = false.obs;
+  RxString loadingMatchId = ''.obs;
+
   final List<String> timeSlots = [
     "6:00 am",
     "7:00 am",
@@ -60,7 +69,7 @@ class OpenMatchForAllCourtController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('EEEE').format(parsed);
+      return DateFormat('EEE').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -70,7 +79,7 @@ class OpenMatchForAllCourtController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('dd MMMM').format(parsed);
+      return DateFormat('dd MMM').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -374,6 +383,152 @@ class OpenMatchForAllCourtController extends GetxController {
       CustomLogger.logMessage(msg: "Error fetching nearby players: $e", level: LogLevel.error);
     } finally {
       isLoadingNearbyPlayers.value = false;
+    }
+  }
+
+  /// Create Scoreboard for Open Match--------------------------------------------------------
+  Future<void> createScoreBoardForOpenMatch({required OpenMatchBookingData matchData}) async {
+    try {
+      final matchId = matchData.sId ?? '';
+      if (matchId.isEmpty) {
+        SnackBarUtils.showErrorSnackBar("Match ID not available");
+        return;
+      }
+
+      // Check if logged-in user is part of the match (in teamA or teamB)
+      final userId = storage.read('userId');
+      if (userId == null) {
+        SnackBarUtils.showErrorSnackBar("User not logged in");
+        return;
+      }
+
+      bool isUserInMatch = false;
+      
+      // Check in teamA
+      for (final player in matchData.teamA ?? []) {
+        if (player.userId?.sId == userId) {
+          isUserInMatch = true;
+          break;
+        }
+      }
+
+      // Check in teamB if not found in teamA
+      if (!isUserInMatch) {
+        for (final player in matchData.teamB ?? []) {
+          if (player.userId?.sId == userId) {
+            isUserInMatch = true;
+            break;
+          }
+        }
+      }
+
+      // Only proceed if user is part of the match
+      if (!isUserInMatch) {
+        SnackBarUtils.showErrorSnackBar("You must be part of the match to create a scoreboard");
+        return;
+      }
+
+      isCheckingScoreboard.value = true;
+      loadingMatchId.value = matchId;
+
+      // First, check if scoreboard already exists for this match
+      final checkResponse = await scoreBoardRepository.getScoreBoard(bookingId: matchId);
+
+      bool scoreboardExists = false;
+
+      if (checkResponse.data != null) {
+        if (checkResponse.data is List) {
+          scoreboardExists = (checkResponse.data as List).isNotEmpty;
+        } else {
+          scoreboardExists = true;
+        }
+      }
+
+      if (scoreboardExists) {
+        isCheckingScoreboard.value = false;
+        Get.toNamed(RoutesName.scoreBoard, arguments: {
+          "bookingId": matchId,
+          "openMatchId": matchId,
+        });
+        return;
+      }
+
+      // --- Create scoreboard ---
+      final matchTimeStr = (matchData.matchTime?.isNotEmpty == true)
+          ? matchData.matchTime!.first
+          : (matchData.slot?.isNotEmpty == true &&
+                  matchData.slot!.first.slotTimes?.isNotEmpty == true)
+              ? matchData.slot!.first.slotTimes!.first.time ?? ""
+              : "";
+
+      final courtName = matchData.slot?.isNotEmpty == true
+          ? matchData.slot!.first.courtName ?? ""
+          : "";
+
+      final clubName = matchData.clubId?.clubName ?? "";
+
+      // Build teams from match data
+      List<Map<String, dynamic>> teams = [];
+      
+      // Team A
+      if (matchData.teamA?.isNotEmpty == true) {
+        teams.add({
+          "name": "Team A",
+          "players": matchData.teamA!.map((player) => {
+            "name": "${player.userId?.name ?? ''} ${player.userId?.lastName ?? ''}".trim(),
+            "playerId": player.userId?.sId ?? "",
+          }).toList(),
+        });
+      } else {
+        teams.add({
+          "name": "Team A",
+          "players": [],
+        });
+      }
+
+      // Team B
+      if (matchData.teamB?.isNotEmpty == true) {
+        teams.add({
+          "name": "Team B",
+          "players": matchData.teamB!.map((player) => {
+            "name": "${player.userId?.name ?? ''} ${player.userId?.lastName ?? ''}".trim(),
+            "playerId": player.userId?.sId ?? "",
+          }).toList(),
+        });
+      } else {
+        teams.add({
+          "name": "Team B",
+          "players": [],
+        });
+      }
+
+      final body = {
+        "bookingId": matchId,
+        "matchDate": matchData.matchDate ?? "",
+        "matchTime": matchTimeStr,
+        "userId": storage.read("userId") ?? "",
+        "courtName": courtName,
+        "clubName": clubName,
+        "openMatchId": matchId,
+        "teams": teams,
+      };
+
+      final response = await scoreBoardRepository.createScoreBoard(data: body);
+
+      isCheckingScoreboard.value = false;
+
+      if (response.success == true) {
+        Get.toNamed(RoutesName.scoreBoard, arguments: {
+          "bookingId": matchId,
+          "openMatchId": matchId,
+        });
+      }
+    } catch (e) {
+      isCheckingScoreboard.value = false;
+      CustomLogger.logMessage(msg: "Error creating scoreboard: $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Failed to load or create scoreboard");
+    } finally {
+      loadingMatchId.value = '';
     }
   }
 }

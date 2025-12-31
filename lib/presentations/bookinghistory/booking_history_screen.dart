@@ -1,30 +1,50 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
+import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:padel_mobile/presentations/score_board/widgets/app_players_bottomsheet.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:padel_mobile/presentations/booking/open_matches/addPlayer/add_player_screen.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../configs/routes/routes_name.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import 'booking_history_controller.dart';
 
-class BookingHistoryUi extends StatelessWidget {
+class BookingHistoryUi extends StatefulWidget {
   const BookingHistoryUi({super.key});
 
   @override
+  State<BookingHistoryUi> createState() => _BookingHistoryUiState();
+}
+
+class _BookingHistoryUiState extends State<BookingHistoryUi> {
+  final List<bool> _expandedStates = [];
+  final storage = GetStorage();
+
+  @override
   Widget build(BuildContext context) {
-    // ✅ FIX: Use Get.put with a tag or ensure single instance
     final BookingHistoryController controller = Get.put(
       BookingHistoryController(),
       tag: 'booking_history',
     );
 
     return Scaffold(
-      appBar: primaryAppBar(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         centerTitle: true,
-        leading: SizedBox.shrink(),
-        title: Text("Booking History").paddingOnly(left: Get.width * 0.02),
-        context: context,
+        title: const Text(
+          "My Booking",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -33,10 +53,8 @@ class BookingHistoryUi extends StatelessWidget {
             child: TabBarView(
               controller: controller.tabController,
               children: [
-                // ✅ FIX: Pass controller directly instead of using Get.find
                 _tabContent(context, controller: controller, type: "upcoming"),
                 _tabContent(context, controller: controller, type: "completed"),
-                _tabContent(context, controller: controller, type: "cancelled"),
               ],
             ),
           ),
@@ -49,29 +67,27 @@ class BookingHistoryUi extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: TabBar(
-        dividerColor: AppColors.tabColor,
+        dividerColor: Colors.grey.shade200,
         controller: controller.tabController,
         indicatorColor: AppColors.primaryColor,
+        indicatorWeight: 3,
         labelColor: AppColors.primaryColor,
-        unselectedLabelColor: AppColors.labelBlackColor,
-        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        unselectedLabelColor: Colors.grey,
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         tabs: const [
           Tab(text: "Upcoming"),
           Tab(text: "Completed"),
-          Tab(text: "Cancelled"),
         ],
       ),
     );
   }
 
-  // ✅ FIX: Accept controller as parameter
   Widget _tabContent(BuildContext context, {
     required BookingHistoryController controller,
     required String type,
   }) {
     return Obx(() {
-
       final bookings = (type == "completed")
           ? (controller.completedBookings.value?.data ?? [])
           : (type == "cancelled")
@@ -82,17 +98,22 @@ class BookingHistoryUi extends StatelessWidget {
         return ListView.builder(
           itemCount: 10,
           itemBuilder: (context, index) {
-            return bookingCardShimmer(context);
+            return bookingCardShimmer(context, index);
           },
         );
       }
 
       if (bookings.isEmpty) {
-        return const Center(child: Text("No bookings found"));
+        return const Center(
+          child: Text(
+            "No bookings found",
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
       }
 
       return RefreshIndicator(
-        color: Colors.white,
+        color: AppColors.whiteColor,
         onRefresh: () async => controller.refreshBookings(),
         child: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
@@ -105,197 +126,1354 @@ class BookingHistoryUi extends StatelessWidget {
           },
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04, vertical: 12),
             itemCount: bookings.length + (controller.hasMoreData(type) ? 1 : 0),
-          itemBuilder: (context, index) {
-            // Show loading indicator at the bottom
-            if (index == bookings.length) {
-              return Obx(() {
-                if (controller.isLoadingMore.value) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: LoadingWidget(color: AppColors.primaryColor,)
-                    ),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              });
-            }
+            itemBuilder: (context, index) {
+              if (index == bookings.length) {
+                return Obx(() {
+                  if (controller.isLoadingMore.value) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: LoadingWidget(color: AppColors.primaryColor),
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                });
+              }
 
-            final booking = bookings[index];
-            final club = booking.registerClubId;
+              final booking = bookings[index];
+              final club = booking.registerClubId;
 
-            return GestureDetector(
-              onTap: () {
-                final bookingId = booking.sId;
-                if (bookingId != null && bookingId.isNotEmpty) {
-                  Get.toNamed(
-                    RoutesName.bookingConfirmAndCancel,
-                    arguments: {
-                      "id": bookingId,
-                      "fromCompleted": type == "completed",
-                      "fromCancelled": type == "cancelled",
-                    },
-                  );
-                } else {
-                  Get.snackbar("Error", "Booking ID not available");
-                }
-              },
-              child: bookingCard(context, booking, club),
-            );
-          },
+              // Initialize expanded states if needed
+              if (_expandedStates.length != bookings.length) {
+                _expandedStates.clear();
+                _expandedStates.addAll(List.filled(bookings.length, false));
+              }
+
+              return GestureDetector(
+                onTap: () {
+                  final bookingId = booking.sId;
+                  if (bookingId != null && bookingId.isNotEmpty) {
+                    Get.toNamed(
+                      RoutesName.bookingConfirmAndCancel,
+                      arguments: {
+                        "id": bookingId,
+                        "fromCompleted": type == "completed",
+                        "fromCancelled": type == "cancelled",
+                      },
+                    );
+                  } else {
+                    Get.snackbar("Error", "Booking ID not available");
+                  }
+                },
+                child: type == "completed"
+                    ? _buildCompletedBookingCard(context, booking, club, index)
+                    : _buildUpcomingBookingCard(context, booking, club, index, type),
+              );
+            },
+          ),
         ),
-      ),
       );
     });
   }
 
-  Widget bookingCard(BuildContext context, dynamic booking, dynamic club) {
+  // NEW: Completed booking card matching the screenshot design
+  Widget _buildCompletedBookingCard(BuildContext context, dynamic booking, dynamic club, int index) {
+    final clubName = club?.clubName ?? "The Good Club";
+    final address = "${club?.city ?? 'Chandigarh'} ${club?.zipCode ?? '160001'}";
+    final price = (booking.totalAmount ?? 2000).toString();
+    final score = _getMatchScore(booking);
+    final bookingType = booking.bookingType ?? "";
+    final isBlueTheme = bookingType.toLowerCase() == "normal" || bookingType.toLowerCase() == "openMatch";
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 0),
-      padding: EdgeInsets.only(
-        left: Get.width * .03,
-        right: Get.width * .03,
-        top: Get.height * .01,
-        bottom: Get.width * .01,
-      ),
-      width: Get.width,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.containerBorderColor,
-          width: 2.0,
+          color: isBlueTheme ? const Color(0xffC8D6FB) : const Color(0xff3DBE64).withOpacity(0.5),
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(16.0),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isBlueTheme
+              ? [const Color(0xffF3F7FF), const Color(0xff9EBAFF).withOpacity(0.3)]
+              : [const Color(0xffBFEECD).withOpacity(0.3), const Color(0xffBFEECD).withOpacity(0.2)],
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  club?.clubName ?? "N/A",
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: AppColors.blackColor,
+          // Header with date, time and badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              formatDate(booking.bookingDate).split(',')[0],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff1c46a0),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              formatDate(booking.bookingDate).split(',').length > 1
+                                  ? formatDate(booking.bookingDate).split(',')[1].trim()
+                                  : '',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              " | ${_getTimeString(booking)}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_shouldShowSkillGenderRow(booking))
+                          Row(
+                            children: [
+                              const Icon(Icons.star, color: Colors.amber, size: 18),
+                              const SizedBox(width: 4),
+                              Text(
+                                booking.openMatchId?.skillLevel ?? "Professional",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "|",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(width: 8),
+                              genderIcon(booking.openMatchId?.gender),
+                              const SizedBox(width: 4),
+                              Text(
+                                booking.openMatchId?.gender ?? "Mixed",
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xff1c46a0),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: const Icon(
+                        Icons.message,
+                        color: Colors.white,
+                        size: 17,
+                      ),
+                    ),
+
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Teams and Score section
+          Row(
+            children: [
+              // Team A
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildTeamAvatars(booking, "teamA"),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Team A",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Score
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    Text(
+                      score,
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff1c46a0),
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          _navigateToScoreboard(booking);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          decoration: BoxDecoration(
+                            // border: Border.all(color: const Color(0xff1c46a0), width: 1.5),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                "View Scoreboard",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xff1c46a0),
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Icon(
+                                Icons.share,
+                                size: 16,
+                                color: Color(0xff1c46a0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Team B
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildTeamAvatars(booking, "teamB"),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Team B",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // Divider
+          Divider(
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+
+          const SizedBox(height: 4),
+
+          // Club info and price
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      clubName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: Color(0xff1c46a0),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            address,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                "₹ $price",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xff1c46a0),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamAvatars(dynamic booking, String team) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) {
+      return _buildDefaultAvatarStack();
+    }
+
+    List<Widget> avatars = [];
+    final teamIndex = team == "teamA" ? 0 : 1;
+
+    if (teamIndex < scoreboard.teams.length) {
+      final teamData = scoreboard.teams[teamIndex];
+      if (teamData.players != null) {
+        for (var player in teamData.players) {
+          final profilePic = player.playerId?.profilePic ?? '';
+          final name = player.playerId?.name ?? player.name ?? 'N/A';
+          avatars.add(_buildCompletedAvatar(profilePic, name));
+        }
+      }
+    }
+
+    // Add missing player placeholders with correct labels
+    while (avatars.length < 2) {
+      final playerNum = team == "teamA" ? (avatars.length + 1) : (avatars.length + 3);
+      final playerLabel = "P$playerNum";
+      avatars.add(_buildCompletedAvatar(null, playerLabel, isPlaceholder: true));
+    }
+
+    return SizedBox(
+      width: 80,
+      height: 50,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 0,
+            child: avatars[0],
+          ),
+          if (avatars.length > 1)
+            Positioned(
+              right: 0,
+              child: avatars[1],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultAvatarStack() {
+    return SizedBox(
+      width: 80,
+      height: 50,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 0,
+            child: _buildCompletedAvatar(null, "P", isPlaceholder: true),
+          ),
+          Positioned(
+            right: 0,
+            child: _buildCompletedAvatar(null, "P", isPlaceholder: true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompletedAvatar(String? imageUrl, String name, {bool isPlaceholder = false}) {
+    final firstLetter = isPlaceholder ? "P" : (name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?');
+    final displayText = isPlaceholder ? name : firstLetter;
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 24,
+        backgroundColor: isPlaceholder ? Color(0xffeaf0ff) : const Color(0xFFEAF0FF),
+        child: (imageUrl != null && imageUrl.isNotEmpty && !isPlaceholder)
+            ? ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorWidget: (context, url, error) => Text(
+              displayText,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isPlaceholder ? Colors.grey.shade600 : const Color(0xFF1C46A0),
+              ),
+            ),
+          ),
+        )
+            : Text(
+          displayText,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isPlaceholder ? Colors.grey.shade600 : const Color(0xFF1C46A0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _shouldShowSkillGenderRow(dynamic booking) {
+    final skillLevel = booking.openMatchId?.skillLevel;
+    final gender = booking.openMatchId?.gender;
+    return (skillLevel != null && skillLevel.isNotEmpty) || (gender != null && gender.isNotEmpty);
+  }
+
+  String _getMatchScore(dynamic booking) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.totalScore == null) {
+      return "0 : 0";
+    }
+
+    final scoreA = scoreboard.totalScore.teamA ?? 0;
+    final scoreB = scoreboard.totalScore.teamB ?? 0;
+
+    return "$scoreA : $scoreB";
+  }
+
+  // EXISTING: Upcoming booking card (your original design)
+  Widget _buildUpcomingBookingCard(BuildContext context, dynamic booking, dynamic club, int index, String type) {
+    final isUpcoming = type == "upcoming";
+    final clubName = club?.clubName ?? "N/A";
+    final address = "${club?.city ?? ''}, ${club?.zipCode ?? ''}";
+    final price = (booking.totalAmount ?? 2000).toString();
+    final bookingType = booking.bookingType ?? "";
+    final isBlueTheme = bookingType.toLowerCase() == "normal" || bookingType.toLowerCase() == "openMatch";
+
+    // Get real players from scoreboard
+    final playerAvatars = _buildPlayerAvatarsFromScoreboard(booking);
+    final addButtons = _buildAddButtonsFromScoreboard(booking, bookingType);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isBlueTheme ? Color(0xffC8D6FB) : Color(0xff3DBE64).withOpacity(0.5)),
+        gradient: LinearGradient(
+          colors: isBlueTheme
+              ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withOpacity(0.3)]
+              : [Color(0xffBFEECD).withOpacity(0.3), Color(0xffBFEECD).withOpacity(0.2)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // TOP SECTION (Date + Time + Status Badge + Arrow)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _buildDateTimeInfo(context, booking),
+                      if (isUpcoming)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: const Text(
+                            "A",
+                            style: TextStyle(color: Colors.white, fontSize: 9),
+                          ),
+                        ).paddingOnly(left: 5),
+                    ],
+                  ),
+                  // Skill Level Tags (if upcoming)
+                  if (isUpcoming && _shouldShowSkillGenderRow(booking))
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 18),
+                        Text(
+                          " ${booking.openMatchId?.skillLevel ?? "Professional"} | ",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        genderIcon(booking.openMatchId?.gender),
+                        const SizedBox(width: 4),
+                        Text(
+                          booking.openMatchId?.gender ?? "Mixed",
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _expandedStates[index] = !_expandedStates[index];
+                    });
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      _expandedStates.length > index && _expandedStates[index]
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(-2, 0),
+              )
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Show expanded or collapsed content
+          _expandedStates.length > index && _expandedStates[index]
+              ? _expandedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type)
+              : _collapsedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateTimeInfo(BuildContext context, dynamic booking) {
+    try {
+      final dateStr = formatDate(booking.bookingDate);
+      final timeStr = _getTimeString(booking);
+
+      return RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '${dateStr.split(',')[0]} ',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff1c46a0),
+              ),
+            ),
+            TextSpan(
+              text: '${dateStr.contains(',') ? dateStr.split(',')[1].trim() : ''}${timeStr.isNotEmpty ? ' | $timeStr' : ''}',
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
+  }
+
+  String _getTimeString(dynamic booking) {
+    try {
+      if (booking.slot == null) return '';
+      final slotList = booking.slot;
+      if (slotList is! List || slotList.isEmpty) return '';
+
+      List<String> allTimes = [];
+
+      // Collect all times from all slots
+      for (var slot in slotList) {
+        if (slot?.slotTimes != null) {
+          for (var slotTime in slot.slotTimes) {
+            final timeString = slotTime?.time ?? "";
+            if (timeString.isNotEmpty) {
+              allTimes.add(timeString);
+            }
+          }
+        }
+      }
+
+      if (allTimes.isEmpty) return '';
+
+      if (allTimes.length == 1) {
+        return formatTimeSlot(allTimes[0]);
+      }
+
+      final firstTime = allTimes.first;
+      final lastTime = allTimes.last;
+
+      return '${formatTimeSlot(firstTime)} - ${formatTimeSlot(lastTime)}';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  List<Widget> _buildPlayerAvatarsFromScoreboard(dynamic booking) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) return [];
+
+    List<Widget> avatars = [];
+    int index = 0; // For theme consistency
+    for (var team in scoreboard.teams) {
+      if (team.players != null) {
+        for (var player in team.players) {
+          final name = player.playerId?.name ?? player.name ?? 'N/A';
+          final lastName = '';
+          final profilePic = player.playerId?.profilePic ?? '';
+          avatars.add(_buildFilledPlayerFromScoreboard(profilePic, name, lastName, booking.bookingType ?? '', index, booking: booking));
+        }
+      }
+    }
+    return avatars;
+  }
+
+  Widget _buildFilledPlayerFromScoreboard(String? imageUrl, String name, String lastName, String bookingType, int index, {dynamic booking}) {
+    final isBlueTheme = bookingType.toLowerCase() == "openmatch" || bookingType.toLowerCase() == "normal";
+    final firstLetter = name.trim().isNotEmpty
+        ? '${name.trim()[0].toUpperCase()}${lastName.trim().isNotEmpty ? lastName.trim()[0].toUpperCase() : ''}'
+        : '??';
+
+    return GestureDetector(
+      onTap: () {
+        if (booking != null) {
+          _showPlayerDetailsDialog(booking);
+        }
+      },
+      child: CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.white,
+        child: CircleAvatar(
+          radius: 24,
+          backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
+          child: ClipOval(
+            child: (imageUrl != null && imageUrl.isNotEmpty)
+                ? CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (context, url) => Center(
+                child: Text(
+                  firstLetter,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: (isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor).withOpacity(0.5),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Center(
+                child: Text(
+                  firstLetter,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+                : Center(
+              child: Text(
+                firstLetter,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildAddButtonsFromScoreboard(dynamic booking, String bookingType) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) return [_buildAvailableCircleFromScoreboard(bookingType, booking: booking), _buildAvailableCircleFromScoreboard(bookingType, booking: booking)];
+
+    int totalPlayers = 0;
+    for (var team in scoreboard.teams) {
+      totalPlayers += (team.players?.length ?? 0) as int;
+    }
+
+    // Show add buttons for remaining slots (assuming max 4 players)
+    int remainingSlots = 4 - totalPlayers;
+    if (remainingSlots <= 0) return [];
+
+    return List.generate(remainingSlots, (index) => _buildAvailableCircleFromScoreboard(bookingType, booking: booking));
+  }
+
+  Widget _buildAvailableCircleFromScoreboard(String bookingType, {dynamic booking}) {
+    final isBlueTheme = bookingType.toLowerCase() == "openmatch" || bookingType.toLowerCase() == "normal";
+    return GestureDetector(
+      onTap: () {
+        if (booking != null) {
+          final matchId = booking.sId ?? "";
+          final isMatchCreator = _isMatchCreator(booking);
+          final isLoginUserInMatch = _isLoginUserInMatch(booking);
+
+          if (isMatchCreator) {
+            Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId, teamName: "teamA"), isScrollControlled: true);
+          } else {
+            AddPlayerBottomSheet.show(
+              context,
+              arguments: {
+                "team": "teamA",
+                "matchId": matchId,
+                "needOpenMatchesForAllCourts": true,
+                "matchLevel": "Professional",
+                "isLoginUser": !isLoginUserInMatch,
+                "isMatchCreator": isMatchCreator,
+              },
+            );
+          }
+        }
+      },
+      child: CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.white,
+        child: CircleAvatar(
+          radius: 24,
+          backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
+          child: Icon(Icons.add, color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor),
+        ),
+      ),
+    );
+  }
+
+  Widget _collapsedCard(BuildContext context, int index, dynamic booking, List<Widget> playerAvatars, List<Widget> addButtons, String clubName, String address, String price, String type) {
+    final isUpcoming = type == "upcoming";
+    final bookingType = booking.bookingType ?? "";
+    final isBlueTheme = bookingType.toLowerCase() == "upcoming" || bookingType.toLowerCase() == "confirmed";
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: (playerAvatars.length + addButtons.length) * 30 + 42,
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, -2),
+                    ),
+                  ]
+              ),
+              child: SizedBox(
+                height: 50,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    for (int i = 0; i < playerAvatars.length; i++)
+                      Positioned(
+                        left: i * 35,
+                        child: playerAvatars[i],
+                      ),
+                    for (int i = 0; i < addButtons.length; i++)
+                      Positioned(
+                        left: (playerAvatars.length * 35) + (i * 35),
+                        child: addButtons[i],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            if (isUpcoming)
+              GestureDetector(
+                onTap: () {
+                  _navigateToScoreboard(booking);
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  child: Transform.translate(
+                    offset: const Offset(0, -3),
+                    child: Container(
+                      height: 23,
+                      width: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.secondaryColor,
+                      ),
+                      child: Text(
+                        "Play Now",
+                        style: Get.textTheme.headlineSmall!
+                            .copyWith(color: Colors.white, fontSize: 10),
+                      ),
+                    ),
+                  ),
+                ),
+              ).paddingOnly(bottom: 12),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (isUpcoming)
+              GestureDetector(
+                onTap: () {
+                  _navigateToChat(booking);
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(left: 5, right: 1),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Image.asset(Assets.imagesIcLocation, scale: 2),
                       Text(
-                        "${club?.city ?? ''}, ${club?.zipCode ?? ''}",
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: AppColors.darkGrey,
+                        "Start Chat with Players",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ).paddingOnly(right: 5),
+                      Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                          ),
+                          child: Icon(Icons.chat_outlined, color: Colors.white, size: 18)
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            if (!isUpcoming) const SizedBox.shrink(),
+            Row(
+              children: [
+                if (isUpcoming) ...[
+                  GestureDetector(
+                    onTap: () {
+                      _showPlayerRequestsBottomSheet(context, booking);
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.notifications, color: AppColors.primaryColor, size: 18),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Players Requests ',
+                              style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
+                              children: [
+                                TextSpan(
+                                  text: '(',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "3",
+                                  style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
+                                ),
+                                TextSpan(
+                                  text: ')',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                if (isUpcoming)
+                  const Icon(Icons.share, size: 20, color: AppColors.darkGreyColor),
+              ],
+            ),
+          ],
+        ).paddingOnly(bottom: Get.height * 0.01),
+
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    clubName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 14, color: AppColors.primaryColor),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        child: Text(
+                          address,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],
-                  ).paddingOnly(top: 3, bottom: 3),
+                  ),
+                ],
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, 2),
+              child: Text(
+                "₹ $price",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xff1c46a0),
                 ),
-                // ✅ CRITICAL FIX: Safe slot checking
-                _buildSlotInfo(context, booking),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _expandedCard(BuildContext context, int index, dynamic booking, List<Widget> playerAvatars, List<Widget> addButtons, String clubName, String address, String price, String type) {
+    final isUpcoming = type == "upcoming";
+    final timeStr = _getTimeString(booking);
+
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.access_time, size: 18),
+                  SizedBox(width: 8),
+                  Text(
+                    "${formatDate(booking.bookingDate)}${timeStr.isNotEmpty ? ' | $timeStr' : ''}",
+                    style: Get.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.group, size: 18),
+              SizedBox(width: 8),
+              Text("4 attendee (4 confirmed)", style: Get.textTheme.bodySmall),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: (playerAvatars.length + addButtons.length) * 30 + 42,
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: AppColors.greyColor),
+            ),
+            child: SizedBox(
+              height: 50,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (int i = 0; i < playerAvatars.length; i++)
+                    Positioned(
+                      left: i * 35,
+                      child: playerAvatars[i],
+                    ),
+                  for (int i = 0; i < addButtons.length; i++)
+                    Positioned(
+                      left: (playerAvatars.length * 35) + (i * 35),
+                      child: addButtons[i],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      clubName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: AppColors.primaryColor),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            address,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, 2),
+                child: Text(
+                  "₹ $price",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xff1c46a0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToChat(dynamic booking) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) {
+      Get.snackbar("Error", "No team data available");
+      return;
+    }
+
+    List<Map<String, dynamic>> teamAData = [];
+    List<Map<String, dynamic>> teamBData = [];
+
+    for (var team in scoreboard.teams) {
+      if (team.players != null) {
+        for (var player in team.players) {
+          final playerData = {
+            'userId': player.playerId?.sId ?? '',
+            'name': player.playerId?.name ?? player.name ?? '',
+            'lastName': '',
+          };
+          if (teamAData.length <= teamBData.length) {
+            teamAData.add(playerData);
+          } else {
+            teamBData.add(playerData);
+          }
+        }
+      }
+    }
+
+    Get.toNamed(RoutesName.chat, arguments: {
+      "matchID": booking.sId ?? "",
+      "teamA": teamAData,
+      "teamB": teamBData,
+    });
+  }
+
+  void _showPlayerRequestsBottomSheet(BuildContext context, dynamic booking) {
+    final matchId = booking.sId ?? '';
+    if (matchId.isEmpty) {
+      Get.snackbar("Error", "Match ID not available");
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: SizedBox(
+            height: Get.height * 0.9,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Player Requests',
+                        style: Get.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600, color: AppColors.primaryColor),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Get.back(),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: Colors.grey.shade300, height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    "You have new match requests! Accept the requests from the "
+                        "players you want to play with. Once accepted, you'll be "
+                        "paired for the match and can start competing right away.",
+                    style: Get.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'No join requests yet',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, size: 18, color: AppColors.textColor),
-        ],
-      ),
-    ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10);
+        );
+      },
+    );
   }
 
-  // ✅ NEW: Separate method for slot info with proper null checks
-  Widget _buildSlotInfo(BuildContext context, dynamic booking) {
-    try {
-      // Check if booking has slot data
-      if (booking.slot == null) return const SizedBox.shrink();
-      final courtName = booking.slot[0].courtName??"";
+  void _showPlayerDetailsDialog(dynamic booking) {
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) {
+      Get.snackbar("Error", "No player data available");
+      return;
+    }
 
-      // Ensure slot is a list
-      final slotList = booking.slot;
-      if (slotList is! List || slotList.isEmpty) return const SizedBox.shrink();
-
-      // Get first slot
-      final firstSlot = slotList[0];
-      if (firstSlot == null) return const SizedBox.shrink();
-
-      // Check if slotTimes exists
-      final slotTimes = firstSlot.slotTimes;
-      if (slotTimes == null) {
-        // Show only date if no time available
-        return Row(
-          children: [
-            const Icon(Icons.alarm, size: 15),
-            Text(
-              formatDate(booking.bookingDate),
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.blackColor,
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Player Information',
+                    style: Get.textTheme.titleMedium
+                        ?.copyWith(color: AppColors.primaryColor),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: Get.back,
+                  ),
+                ],
               ),
-            ).paddingOnly(left: 5),
-            Text(
-              "($courtName)",
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.labelBlackColor,
-              ),
-            ).paddingOnly(left: 5),
-          ],
-        );
-      }
+              const Divider(thickness: 0.6),
+              ..._buildPlayersFromScoreboard(scoreboard.teams),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-      if (slotTimes is! List || slotTimes.isEmpty) {
-        return Row(
-          children: [
-            const Icon(Icons.alarm, size: 15),
-            Text(
-              formatDate(booking.bookingDate),
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.blackColor,
-              ),
-            ).paddingOnly(left: 5),
-            Text(
-              "($courtName)",
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.labelBlackColor,
-              ),
-            ).paddingOnly(left: 5),
-          ],
-        );
-      }
-      final firstTime = slotTimes[0];
-      final timeString = firstTime?.time ?? "";
+  List<Widget> _buildPlayersFromScoreboard(List<dynamic> teams) {
+    List<Widget> playerWidgets = [];
+    for (var team in teams) {
+      if (team.players != null) {
+        for (var player in team.players) {
+          final name = player.playerId?.name ?? player.name ?? '';
+          final phoneNumber = player.playerId?.phoneNumber?.toString() ?? '';
+          final countryCode = player.playerId?.countryCode?.toString() ?? '';
+          final profilePic = player.playerId?.profilePic ?? '';
 
-      return Row(
-        children: [
-          const Icon(Icons.alarm, size: 15),
-          Text(
-            formatDate(booking.bookingDate),
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-              color: AppColors.blackColor,
+          playerWidgets.add(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.secondaryColor,
+                    radius: 28,
+                    child: CircleAvatar(
+                      radius: 26,
+                      backgroundImage: (profilePic.isNotEmpty)
+                          ? CachedNetworkImageProvider(profilePic)
+                          : null,
+                      child: (profilePic.isEmpty)
+                          ? Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : '',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: Get.textTheme.labelLarge),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              '⭐ 0 XP Points ',
+                              style: Get.textTheme.bodySmall
+                                  ?.copyWith(color: Colors.orange),
+                            ),
+                            Text(
+                              '| $countryCode-$phoneNumber',
+                              style: Get.textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundColor: AppColors.primaryColor,
+                      child: const Icon(Icons.call, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ).paddingOnly(left: 5),
-          if (timeString.isNotEmpty)
-            Text(
-              formatTimeSlot(timeString),
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: AppColors.blackColor,
-              ),
-            ).paddingOnly(left: 5),
-          Text(
-            "($courtName)",
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-              color: AppColors.labelBlackColor,
-            ),
-          ).paddingOnly(left: 5),
-        ],
+          );
+        }
+      }
+    }
+    return playerWidgets;
+  }
+
+  bool _isMatchCreator(dynamic booking) {
+    final userId = storage.read('userId');
+    if (userId == null || booking == null) return false;
+    return booking.ownerId == userId.toString();
+  }
+
+  bool _isLoginUserInMatch(dynamic booking) {
+    final userId = storage.read('userId');
+    if (userId == null || booking == null) return false;
+
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams == null) return false;
+
+    for (var team in scoreboard.teams) {
+      if (team.players != null) {
+        for (var player in team.players) {
+          if (player.playerId?.sId == userId.toString()) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  void _navigateToScoreboard(dynamic booking) {
+    final bookingId = booking.sId;
+    if (bookingId != null && bookingId.isNotEmpty) {
+      Get.toNamed(
+        RoutesName.scoreBoard,
+        arguments: {
+          "bookingId": bookingId,
+          "fromBookingHistory": true,
+        },
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error building slot info: $e");
-      }
-      return const SizedBox.shrink();
+    } else {
+      Get.snackbar("Error", "Booking ID not available");
     }
   }
 
@@ -303,7 +1481,7 @@ class BookingHistoryUi extends StatelessWidget {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('EEE, dd MMM').format(date);
+      return DateFormat('EEEE, dd MMM').format(date);
     } catch (e) {
       if (kDebugMode) {
         print("Error parsing date: $e");
@@ -312,107 +1490,98 @@ class BookingHistoryUi extends StatelessWidget {
     }
   }
 
-  Widget bookingCardShimmer(BuildContext context) {
+  Widget bookingCardShimmer(BuildContext context, int index) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade200,
+      baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 0),
-        padding: EdgeInsets.only(
-          left: Get.width * .03,
-          right: Get.width * .03,
-          top: Get.height * .01,
-          bottom: Get.width * .01,
-        ),
-        width: Get.width,
+        margin: const EdgeInsets.only(bottom: 6,left: 15,right: 15,top: 6),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: index % 2 == 0 ? Color(0xffC8D6FB) : Color(0xff3DBE64).withOpacity(0.5)),
+          gradient: LinearGradient(
+            colors: index % 2 == 0
+                ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withOpacity(0.3)]
+                : [Color(0xffBFEECD).withOpacity(0.3), Color(0xffBFEECD).withOpacity(0.2)],
           ),
-          borderRadius: BorderRadius.circular(10.0),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 14,
-                    width: Get.width * 0.4,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  height: 20,
+                  width: Get.width * 0.5,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Container(
-                        height: 14,
-                        width: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        height: 12,
-                        width: Get.width * 0.3,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                    ],
+                ),
+                Container(
+                  height: 36,
+                  width: 36,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Container(
-                        height: 12,
-                        width: Get.width * 0.25,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        height: 12,
-                        width: Get.width * 0.2,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        height: 12,
-                        width: Get.width * 0.15,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Container(
-              height: 18,
-              width: 18,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-              ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 16,
+                      width: Get.width * 0.4,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      height: 12,
+                      width: Get.width * 0.3,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  height: 28,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ).paddingOnly(left: Get.width * .03, right: Get.width * .03, top: 10),
+      ),
     );
   }
 }

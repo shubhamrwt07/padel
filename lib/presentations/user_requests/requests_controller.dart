@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_requests_player_open_match_model.dart';
 
 class RequestsController extends GetxController {
@@ -11,9 +12,9 @@ class RequestsController extends GetxController {
   RxInt selectedTab = 0.obs; // 0 = Join, 1 = My
   void changeTab(int index) => selectedTab.value = index;
 
+  final OpenMatchRepository repository = Get.put(OpenMatchRepository());
   RxList<Requests> joinRequests = <Requests>[].obs;
-  RxList<Requests> myRequests = <Requests>[].obs; // ✅ ADD THIS
-
+  RxList<Requests> myRequests = <Requests>[].obs;
   RxBool isLoadingRequests = false.obs;
 
   void deleteRequest(int index) {
@@ -43,115 +44,73 @@ class RequestsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadStaticData();
+    fetchJoinRequests();
+    fetchMyRequests();
   }
-  void _loadStaticData() {
-    isLoadingRequests.value = true;
-    
-    final staticRequests = [
-      Requests(
-        id: "1",
-        type: "request",
-        status: "pending",
-        preferredTeam: "teamA",
-        level: "Intermediate",
-        match: MatchId(
-          id: "match1",
-          matchDate: "2024-01-15",
-          matchTime: ["10:00", "11:00"],
-          skillLevel: "Intermediate",
-          gender: "Mixed",
-          club: ClubId(
-            id: "club1",
-            clubName: "Elite Padel Club",
-            address: "123 Sports Avenue",
-            city: "Mumbai",
-            zipCode: "400001",
-            courtCount: 4,
-            courtType: ["Indoor", "Outdoor"],
-          ),
-          teamA: [
-            TeamA(
-              user: RequesterId(
-                id: "user1",
-                name: "John",
-                lastName: "Doe",
-                email: "john@example.com",
-              ),
-            ),
-          ],
-          teamB: [
-            TeamB(
-              user: RequesterId(
-                id: "user2",
-                name: "Jane",
-                lastName: "Smith",
-                email: "jane@example.com",
-              ),
-            ),
-          ],
-        ),
-        requester: RequesterId(
-          id: "requester1",
-          name: "Mike",
-          lastName: "Johnson",
-          email: "mike@example.com",
-        ),
-      ),
-      Requests(
-        id: "2",
-        type: "invitation",
-        status: "pending",
-        preferredTeam: "teamB",
-        level: "Advanced",
-        match: MatchId(
-          id: "match2",
-          matchDate: "2024-01-16",
-          matchTime: ["14:00", "15:00"],
-          skillLevel: "Advanced",
-          gender: "Male",
-          club: ClubId(
-            id: "club2",
-            clubName: "Champions Padel Arena",
-            address: "456 Victory Road",
-            city: "Delhi",
-            zipCode: "110001",
-            courtCount: 6,
-            courtType: ["Professional", "Indoor"],
-          ),
-          teamA: [
-            TeamA(
-              user: RequesterId(
-                id: "user3",
-                name: "Alex",
-                lastName: "Wilson",
-                email: "alex@example.com",
-              ),
-            ),
-            TeamA(
-              user: RequesterId(
-                id: "user4",
-                name: "Chris",
-                lastName: "Brown",
-                email: "chris@example.com",
-              ),
-            ),
-          ],
-          teamB: [],
-        ),
-        requester: RequesterId(
-          id: "requester2",
-          name: "Sarah",
-          lastName: "Davis",
-          email: "sarah@example.com",
-        ),
-      ),
-    ];
+  Future<void> fetchJoinRequests() async {
+    try {
+      isLoadingRequests.value = true;
+      joinRequests.clear();
 
-     Future.delayed(const Duration(milliseconds: 500), () {
-      joinRequests.assignAll(staticRequests);
-      myRequests.assignAll(staticRequests); // 🔹 TEMP (replace with API later)
+      final response = await repository.getRequestPlayersOpenMatch(type: "both",filter: "request");
+
+      if (response != null && response.requests != null) {
+        joinRequests.addAll(response.requests!);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error fetching join requests: $e", level: LogLevel.error);
+      Get.snackbar("Error", "Failed to fetch join requests");
+    } finally {
       isLoadingRequests.value = false;
-    });
+    }
+  }
+
+  Future<void> fetchMyRequests() async {
+    try {
+      isLoadingRequests.value = true;
+      myRequests.clear();
+
+      final response = await repository.getRequestPlayersOpenMatch(type: "both",filter: "invitation");
+
+      if (response != null && response.requests != null) {
+        myRequests.addAll(response.requests!);
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error fetching my requests: $e", level: LogLevel.error);
+      Get.snackbar("Error", "Failed to fetch my requests");
+    } finally {
+      isLoadingRequests.value = false;
+    }
+  }
+
+  Future<void> acceptPlayerRequest(String requestId, String matchId, String team) async {
+    try {
+      isLoadingRequests.value = true;
+      final body = {
+        "requestId": requestId,
+        "action": "accept",
+        "type": "MatchCreator"
+      };
+      final response = await repository.acceptOrRejectRequestPlayer(body:  body,);
+      
+      if (response != null) {
+        // Remove the accepted request from the list
+        joinRequests.removeWhere((request) => request.id == requestId);
+        Get.snackbar("Success", "Player request accepted successfully");
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Error accepting player request: $e", level: LogLevel.error);
+      Get.snackbar("Error", "Failed to accept player request");
+    } finally {
+      isLoadingRequests.value = false;
+    }
+  }
+
+  Future<void> refreshData() async {
+    if (selectedTab.value == 0) {
+      await fetchJoinRequests();
+    } else {
+      await fetchMyRequests();
+    }
   }
 }

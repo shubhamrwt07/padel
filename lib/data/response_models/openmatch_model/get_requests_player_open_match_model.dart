@@ -186,6 +186,8 @@ class RequesterId {
   final String? name;
   final String? lastName;
   final String? profilePic;
+  final String? xpPoints;
+  final String? gender;
 
   RequesterId({
     this.id,
@@ -194,6 +196,8 @@ class RequesterId {
     this.name,
     this.lastName,
     this.profilePic,
+    this.xpPoints,
+    this.gender,
   });
 
   factory RequesterId.fromJson(Map<String, dynamic> json) {
@@ -206,6 +210,8 @@ class RequesterId {
       name: json['name']?.toString(),
       lastName: json['lastName']?.toString(),
       profilePic: json['profilePic']?.toString(),
+      xpPoints: json['xpPoints']?.toString(),
+      gender: json['gender']?.toString(),
     );
   }
 }

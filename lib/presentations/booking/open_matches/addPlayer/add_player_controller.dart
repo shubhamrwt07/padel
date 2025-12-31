@@ -114,7 +114,7 @@ class AddPlayerController extends GetxController {
               );
             }
           } else {
-            final requested = await requestPlayerForOpenMatch();
+            final requested = await requestPlayerForOpenMatch(bookingId: bookingId.value);
             if (requested) {
               CustomLogger.logMessage(
                 msg: "User Created & Player Requested $body",
@@ -179,7 +179,7 @@ class AddPlayerController extends GetxController {
               );
             }
           } else {
-            final requested = await requestPlayerForOpenMatch();
+            final requested = await requestPlayerForOpenMatch(bookingId: bookingId.value);
             if (requested) {
               CustomLogger.logMessage(
                 msg: "Login User Requested Directly",
@@ -188,7 +188,7 @@ class AddPlayerController extends GetxController {
             }
           }
         } else if (openMatchBookingController != null) {
-          final requested = await requestPlayerForOpenMatch();
+          final requested = await requestPlayerForOpenMatch(bookingId: bookingId.value);
           if (requested) {
             CustomLogger.logMessage(
               msg: "Login User Requested Directly",
@@ -205,7 +205,7 @@ class AddPlayerController extends GetxController {
               );
             }
           } else {
-            final requested = await requestPlayerForOpenMatch();
+            final requested = await requestPlayerForOpenMatch(bookingId: bookingId.value);
             if (requested) {
               CustomLogger.logMessage(
                 msg: "Login User Requested Directly",
@@ -266,10 +266,11 @@ class AddPlayerController extends GetxController {
   }
 
   ///Request Player For Open Match Api-----------------------------------------------
-  Future<bool> requestPlayerForOpenMatch({String? type}) async {
+  Future<bool> requestPlayerForOpenMatch({String? type,String? bookingId}) async {
     try {
       final body = {
         "matchId": matchId.value,
+        "bookingId":bookingId,
         "preferredTeam": selectedTeam.value,
       };
       
@@ -447,6 +448,7 @@ class AddPlayerController extends GetxController {
 
   ///Get Players Level Api------------------------------------------------------
   var matchLevel = ''.obs;
+  var bookingId = ''.obs;
   Future<void> fetchPlayerLevels() async {
     isLoadingLevels.value = true;
     try {
@@ -471,6 +473,7 @@ class AddPlayerController extends GetxController {
   void initializeWithArguments(Map<String, dynamic> args) {
     matchId.value = args["matchId"] ?? "";
     selectedTeam.value = args["team"] ?? "";
+    bookingId.value = args["bookingId"]??"";
     scoreboardId.value = args["scoreBoardId"] ?? "";
     openMatchId.value = args["openMatchId"] ?? "";
     matchLevel.value = args["matchLevel"] ?? "";
@@ -511,7 +514,7 @@ class AddPlayerController extends GetxController {
       preloadLoginUserData();
     }
 
-    fetchPlayerLevels();
+    // fetchPlayerLevels();
   }
 
   void clearTextFields() {

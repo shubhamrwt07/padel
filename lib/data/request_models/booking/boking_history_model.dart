@@ -61,9 +61,8 @@ class BookingHistoryData {
   String? updatedAt;
   int? iV;
   dynamic customerReview;
-
-  /// ✅ NEW
   OpenMatchId? openMatchId;
+  Scoreboard? scoreboard; // ✅ NEW
 
   BookingHistoryData({
     this.sId,
@@ -80,6 +79,7 @@ class BookingHistoryData {
     this.iV,
     this.customerReview,
     this.openMatchId,
+    this.scoreboard, // ✅ NEW
   });
 
   BookingHistoryData.fromJson(Map<String, dynamic> json) {
@@ -106,9 +106,13 @@ class BookingHistoryData {
     iV = json['__v'];
     customerReview = json['customerReview'];
 
-    /// ✅ PARSE openMatchId
     openMatchId = json['openMatchId'] != null
         ? OpenMatchId.fromJson(json['openMatchId'])
+        : null;
+
+    // ✅ PARSE scoreboard
+    scoreboard = json['scoreboard'] != null
+        ? Scoreboard.fromJson(json['scoreboard'])
         : null;
   }
 
@@ -132,11 +136,234 @@ class BookingHistoryData {
     data['__v'] = iV;
     data['customerReview'] = customerReview;
 
-    /// ✅ TO JSON
     if (openMatchId != null) {
       data['openMatchId'] = openMatchId!.toJson();
     }
 
+    // ✅ TO JSON
+    if (scoreboard != null) {
+      data['scoreboard'] = scoreboard!.toJson();
+    }
+
+    return data;
+  }
+}
+
+// ✅ NEW Scoreboard class
+class Scoreboard {
+  String? sId;
+  String? userId;
+  String? bookingId;
+  String? matchDate;
+  String? matchTime;
+  String? courtName;
+  String? clubName;
+  List<ScoreboardTeam>? teams;
+  TotalScore? totalScore;
+  String? matchDuration;
+  String? winner;
+  bool? isCompleted;
+  String? openMatchId;
+  List<dynamic>? sets;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+
+  Scoreboard({
+    this.sId,
+    this.userId,
+    this.bookingId,
+    this.matchDate,
+    this.matchTime,
+    this.courtName,
+    this.clubName,
+    this.teams,
+    this.totalScore,
+    this.matchDuration,
+    this.winner,
+    this.isCompleted,
+    this.openMatchId,
+    this.sets,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
+
+  Scoreboard.fromJson(Map<String, dynamic> json) {
+    sId = json['_id']?.toString();
+    userId = json['userId']?.toString();
+    bookingId = json['bookingId']?.toString();
+    matchDate = json['matchDate']?.toString();
+    matchTime = json['matchTime']?.toString();
+    courtName = json['courtName']?.toString();
+    clubName = json['clubName']?.toString();
+
+    if (json['teams'] != null) {
+      teams = <ScoreboardTeam>[];
+      json['teams'].forEach((v) {
+        teams!.add(ScoreboardTeam.fromJson(v));
+      });
+    }
+
+    totalScore = json['totalScore'] != null
+        ? TotalScore.fromJson(json['totalScore'])
+        : null;
+
+    matchDuration = json['matchDuration']?.toString();
+    winner = json['winner']?.toString();
+    isCompleted = json['isCompleted'];
+    openMatchId = json['openMatchId']?.toString();
+    sets = json['sets'] ?? [];
+    createdAt = json['createdAt']?.toString();
+    updatedAt = json['updatedAt']?.toString();
+    iV = json['__v'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['_id'] = sId;
+    data['userId'] = userId;
+    data['bookingId'] = bookingId;
+    data['matchDate'] = matchDate;
+    data['matchTime'] = matchTime;
+    data['courtName'] = courtName;
+    data['clubName'] = clubName;
+    if (teams != null) {
+      data['teams'] = teams!.map((v) => v.toJson()).toList();
+    }
+    if (totalScore != null) {
+      data['totalScore'] = totalScore!.toJson();
+    }
+    data['matchDuration'] = matchDuration;
+    data['winner'] = winner;
+    data['isCompleted'] = isCompleted;
+    data['openMatchId'] = openMatchId;
+    data['sets'] = sets;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['__v'] = iV;
+    return data;
+  }
+}
+
+class ScoreboardTeam {
+  String? name;
+  List<ScoreboardPlayer>? players;
+  int? totalWins;
+  bool? isWinner;
+  String? sId;
+
+  ScoreboardTeam({
+    this.name,
+    this.players,
+    this.totalWins,
+    this.isWinner,
+    this.sId,
+  });
+
+  ScoreboardTeam.fromJson(Map<String, dynamic> json) {
+    name = json['name']?.toString();
+
+    if (json['players'] != null) {
+      players = <ScoreboardPlayer>[];
+      json['players'].forEach((v) {
+        players!.add(ScoreboardPlayer.fromJson(v));
+      });
+    }
+
+    totalWins = json['totalWins'];
+    isWinner = json['isWinner'];
+    sId = json['_id']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['name'] = name;
+    if (players != null) {
+      data['players'] = players!.map((v) => v.toJson()).toList();
+    }
+    data['totalWins'] = totalWins;
+    data['isWinner'] = isWinner;
+    data['_id'] = sId;
+    return data;
+  }
+}
+
+class ScoreboardPlayer {
+  PlayerId? playerId;
+  String? name;
+  String? sId;
+
+  ScoreboardPlayer({this.playerId, this.name, this.sId});
+
+  ScoreboardPlayer.fromJson(Map<String, dynamic> json) {
+    playerId = json['playerId'] != null
+        ? PlayerId.fromJson(json['playerId'])
+        : null;
+    name = json['name']?.toString();
+    sId = json['_id']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (playerId != null) {
+      data['playerId'] = playerId!.toJson();
+    }
+    data['name'] = name;
+    data['_id'] = sId;
+    return data;
+  }
+}
+
+class PlayerId {
+  String? sId;
+  String? email;
+  int? phoneNumber;
+  String? name;
+  String? profilePic;
+
+  PlayerId({
+    this.sId,
+    this.email,
+    this.phoneNumber,
+    this.name,
+    this.profilePic,
+  });
+
+  PlayerId.fromJson(Map<String, dynamic> json) {
+    sId = json['_id']?.toString();
+    email = json['email']?.toString();
+    phoneNumber = json['phoneNumber'];
+    name = json['name']?.toString();
+    profilePic = json['profilePic']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['_id'] = sId;
+    data['email'] = email;
+    data['phoneNumber'] = phoneNumber;
+    data['name'] = name;
+    data['profilePic'] = profilePic;
+    return data;
+  }
+}
+
+class TotalScore {
+  int? teamA;
+  int? teamB;
+
+  TotalScore({this.teamA, this.teamB});
+
+  TotalScore.fromJson(Map<String, dynamic> json) {
+    teamA = json['teamA'];
+    teamB = json['teamB'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['teamA'] = teamA;
+    data['teamB'] = teamB;
     return data;
   }
 }

@@ -292,40 +292,62 @@ class MainHomeScreen extends StatelessWidget {
     final club = b.registerClubId;
     return GestureDetector(
       onTap: () {
-        if (b.sId != null && b.sId!.isNotEmpty) {
-          Get.toNamed(RoutesName.bookingConfirmAndCancel, arguments: {"id": b.sId!});
-        } else {
-          Get.snackbar("Error", "Booking ID not available");
+        if (!controller.homeController.isCheckingScoreboard.value) {
+          if (b.sId != null && b.sId!.isNotEmpty) {
+            controller.homeController.createScoreBoard(bookingId: b.sId!);
+          }
         }
       },
-      child: Container(
-        width: 235,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.tabColor),
-          gradient:LinearGradient(
-            colors: [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Obx(() {
+        final isLoading = controller.homeController.loadingBookingId.value == b.sId;
+        return Stack(
           children: [
-            const SizedBox(height: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _bookingImage(club),
-                _bookingInfo(context, club),
-                _bookingRatingArrow(context),
-              ],
+            Container(
+              width: 235,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.tabColor),
+                gradient:LinearGradient(
+                  colors: [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const SizedBox(height: 1),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _bookingImage(club),
+                      _bookingInfo(context, club),
+                      _bookingRatingArrow(context),
+                    ],
+                  ),
+                  _bookingTimeInfo(context, b),
+                ],
+              ),
             ),
-            _bookingTimeInfo(context, b),
+            if (isLoading)
+              Container(
+                width: 235,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.black.withValues(alpha: 0.3),
+                ),
+                child: Center(
+                  child: LoadingAnimationWidget.waveDots(
+                    color: AppColors.whiteColor,
+                    size: 30,
+                  ),
+                ),
+              ),
           ],
-        ),
-      ).paddingOnly(right: 10),
+        );
+      }).paddingOnly(right: 10),
     );
   }
 
@@ -411,50 +433,40 @@ class MainHomeScreen extends StatelessWidget {
                 controller.homeController.formatDate(b.bookingDate),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: AppColors.blackColor,
+                  color: AppColors.blackColor
                 ),
               ),
               if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
                 Text(
-                  formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? ""),
+                  "${formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? "")} - ${formatTimeSlot(b.slot!.first.slotTimes!.last.time ?? "")}",
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
                 ).paddingOnly(left: 5),
             ],
           ),
-          Transform.translate(
-            offset: const Offset(0, -3),
-            child: GestureDetector(
-              onTap: () {
-                if (!controller.homeController.isCheckingScoreboard.value) {
-                  if (b.sId != null && b.sId!.isNotEmpty) {
-                    controller.homeController.createScoreBoard(bookingId: b.sId!);
-                  }
-                }
-              },
-              child: Obx(() {
-                final isLoading = controller.homeController.loadingBookingId.value == b.sId;
-                return Container(
-                  height: 23,
-                  width: 55,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.secondaryColor,
-                  ),
-                  child: isLoading
-                      ? LoadingAnimationWidget.waveDots(
-                    color: AppColors.whiteColor,
-                    size: 20,
-                  )
-                      : Text(
-                    "Play Now",
-                    style: Get.textTheme.headlineSmall!
-                        .copyWith(color: Colors.white, fontSize: 10),
-                  ),
-                );
-              }),
-            ),
-          )
+          //     child: Obx(() {
+          //       final isLoading = controller.homeController.loadingBookingId.value == b.sId;
+          //       return Container(
+          //         height: 23,
+          //         width: 55,
+          //         alignment: Alignment.center,
+          //         decoration: BoxDecoration(
+          //           borderRadius: BorderRadius.circular(10),
+          //           color: AppColors.secondaryColor,
+          //         ),
+          //         child: isLoading
+          //             ? LoadingAnimationWidget.waveDots(
+          //           color: AppColors.whiteColor,
+          //           size: 20,
+          //         )
+          //             : Text(
+          //           "Play Now",
+          //           style: Get.textTheme.headlineSmall!
+          //               .copyWith(color: Colors.white, fontSize: 10),
+          //         ),
+          //       );
+          //     }),
+          //   ),
+          // )
         ],
       ),
     ).paddingOnly(bottom: 2);

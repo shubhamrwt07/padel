@@ -221,6 +221,7 @@ class ScoreBoardController extends GetxController {
     try {
       final body = {
         "scoreboardId": scoreboardId.value,
+        'type': 'remove',
         "setNumber": setNumber,
       };
 
@@ -293,25 +294,37 @@ class ScoreBoardController extends GetxController {
     }
     isAddingScore.value = true;
     try {
-      String? winner;
-      if (teamAScore > teamBScore) {
-        winner = "Team A";
-      } else if (teamBScore > teamAScore) {
-        winner = "Team B";
-      } else {
-        winner = null;
+      // Only send the score for the team that actually scored
+      final Map<String, dynamic> setData = {
+        "setNumber": setNumber,
+      };
+      
+      if (teamAScore > 0) {
+        setData["teamAScore"] = teamAScore;
+      }
+      if (teamBScore > 0) {
+        setData["teamBScore"] = teamBScore;
+      }
+      
+      // Only determine winner if both teams have scores
+      final currentSet = sets.firstWhere((s) => s["setNumber"] == setNumber, orElse: () => {});
+      final currentTeamAScore = currentSet["teamAScore"] ?? 0;
+      final currentTeamBScore = currentSet["teamBScore"] ?? 0;
+      
+      final finalTeamAScore = teamAScore > 0 ? teamAScore : currentTeamAScore;
+      final finalTeamBScore = teamBScore > 0 ? teamBScore : currentTeamBScore;
+      
+      if (finalTeamAScore > 0 && finalTeamBScore > 0) {
+        if (finalTeamAScore > finalTeamBScore) {
+          setData["winner"] = "Team A";
+        } else if (finalTeamBScore > finalTeamAScore) {
+          setData["winner"] = "Team B";
+        }
       }
 
       final body = {
         "scoreboardId": scoreboardId.value,
-        "sets": [
-          {
-            "setNumber": setNumber,
-            "teamAScore": teamAScore,
-            "teamBScore": teamBScore,
-            "winner": winner
-          }
-        ]
+        "sets": [setData]
       };
       
       final response = await repository.updateScoreBoard(data: body);
