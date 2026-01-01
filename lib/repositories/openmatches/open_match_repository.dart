@@ -1,5 +1,6 @@
 import 'package:padel_mobile/data/request_models/open%20matches/accept_or_reject_request_players_model.dart';
 import 'package:padel_mobile/data/request_models/open%20matches/request_player_to_open_match_model.dart';
+import 'package:padel_mobile/data/request_models/open%20matches/withdraw_request_model.dart';
 import 'package:padel_mobile/data/response_models/get_players_level_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/find_near_by_player_model.dart';
 import 'package:padel_mobile/data/response_models/openmatch_model/get_customer_data_by_phone_number_model.dart';
@@ -387,6 +388,33 @@ class OpenMatchRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Get-Customer Name By Phone Number failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+  ///WithDraw Request-----------------------------------------------------------
+  Future<WithdrawRequestModel> withdrawRequest({
+    required id,
+  }) async {
+    try {
+      final response = await dioClient.delete(
+        "${AppEndpoints.withdrawRequest}$id", data: {},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Withdraw Request Data: ${response.data}",
+          level: LogLevel.info,
+        );
+        return WithdrawRequestModel.fromJson(response.data);
+      } else {
+        throw Exception("Withdraw Request failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Withdraw Request failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );

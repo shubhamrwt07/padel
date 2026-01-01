@@ -164,13 +164,17 @@ class ClubId {
   String? sId;
   String? clubName;
   String? address;
+  String? city;
+  String? zipCode;
 
-  ClubId({this.sId, this.clubName, this.address});
+  ClubId({this.sId, this.clubName, this.address,this.city,this.zipCode});
 
   ClubId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     clubName = MatchData._asJoinedString(json['clubName']);
     address = MatchData._asJoinedString(json['address']);
+    city = MatchData._asJoinedString(json['city']);
+    zipCode = MatchData._asJoinedString(json['zipCode']);
   }
 
   Map<String, dynamic> toJson() {
@@ -178,6 +182,8 @@ class ClubId {
       '_id': sId,
       'clubName': clubName,
       'address': address,
+      'city': city,
+      'zipCode': zipCode,
     };
   }
 }

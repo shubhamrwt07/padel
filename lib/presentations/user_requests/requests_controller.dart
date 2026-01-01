@@ -73,6 +73,8 @@ class RequestsController extends GetxController {
       final response = await repository.getRequestPlayersOpenMatch(type: "both",filter: "invitation");
 
       if (response != null && response.requests != null) {
+        requestIds.clear();
+        requestIds.addAll(response.requests!.map((request) => request.id ?? "").where((id) => id.isNotEmpty));
         myRequests.addAll(response.requests!);
       }
     } catch (e) {
@@ -100,9 +102,30 @@ class RequestsController extends GetxController {
       }
     } catch (e) {
       CustomLogger.logMessage(msg: "Error accepting player request: $e", level: LogLevel.error);
-      Get.snackbar("Error", "Failed to accept player request");
     } finally {
       isLoadingRequests.value = false;
+    }
+  }
+
+  RxList<String> requestIds = <String>[].obs;
+  Future<void> withdrawRequest(String requestId) async {
+    if (requestId.isNotEmpty) {
+      try {
+        isLoadingRequests.value = true;
+        final response = await repository.withdrawRequest(id: requestId);
+
+        if (response.status == 200) {
+          CustomLogger.logMessage(msg: response.message ?? "", level: LogLevel.debug);
+          // Remove the request from the list after successful withdrawal
+          myRequests.removeWhere((request) => request.id == requestId);
+          Get.snackbar("Success", "Request withdrawn successfully");
+        }
+      } catch (e) {
+        CustomLogger.logMessage(msg: "Error request: $e", level: LogLevel.error);
+        Get.snackbar("Error", "Failed to withdraw request");
+      } finally {
+        isLoadingRequests.value = false;
+      }
     }
   }
 

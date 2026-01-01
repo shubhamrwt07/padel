@@ -548,7 +548,7 @@ class MainHomeScreen extends StatelessWidget {
   Widget _quickActions() {
     final items = [
       {"icon": Icons.sports_tennis, "title": "Book a Court", "action": "book"},
-      {"icon": Icons.groups, "title": "Open Match", "action": "match"},
+      {"icon": Icons.groups, "title": "Find a Game", "action": "match"},
       {"icon": Icons.emoji_events, "title": "Americano", "action": "americano"},
       {"icon": Icons.sports, "title": "Challenge", "action": "challenge"},
     ];

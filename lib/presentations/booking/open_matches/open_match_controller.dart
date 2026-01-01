@@ -55,7 +55,7 @@ class OpenMatchesController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('EEEE').format(parsed);
+      return DateFormat('EEE').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -65,7 +65,7 @@ class OpenMatchesController extends GetxController {
     if (ymd == null || ymd.isEmpty) return '';
     try {
       final parsed = DateFormat('yyyy-MM-dd').parse(ymd);
-      return DateFormat('dd MMMM').format(parsed);
+      return DateFormat('dd MMM').format(parsed);
     } catch (_) {
       return ymd;
     }
@@ -230,7 +230,14 @@ class OpenMatchesController extends GetxController {
   String formatTimeRange(List<String>? times) {
     if (times == null || times.isEmpty) return '';
     if (times.length == 1) return times.first;
-    return '${times.first} - ${times.last}';
+
+    final first = times.first;
+    final last = times.last;
+
+    // Extract number from first time (e.g., "8" from "8 pm")
+    final firstNumber = first.replaceAll(RegExp(r'[^0-9]'), '');
+
+    return '$firstNumber-$last';
   }
 
   bool isPastTime(String slotLabel) {
