@@ -535,7 +535,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
     final timeStr = controller.formatTimeRange(slotTimes);
     
     final clubName = data.clubId?.clubName ?? '-';
-    final address = data.clubId?.address ?? "N/A";
+    final address = "${data.clubId?.city ?? ""} ${data.clubId?.zipCode??""}";
     final price = (data.slot?.isNotEmpty == true &&
         data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '${data.slot!.first.slotTimes!.first.amount ?? ''}'
@@ -591,115 +591,122 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               : [Color(0xffBFEECD).withValues(alpha: 0.3),Color(0xffBFEECD).withValues(alpha: 0.2)],
         )
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          // 🔵 TOP SECTION (Day + Date + Time + Level Badge + Arrow)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Align(
+              alignment: AlignmentGeometry.centerRight,
+              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // 🔵 TOP SECTION (Day + Date + Time + Level Badge + Arrow)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '$dayStr ',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xff1c46a0),
-                              ),
+                      Row(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '$dayStr ',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff1c46a0),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '$dateOnlyStr | $timeStr',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
                             ),
-                            TextSpan(
-                              text: '$dateOnlyStr | $timeStr',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black87,
-                              ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.secondaryColor,
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          ],
-                        ),
+                            child: const Text(
+                              "A",
+                              style: TextStyle(color: Colors.white,fontSize: 9),
+                            ),
+                          ).paddingOnly(left: 5),
+                        ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Text(
-                          "A",
-                          style: TextStyle(color: Colors.white,fontSize: 9),
-                        ),
-                      ).paddingOnly(left: 5),
+                      // ⭐ Professional | Mixed
+                      Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Text(
+                            " ${data.skillLevel?.capitalizeFirst ?? 'Professional'} | ",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          genderIcon(data.gender),
+                          const SizedBox(width: 4),
+                          Text(
+                            data.gender?.capitalizeFirst ?? "Mixed",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  // ⭐ Professional | Mixed
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 18),
-                      Text(
-                        " ${data.skillLevel?.capitalizeFirst ?? 'Professional'} | ",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _expandedStates[index] = !_expandedStates[index];
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          _expandedStates.length > index && _expandedStates[index]
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.black,
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      genderIcon(data.gender),
-                      const SizedBox(width: 4),
-                      Text(
-                        data.gender?.capitalizeFirst ?? "Mixed",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
+                    ),
+                  )
                 ],
               ),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _expandedStates[index] = !_expandedStates[index];
-                    });
-                  },
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      _expandedStates.length > index && _expandedStates[index]
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              )
+              const SizedBox(height: 10),
+
+              // 🧑‍🧑‍ Players Row
+              // Show expanded or collapsed content
+              _expandedStates.length > index && _expandedStates[index]
+                  ? _expandedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price)
+                  : _collapsedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price,pendingRequestsCount),
+
             ],
           ),
-          const SizedBox(height: 10),
-
-          // 🧑‍🧑‍ Players Row
-          // Show expanded or collapsed content
-          _expandedStates.length > index && _expandedStates[index]
-              ? _expandedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price)
-              : _collapsedCard(context, index, data, teamAPlayers, teamBPlayers, clubName, address, price,pendingRequestsCount),
-
         ],
       ),
     );
@@ -717,10 +724,10 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
@@ -801,10 +808,10 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor:index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
           child: Icon(Icons.add, color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor),
         ),
@@ -1025,7 +1032,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Player Requests',
+                        'Requests',
                         style: Get.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,color: AppColors.primaryColor
                         ),
@@ -1397,7 +1404,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+          width: (teamAPlayers.length + teamBPlayers.length) * 28 + 28,
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -1411,25 +1418,25 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
             ]
           ),
           child: SizedBox(
-            height: 50,
+            height: 44,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 for (int i = 0; i < teamAPlayers.length; i++)
                   Positioned(
-                    left: i * 35,
+                    left: i * 30,
                     child: teamAPlayers[i],
                   ),
                 for (int i = 0; i < teamBPlayers.length; i++)
                   Positioned(
-                    left: (teamAPlayers.length * 35) + (i * 35),
+                    left: (teamAPlayers.length * 30) + (i * 30),
                     child: teamBPlayers[i],
                   ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        if (_isLoginUserInMatch(data)) const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1454,7 +1461,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.only(left: 5,right: 1),
+                  padding: const EdgeInsets.only(left: 5,right: 1,top: 2,bottom: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
@@ -1464,13 +1471,13 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                     children: [
                       Text(
                         "Start Chat with Players",
-                        style: TextStyle(color: Colors.grey,fontSize: 12),
-                      ).paddingOnly(right: 5),
+                        style: TextStyle(color: Colors.grey,fontSize: 10),
+                      ).paddingOnly(left: 5,right: 10),
                       Container(
-                          height: 30,
-                          width: 30,
+                          height: 28,
+                          width: 28,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
                           ),
                           child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
@@ -1492,7 +1499,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                           const Icon(Icons.notifications, color: AppColors.primaryColor,size: 18,),
                           RichText(
                             text: TextSpan(
-                              text: 'Players Requests ',
+                              text: 'Requests ',
                               style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
                               children: [
                                 TextSpan(
@@ -1527,7 +1534,8 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               ],
             ),
           ],
-        ).paddingOnly(bottom: Get.height*0.01),
+        ).paddingOnly(bottom: Get.height*0.005),
+        Divider(color: Colors.grey,thickness: 0.1,),
         Row(
           children: [
             Expanded(
@@ -1552,7 +1560,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                           address,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 11,
                             color: Colors.grey,
                           ),
                         ),
@@ -1615,7 +1623,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
           ),
           const SizedBox(height: 8),
           Container(
-            width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+            width: (teamAPlayers.length + teamBPlayers.length) * 28 + 28,
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1623,18 +1631,18 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
               border: Border.all(color: AppColors.greyColor),
             ),
             child: SizedBox(
-              height: 50,
+              height: 44,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   for (int i = 0; i < teamAPlayers.length; i++)
                     Positioned(
-                      left: i * 35,
+                      left: i * 30,
                       child: teamAPlayers[i],
                     ),
                   for (int i = 0; i < teamBPlayers.length; i++)
                     Positioned(
-                      left: (teamAPlayers.length * 35) + (i * 35),
+                      left: (teamAPlayers.length * 30) + (i * 30),
                       child: teamBPlayers[i],
                     ),
                 ],
@@ -1666,7 +1674,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                             address,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 11,
                               color: Colors.grey,
                             ),
                           ),

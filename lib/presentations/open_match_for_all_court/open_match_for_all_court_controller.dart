@@ -240,7 +240,14 @@ class OpenMatchForAllCourtController extends GetxController {
   String formatTimeRange(List<String>? times) {
     if (times == null || times.isEmpty) return '';
     if (times.length == 1) return times.first;
-    return '${times.first} - ${times.last}';
+    
+    final first = times.first;
+    final last = times.last;
+    
+    // Extract number from first time (e.g., "8" from "8 pm")
+    final firstNumber = first.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    return '$firstNumber-$last';
   }
 
   bool isPastTime(String slotLabel) {

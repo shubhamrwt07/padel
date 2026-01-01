@@ -48,6 +48,7 @@ class AppEndpoints {
   static const String createMatches = "${baseUrl}court/openmatch/createOpenMatch";
   static const String findNearByPlayer = "${baseUrl}court/openmatch/findNearByPLayers";
   static const String getCustomerNameByPhoneNumber = "${baseUrl}court/booking/getCustomerDataByPhoneNumber?";
+  static const String withdrawRequest = "${baseUrl}court/openmatch/withDrawMatchRequest/";
   // static const String getParticularMatch = "${BASE_URL}court/openmatch/findByOpenMatchId?_id=68d2300a723257df65e574ab";
   static const String getOpenMatches = "${baseUrl}court/openmatch/getOpenMatches";
   static const String createUserForOpenMatch = "${baseUrl}customerSignupWithOutPassword";

@@ -104,7 +104,7 @@ class BookACourtScreen extends StatelessWidget {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -293,12 +293,12 @@ class BookACourtScreen extends StatelessWidget {
       final displaySlots = [
         Slots(
           sId: 'court${selectedIndex}_slot1',
-          time: '08:00 AM',
+          time: '8:00 AM',
           amount: 400,
         ),
         Slots(
           sId: 'court${selectedIndex}_slot2',
-          time: '09:00 AM',
+          time: '9:00 AM',
           amount: 400,
         ),
         Slots(
@@ -312,8 +312,9 @@ class BookACourtScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// LEFT TEXT
-          SizedBox(
-            width: 80,
+          Container(
+            // color: AppColors.redColor,
+            // width: 70,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -325,8 +326,7 @@ class BookACourtScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          const SizedBox(width: 12),
+          SizedBox(width: 10,),
 
           /// TIME SLOTS
           Expanded(
@@ -476,7 +476,7 @@ class BookACourtScreen extends StatelessWidget {
                       firstDate: DateTime.now(),
                       lastDate: DateTime(2030, 3, 18),
                       focusedDate: controller.selectedDate.value,
-                      itemExtent: 46,
+                      itemExtent: 43,
                       itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
                         final now = DateTime.now();
                         final today = DateTime(now.year, now.month, now.day);
@@ -675,7 +675,7 @@ class BookACourtScreen extends StatelessWidget {
         crossAxisCount: 4,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 2.2,
+        childAspectRatio: 2.5,
       ),
       itemCount: slotTimes.length,
       itemBuilder: (context, index) {
@@ -710,6 +710,7 @@ class BookACourtScreen extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: AnimatedContainer(
+          height: 34,
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
@@ -750,7 +751,7 @@ class BookACourtScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Transform.translate(
-                      offset: Offset(0, 2),
+                      offset: Offset(0, 0),
                       child: Text(
                         slot.time ?? "",
                         style: TextStyle(
@@ -760,17 +761,17 @@ class BookACourtScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Transform.translate(
-                      offset: Offset(0, -1),
-                      child: Text(
-                        "₹ ${slot.amount ?? 0}",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: isSelected ? Colors.white : Colors.grey,
-                        ),
-                      ),
-                    ),
+                    // Transform.translate(
+                    //   offset: Offset(0, -1),
+                    //   child: Text(
+                    //     "₹ ${slot.amount ?? 0}",
+                    //     style: TextStyle(
+                    //       fontSize: 11,
+                    //       fontWeight: FontWeight.w400,
+                    //       color: isSelected ? Colors.white : Colors.grey,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -854,7 +855,7 @@ class BookACourtScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Transform.translate(
-                      offset: Offset(0, 2),
+                      offset: Offset(0, 0),
                       child: Text(
                         slot.time ?? "",
                         style: TextStyle(
@@ -868,21 +869,21 @@ class BookACourtScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Transform.translate(
-                      offset: Offset(0, -1),
-                      child: Text(
-                        "₹ ${slot.amount ?? 0}",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: (isUnavailable || isDisabled)
-                              ? Colors.grey.shade500
-                              : isSelected
-                              ? Colors.white
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
+                    // Transform.translate(
+                    //   offset: Offset(0, -1),
+                    //   child: Text(
+                    //     "₹ ${slot.amount ?? 0}",
+                    //     style: TextStyle(
+                    //       fontSize: 11,
+                    //       fontWeight: FontWeight.w400,
+                    //       color: (isUnavailable || isDisabled)
+                    //           ? Colors.grey.shade500
+                    //           : isSelected
+                    //           ? Colors.white
+                    //           : Colors.grey,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

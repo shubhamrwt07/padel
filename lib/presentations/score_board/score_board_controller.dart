@@ -37,6 +37,7 @@ class ScoreBoardController extends GetxController {
   final isAddingScore = false.obs;
   final isShuffleMode = false.obs;
   final hasPlayerSwaps = false.obs;
+  var matchBookingId = ''.obs;
   Future<void> fetchScoreBoard({bool showLoader = true}) async {
     if (showLoader) {
       isLoading.value = true;
@@ -49,6 +50,7 @@ class ScoreBoardController extends GetxController {
         final item = response.data!.first;
         scoreboardId.value = item.sId ?? "";
         openMatchId.value = item.bookingId?.openMatchId ?? "";
+        matchBookingId.value = item.bookingId?.sId??"";
         CustomLogger.logMessage(
             msg: "Using scoreboard ID: ${item.sId}", level: LogLevel.info);
         CustomLogger.logMessage(

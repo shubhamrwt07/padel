@@ -20,7 +20,7 @@ class RequestsScreen extends StatelessWidget {
     if (dateString == null) return 'N/A';
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('EEEE dd MMM').format(date);
+      return DateFormat('EEE dd MMM').format(date);
     } catch (e) {
       return dateString;
     }
@@ -47,7 +47,7 @@ class RequestsScreen extends StatelessWidget {
     for (int i = 0; i < 2; i++) {
       avatars.add(
         Positioned(
-          left: i * 35.0,
+          left: i * 30.0,
           child: i < teamAPlayers.length
               ? _buildPlayerAvatar(teamAPlayers[i], index,context, isAdd: false)
               : _buildPlayerAvatar(null, index,context, isAdd: true, team: "teamA", matchId: matchId, request: request),
@@ -59,7 +59,7 @@ class RequestsScreen extends StatelessWidget {
     for (int i = 0; i < 2; i++) {
       avatars.add(
         Positioned(
-          left: (2 + i) * 35.0,
+          left: (2 + i) * 30.0,
           child: i < teamBPlayers.length
               ? _buildPlayerAvatar(teamBPlayers[i], index,context, isAdd: false)
               : _buildPlayerAvatar(null, index,context, isAdd: true, team: "teamB", matchId: matchId, request: request),
@@ -672,8 +672,7 @@ class RequestsScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         Get.back();
-                        controller.deleteRequest(index);
-                        SnackBarUtils.showSuccessSnackBar("Request Successfully Withdrawn");
+                        controller.withdrawRequest(request.id ?? "");
                       },
                       child: const Text(
                         'Withdraw',
@@ -703,7 +702,7 @@ class RequestsScreen extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         Container(
-          width: 4 * 30 + 42,
+          width: 4 * 28 + 28,
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
           decoration: BoxDecoration(
               color: Colors.white,
@@ -717,7 +716,7 @@ class RequestsScreen extends StatelessWidget {
               ]
           ),
           child: SizedBox(
-            height: 50,
+            height: 44,
             child: Stack(
               clipBehavior: Clip.none,
               children: _buildAvatarList(match, request, index,context),
@@ -744,10 +743,10 @@ class RequestsScreen extends StatelessWidget {
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          '${club?.address ?? ''}, ${club?.city ?? ''}',
+                          '${club?.city ?? ''}, ${club?.zipCode ?? ''}',
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 11,
                             color: Colors.grey,
                           ),
                         ),
@@ -816,7 +815,7 @@ class RequestsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Container(
-            width: 4 * 30 + 42,
+            width: 4 * 28 + 28,
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -831,7 +830,7 @@ class RequestsScreen extends StatelessWidget {
               // ]
             ),
             child: SizedBox(
-              height: 50,
+              height: 44,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: _buildAvatarList(match, request, index,context),
@@ -910,25 +909,32 @@ class RequestsScreen extends StatelessWidget {
     );
   }
   String formatTimeRange(List<String>? times) {
-    if (times == null || times.isEmpty) return 'N/A';
+    if (times == null || times.isEmpty) return '';
     if (times.length == 1) return times.first;
-    return '${times.first} - ${times.last}';
+
+    final first = times.first;
+    final last = times.last;
+
+    // Extract number from first time (e.g., "8" from "8 pm")
+    final firstNumber = first.replaceAll(RegExp(r'[^0-9]'), '');
+
+    return '$firstNumber-$last';
   }
   Widget _buildPlayerAvatar(RequesterId? player, int index,BuildContext context, {bool isAdd = false, String? team, String? matchId, Requests? request}) {
     return GestureDetector(
       onTap: isAdd ? () {
-        AddPlayerBottomSheet.show(
-          context,
-          arguments: {
-            "team": request?.preferredTeam ?? team,
-            "matchId": matchId ?? "",
-            "needYourMatchRequests": true,
-            "matchLevel": "",
-            "isLoginUser": true,
-            "isMatchCreator": false,
-            "requestId":request?.id??""
-          },
-        );
+        // AddPlayerBottomSheet.show(
+        //   context,
+        //   arguments: {
+        //     "team": request?.preferredTeam ?? team,
+        //     "matchId": matchId ?? "",
+        //     "needYourMatchRequests": true,
+        //     "matchLevel": "",
+        //     "isLoginUser": true,
+        //     "isMatchCreator": false,
+        //     "requestId":request?.id??""
+        //   },
+        // );
         // Get.toNamed(
         //   '/addPlayer',
         //   arguments: {
@@ -943,17 +949,17 @@ class RequestsScreen extends StatelessWidget {
         // );
       } : null,
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: !isAdd && player?.profilePic != null && player!.profilePic!.isNotEmpty
             ? ClipOval(
           child: CachedNetworkImage(
             imageUrl: player.profilePic!,
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
             fit: BoxFit.cover,
             placeholder: (context, url) => CircleAvatar(
-              radius: 24,
+              radius: 20,
               backgroundColor: index % 2 == 0 ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
               child: Text(
                 _getInitials(player.name),
@@ -965,7 +971,7 @@ class RequestsScreen extends StatelessWidget {
               ),
             ),
             errorWidget: (context, url, error) => CircleAvatar(
-              radius: 24,
+              radius: 20,
               backgroundColor: index % 2 == 0 ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
               child: Text(
                 _getInitials(player.name),
@@ -979,7 +985,7 @@ class RequestsScreen extends StatelessWidget {
           ),
         )
             : CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor: index % 2 == 0 ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
           child: isAdd
               ? Icon(Icons.add, color: index % 2 == 0 ? AppColors.primaryColor : Colors.green)

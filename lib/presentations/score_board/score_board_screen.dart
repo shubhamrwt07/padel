@@ -532,10 +532,11 @@ class ScoreBoardScreen extends StatelessWidget {
       onTap: () {
         if (!hasPlayer) {
           Get.bottomSheet(
-            AppPlayersBottomSheet(
-              matchId: controller.openMatchId.value,
+            AppPlayersBottomSheetScore(
+              matchId: controller.scoreboardId.value,
               teamName: teamName,
               openMatchId: controller.openMatchId.value,
+              bookingId: controller.bookingId.value,
             ),
             isScrollControlled: true,
           );

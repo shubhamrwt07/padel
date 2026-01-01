@@ -41,12 +41,13 @@ class AppPlayersController extends GetxController {
   }
 }
 
-class AppPlayersBottomSheet extends StatelessWidget {
+class AppPlayersBottomSheetScore extends StatelessWidget {
   final String matchId;
   final String teamName;
   final String? openMatchId;
+  final String? bookingId;
   
-  AppPlayersBottomSheet({super.key, required this.matchId, required this.teamName, this.openMatchId});
+  AppPlayersBottomSheetScore({super.key, required this.matchId, required this.teamName, this.openMatchId,this.bookingId});
   
   final AppPlayersController controller = Get.put(AppPlayersController());
 
@@ -77,7 +78,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
               style: Get.textTheme.labelLarge,
             ),
             const SizedBox(height: 12),
-            _playersList(),
+            _playersList(bookingId??""),
             const SizedBox(height: 12),
             _actionButtons(context),
           ],
@@ -105,7 +106,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _playersList() {
+  Widget _playersList(String bookingId) {
     return Obx(() {
       if (controller.isLoadingNearbyPlayers.value) {
         return const SizedBox(
@@ -201,7 +202,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _requestButton(isRequested, player['id'] ?? '', player['preferredTeam'] ?? 'teamA'),
+                  _requestButton(isRequested, player['id'] ?? '', player['preferredTeam'] ?? 'teamA',bookingId),
                 ],
               ),
             );
@@ -211,7 +212,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
     });
   }
 
-  Widget _requestButton(bool sent, String playerId, String team) {
+  Widget _requestButton(bool sent, String playerId, String team,String bookingId) {
     return Obx(() {
       final isRequesting = controller.requestingPlayerId.value == playerId;
       final isRequested = sent || controller.requestedPlayerIds.contains(playerId);
@@ -221,11 +222,11 @@ class AppPlayersBottomSheet extends StatelessWidget {
           controller.requestingPlayerId.value = playerId;
           
           final addPlayerController = Get.put(AddPlayerController());
-          addPlayerController.matchId.value = matchId;
+          addPlayerController.matchId.value = openMatchId??"";
           addPlayerController.playerId.value = playerId;
           addPlayerController.selectedTeam.value = team;
           
-          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest');
+          final success = await addPlayerController.requestPlayerForOpenMatch(type: 'matchCreatorRequest',bookingId: bookingId);
           
           if (success) {
             controller.requestedPlayerIds.add(playerId);
@@ -300,6 +301,7 @@ class AppPlayersBottomSheet extends StatelessWidget {
                 "needAsGuest": true,
                 "scoreBoardId": matchId,
                 "openMatchId": openMatchId ?? "",
+                "bookingId": bookingId
               },
             );
             // Get.toNamed(

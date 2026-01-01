@@ -445,7 +445,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
     final timeStr = controller.formatTimeRange(data.matchTime ?? []);
 
     final clubName = data.clubId?.clubName ?? '-';
-    final address = "${data.clubId?.city ?? ""}${data.clubId?.zipCode??""}";
+    final address = "${data.clubId?.city ?? ""} ${data.clubId?.zipCode??""}";
     final price = (data.slot?.isNotEmpty == true &&
         data.slot!.first.slotTimes?.isNotEmpty == true)
         ? '${data.slot!.first.slotTimes!.first.amount ?? ''}'
@@ -505,7 +505,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
         children: [
           Align(
               alignment: AlignmentGeometry.centerRight,
-              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height: 150,width: 150,).paddingOnly(right: 20)),
+              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -568,7 +568,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                           genderIcon(data.gender),
                           const SizedBox(width: 4),
                           Text(
-                            data.gender?.capitalizeFirst ?? "Mixed",
+                            data.gender?.capitalizeFirst ?? "Mixed Doubles",
                             style: const TextStyle(fontSize: 12),
                           ),
                         ],
@@ -634,10 +634,10 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
@@ -719,10 +719,10 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor:index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
           child: Icon(Icons.add, color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor),
         ),
@@ -1288,7 +1288,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+              width: (teamAPlayers.length + teamBPlayers.length) * 28 + 28,
               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -1302,18 +1302,18 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                   ]
               ),
               child: SizedBox(
-                height: 50,
+                height: 44,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
                     for (int i = 0; i < teamAPlayers.length; i++)
                       Positioned(
-                        left: i * 35,
+                        left: i * 30,
                         child: teamAPlayers[i],
                       ),
                     for (int i = 0; i < teamBPlayers.length; i++)
                       Positioned(
-                        left: (teamAPlayers.length * 35) + (i * 35),
+                        left: (teamAPlayers.length * 30) + (i * 30),
                         child: teamBPlayers[i],
                       ),
                   ],
@@ -1350,7 +1350,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                             width: 55,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               color: AppColors.secondaryColor,
                             ),
                             child: isLoading
@@ -1372,9 +1372,8 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
               ).paddingOnly(bottom: 12),
           ],
         ),
-        const SizedBox(height: 16),
         // Play Now button row (similar to booking card)
-
+        if (_isLoginUserInMatch(data)) const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1399,7 +1398,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.only(left: 5,right: 1),
+                  padding: const EdgeInsets.only(left: 5,right: 1,top: 2,bottom: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
@@ -1410,12 +1409,12 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                       Text(
                         "Start Chat with Players",
                         style: TextStyle(color: Colors.grey,fontSize: 10),
-                      ).paddingOnly(right: 10,left: 10),
+                      ).paddingOnly(right: 10,left: 5),
                       Container(
-                          height: 30,
-                          width: 30,
+                          height: 28,
+                          width: 28,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
                           ),
                           child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
@@ -1498,7 +1497,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                           address,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: Colors.grey,
                           ),
                         ),
@@ -1561,7 +1560,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
           ),
           const SizedBox(height: 8),
           Container(
-            width: (teamAPlayers.length + teamBPlayers.length) * 30 + 42,
+            width: (teamAPlayers.length + teamBPlayers.length) * 28 + 28,
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1569,18 +1568,18 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
               border: Border.all(color: AppColors.greyColor),
             ),
             child: SizedBox(
-              height: 50,
+              height: 44,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   for (int i = 0; i < teamAPlayers.length; i++)
                     Positioned(
-                      left: i * 35,
+                      left: i * 30,
                       child: teamAPlayers[i],
                     ),
                   for (int i = 0; i < teamBPlayers.length; i++)
                     Positioned(
-                      left: (teamAPlayers.length * 35) + (i * 35),
+                      left: (teamAPlayers.length * 30) + (i * 30),
                       child: teamBPlayers[i],
                     ),
                 ],
@@ -1612,7 +1611,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                             address,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: Colors.grey,
                             ),
                           ),

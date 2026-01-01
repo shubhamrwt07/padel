@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
@@ -610,94 +611,101 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
               : [Color(0xffBFEECD).withOpacity(0.3), Color(0xffBFEECD).withOpacity(0.2)],
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          // TOP SECTION (Date + Time + Status Badge + Arrow)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Align(
+              alignment: AlignmentGeometry.centerRight,
+              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height: 190,width: 150,).paddingOnly(right: 20)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // TOP SECTION (Date + Time + Status Badge + Arrow)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDateTimeInfo(context, booking),
-                      if (isUpcoming)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondaryColor,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Text(
-                            "A",
-                            style: TextStyle(color: Colors.white, fontSize: 9),
-                          ),
-                        ).paddingOnly(left: 5),
+                      Row(
+                        children: [
+                          _buildDateTimeInfo(context, booking),
+                          if (isUpcoming)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: const Text(
+                                "A",
+                                style: TextStyle(color: Colors.white, fontSize: 9),
+                              ),
+                            ).paddingOnly(left: 5),
+                        ],
+                      ),
+                      // Skill Level Tags (if upcoming)
+                      if (isUpcoming && _shouldShowSkillGenderRow(booking))
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Colors.amber, size: 18),
+                            Text(
+                              " ${booking.openMatchId?.skillLevel ?? "Professional"} | ",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            genderIcon(booking.openMatchId?.gender),
+                            const SizedBox(width: 4),
+                            Text(
+                              booking.openMatchId?.gender ?? "Mixed",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
-                  // Skill Level Tags (if upcoming)
-                  if (isUpcoming && _shouldShowSkillGenderRow(booking))
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 18),
-                        Text(
-                          " ${booking.openMatchId?.skillLevel ?? "Professional"} | ",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 2),
-                        genderIcon(booking.openMatchId?.gender),
-                        const SizedBox(width: 4),
-                        Text(
-                          booking.openMatchId?.gender ?? "Mixed",
-                          style: const TextStyle(fontSize: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
                         ),
                       ],
                     ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _expandedStates[index] = !_expandedStates[index];
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          _expandedStates.length > index && _expandedStates[index]
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _expandedStates[index] = !_expandedStates[index];
-                    });
-                  },
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      _expandedStates.length > index && _expandedStates[index]
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              )
+              const SizedBox(height: 10),
+
+              // Show expanded or collapsed content
+              _expandedStates.length > index && _expandedStates[index]
+                  ? _expandedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type)
+                  : _collapsedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type),
             ],
           ),
-          const SizedBox(height: 10),
-
-          // Show expanded or collapsed content
-          _expandedStates.length > index && _expandedStates[index]
-              ? _expandedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type)
-              : _collapsedCard(context, index, booking, playerAvatars, addButtons, clubName, address, price, type),
         ],
       ),
     );
@@ -736,6 +744,27 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
 
   String _getTimeString(dynamic booking) {
     try {
+      // Check for matchTime array first
+      if (booking.openMatchId?.matchTime != null && booking.openMatchId?.matchTime is List) {
+        final matchTimes = booking.openMatchId?.matchTime as List;
+        if (matchTimes.isEmpty) return '';
+        
+        if (matchTimes.length == 1) {
+          return matchTimes[0].toString();
+        }
+        
+        final firstTime = matchTimes.first.toString();
+        final lastTime = matchTimes.last.toString();
+        
+        // Extract hour from first and last time (e.g., "8 pm" -> "8", "9 pm" -> "9")
+        final firstHour = firstTime.replaceAll(RegExp(r'[^0-9]'), '');
+        final lastHour = lastTime.replaceAll(RegExp(r'[^0-9]'), '');
+        final period = lastTime.contains('pm') ? 'pm' : 'am';
+        
+        return '$firstHour-$lastHour$period';
+      }
+      
+      // Fallback to original slot logic
       if (booking.slot == null) return '';
       final slotList = booking.slot;
       if (slotList is! List || slotList.isEmpty) return '';
@@ -801,10 +830,10 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
@@ -876,7 +905,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
           final isLoginUserInMatch = _isLoginUserInMatch(booking);
 
           if (isMatchCreator) {
-            Get.bottomSheet(AppPlayersBottomSheet(matchId: matchId, teamName: "teamA"), isScrollControlled: true);
+            Get.bottomSheet(AppPlayersBottomSheetScore(matchId: matchId, teamName: "teamA"), isScrollControlled: true);
           } else {
             AddPlayerBottomSheet.show(
               context,
@@ -893,10 +922,10 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         }
       },
       child: CircleAvatar(
-        radius: 26,
+        radius: 22,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: 24,
+          radius: 20,
           backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
           child: Icon(Icons.add, color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor),
         ),
@@ -916,7 +945,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              width: (playerAvatars.length + addButtons.length) * 30 + 42,
+              width: (playerAvatars.length + addButtons.length) * 28 + 28,
               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -930,18 +959,18 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   ]
               ),
               child: SizedBox(
-                height: 50,
+                height: 44,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
                     for (int i = 0; i < playerAvatars.length; i++)
                       Positioned(
-                        left: i * 35,
+                        left: i * 30,
                         child: playerAvatars[i],
                       ),
                     for (int i = 0; i < addButtons.length; i++)
                       Positioned(
-                        left: (playerAvatars.length * 35) + (i * 35),
+                        left: (playerAvatars.length * 30) + (i * 30),
                         child: addButtons[i],
                       ),
                   ],
@@ -962,7 +991,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                       width: 55,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         color: AppColors.secondaryColor,
                       ),
                       child: Text(
@@ -987,7 +1016,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   _navigateToChat(booking);
                 },
                 child: Container(
-                  padding: const EdgeInsets.only(left: 5, right: 1),
+                  padding: const EdgeInsets.only(left: 5, right: 1,top: 2,bottom: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
@@ -997,13 +1026,13 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                     children: [
                       Text(
                         "Start Chat with Players",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ).paddingOnly(right: 5),
+                        style: TextStyle(color: Colors.grey, fontSize: 10),
+                      ).paddingOnly(right: 10,left: 5),
                       Container(
-                          height: 30,
-                          width: 30,
+                          height: 28,
+                          width: 28,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
                           ),
                           child: Icon(Icons.chat_outlined, color: Colors.white, size: 18)
@@ -1027,7 +1056,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                           const Icon(Icons.notifications, color: AppColors.primaryColor, size: 18),
                           RichText(
                             text: TextSpan(
-                              text: 'Players Requests ',
+                              text: 'Requests ',
                               style: Get.textTheme.labelSmall!.copyWith(decoration: TextDecoration.underline),
                               children: [
                                 TextSpan(
@@ -1086,7 +1115,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                           address,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 11,
                             color: Colors.grey,
                           ),
                         ),
@@ -1152,7 +1181,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
           ),
           const SizedBox(height: 8),
           Container(
-            width: (playerAvatars.length + addButtons.length) * 30 + 42,
+            width: (playerAvatars.length + addButtons.length) * 28 + 28,
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1160,18 +1189,18 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
               border: Border.all(color: AppColors.greyColor),
             ),
             child: SizedBox(
-              height: 50,
+              height: 44,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   for (int i = 0; i < playerAvatars.length; i++)
                     Positioned(
-                      left: i * 35,
+                      left: i * 30,
                       child: playerAvatars[i],
                     ),
                   for (int i = 0; i < addButtons.length; i++)
                     Positioned(
-                      left: (playerAvatars.length * 35) + (i * 35),
+                      left: (playerAvatars.length * 30) + (i * 30),
                       child: addButtons[i],
                     ),
                 ],
@@ -1201,7 +1230,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                             address,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 11,
                               color: Colors.grey,
                             ),
                           ),
@@ -1481,7 +1510,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat('EEEE, dd MMM').format(date);
+      return DateFormat('EEE, dd MMM').format(date);
     } catch (e) {
       if (kDebugMode) {
         print("Error parsing date: $e");
