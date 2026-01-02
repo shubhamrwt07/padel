@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:padel_mobile/data/response_models/get_all_slot_prices_of_court_model.dart';
 import 'package:padel_mobile/data/response_models/get_location_maps_model.dart';
 import 'package:padel_mobile/data/response_models/get_register_club_model.dart';
+import 'package:padel_mobile/handler/logger.dart';
 import '../../core/endpoitns.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/request_models/home_models/get_available_court.dart';
@@ -108,6 +110,29 @@ class HomeRepository {
         debugPrint("Dio Error: ${e.message}");
         throw Exception("Network error: ${e.message}");
       }
+    }
+  }
+
+  ///Get All Slot Prices Of Court------------------------------------------------
+  Future<GetAllSlotPricesOfCourtModel> getAllSlotPricesOfCourt({required registerClubId,required duration,required day,required timePeriod}) async {
+    try {
+      final response = await dioClient.get("${AppEndpoints.getAllSlotPricesOfCourt}register_club_id=$registerClubId&duration=$duration&day=$day&timePeriod=$timePeriod",);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Get All Slot Prices Of Court Data: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetAllSlotPricesOfCourtModel.fromJson(response.data);
+      } else {
+        throw Exception("Get All Slot Prices Of Court Data failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Get All Slot Prices Of Court Data failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
     }
   }
 }

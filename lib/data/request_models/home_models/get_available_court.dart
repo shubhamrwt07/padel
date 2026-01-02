@@ -171,6 +171,8 @@ class Slots {
   int? amount;
   String? status;
   String? availabilityStatus;
+  int? duration;
+  String? bookingTime;
   List<BusinessHours>? businessHours;
 
   Slots({
@@ -179,6 +181,8 @@ class Slots {
     this.amount,
     this.status,
     this.availabilityStatus,
+    this.duration,
+    this.bookingTime,
     this.businessHours,
   });
 
@@ -188,6 +192,8 @@ class Slots {
     amount = json['amount'];
     status = json['status'];
     availabilityStatus = json['availabilityStatus'];
+    duration = json['duration'];
+    bookingTime = json['bookingTime'];
     businessHours = (json['businessHours'] as List?)
         ?.map((e) => BusinessHours.fromJson(e))
         .toList();
@@ -199,6 +205,8 @@ class Slots {
         'amount': amount,
         'status': status,
         'availabilityStatus': availabilityStatus,
+        'duration': duration,
+        'bookingTime': bookingTime,
         'businessHours': businessHours?.map((e) => e.toJson()).toList(),
       };
 }

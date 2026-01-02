@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../data/response_models/cart/cart_items_model.dart';
 import '../../data/response_models/cart/carte_booking_model.dart';
 import '../../data/response_models/cart/romove_cart_product_model.dart';
@@ -220,6 +221,25 @@ class CartController extends GetxController {
 }
 
 extension CartControllerBooking on CartController {
+  /// Add minutes to a time string (e.g., "3:00 PM" + 30 minutes = "3:30 PM")
+  String _addMinutesToTime(String timeString, int minutesToAdd) {
+    try {
+      // First try with minutes format
+      final time = DateFormat('h:mm a').parseStrict(timeString.trim());
+      final newTime = time.add(Duration(minutes: minutesToAdd));
+      return DateFormat('h:mm a').format(newTime);
+    } catch (_) {
+      try {
+        // Try without minutes format but with uppercase AM/PM
+        final upperTime = timeString.trim().toUpperCase();
+        final time = DateFormat('h a').parseStrict(upperTime);
+        final newTime = time.add(Duration(minutes: minutesToAdd));
+        return DateFormat('h:mm a').format(newTime);
+      } catch (_) {
+        return timeString; // Return original if parsing fails
+      }
+    }
+  }
   List<Map<String, dynamic>>? buildBookingPayload() {
     final selectedItems = cartItems
         .where((c) => selectedClubIds.contains(c.registerClubId?.sId ?? ""))
@@ -275,6 +295,11 @@ extension CartControllerBooking on CartController {
               .toList() ??
               [];
 
+          // Use values directly from the slotTime model
+          final finalDuration = slotTime.duration ?? 60;
+          final totalTimeForBooking = slotTime.totalTime ?? 60;
+          final finalBookingTime = slotTime.bookingTime ?? slotTime.time ?? "";
+
           slotData.add({
             "slotId": slotTime.slotId ?? "",
             "businessHours": selectedBusinessHour,
@@ -287,6 +312,9 @@ extension CartControllerBooking on CartController {
             "courtId": slotTime.courtId,
             "courtName": slotTime.courtName,
             "bookingDate": slotTime.bookingDate ?? "",
+            "duration": finalDuration,
+            "totalTime": totalTimeForBooking,
+            "bookingTime": finalBookingTime
           });
         }
       }
