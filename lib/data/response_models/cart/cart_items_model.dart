@@ -94,8 +94,11 @@ class CartItems {
 class Slot {
   List<SlotTimes>? slotTimes;
   String? sId;
+  int? duration;
+  int? totalTime;
+  String? bookingTime;
 
-  Slot({this.slotTimes, this.sId});
+  Slot({this.slotTimes, this.sId, this.duration, this.totalTime, this.bookingTime});
 
   Slot.fromJson(Map<String, dynamic> json) {
     if (json['slotTimes'] != null) {
@@ -103,11 +106,17 @@ class Slot {
           (json['slotTimes'] as List).map((e) => SlotTimes.fromJson(e)).toList();
     }
     sId = json['_id'];
+    duration = json['duration'];
+    totalTime = json['totalTime'];
+    bookingTime = json['bookingTime'];
   }
 
   Map<String, dynamic> toJson() => {
         'slotTimes': slotTimes?.map((e) => e.toJson()).toList(),
         '_id': sId,
+        'duration': duration,
+        'totalTime': totalTime,
+        'bookingTime': bookingTime,
       };
 }
 
@@ -119,6 +128,9 @@ class SlotTimes {
   String? sId;
   String? courtName;
   String? courtId;
+  int? duration;
+  int? totalTime;
+  String? bookingTime;
 
   SlotTimes({
     this.time,
@@ -128,6 +140,9 @@ class SlotTimes {
     this.sId,
     this.courtName,
     this.courtId,
+    this.duration,
+    this.totalTime,
+    this.bookingTime,
   });
 
   SlotTimes.fromJson(Map<String, dynamic> json) {
@@ -138,6 +153,9 @@ class SlotTimes {
     sId = json['_id'];
     courtName = json['courtName'];
     courtId = json['courtId'];
+    duration = json['duration'];
+    totalTime = json['totalTime'];
+    bookingTime = json['bookingTime'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -148,6 +166,9 @@ class SlotTimes {
         '_id': sId,
         'courtName': courtName,
         'courtId': courtId,
+        'duration': duration,
+        'totalTime': totalTime,
+        'bookingTime': bookingTime,
       };
 }
 
