@@ -2,9 +2,11 @@
 class Assets {
   Assets._();
 
+  static const String assetsImagesIcBookACourt = 'assets/images/ic_book_a_court.svg';
   static const String imagesAppLogo = 'assets/images/app_logo.png';
   static const String imagesGirl = 'assets/images/girl.png';
   static const String imagesGirls = 'assets/images/girls.png';
+  static const String imagesIcAmericano = 'assets/images/ic_americano.svg';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcBookACourt = 'assets/images/ic_book_a_court.png';
@@ -13,10 +15,12 @@ class Assets {
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcCelebration = 'assets/images/ic_celebration.svg';
+  static const String imagesIcChallenges = 'assets/images/ic_challenges.svg';
   static const String imagesIcCheckCircle = 'assets/images/ic_check_circle.svg';
   static const String imagesIcEye = 'assets/images/ic_eye.png';
   static const String imagesIcEyeOff = 'assets/images/ic_eye_off.png';
   static const String imagesIcFilter = 'assets/images/ic_filter.png';
+  static const String imagesIcFindAGame = 'assets/images/ic_find_a_game.svg';
   static const String imagesIcGooglePayment = 'assets/images/ic_google_payment.svg';
   static const String imagesIcHomeBottomBar = 'assets/images/ic_home_bottomBar.svg';
   static const String imagesIcLocation = 'assets/images/ic_location.png';
@@ -54,6 +58,7 @@ class Assets {
   static const String imagesImgGooglePay = 'assets/images/img_google_pay.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
   static const String imagesImgOpenMatchBg = 'assets/images/img_open_match_bg.svg';
+  static const String imagesImgOpenMatchGreenBg = 'assets/images/img_open_match_green_bg.svg';
   static const String imagesImgOtherUpi = 'assets/images/img_other_upi.png';
   static const String imagesImgPaytm = 'assets/images/img_paytm.png';
   static const String imagesImgPhonePay = 'assets/images/img_phone_pay.png';

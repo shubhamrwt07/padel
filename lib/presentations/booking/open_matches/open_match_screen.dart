@@ -595,7 +595,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
         children: [
           Align(
               alignment: AlignmentGeometry.centerRight,
-              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
+              child: SvgPicture.asset(index % 2 == 0?Assets.imagesImgOpenMatchBg:Assets.imagesImgOpenMatchGreenBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

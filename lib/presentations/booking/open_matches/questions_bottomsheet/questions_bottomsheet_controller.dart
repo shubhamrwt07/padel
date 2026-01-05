@@ -66,7 +66,8 @@ class QuestionsBottomsheetController extends GetxController {
     required String orderId,
     required String signature,
   }) async {
-    log("Payment successful - ID: $paymentId, Order: $orderId, Signature: $signature");
+    log("🎉 Payment successful - ID: $paymentId, Order: $orderId, Signature: $signature");
+    log("🚀 About to call createMatchAfterPayment");
 
     try {
       isProcessing.value = true;
@@ -120,6 +121,7 @@ class QuestionsBottomsheetController extends GetxController {
   // Create match after payment success
   var openMatchId = ''.obs;
   Future<void> createMatchAfterPayment() async {
+    log("🚀 Starting createMatchAfterPayment method");
     try {
       final matchDateValue = localMatchData["matchDate"];
       DateTime? parsedMatchDate;
@@ -168,6 +170,9 @@ class QuestionsBottomsheetController extends GetxController {
           "courtName": courtName,
           "courtId": slotCourtId,
           "bookingDate": formattedBookingDate,
+          "duration": slot.duration ?? 60,
+          "totalTime": slot.duration ?? 60,
+          "bookingTime": slot.bookingTime ?? slot.time ?? ""
         };
       }).toList();
 
@@ -203,9 +208,11 @@ class QuestionsBottomsheetController extends GetxController {
             .toList(),
       };
 
-      log("✅ Final Match Request Body: ${body.toString()}");
+      log("✅ Final Match Request Body:");
+      log(body.toString());
       final cleanedBody = removeEmpty(body);
-      log("📦 Final Cleaned Body: $cleanedBody");
+      log("📦 Final Cleaned Body:");
+      log(cleanedBody.toString());
 
       final response = await repository.createMatch(data: cleanedBody);
       log("🎯 Match Created -> ${response.toJson()}");
@@ -223,58 +230,6 @@ class QuestionsBottomsheetController extends GetxController {
     }
   }
 
-  Future<void> createBooking() async {
-    final slotData = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
-    final String ownerId = (localMatchData["ownerId"] ?? "").toString();
-
-    final matchDateValue = localMatchData["matchDate"];
-    DateTime? parsedMatchDate;
-    if (matchDateValue is DateTime) {
-      parsedMatchDate = matchDateValue;
-    } else if (matchDateValue != null) {
-      parsedMatchDate = DateTime.tryParse(matchDateValue.toString());
-    }
-    final formattedBookingDate = parsedMatchDate != null 
-        ? DateTime.utc(parsedMatchDate.year, parsedMatchDate.month, parsedMatchDate.day).toIso8601String()
-        : "";
-
-    final payload = [
-      {
-        "slot": slotData
-            .map(
-              (slot) => {
-                "slotId": slot.sId ?? "",
-                "businessHours": slot.businessHours?.map((bh) {
-                      return {
-                        "time": bh.time ?? "",
-                        "day": bh.day ?? "",
-                      };
-                    }).toList() ??
-                    [],
-                "slotTimes": [
-                  {
-                    "time": slot.time ?? "",
-                    "amount": slot.amount ?? 0,
-                  }
-                ],
-                "courtId": localMatchData["courtId"] ?? "",
-                "courtName": localMatchData["courtName"] ?? "",
-                "bookingDate": formattedBookingDate,
-              },
-            )
-            .toList(),
-        "register_club_id": localMatchData["clubId"] ?? "",
-        "ownerId": ownerId,
-        "openMatchId":openMatchId.value
-      }
-    ];
-
-    log("🎯 Booking Payload: $payload");
-    await cartController.bookCart(data: payload);
-    
-    // Refresh bookings in home controller
-    await homeController.fetchBookings();
-  }
 
   Map<String, dynamic> removeEmpty(Map<String, dynamic> json) {
     json.removeWhere((key, value) =>
@@ -390,6 +345,7 @@ class QuestionsBottomsheetController extends GetxController {
 
   // Main method for direct payment
   Future<void> initiatePaymentAndCreateMatch() async {
+    log("💳 Starting payment initiation process");
     if (!validateSelections()) {
       return;
     }

@@ -10,6 +10,7 @@ import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/payment/payment_method_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
+import 'package:padel_mobile/presentations/book_a_court/book_a_court_controller.dart';
 
 class PaymentMethodScreen extends GetView<PaymentMethodController> {
   const PaymentMethodScreen({super.key});
@@ -77,8 +78,16 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
   }
 
   Widget _buildPaymentSummary(BuildContext context, CartController cartController) {
+    final BookACourtController? bookACourtController = Get.isRegistered<BookACourtController>() 
+        ? Get.find<BookACourtController>() 
+        : null;
+    final bool isFromBookACourt = bookACourtController != null && bookACourtController.realCourtSelections.isNotEmpty;
+    
     return Obx(() {
-      final totalAmount = cartController.totalPrice.value;
+      // Get total amount from appropriate controller
+      final totalAmount = isFromBookACourt
+          ? bookACourtController.totalAmount.value
+          : cartController.totalPrice.value;
       final walletBalance = 0; // Replace with actual wallet balance
       final amountToPay = totalAmount - walletBalance;
 
@@ -336,7 +345,14 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                           child: ElevatedButton(
                             onPressed: () async {
                               final CartController cartController = Get.find<CartController>();
-                              if (cartController.totalPrice.value <= 0) {
+                              final BookACourtController? bookACourtController = Get.isRegistered<BookACourtController>() 
+                                  ? Get.find<BookACourtController>() 
+                                  : null;
+                              final bool isFromBookACourt = bookACourtController != null && bookACourtController.realCourtSelections.isNotEmpty;
+                              final int amountToCheck = isFromBookACourt
+                                  ? bookACourtController.totalAmount.value
+                                  : cartController.totalPrice.value;
+                              if (amountToCheck <= 0) {
                                 SnackBarUtils.showWarningSnackBar("Amount cannot be zero");
                                 return;
                               }
@@ -369,6 +385,11 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
   }
 
   Widget _buildPaymentButton(BuildContext context, CartController cartController) {
+    final BookACourtController? bookACourtController = Get.isRegistered<BookACourtController>() 
+        ? Get.find<BookACourtController>() 
+        : null;
+    final bool isFromBookACourt = bookACourtController != null && bookACourtController.realCourtSelections.isNotEmpty;
+    
     return Container(
       padding: EdgeInsets.all(Get.width * 0.05),
       decoration: BoxDecoration(
@@ -381,55 +402,63 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
           ),
         ],
       ),
-      child: Obx(() => CustomButton(
-        width: Get.width,
-        onTap: () async {
-          if (controller.option.value.isEmpty) {
-            SnackBarUtils.showWarningSnackBar("Please select payment method");
-            return;
+      child: Obx(() {
+        final int totalAmount = isFromBookACourt
+            ? bookACourtController.totalAmount.value
+            : cartController.totalPrice.value;
+        
+        return CustomButton(
+          width: Get.width,
+          onTap: () async {
+            if (controller.option.value.isEmpty) {
+              SnackBarUtils.showWarningSnackBar("Please select payment method");
+              return;
+            }
+
+          if (!isFromBookACourt) {
+            if (cartController.cartItems.isEmpty) {
+              SnackBarUtils.showWarningSnackBar("Cart is empty");
+              return;
+            }
           }
 
-          if (cartController.cartItems.isEmpty) {
-            SnackBarUtils.showWarningSnackBar("Cart is empty");
-            return;
-          }
-
-          await controller.startPayment();
-        },
-        child: controller.isProcessing.value || cartController.isBooking.value
-            ? LoadingAnimationWidget.waveDots(
-          color: AppColors.whiteColor,
-          size: 45,
-        )
-            : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "₹",
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: AppColors.whiteColor,
-                fontFamily: "Roboto",
-                fontWeight: FontWeight.w600,
+            await controller.startPayment();
+          },
+          child: controller.isProcessing.value || cartController.isBooking.value
+              ? LoadingAnimationWidget.waveDots(
+            color: AppColors.whiteColor,
+            size: 45,
+          )
+              : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "₹",
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  color: AppColors.whiteColor,
+                  fontFamily: "Roboto",
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            SizedBox(width: 5),
-            Text(
-              formatAmount(cartController.totalPrice.value.toString()),
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: AppColors.whiteColor,
-                fontWeight: FontWeight.w600,
+              SizedBox(width: 5),
+              Text(
+                formatAmount(totalAmount.toString()),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  color: AppColors.whiteColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            SizedBox(width: 20),
-            Text(
-              "Payment",
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                color: AppColors.whiteColor,
+              SizedBox(width: 20),
+              Text(
+                "Payment",
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  color: AppColors.whiteColor,
+                ),
               ),
-            ),
-          ],
-        ),
-      )),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

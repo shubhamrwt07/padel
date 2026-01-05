@@ -770,26 +770,126 @@ class BookSessionController extends GetxController {
 
       final clubId = argument.id!;
       final List<Map<String, dynamic>> allSlots = [];
+      final Map<String, Map<String, dynamic>> consolidatedSlots = {}; // To merge both halves of 30min slots
+      final selectedDurationMinutes = int.tryParse(selectedDuration.value.replaceAll(' min', '')) ?? 60;
 
+      // First pass: identify slots that need consolidation
+      multiDateSelections.forEach((key, selection) {
+        final slot = selection['slot'] as Slots;
+        final slotId = slot.sId ?? '';
+        
+        if (selectedDurationMinutes == 30) {
+          if (key.endsWith('_L') || key.endsWith('_R')) {
+            // This is a half-slot selection
+            if (!consolidatedSlots.containsKey(slotId)) {
+              consolidatedSlots[slotId] = {
+                'leftHalf': null,
+                'rightHalf': null,
+                'slot': slot,
+                'courtId': selection['courtId'],
+                'courtName': selection['courtName'],
+                'dateString': selection['date'],
+              };
+            }
+            
+            if (key.endsWith('_L')) {
+              consolidatedSlots[slotId]!['leftHalf'] = selection;
+            } else {
+              consolidatedSlots[slotId]!['rightHalf'] = selection;
+            }
+          }
+        }
+      });
+
+      // Second pass: process all selections
       multiDateSelections.forEach((key, selection) {
         final slot = selection['slot'] as Slots;
         final courtId = selection['courtId'] as String;
         final courtName = selection['courtName'] as String;
         final dateString = selection['date'] as String;
         final bookingTime = selection['bookingTime'] as String? ?? slot.time ?? '';
-        final selectedDurationMinutes = int.tryParse(selectedDuration.value.replaceAll(' min', '')) ?? 60;
         final adjustedAmount = selection['adjustedAmount'] as int? ?? slot.amount ?? 0;
+        final slotId = slot.sId ?? '';
         
-        // Determine the duration for this specific slot
+        // Skip if this is a half-slot that will be consolidated
+        if (selectedDurationMinutes == 30 && (key.endsWith('_L') || key.endsWith('_R'))) {
+          final consolidatedSlot = consolidatedSlots[slotId];
+          if (consolidatedSlot != null && 
+              consolidatedSlot['leftHalf'] != null && 
+              consolidatedSlot['rightHalf'] != null) {
+            // Both halves exist - only process once (for left half)
+            if (key.endsWith('_L')) {
+              // Get the full slot price (60-minute price) from the original slot
+              final fullSlotPrice = slot.amount ?? 0; // This should be the 60-minute price from API
+              final slotEntry = {
+                "businessHours": slot.businessHours
+                    ?.map((bh) => {
+                  "time": bh.time,
+                  "day": bh.day,
+                })
+                    .toList(),
+                "slotTimes": [
+                  {
+                    "time": slot.time,
+                    "amount": fullSlotPrice, // Use full slot price instead of adjustedAmount
+                    "slotId": slot.sId,
+                  },
+                  {
+                    "bookingDate": dateString,
+                  },
+                  {
+                    "courtId": courtId,
+                  },
+                  {
+                    "courtName": courtName,
+                  }
+                ],
+                "duration": 60, // Full slot duration when both halves selected
+                "totalTime": 60,
+                "bookingTime": slot.time ?? '' // Use original time for full slot
+              };
+              allSlots.add(slotEntry);
+            }
+            return; // Skip right half processing
+          } else {
+            // Only one half selected - process as 30min slot
+            final slotEntry = {
+              "businessHours": slot.businessHours
+                  ?.map((bh) => {
+                "time": bh.time,
+                "day": bh.day,
+              })
+                  .toList(),
+              "slotTimes": [
+                {
+                  "time": slot.time,
+                  "amount": adjustedAmount,
+                  "slotId": slot.sId,
+                },
+                {
+                  "bookingDate": dateString,
+                },
+                {
+                  "courtId": courtId,
+                },
+                {
+                  "courtName": courtName,
+                }
+              ],
+              "duration": 30,
+              "totalTime": 30,
+              "bookingTime": bookingTime
+            };
+            allSlots.add(slotEntry);
+          }
+          return;
+        }
+        
+        // Process non-30min selections normally
         int slotDuration = selectedDurationMinutes;
         int totalDuration = selectedDurationMinutes;
         
-        if (selectedDurationMinutes == 30) {
-          // 30min selection: always duration 30
-          slotDuration = 30;
-          totalDuration = 30;
-        } else if (selectedDurationMinutes == 60) {
-          // 60min selection: always duration 60
+        if (selectedDurationMinutes == 60) {
           slotDuration = 60;
           totalDuration = 60;
         } else if (selectedDurationMinutes == 90) {
@@ -810,9 +910,8 @@ class BookSessionController extends GetxController {
               slotDuration = 60; // First slot in 90min selection
             }
           }
-          totalDuration = 90; // Total time for 90min selection
+          totalDuration = 90;
         } else if (selectedDurationMinutes == 120) {
-          // 120min selection: both slots get 60
           slotDuration = 60;
           totalDuration = 120;
         }
@@ -827,7 +926,7 @@ class BookSessionController extends GetxController {
           "slotTimes": [
             {
               "time": slot.time,
-              "amount": adjustedAmount, // Use adjusted amount
+              "amount": adjustedAmount,
               "slotId": slot.sId,
             },
             {
@@ -840,8 +939,8 @@ class BookSessionController extends GetxController {
               "courtName": courtName,
             }
           ],
-          "duration": slotDuration, // Use calculated duration
-          "totalTime": totalDuration, // Use calculated total duration
+          "duration": slotDuration,
+          "totalTime": totalDuration,
           "bookingTime": bookingTime
         };
 

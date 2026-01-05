@@ -9,15 +9,17 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:get/get.dart';
 import 'package:padel_mobile/configs/components/custom_button.dart';
 import 'package:padel_mobile/configs/components/fade_divider.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/data/request_models/home_models/get_available_court.dart';
 import 'package:padel_mobile/generated/assets.dart';
+import 'package:padel_mobile/handler/text_formatter.dart';
 import 'package:padel_mobile/presentations/book_a_court/book_a_court_controller.dart';
 import 'package:padel_mobile/presentations/cart/cart_controller.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/court_slots_shimmer.dart';
 import 'package:padel_mobile/presentations/booking/book_session/widgets/upword_arrow_animation.dart';
-import 'package:padel_mobile/handler/text_formatter.dart';
+import 'package:padel_mobile/data/response_models/get_courts_by_duration_model.dart' as GetCourtsByDurationModel;
 
 class BookACourtScreen extends StatelessWidget {
   final BookACourtController controller = Get.put(BookACourtController());
@@ -84,7 +86,31 @@ class BookACourtScreen extends StatelessWidget {
               ),
               Transform.translate(
                 offset: Offset(0, -10),
-                child: Text('Available Slots', style: Get.textTheme.labelLarge),
+                child: Obx(() => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Available Slots', style: Get.textTheme.labelLarge),
+                    if (controller.selectedSearchSlotId.value != null)
+                      GestureDetector(
+                        onTap: () => controller.toggleSlotsCollapse(),
+                        child: AnimatedRotation(
+                          turns: controller.isSlotsCollapsed.value ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 250),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor,
+                              shape: BoxShape.circle
+                            ),
+                            child: Icon(
+                              Icons.keyboard_arrow_up,
+                              size: 22,
+                              color: AppColors.whiteColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                )),
               ),
               _buildAllCourtsWithSlots(),
               const SizedBox(height: 10),
@@ -158,169 +184,274 @@ class BookACourtScreen extends StatelessWidget {
   }
 
   Widget availableCourts() {
-    final courts = ['The Good Club', 'Chandigarh Club', 'Let’s Padel'];
+    return Obx(() {
+      // Show loading state
+      if (controller.isLoadingCourtsByDuration.value) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Available Courts', style: Get.textTheme.labelLarge),
+            const SizedBox(height: 100),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: LoadingWidget(color: AppColors.primaryColor,),
+              ),
+            ),
+          ],
+        );
+      }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Available Courts', style: Get.textTheme.labelLarge),
-        ...List.generate(courts.length, (index) {
-          return Obx(() {
-            final isExpanded = controller.expandedIndex.value == index;
-
-            return AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              child: Container(
-                // margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  // border: Border.all(color: Colors.grey.shade300),
-                  // borderRadius: BorderRadius.circular(12),
+      final courtsByDuration = controller.courtsByDuration.value;
+      
+      // Show empty state if no data
+      if (courtsByDuration == null || 
+          courtsByDuration.data == null || 
+          courtsByDuration.data!.isEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Available Courts', style: Get.textTheme.labelLarge),
+            const SizedBox(height: 16),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Text(
+                  'No courts available. Please select a time slot first.',
+                  style: TextStyle(color: Colors.grey),
                 ),
-                child: Column(
-                  children: [
-                    /// HEADER
-                    GestureDetector(
-                      onTap: () => controller.toggle(index),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Row(
-                          children: [
-                            ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    'https://picsum.photos/44/44?random=$index',
-                                width: 44,
-                                height: 44,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  width: 44,
-                                  height: 44,
-                                  color: Colors.grey.shade200,
-                                  child: const Icon(Icons.sports_tennis),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 44,
-                                  height: 44,
-                                  color: Colors.grey.shade200,
-                                  child: const Icon(Icons.sports_tennis),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ),
+          ],
+        );
+      }
+
+      final clubs = courtsByDuration.data!;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Available Courts', style: Get.textTheme.labelLarge),
+          ...List.generate(clubs.length, (index) {
+            final club = clubs[index];
+            
+            // Use totalAmount from availabilityByTime in API or updated slot prices
+            int minPrice = 0;
+            if (club.courts != null && club.courts!.isNotEmpty) {
+              // First try to get prices from updated slot data (after fetchAllSlotPrices)
+              final allSlotAmounts = club.courts!
+                  .expand((court) => court.availabilityByTime ?? [])
+                  .expand((availability) => availability.slots ?? [])
+                  .where((slot) => slot.amount != null && slot.amount! > 0)
+                  .map((slot) => slot.amount!)
+                  .toList();
+              
+              if (allSlotAmounts.isNotEmpty) {
+                minPrice = allSlotAmounts.reduce((a, b) => a < b ? a : b);
+              } else {
+                // Fallback to totalAmount from API
+                final allTotalAmounts = club.courts!
+                    .expand((court) => court.availabilityByTime ?? [])
+                    .where((availability) => availability.totalAmount != null && availability.totalAmount! > 0)
+                    .map((availability) => availability.totalAmount!)
+                    .toList();
+                if (allTotalAmounts.isNotEmpty) {
+                  minPrice = allTotalAmounts.reduce((a, b) => a < b ? a : b);
+                }
+              }
+            }
+
+            return Obx(() {
+              final isExpanded = controller.expandedIndex.value == index;
+
+              return Column(
+                children: [
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          /// HEADER
+                          GestureDetector(
+                            onTap: () => controller.toggle(index),
+                            child: Container(
+                              color: Colors.transparent,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    courts[index],
-                                    style: Get.textTheme.headlineMedium!
-                                        .copyWith(fontWeight: FontWeight.w500),
+                                  ClipOval(
+                                    child: (club.courtImage != null &&
+                                            club.courtImage!.isNotEmpty)
+                                        ? CachedNetworkImage(
+                                            imageUrl: club.courtImage!.first,
+                                            width: 44,
+                                            height: 44,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => Container(
+                                              width: 44,
+                                              height: 44,
+                                              color: Colors.grey.shade200,
+                                              child: const Icon(Icons.sports_tennis),
+                                            ),
+                                            errorWidget: (context, url, error) => Container(
+                                              width: 44,
+                                              height: 44,
+                                              color: Colors.grey.shade200,
+                                              child: const Icon(Icons.sports_tennis),
+                                            ),
+                                          )
+                                        : Container(
+                                            width: 44,
+                                            height: 44,
+                                            color: Colors.grey.shade200,
+                                            child: const Icon(Icons.sports_tennis),
+                                          ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'Chandigarh',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          club.clubName ?? 'Club',
+                                          style: Get.textTheme.headlineMedium!
+                                              .copyWith(fontWeight: FontWeight.w500),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          club.city ?? '',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                  ),
+                                  // if (minPrice > 0)
+                                    Text(
+                                      '₹ $minPrice',
+                                      style: Get.textTheme.titleLarge!.copyWith(
+                                        fontSize: 23,
+                                      ),
+                                    ),
+                                  const SizedBox(width: 6),
+                                  AnimatedRotation(
+                                    turns: isExpanded ? 0.5 : 0,
+                                    duration: const Duration(milliseconds: 250),
+                                    child: const Icon(Icons.keyboard_arrow_down),
                                   ),
                                 ],
                               ),
                             ),
-                            Text(
-                              '₹ 2000',
-                              style: Get.textTheme.titleLarge!.copyWith(
-                                fontSize: 23,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
+                          ),
 
-                            AnimatedRotation(
-                              turns: isExpanded ? 0.5 : 0,
-                              duration: const Duration(milliseconds: 250),
-                              child: const Icon(Icons.keyboard_arrow_down),
-                            ),
+                          /// EXPANDED CONTENT
+                          if (isExpanded && club.courts != null && club.courts!.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            ...List.generate(club.courts!.length, (courtIndex) {
+                              final court = club.courts![courtIndex];
+                              final courtType = (court.courtType != null && court.courtType!.isNotEmpty)
+                                  ? court.courtType!.join(', ')
+                                  : 'Court';
+
+                              // Get unique slots from availabilityByTime (remove duplicates by slot ID)
+                              final availableSlots = court.availabilityByTime
+                                  ?.expand((availability) => availability.slots ?? [])
+                                  .cast<GetCourtsByDurationModel.Slots>()
+                                  .fold<Map<String, GetCourtsByDurationModel.Slots>>({}, (map, slot) {
+                                    if (slot.sId != null) {
+                                      map[slot.sId!] = slot;
+                                    }
+                                    return map;
+                                  })
+                                  .values
+                                  .toList();
+                              
+                              // Update slot prices if fetchAllSlotPrices has been called
+                              if (availableSlots != null && controller.allSlotPricesResponse.value != null) {
+                                final currentDate = controller.selectedDate.value ?? DateTime.now();
+                                final dayName = controller.getWeekday(currentDate.weekday);
+                                final selectedDurationMinutes = int.tryParse(controller.selectedDuration.value.replaceAll(' min', '')) ?? 60;
+                                
+                                for (var slot in availableSlots) {
+                                  if (slot.time != null) {
+                                    int? updatedPrice;
+                                    if (selectedDurationMinutes == 90) {
+                                      final price60 = controller.findPriceForSlot(slot.time!, dayName, 60);
+                                      final price30 = controller.findPriceForSlot(slot.time!, dayName, 30);
+                                      if (price60 != null && price30 != null) {
+                                        updatedPrice = price60 + price30;
+                                      }
+                                    } else {
+                                      final duration = selectedDurationMinutes == 120 ? 60 : selectedDurationMinutes;
+                                      updatedPrice = controller.findPriceForSlot(slot.time!, dayName, duration);
+                                    }
+                                    
+                                    if (updatedPrice != null) {
+                                      slot.amount = updatedPrice;
+                                    }
+                                  }
+                                }
+                              }
+
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: courtIndex < club.courts!.length - 1 ? 16 : 0,
+                                ),
+                                child: _courtRow(
+                                  courtName: court.courtName ?? 'Court ${courtIndex + 1}',
+                                  type: courtType,
+                                  selectedIndex: index * 100 + courtIndex, // Unique index
+                                  availableSlots: availableSlots,
+                                  courtId: court.courtId ?? '',
+                                ),
+                              );
+                            }),
                           ],
-                        ),
+                        ],
                       ),
                     ),
-
-                    /// EXPANDED CONTENT
-                    if (isExpanded) ...[
-                      const SizedBox(height: 16),
-
-                      _courtRow(
-                        courtName: 'Court 1',
-                        type: 'Outdoor',
-                        selectedIndex: 0,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _courtRow(
-                        courtName: 'Court 2',
-                        type: 'Outdoor',
-                        selectedIndex: 1,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _courtRow(
-                        courtName: 'Court 3',
-                        type: 'Indoor',
-                        selectedIndex: 2,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          });
-        }),
-      ],
-    );
+                  ),
+                  fadeDivider()
+                ],
+              );
+            });
+          }),
+        ],
+      );
+    });
   }
 
   Widget _courtRow({
     required String courtName,
     required String type,
     required int selectedIndex,
+    List<GetCourtsByDurationModel.Slots>? availableSlots,
+    String? courtId,
   }) {
     return Obx(() {
-      // Show default time slots for all courts
-      final displaySlots = [
-        Slots(
-          sId: 'court${selectedIndex}_slot1',
-          time: '8:00 AM',
-          amount: 400,
-        ),
-        Slots(
-          sId: 'court${selectedIndex}_slot2',
-          time: '9:00 AM',
-          amount: 400,
-        ),
-        Slots(
-          sId: 'court${selectedIndex}_slot3',
-          time: '10:00 AM',
-          amount: 400,
-        ),
-      ];
+      // Only show slots if available from API
+      final displaySlots = availableSlots?.isNotEmpty == true
+          ? availableSlots!.take(3).map((slot) => Slots(
+              sId: slot.sId ?? 'slot_${selectedIndex}_${slot.time}',
+              time: slot.time ?? '',
+              amount: slot.amount ?? 0,
+            )).toList()
+          : <Slots>[];
 
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// LEFT TEXT
           Container(
-            // color: AppColors.redColor,
-            // width: 70,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(courtName, style: Get.textTheme.headlineMedium),
                 Text(
-                  type,
+                  type.split(',').first,
                   style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
               ],
@@ -328,28 +459,44 @@ class BookACourtScreen extends StatelessWidget {
           ),
           SizedBox(width: 10,),
 
-          /// TIME SLOTS
-          Expanded(
-            child: Row(
-              children: List.generate(displaySlots.length, (index) {
-                final slot = displaySlots[index];
+          /// TIME SLOTS - Only show if slots available
+          if (displaySlots.isNotEmpty)
+            Expanded(
+              child: Row(
+                children: List.generate(displaySlots.length, (index) {
+                  final slot = displaySlots[index];
 
-                return Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(
-                      right: index == displaySlots.length - 1 ? 0 : 10,
+                  return Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(
+                        right: index == displaySlots.length - 1 ? 0 : 10,
+                      ),
+                      child: _buildCourtSlotTile(
+                        slot,
+                        courtName,
+                        selectedIndex,
+                        index,
+                        courtId: courtId ?? 'court$selectedIndex',
+                        availableSlots: displaySlots,
+                      ),
                     ),
-                    child: _buildCourtSlotTile(
-                      slot,
-                      courtName,
-                      selectedIndex,
-                      index,
-                    ),
+                  );
+                }),
+              ),
+            )
+          else
+            Expanded(
+              child: Center(
+                child: Text(
+                  'No slots available',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
                   ),
-                );
-              }),
+                ),
+              ),
             ),
-          ),
         ],
       );
     });
@@ -620,6 +767,8 @@ class BookACourtScreen extends StatelessWidget {
                               controller.showUnavailableSlots.value,
                         );
                         controller.slots.refresh();
+                        // Refresh courts by duration if time slot is selected
+                        controller.fetchCourtsIfReady();
                       },
                     ),
                   ),
@@ -647,7 +796,24 @@ class BookACourtScreen extends StatelessWidget {
       }
 
       final court = slotsData.data!.first;
-      final slotTimes = court.slots ?? [];
+      var slotTimes = court.slots ?? [];
+      
+      // Filter to show only the row containing selected slot when collapsed
+      if (controller.isSlotsCollapsed.value && controller.selectedSearchSlotId.value != null) {
+        final selectedSlotId = controller.selectedSearchSlotId.value!;
+        final selectedIndex = slotTimes.indexWhere((slot) => slot.sId == selectedSlotId);
+        
+        if (selectedIndex != -1) {
+          // Grid has 4 columns per row
+          const columnsPerRow = 4;
+          final rowIndex = selectedIndex ~/ columnsPerRow;
+          final startIndex = rowIndex * columnsPerRow;
+          final endIndex = (startIndex + columnsPerRow).clamp(0, slotTimes.length);
+          
+          // Get all slots in the same row
+          slotTimes = slotTimes.sublist(startIndex, endIndex);
+        }
+      }
 
       return _buildSlotsGrid(slotTimes, court.sId ?? '');
     });
@@ -690,104 +856,367 @@ class BookACourtScreen extends StatelessWidget {
     dynamic slot,
     String courtName,
     int courtIndex,
-    int slotIndex,
-  ) {
-    // Check actual selection state from controller
-    final courtId = 'court${courtIndex + 1}';
-    final isSelected = controller.isSlotSelected(slot, courtId);
+    int slotIndex, {
+    String? courtId,
+    List<dynamic>? availableSlots,
+  }) {
+    // Check actual selection state from controller (for real court selections)
+    final resolvedCourtId = courtId ?? 'court${courtIndex + 1}';
+    final isSelected = controller.isRealCourtSlotSelected(slot, resolvedCourtId);
+    final selectedDuration = controller.selectedDuration.value;
+    final isHalfSlot = selectedDuration == '30 min';
+    final is90MinSlot = selectedDuration == '90 min';
+
+    // Check if this is the second slot in 90min mode
+    final isSecondSlotIn90Min = is90MinSlot && !isSelected && 
+        controller.isSecondSlotIn90MinForRealCourt(slot, resolvedCourtId, availableSlots);
 
     const blueColor = Color(0xff053CFF);
     const radius = 5.0;
 
-    return GestureDetector(
-      onTap: () {
-        controller.toggleCourtRowSlotSelection(
-          slot,
-          courtId: courtId,
-          courtName: courtName,
+    return Builder(
+      builder: (BuildContext slotContext) {
+        return GestureDetector(
+          onTapDown: (details) {
+            if (selectedDuration == '30 min') {
+              final RenderBox box = slotContext.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final isLeftHalf = localPosition.dx < box.size.width / 2;
+
+              controller.toggleCourtRowSlotSelection(
+                slot,
+                courtId: resolvedCourtId,
+                courtName: courtName,
+                isLeftHalf: isLeftHalf,
+              );
+            } else if (selectedDuration == '90 min' && isSecondSlotIn90Min) {
+              // Special handling for 90min second slot
+              final RenderBox box = slotContext.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final isRightHalf = localPosition.dx >= box.size.width / 2;
+              
+              if (isRightHalf) {
+                // Clicked right half of second slot - select as 90min
+                controller.toggleCourtRowSlotSelection(
+                  slot,
+                  courtId: resolvedCourtId,
+                  courtName: courtName,
+                );
+              }
+            } else {
+              controller.toggleCourtRowSlotSelection(
+                slot,
+                courtId: resolvedCourtId,
+                courtName: courtName,
+              );
+            }
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: AnimatedContainer(
+              height: 34,
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                color: Colors.white,
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Stack(
+                children: [
+                  /// FULL GRADIENT FOR BOTH HALVES SELECTED (30MIN)
+                  if (isHalfSlot && _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId))
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// FULL GRADIENT FOR NON-30MIN AND NON-90MIN-SECOND-SLOT SELECTIONS
+                  if (isSelected && !isHalfSlot && !isSecondSlotIn90Min)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// LEFT HALF GRADIENT FOR 90MIN SECOND SLOT
+                  if (isSecondSlotIn90Min)
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(radius),
+                            bottomLeft: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// LEFT HALF GRADIENT FOR 30MIN LEFT SELECTION
+                  if (isHalfSlot && _isLeftHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isBothHalvesSelectedInRealCourt(slot, resolvedCourtId))
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(radius),
+                            bottomLeft: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// RIGHT HALF GRADIENT FOR 30MIN RIGHT SELECTION
+                  if (isHalfSlot && _isRightHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isBothHalvesSelectedInRealCourt(slot, resolvedCourtId))
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(radius),
+                            bottomRight: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// VERTICAL DIVIDER FOR 30MIN SLOTS
+                  if (isHalfSlot)
+                    Positioned(
+                      left: 40,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 1,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+
+                  /// VERTICAL DIVIDER FOR 90MIN SLOTS
+                  if (is90MinSlot && !isSelected && !isSecondSlotIn90Min)
+                    Positioned(
+                      left: 40,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 1,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+
+                  /// LEFT BLUE STRIP (ONLY WHEN NOT SELECTED)
+                  if (!isSelected && !isSecondSlotIn90Min)
+                    Positioned.fill(
+                      left: 0,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 4,
+                          decoration: BoxDecoration(
+                            color: blueColor,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(radius),
+                              bottomLeft: Radius.circular(radius),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 30MIN LEFT HALF SELECTED
+                  if (isHalfSlot && _isLeftHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isBothHalvesSelectedInRealCourt(slot, resolvedCourtId))
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.white, Colors.white, Colors.black87, Colors.black87],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              slot.time ?? "",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              '₹${slot.amount ?? 0}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 30MIN RIGHT HALF SELECTED
+                  if (isHalfSlot && _isRightHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isBothHalvesSelectedInRealCourt(slot, resolvedCourtId))
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.black87, Colors.black87, Colors.white, Colors.white],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              slot.time ?? "",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              '₹${slot.amount ?? 0}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 90MIN SECOND SLOT
+                  if (isSecondSlotIn90Min)
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.white, Colors.white, Colors.black87, Colors.black87],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              slot.time ?? "",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              '₹${slot.amount ?? 0}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR OTHER CASES
+                  if (!isSecondSlotIn90Min && (!isHalfSlot || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) || 
+                      (!_isLeftHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isRightHalfSelectedInRealCourt(slot, resolvedCourtId))))
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            slot.time ?? "",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          Transform.translate(
+                            offset: Offset(0, 2),
+                            child: Text(
+                              '₹${slot.amount ?? 0}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) ? Colors.white : AppColors.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: AnimatedContainer(
-          height: 34,
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius),
-            color: Colors.white,
-            gradient: isSelected
-                ? const LinearGradient(
-                    colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )
-                : null,
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Stack(
-            children: [
-              /// LEFT BLUE STRIP (ONLY WHEN NOT SELECTED)
-              if (!isSelected)
-                Positioned.fill(
-                  left: 0,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        color: blueColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(radius),
-                          bottomLeft: Radius.circular(radius),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Transform.translate(
-                      offset: Offset(0, 0),
-                      child: Text(
-                        slot.time ?? "",
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                    ),
-                    // Transform.translate(
-                    //   offset: Offset(0, -1),
-                    //   child: Text(
-                    //     "₹ ${slot.amount ?? 0}",
-                    //     style: TextStyle(
-                    //       fontSize: 11,
-                    //       fontWeight: FontWeight.w400,
-                    //       color: isSelected ? Colors.white : Colors.grey,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
   Widget _buildSlotTile(dynamic slot, String courtId) {
     final isSelected = controller.isSlotSelected(slot, courtId);
-    final isDisabled = controller.isSlotDisabled(slot, courtId);
+    final isPartOfGroup = _isPartOfSelectedGroup(slot, courtId);
+    final selectedDuration = controller.selectedDuration.value;
+    final isHalfSlot = selectedDuration == '30 min';
+    final is90MinSlot = selectedDuration == '90 min';
 
-    final isUnavailable =
-        controller.isPastAndUnavailable(slot) ||
+    final isUnavailable = controller.isPastAndUnavailable(slot) ||
         (slot.status?.toLowerCase() == 'booked') ||
         (slot.availabilityStatus?.toLowerCase() == 'maintenance') ||
         (slot.availabilityStatus?.toLowerCase() == 'weather conditions') ||
@@ -796,102 +1225,361 @@ class BookACourtScreen extends StatelessWidget {
     const blueColor = Color(0xff053CFF);
     const radius = 5.0;
 
-    return GestureDetector(
-      onTap: (isUnavailable || isDisabled)
-          ? null
-          : () {
+    // For 90 min, check if this is the second slot (should show half selection)
+    bool isSecondSlotIn90Min = false;
+    if (is90MinSlot && !isSelected) {
+      final courtData = controller.slots.value?.data?.first;
+      if (courtData?.slots != null) {
+        final allSlots = courtData!.slots!;
+        final currentSlotIndex = allSlots.indexWhere((s) => s.sId == slot.sId);
+
+        if (currentSlotIndex > 0) {
+          final previousSlot = allSlots[currentSlotIndex - 1];
+          final currentDate = controller.selectedDate.value ?? DateTime.now();
+          final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+          final previousSlotKey = '${dateString}_${courtId}_${previousSlot.sId}';
+
+          // Check if previous slot is selected - this makes current slot the second in 90min
+          isSecondSlotIn90Min = controller.multiDateSelections.containsKey(previousSlotKey);
+        }
+      }
+    }
+
+    return Builder(
+      builder: (BuildContext slotContext) {
+        return GestureDetector(
+          onTapDown: isUnavailable
+              ? null
+              : (details) {
+            if (selectedDuration == '30 min') {
+              final RenderBox box = slotContext.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final isLeftHalf = localPosition.dx < box.size.width / 2;
+
+              controller.toggleSlotSelection(
+                slot,
+                courtId: courtId,
+                courtName: '',
+                isLeftHalf: isLeftHalf,
+              );
+            } else if (selectedDuration == '90 min' && isSecondSlotIn90Min) {
+              // Special handling for 90min second slot
+              final RenderBox box = slotContext.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final isRightHalf = localPosition.dx >= box.size.width / 2;
+              
+              if (isRightHalf) {
+                // Clicked right half of second slot - select next 1.5 slots
+                controller.toggleSlotSelection(
+                  slot,
+                  courtId: courtId,
+                  courtName: '',
+                );
+              }
+            } else {
               controller.toggleSlotSelection(
                 slot,
                 courtId: courtId,
                 courtName: '',
               );
-            },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
+            }
+          },
+          child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
-            color: (isUnavailable || isDisabled)
-                ? Colors.grey.shade100
-                : Colors.white,
-            gradient: isSelected
-                ? const LinearGradient(
-                    colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )
-                : null,
-            border: Border.all(
-              color: (isUnavailable || isDisabled)
-                  ? Colors.grey.shade300
-                  : Colors.grey.shade300,
-            ),
-          ),
-          child: Stack(
-            children: [
-              /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE AND NOT DISABLED)
-              if (!isUnavailable && !isDisabled && !isSelected)
-                Positioned.fill(
-                  left: 0,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        color: blueColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(radius),
-                          bottomLeft: Radius.circular(radius),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Transform.translate(
-                      offset: Offset(0, 0),
-                      child: Text(
-                        slot.time ?? "",
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: (isUnavailable || isDisabled)
-                              ? Colors.grey.shade500
-                              : isSelected
-                              ? Colors.white
-                              : Colors.black87,
-                        ),
-                      ),
-                    ),
-                    // Transform.translate(
-                    //   offset: Offset(0, -1),
-                    //   child: Text(
-                    //     "₹ ${slot.amount ?? 0}",
-                    //     style: TextStyle(
-                    //       fontSize: 11,
-                    //       fontWeight: FontWeight.w400,
-                    //       color: (isUnavailable || isDisabled)
-                    //           ? Colors.grey.shade500
-                    //           : isSelected
-                    //           ? Colors.white
-                    //           : Colors.grey,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                color: isUnavailable ? Colors.grey.shade100 : Colors.white,
+                border: Border.all(
+                  color: isUnavailable
+                      ? Colors.grey.shade300
+                      : (isSelected || isPartOfGroup)
+                      ? Colors.transparent
+                      : Colors.grey.shade300,
+                  width: (isSelected || isPartOfGroup) ? 2 : 1,
                 ),
               ),
-            ],
+              child: Stack(
+                children: [
+                  /// FULL GRADIENT FOR BOTH HALVES SELECTED (30MIN)
+                  if (isHalfSlot && controller.isBothHalvesSelected(slot, courtId))
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// FULL GRADIENT FOR NON-30MIN AND NON-90MIN-SECOND-SLOT SELECTIONS
+                  if ((isSelected || isPartOfGroup) && !isHalfSlot && !isSecondSlotIn90Min)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// LEFT HALF GRADIENT FOR 90MIN SECOND SLOT
+                  if (isSecondSlotIn90Min)
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(radius),
+                            bottomLeft: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// LEFT HALF GRADIENT FOR 30MIN LEFT SELECTION
+                  if (isHalfSlot && _isLeftHalfSelected(slot, courtId) && !controller.isBothHalvesSelected(slot, courtId))
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(radius),
+                            bottomLeft: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// RIGHT HALF GRADIENT FOR 30MIN RIGHT SELECTION
+                  if (isHalfSlot && _isRightHalfSelected(slot, courtId) && !controller.isBothHalvesSelected(slot, courtId))
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(radius),
+                            bottomRight: Radius.circular(radius),
+                          ),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// VERTICAL DIVIDER FOR 30MIN SLOTS
+                  if (isHalfSlot && !isUnavailable)
+                    Positioned(
+                      left: 40,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 2,
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+
+                  /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE AND NOT SELECTED)
+                  if (!isUnavailable && !isSelected && !isPartOfGroup)
+                    Positioned.fill(
+                      left: 0,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 4,
+                          decoration: BoxDecoration(
+                            color: blueColor,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(radius),
+                              bottomLeft: Radius.circular(radius),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 30MIN LEFT HALF SELECTED
+                  if (isHalfSlot && _isLeftHalfSelected(slot, courtId) && !controller.isBothHalvesSelected(slot, courtId))
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.white, Colors.white, Colors.black87, Colors.black87],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Text(
+                          slot.time ?? "",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 30MIN RIGHT HALF SELECTED
+                  if (isHalfSlot && _isRightHalfSelected(slot, courtId) && !controller.isBothHalvesSelected(slot, courtId))
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.black87, Colors.black87, Colors.white, Colors.white],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Text(
+                          slot.time ?? "",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR 90MIN SECOND SLOT
+                  if (isSecondSlotIn90Min)
+                    Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            colors: [Colors.white, Colors.white, Colors.black87, Colors.black87],
+                            stops: [0.0, 0.5, 0.5, 1.0],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds);
+                        },
+                        child: Text(
+                          slot.time ?? "",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// TEXT FOR OTHER CASES
+                  if (!isSecondSlotIn90Min && (!isHalfSlot || controller.isBothHalvesSelected(slot, courtId) || 
+                      (!_isLeftHalfSelected(slot, courtId) && !_isRightHalfSelected(slot, courtId))))
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            slot.time ?? "",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: isUnavailable
+                                  ? Colors.grey.shade500
+                                  : (isSelected || isPartOfGroup || controller.isBothHalvesSelected(slot, courtId))
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  /// Helper methods for slot selection logic
+  bool _isPartOfSelectedGroup(dynamic slot, String courtId) {
+    final selectedDuration = controller.selectedDuration.value;
+    
+    // For 30min and 60min, no grouping logic needed
+    if (selectedDuration == '30 min' || selectedDuration == '60 min') return false;
+    
+    // For 90min and 120min, only check if this slot is the second slot in a selection
+    if (selectedDuration == '90 min') {
+      return false; // For 90min, we handle this separately with isSecondSlotIn90Min
+    }
+    
+    // For 120min, no grouping logic needed - only show exactly 2 selected slots
+    if (selectedDuration == '120 min') {
+      return false;
+    }
+    
+    return false;
+  }
+  
+  bool _isLeftHalfSelected(dynamic slot, String courtId) {
+    final currentDate = controller.selectedDate.value ?? DateTime.now();
+    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final leftKey = '${dateString}_${courtId}_${slot.sId}_left';
+    return controller.multiDateSelections.containsKey(leftKey);
+  }
+  
+  bool _isRightHalfSelected(dynamic slot, String courtId) {
+    final currentDate = controller.selectedDate.value ?? DateTime.now();
+    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final rightKey = '${dateString}_${courtId}_${slot.sId}_right';
+    return controller.multiDateSelections.containsKey(rightKey);
+  }
+
+  bool _isLeftHalfSelectedInRealCourt(dynamic slot, String courtId) {
+    final currentDate = controller.selectedDate.value ?? DateTime.now();
+    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final leftKey = '${dateString}_${courtId}_${slot.sId}_left';
+    return controller.realCourtSelections.containsKey(leftKey);
+  }
+  
+  bool _isRightHalfSelectedInRealCourt(dynamic slot, String courtId) {
+    final currentDate = controller.selectedDate.value ?? DateTime.now();
+    final dateString = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+    final rightKey = '${dateString}_${courtId}_${slot.sId}_right';
+    return controller.realCourtSelections.containsKey(rightKey);
+  }
+  
+  bool _isBothHalvesSelectedInRealCourt(dynamic slot, String courtId) {
+    return _isLeftHalfSelectedInRealCourt(slot, courtId) && _isRightHalfSelectedInRealCourt(slot, courtId);
   }
 
   void showChangeLocationBottomSheet(BuildContext context) {
@@ -905,7 +1593,7 @@ class BookACourtScreen extends StatelessWidget {
 
   Widget _buildPaymentPanel() {
     return Obx(() {
-      if (controller.multiDateSelections.isEmpty) {
+      if (controller.realCourtSelections.isEmpty) {
         return const SizedBox.shrink();
       }
 
@@ -954,7 +1642,7 @@ class BookACourtScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Total Slots: ${controller.multiDateSelections.length}',
+                              'Total Slots: ${controller.realCourtSelections.length}',
                               style: Get.textTheme.bodySmall!.copyWith(
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
@@ -980,12 +1668,15 @@ class BookACourtScreen extends StatelessWidget {
                     gradientColors: [Colors.white, Colors.white, Colors.white],
                     onTap: isProcessing.value
                         ? null
-                        : () {
+                          : () {
                             if (Get.isSnackbarOpen) return;
                             // Initialize CartController if not already present
                             if (!Get.isRegistered<CartController>()) {
                               Get.put(CartController());
                             }
+                            // Sync total amount to CartController for payment screen
+                            final cartController = Get.find<CartController>();
+                            cartController.totalPrice.value = controller.totalAmount.value;
                             Get.toNamed(RoutesName.paymentMethod);
                           },
                     child: isProcessing.value
@@ -1055,7 +1746,7 @@ class BookACourtScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...controller.multiDateSelections.entries.map((entry) {
+        ...controller.realCourtSelections.entries.map((entry) {
           final selection = entry.value;
           final slot = selection['slot'] as Slots;
           final dateTime = selection['dateTime'] as DateTime;
@@ -1105,11 +1796,11 @@ class BookACourtScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
-                    controller.multiDateSelections.remove(entry.key);
+                    controller.realCourtSelections.remove(entry.key);
                     controller.selectedSlots.removeWhere(
                       (s) => s.sId == slot.sId,
                     );
-                    controller.totalAmount.value -= (slot.amount ?? 0);
+                    controller.recalculateRealCourtTotalAmount();
                   },
                   child: const Icon(
                     Icons.delete_outline,

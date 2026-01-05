@@ -8,6 +8,7 @@ import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
 import '../cart/cart_controller.dart'; // Import CartController
+import '../book_a_court/book_a_court_controller.dart'; // Import BookACourtController
 
 class PaymentMethodController extends GetxController {
   var option = ''.obs;
@@ -16,6 +17,21 @@ class PaymentMethodController extends GetxController {
   // Get CartController instance
   final CartController cartController = Get.find<CartController>();
   RxBool isProcessing = false.obs;
+  
+  // Check if BookACourtController is available
+  BookACourtController? get bookACourtController {
+    try {
+      return Get.isRegistered<BookACourtController>() ? Get.find<BookACourtController>() : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  // Check if booking is from BookACourtController
+  bool get isFromBookACourt {
+    final controller = bookACourtController;
+    return controller != null && controller.realCourtSelections.isNotEmpty;
+  }
 
   @override
   void onInit() {
@@ -83,7 +99,15 @@ class PaymentMethodController extends GetxController {
 
   Future<void> _processBookingAfterPayment() async {
     try {
-      final bookingPayload = cartController.buildBookingPayload();
+      List<Map<String, dynamic>>? bookingPayload;
+      
+      // Check if booking is from BookACourtController
+      if (isFromBookACourt && bookACourtController != null) {
+        bookingPayload = bookACourtController!.buildBookingPayload();
+      } else {
+        // Use CartController's payload
+        bookingPayload = cartController.buildBookingPayload();
+      }
 
       if (bookingPayload == null) {
         Get.back();
@@ -93,12 +117,18 @@ class PaymentMethodController extends GetxController {
 
       log("Booking payload after payment: $bookingPayload");
 
-      // ⬅️ Get true/false from bookCart()
+      // ⬅️ Get true/false from bookCart() - same API for both cases
       bool success = await cartController.bookCart(data: bookingPayload);
 
       if (success) {
         // 👍 Booking success
         SnackBarUtils.showSuccessSnackBar("Booking completed successfully");
+        
+        // Clear selections if from BookACourtController
+        if (isFromBookACourt && bookACourtController != null) {
+          bookACourtController!.clearAllSelections();
+        }
+        
         Get.to(() => BookingSuccessfulScreen());
       } else {
         // ❌ API returned error
@@ -258,9 +288,17 @@ class PaymentMethodController extends GetxController {
     isProcessing.value = true;
 
     try {
+      // Get amount from BookACourtController if available, otherwise use CartController
+      double amountToPay;
+      if (isFromBookACourt && bookACourtController != null) {
+        amountToPay = bookACourtController!.totalAmount.value.toDouble();
+      } else {
+        amountToPay = cartController.totalPrice.value.toDouble();
+      }
+      
       await _paymentService.initiatePayment(
         keyId: 'rzp_test_1DP5mmOlF5G5ag',
-        amount: cartController.totalPrice.value.toDouble(), // Use dynamic amount from cart
+        amount: amountToPay,
         currency: 'INR',
         name: 'Swoot',
         description: 'Paying for court booking',

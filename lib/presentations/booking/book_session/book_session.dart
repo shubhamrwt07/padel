@@ -957,6 +957,18 @@ class BookSession extends StatelessWidget {
                       ),
                     ),
 
+                  /// VERTICAL DIVIDER FOR 30MIN SLOTS
+                  if (isHalfSlot && !isUnavailable && !isBothHalvesBooked && !isSlotBookedForNon30Min)
+                    Positioned(
+                      left: 40, // Center of the 80px wide slot tile
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 2,
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+
                   /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE AND NOT SELECTED)
                   if (!isUnavailable && !isSelected && !isPartOfGroup)
                     Positioned.fill(
@@ -1267,6 +1279,58 @@ class BookSession extends StatelessWidget {
                         final totalAmount = controller.totalAmount.value;
                         final entries = selectionsByDate.entries.toList()
                           ..sort((a, b) => a.key.compareTo(b.key));
+                        
+                        // Consolidate 30-minute slots for display
+                        final consolidatedEntries = <String, List<Map<String, dynamic>>>{};
+                        final selectedDurationMinutes = int.tryParse(controller.selectedDuration.value.replaceAll(' min', '')) ?? 60;
+                        
+                        for (final entry in entries) {
+                          final dateKey = entry.key;
+                          final selections = entry.value;
+                          final consolidatedSelections = <Map<String, dynamic>>[];
+                          final processedSlots = <String>{};
+                          
+                          if (selectedDurationMinutes == 30) {
+                            // Group 30-minute half-slots
+                            for (final selection in selections) {
+                              final slotId = selection['slot'].sId ?? '';
+                              if (processedSlots.contains(slotId)) continue;
+                              
+                              // Find both halves of this slot by checking if bookingTime equals original time or is 30 minutes later
+                              final originalTime = selection['slot'].time ?? '';
+                              final leftHalf = selections.where((s) => 
+                                s['slot'].sId == slotId && s['bookingTime'] == originalTime).firstOrNull;
+                              final rightHalf = selections.where((s) => 
+                                s['slot'].sId == slotId && s['bookingTime'] != originalTime).firstOrNull;
+                              
+                              if (leftHalf != null && rightHalf != null) {
+                                // Both halves selected - show as one full slot with 60-minute price
+                                // Get the 60-minute price for this slot from the original slot data
+                                final originalSlot = leftHalf['slot'];
+                                final fullSlotPrice = originalSlot.amount ?? 0; // This should be the 60-minute price
+                                consolidatedSelections.add({
+                                  ...leftHalf,
+                                  'bookingTime': originalTime, // Use original time for full slot
+                                  'adjustedAmount': fullSlotPrice, // Use original slot amount (60-minute price)
+                                  'isConsolidated': true,
+                                });
+                              } else if (leftHalf != null) {
+                                // Only left half selected
+                                consolidatedSelections.add(leftHalf);
+                              } else if (rightHalf != null) {
+                                // Only right half selected
+                                consolidatedSelections.add(rightHalf);
+                              }
+                              
+                              processedSlots.add(slotId);
+                            }
+                          } else {
+                            // For non-30min durations, use selections as-is
+                            consolidatedSelections.addAll(selections);
+                          }
+                          
+                          consolidatedEntries[dateKey] = consolidatedSelections;
+                        }
 
                         return SafeArea(
                           top: false,
@@ -1354,9 +1418,9 @@ class BookSession extends StatelessWidget {
                                 child: ListView.builder(
                                   controller: scrollController,
                                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  itemCount: entries.length,
+                                  itemCount: consolidatedEntries.length,
                                   itemBuilder: (context, index) {
-                                    final entry = entries[index];
+                                    final entry = consolidatedEntries.entries.toList()[index];
                                     final date = DateTime.parse(entry.key);
                                     final formattedDate = DateFormat('MMM dd, yyyy').format(date);
                                     final dayName = DateFormat('EEEE').format(date);
