@@ -28,6 +28,10 @@ class OpenMatchRepository {
     required dynamic data,
   }) async {
     try {
+      CustomLogger.logMessage(
+        msg: "Open Match Body: $data",
+        level: LogLevel.info,
+      );
       final response = await dioClient.post(
         AppEndpoints.createMatches,
         data: data,

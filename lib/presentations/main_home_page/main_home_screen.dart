@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:padel_mobile/presentations/booking/booking_controller.dart';
 import 'package:padel_mobile/presentations/open_match_for_all_court/widgets/semi_circle_progress_bar.dart';
 import 'package:padel_mobile/presentations/profile/widgets/profile_exports.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../data/request_models/home_models/get_club_name_model.dart';
 import 'dart:developer';
 class MainHomeScreen extends StatelessWidget {
@@ -547,10 +548,10 @@ class MainHomeScreen extends StatelessWidget {
   /// QUICK ACTIONS
   Widget _quickActions() {
     final items = [
-      {"icon": Icons.sports_tennis, "title": "Book a Court", "action": "book"},
-      {"icon": Icons.groups, "title": "Find a Game", "action": "match"},
-      {"icon": Icons.emoji_events, "title": "Americano", "action": "americano"},
-      {"icon": Icons.sports, "title": "Challenge", "action": "challenge"},
+      {"icon": Assets.assetsImagesIcBookACourt, "title": "Book a Court", "action": "book"},
+      {"icon": Assets.imagesIcFindAGame, "title": "Find a Game", "action": "match"},
+      {"icon": Assets.imagesIcAmericano, "title": "Americano", "action": "americano"},
+      {"icon": Assets.imagesIcChallenges, "title": "Challenge", "action": "challenge"},
     ];
 
     return Row(
@@ -590,10 +591,11 @@ class MainHomeScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Center(
-                                  child: Icon(
-                                    e["icon"] as IconData,
+                                  child: SvgPicture.asset(
+                                    e["icon"] as String,
                                     color: Colors.white,
-                                    size: 28,
+                                    width: 28,
+                                    height: 28,
                                   ),
                                 ),
                               ],

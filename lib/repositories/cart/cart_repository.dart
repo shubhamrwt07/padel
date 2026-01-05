@@ -73,6 +73,10 @@ class CartRepository {
   Future<AddToCartModel> addCartItems({
     required List<Map<String, dynamic>> data,
   }) async {
+    CustomLogger.logMessage(
+      msg: "Cart item body: $data",
+      level: LogLevel.info,
+    );
     log("POST API -${AppEndpoints.addCartItems} body ${data.toString()}");
     try {
       final response = await dioClient.post(
@@ -103,6 +107,10 @@ class CartRepository {
     required dynamic data,
   }) async {
     try {
+      CustomLogger.logMessage(
+        msg: "Book Session body: $data",
+        level: LogLevel.info,
+      );
       final response = await dioClient.post(
         AppEndpoints.carteBooking,
         data: data,

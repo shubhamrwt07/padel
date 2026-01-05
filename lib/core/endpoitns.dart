@@ -5,16 +5,16 @@ class AppEndpoints {
   // static const String socketUrl = "http://103.185.212.117:5070";
 
   /// -----------------------Staging URL-------------------------------------------
-  static const String baseUrl = "http://103.142.118.40:5080/api/customer/";
-  static const String socketUrl = "http://103.142.118.40:5080";
+  // static const String baseUrl = "http://103.142.118.40:5080/api/customer/";
+  // static const String socketUrl = "http://103.142.118.40:5080";
 
   /// -----------------------New Live URL-------------------------------------------
   // static const String baseUrl = "https://apimobile.swootapp.com/api/customer/";
   // static const String socketUrl = "https://apimobile.swootapp.com";
 
   // ///-----------------------Local URL-------------------------------------------
-  // static const String baseUrl = "http://192.168.0.118:5070/api/customer/";
-  // static const String socketUrl = "http://192.168.0.118:5070";
+  static const String baseUrl = "http://192.168.0.137:5070/api/customer/";
+  static const String socketUrl = "http://192.168.0.137:5070";
 
 
   // static const String login = "${baseUrl}customerLogin";
@@ -33,6 +33,7 @@ class AppEndpoints {
   static const String getClub ="${baseUrl}court/registerCourt/getAllRegisteredCourts?limit=";
   static const String getAllActiveCourtsForSlotWise = "${baseUrl}court/saveCourt/getAllActiveCourtsForSlotWise?";
   static const String getAllSlotPricesOfCourt = "${baseUrl}court/price/prices?";
+  static const String getCourtsByDuration = "${baseUrl}court/saveCourt/getCourtsByDuration?";
   static const String getLocations = "${baseUrl}court/state/getStates";
   ///Cart Urls------------------------------------------------------------------
   static const String getCartItems = "${baseUrl}court/cart/getCartForUser";

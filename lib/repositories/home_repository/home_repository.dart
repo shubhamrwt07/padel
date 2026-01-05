@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:padel_mobile/data/response_models/get_all_slot_prices_of_court_model.dart';
+import 'package:padel_mobile/data/response_models/get_courts_by_duration_model.dart';
 import 'package:padel_mobile/data/response_models/get_location_maps_model.dart';
 import 'package:padel_mobile/data/response_models/get_register_club_model.dart';
 import 'package:padel_mobile/handler/logger.dart';
@@ -129,6 +130,33 @@ class HomeRepository {
     } catch (e, st) {
       CustomLogger.logMessage(
         msg: "Get All Slot Prices Of Court Data failed with error: ${e.toString()}",
+        level: LogLevel.error,
+        st: st,
+      );
+      rethrow;
+    }
+  }
+
+  ///Get Courts By Duration Court------------------------------------------------
+  Future<GetCourtsByDurationModel> getCourtsByDuration({
+    required String duration,
+    required String date,
+    required String time
+  }) async {
+    try {
+      final response = await dioClient.get("${AppEndpoints.getCourtsByDuration}duration=$duration&date=$date&time=$time",);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CustomLogger.logMessage(
+          msg: "Get Courts By Durationt Data: ${response.data}",
+          level: LogLevel.info,
+        );
+        return GetCourtsByDurationModel.fromJson(response.data);
+      } else {
+        throw Exception("Get Courts By Duration Data failed: ${response.statusCode}");
+      }
+    } catch (e, st) {
+      CustomLogger.logMessage(
+        msg: "Get Courts By Duration Data failed with error: ${e.toString()}",
         level: LogLevel.error,
         st: st,
       );
