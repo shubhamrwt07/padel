@@ -691,6 +691,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
           onTapDown: (isUnavailable || isBothHalvesBooked || isSlotBookedForNon30Min)
               ? null
               : (details) {
+            print('Tapping slot: ${slot.sId}, isSelected: $isSelected');
             if (selectedDuration == '30 min') {
               // For 30 min slots, detect left/right half tap
               final RenderBox box = slotContext.findRenderObject() as RenderBox;
@@ -732,6 +733,7 @@ class CreateOpenMatchesScreen extends StatelessWidget {
                 return;
               }
 
+              print('Toggling slot selection for: ${slot.sId}');
               controller.toggleSlotSelection(
                 slot,
                 courtId: courtId,

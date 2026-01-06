@@ -254,17 +254,17 @@ class MainHomeScreen extends StatelessWidget {
                     AppStrings.yourBooking,
                     style: Get.textTheme.headlineMedium,
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: (){},
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Text(
-                        "See all",
-                        style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
-                      ),
-                    ),
-                  ),
+                  // const Spacer(),
+                  // GestureDetector(
+                  //   onTap: (){},
+                  //   child: Container(
+                  //     color: Colors.transparent,
+                  //     child: Text(
+                  //       "See all",
+                  //       style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

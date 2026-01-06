@@ -35,6 +35,17 @@ class QuestionsBottomsheetController extends GetxController {
   // Local match data from create open matches controller
   Map<String, dynamic> localMatchData = {};
   
+  // Calculate total amount from selected slots
+  int get totalAmount {
+    final slots = (localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
+    return slots.fold(0, (sum, slot) => sum + (slot.amount ?? 0));
+  }
+  
+  // Get slot count
+  int get totalSlots {
+    return (localMatchData["slot"] as List?)?.length ?? 0;
+  }
+  
   // Validation method
   bool validateSelections() {
     if (selectedGameLevel.value.isEmpty) {
@@ -154,25 +165,90 @@ class QuestionsBottomsheetController extends GetxController {
           slotCourtId = courtIds[index];
         }
 
+        // Get businessHours from localMatchData
+        final businessHours = (localMatchData["businessHours"] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        
+        // Clean businessHours to only include time and day
+        final cleanBusinessHours = businessHours.map((bh) => {
+          "time": bh["time"] ?? "",
+          "day": bh["day"] ?? "",
+        }).toList();
+
+        // Handle half slots and other suffixes - don't send suffixes in slotId
+        String cleanSlotId = slot.sId ?? "";
+        if (cleanSlotId.contains('_')) {
+          cleanSlotId = cleanSlotId.split('_')[0]; // Remove everything after first underscore
+        }
+        
+        // Calculate proper duration, totalTime, and bookingTime
+        int duration = slot.duration ?? 60;
+        int totalTime = slot.duration ?? 60;
+        String bookingTime = slot.bookingTime ?? slot.time ?? "";
+        
+        // Get the selected duration from localMatchData
+        final selectedDurationStr = localMatchData["selectedDuration"] as String?;
+        int selectedDurationMinutes = 60;
+        if (selectedDurationStr != null) {
+          selectedDurationMinutes = int.tryParse(selectedDurationStr.replaceAll(' min', '')) ?? 60;
+          log("Debug - Found selectedDuration in localMatchData: $selectedDurationStr -> $selectedDurationMinutes");
+        } else {
+          // Fallback: determine from slot count
+          if (slotData.length >= 2) {
+            selectedDurationMinutes = 120; // Assume 120min for 2+ slots
+          }
+          log("Debug - No selectedDuration found, using fallback based on slot count ${slotData.length}: $selectedDurationMinutes");
+        }
+        
+        // Check if this is a half slot selection (30min duration with left/right indicators)
+        bool isHalfSlot = selectedDurationMinutes == 30 && 
+            (slot.sId?.contains('_left') == true || slot.sId?.contains('_right') == true);
+        
+        // Check if this is a 90min half slot (second slot in 90min selection)
+        bool is90MinHalfSlot = selectedDurationMinutes == 90 && 
+            (slot.sId?.contains('_half') == true || slot.sId?.contains('_second') == true);
+        
+        // Set duration and totalTime based on selected duration and slot type
+        if (isHalfSlot || selectedDurationMinutes == 30) {
+          duration = 30;
+          totalTime = 30;
+        } else if (is90MinHalfSlot) {
+          duration = 30; // Half slot duration
+          totalTime = 90; // Total time for 90min selection
+        } else if (selectedDurationMinutes == 90) {
+          duration = 60; // Full slot duration
+          totalTime = 90; // Total time for 90min selection
+        } else if (selectedDurationMinutes == 120) {
+          totalTime = 60; // 60min per slot for 120min (2 slots of 60min each)
+        } else {
+          totalTime = selectedDurationMinutes; // 60min
+        }
+        
+        log("Debug - Slot ${index}: selectedDuration=$selectedDurationMinutes, isHalfSlot=$isHalfSlot, is90MinHalfSlot=$is90MinHalfSlot, duration=$duration, totalTime=$totalTime");
+        
+        // For 30min slots, adjust bookingTime based on half selection
+        if (slot.sId?.contains('_half') == true || slot.sId?.contains('_R') == true) {
+          // For right half, add 30 minutes to the original time
+          if (slot.sId?.endsWith('_R') == true) {
+            bookingTime = _addMinutesToTime(slot.time ?? "", 30);
+          }
+        }
+
         return {
-          "slotId": slot.sId ?? "",
-          "businessHours": slot.businessHours?.map((bh) => {
-            "time": bh.time ?? "",
-            "day": bh.day ?? "",
-          }).toList() ?? [],
+          "slotId": cleanSlotId,
+          "businessHours": cleanBusinessHours,
           "slotTimes": [
             {
               "time": slot.time ?? "",
               "amount": slot.amount ?? 0,
             }
           ],
-          "matchType":selectedMatchType.value,
+          "matchType": selectedMatchType.value,
           "courtName": courtName,
           "courtId": slotCourtId,
           "bookingDate": formattedBookingDate,
-          "duration": slot.duration ?? 60,
-          "totalTime": slot.duration ?? 60,
-          "bookingTime": slot.bookingTime ?? slot.time ?? ""
+          "duration": duration,
+          "totalTime": totalTime,
+          "bookingTime": bookingTime
         };
       }).toList();
 
@@ -358,7 +434,7 @@ class QuestionsBottomsheetController extends GetxController {
     isProcessing.value = true;
 
     try {
-      final priceString = localMatchData['price']?.toString() ?? '0';
+      final priceString = totalAmount.toString();
       final price = double.tryParse(priceString.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
 
       if (price <= 0) {
@@ -430,11 +506,8 @@ class QuestionsBottomsheetController extends GetxController {
 
     profileController.fetchUserProfile();
     
-    // Get local match data from arguments
-    final args = Get.arguments;
-    if (args != null && args is Map<String, dynamic>) {
-      localMatchData = args;
-    }
+    // localMatchData will be set directly by the calling controller
+    // No need to get from arguments since this is a bottomsheet
     
     // Add profile data to teamA
     String skillLevel = "";
@@ -467,5 +540,24 @@ class QuestionsBottomsheetController extends GetxController {
   void onClose() {
     _paymentService.dispose();
     super.onClose();
+  }
+  
+  // Helper method to add minutes to time string
+  String _addMinutesToTime(String timeStr, int minutes) {
+    try {
+      final time = timeStr.trim().toLowerCase();
+      final dt = DateFormat('h:mm a').parseStrict(time);
+      final newTime = dt.add(Duration(minutes: minutes));
+      return DateFormat('h:mm a').format(newTime);
+    } catch (_) {
+      try {
+        final time = timeStr.trim().toLowerCase();
+        final dt = DateFormat('h a').parseStrict(time);
+        final newTime = dt.add(Duration(minutes: minutes));
+        return DateFormat('h:mm a').format(newTime);
+      } catch (_) {
+        return timeStr; // Return original if parsing fails
+      }
+    }
   }
 }

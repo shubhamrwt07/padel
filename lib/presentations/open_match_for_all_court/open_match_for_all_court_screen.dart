@@ -97,7 +97,9 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                 offset: Offset(0, -Get.height * 0.015),
                 child: Obx(() {
                   if (controller.isLoading.value) {
-                    return Center(child: buildMatchCardShimmer());
+                    return Center(child: ListView.builder(shrinkWrap: true,itemCount: 3,itemBuilder: (context,index){
+                      return buildMatchCardShimmer();
+                    }));
                   }
                   final matches = controller.matchesBySelection.value;
                   if (matches == null || (matches.data?.isEmpty ?? true)) {

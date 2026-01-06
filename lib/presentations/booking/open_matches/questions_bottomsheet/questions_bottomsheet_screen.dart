@@ -90,13 +90,13 @@ class QuestionsBottomsheetScreen extends StatelessWidget {
                               style: Get.textTheme.bodyMedium!.copyWith(color: Colors.white)
                             ),
                             Text(
-                              'Total Slots: ${(controller.localMatchData["slot"] as List?)?.length ?? 0}',
+                              'Total Slots: ${controller.totalSlots}',
                               style: Get.textTheme.bodySmall!.copyWith(color: Colors.white.withValues(alpha: 0.8))
                             ),
                           ],
                         ),
                         Text(
-                          '₹ ${controller.localMatchData["price"] ?? "0"}',
+                          '₹ ${controller.totalAmount}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -345,7 +345,12 @@ class QuestionsBottomsheetScreen extends StatelessWidget {
   Widget _buildSlotDetails() {
     final slots = (controller.localMatchData["slot"] as List?)?.cast<Slots>() ?? [];
     final matchDate = controller.localMatchData["matchDate"];
-    final pricePerSlot = controller.localMatchData["slotPrice"] ?? 1000;
+    
+    // Debug: Print the slots to see what's being passed
+    print("Debug - Slots in bottomsheet: ${slots.length}");
+    for (var slot in slots) {
+      print("Slot: ${slot.sId} - ${slot.time} - ${slot.amount}");
+    }
 
     String formattedDate = '';
     if (matchDate != null) {
@@ -370,8 +375,8 @@ class QuestionsBottomsheetScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Slot list
-        ...slots.map((slot) {
+        // Slot list - Remove duplicates by sId
+        ...slots.toSet().map((slot) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Row(
@@ -394,7 +399,7 @@ class QuestionsBottomsheetScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '₹ $pricePerSlot',
+                  '₹ ${slot.amount ?? 0}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

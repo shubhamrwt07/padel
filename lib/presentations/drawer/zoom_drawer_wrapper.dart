@@ -18,18 +18,25 @@ class ZoomDrawerWrapper extends StatelessWidget {
 
     return ZoomDrawer(
       controller: drawerController.zoomDrawerController,
-      menuScreen: CustomDrawerUi(),
+      menuScreen: const CustomDrawerUi(),
       mainScreen: child,
-      borderRadius: 20.0,
-      showShadow: true,
-      // shadowLayer1Color: Colors.black.withValues(alpha: 0.03),
-      // shadowLayer2Color: Colors.black.withValues(alpha: 0.03),
+
+      // 🎯 Smooth animation tuning
+      duration: const Duration(milliseconds: 300),
+      openCurve: Curves.easeOutCubic,
+      closeCurve: Curves.easeInCubic,
+
+      // 🎨 Visual smoothness
+      borderRadius: 24,
       angle: 0.0,
-      slideWidth: MediaQuery.of(context).size.width * 0.55,
+      slideWidth: MediaQuery.of(context).size.width * 0.65,
+      showShadow: true,
+
+      // shadowLayer1Color: Colors.black.withOpacity(0.05),
+      // shadowLayer2Color: Colors.black.withOpacity(0.08),
+
+      // ⚙️ Behavior
       menuBackgroundColor: Colors.white,
-      openCurve: Curves.easeInOut,
-      closeCurve: Curves.easeInOut,
-      // Optional: Add more shadow customization
       mainScreenTapClose: true,
       moveMenuScreen: true,
     );

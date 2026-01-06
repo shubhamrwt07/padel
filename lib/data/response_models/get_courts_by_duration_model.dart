@@ -191,7 +191,7 @@ class AvailabilityByTime {
   String? startTime;
   int? duration;
   int? totalAmount;
-  List<Slots>? slots;
+  List<CourtDurationSlots>? slots;
 
   AvailabilityByTime(
       {this.requestedTime,
@@ -206,9 +206,9 @@ class AvailabilityByTime {
     duration = json['duration'];
     totalAmount = json['totalAmount'];
     if (json['slots'] != null) {
-      slots = <Slots>[];
+      slots = <CourtDurationSlots>[];
       json['slots'].forEach((v) {
-        slots!.add(new Slots.fromJson(v));
+        slots!.add(new CourtDurationSlots.fromJson(v));
       });
     }
   }
@@ -226,7 +226,7 @@ class AvailabilityByTime {
   }
 }
 
-class Slots {
+class CourtDurationSlots {
   String? sId;
   String? time;
   int? slotSequence;
@@ -236,7 +236,7 @@ class Slots {
   String? status;
   List<BusinessHours>? businessHours;
 
-  Slots(
+  CourtDurationSlots(
       {this.sId,
         this.time,
         this.slotSequence,
@@ -246,7 +246,7 @@ class Slots {
         this.status,
         this.businessHours});
 
-  Slots.fromJson(Map<String, dynamic> json) {
+  CourtDurationSlots.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     time = json['time'];
     slotSequence = json['slotSequence'];
