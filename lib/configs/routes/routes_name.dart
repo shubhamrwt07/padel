@@ -60,7 +60,7 @@ class RoutesName {
   static const String bookACourt = '/bookACourt';
 
   //LeaderBoard-----------------------------------------------------------------
-  static const String leaderBoard = '/leaderBoard';
+  static const String leaderBoard = '/leaderBoard_repo';
 
   //ScoreBoard------------------------------------------------------------------
   static const String scoreBoard = '/scoreBoard';

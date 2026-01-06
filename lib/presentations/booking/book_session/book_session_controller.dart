@@ -195,6 +195,7 @@ class BookSessionController extends GetxController {
         day: formattedDay,
         registerClubId: clubId,
         date: formattedDate,
+        duration: selectedDuration.value.split(' ').first
       );
 
       // Debug: Log booking times from API

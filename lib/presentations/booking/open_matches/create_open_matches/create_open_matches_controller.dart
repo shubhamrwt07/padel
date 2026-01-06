@@ -343,6 +343,12 @@ class CreateOpenMatchesController extends GetxController {
     }
   }
   void toggleSlotSelection(Slots slot, {String? courtId, String? courtName, bool? isLeftHalf}) {
+    print('=== toggleSlotSelection called ===');
+    print('Slot ID: ${slot.sId}');
+    print('Court ID: $courtId');
+    print('Is Left Half: $isLeftHalf');
+    print('Current selections count: ${multiDateSelections.length}');
+    
     // Resolve court info
     Map<String, String>? resolvedCourtInfo;
     if (courtId != null && courtId.isNotEmpty) {
@@ -356,7 +362,10 @@ class CreateOpenMatchesController extends GetxController {
     } else {
       resolvedCourtInfo = _findCourtInfoForSlot(slot);
     }
-    if (resolvedCourtInfo == null) return;
+    if (resolvedCourtInfo == null) {
+      print('ERROR: Could not resolve court info');
+      return;
+    }
 
     final slotId = slot.sId ?? '';
     final resolvedCourtId = resolvedCourtInfo['courtId'] ?? '';
@@ -370,13 +379,18 @@ class CreateOpenMatchesController extends GetxController {
         ? '${dateString}_${resolvedCourtId}_${slotId}_${isLeftHalf ? 'L' : 'R'}'
         : '${dateString}_${resolvedCourtId}_$slotId';
 
+    print('Multi-date key: $multiDateKey');
+    print('Key exists in selections: ${multiDateSelections.containsKey(multiDateKey)}');
+
     // Legacy key for current date compatibility
     final compositeKey = '${resolvedCourtId}_$slotId';
 
     if (multiDateSelections.containsKey(multiDateKey)) {
+      print('DESELECTING slot group');
       // Remove selection group
       _removeSlotGroup(slot, resolvedCourtId, dateString);
     } else {
+      print('SELECTING slot group');
       // Check limits before adding
       if (!_canAddSlot()) {
         return;
@@ -413,6 +427,7 @@ class CreateOpenMatchesController extends GetxController {
     // Recalculate total amount from all dates
     _recalculateTotalAmount();
 
+    print('Final selections count: ${multiDateSelections.length}');
     log("Selected ${multiDateSelections.length} slots for date: $dateString, Total: ₹${totalAmount.value}");
   }
   /// Check if adding a new slot would violate limits
@@ -575,58 +590,85 @@ class CreateOpenMatchesController extends GetxController {
   }
   
   void _removeSlotGroup(Slots primarySlot, String courtId, String dateString) {
+    print('=== _removeSlotGroup called ===');
+    print('Primary slot ID: ${primarySlot.sId}');
+    print('Court ID: $courtId');
+    print('Date string: $dateString');
+    
     final selectedDurationMinutes = int.tryParse(selectedDuration.value.replaceAll(' min', '')) ?? 60;
+    print('Selected duration: ${selectedDurationMinutes}min');
     
     // Find all slots for this court
     final courtData = slots.value?.data?.firstWhere((court) => court.sId == courtId);
-    if (courtData?.slots == null) return;
+    if (courtData?.slots == null) {
+      print('ERROR: Court data or slots not found');
+      return;
+    }
     
     final allSlots = courtData!.slots!;
     final primarySlotIndex = allSlots.indexWhere((s) => s.sId == primarySlot.sId);
-    if (primarySlotIndex == -1) return;
-    
-    // Calculate how many slots to remove based on duration
-    int slotsToRemove;
-    switch (selectedDurationMinutes) {
-      case 30:
-        slotsToRemove = 1;
-        break;
-      case 60:
-        slotsToRemove = 1; // Fixed: 60min should remove only 1 slot
-        break;
-      case 90:
-        slotsToRemove = 2; // Fixed: 90min should remove 2 slots
-        break;
-      case 120:
-        slotsToRemove = 2; // Fixed: 120min should remove 2 slots
-        break;
-      default:
-        slotsToRemove = 1;
+    if (primarySlotIndex == -1) {
+      print('ERROR: Primary slot not found in court slots');
+      return;
     }
     
-    // Remove all slots in the group
-    for (int i = 0; i < slotsToRemove; i++) {
-      final slotIndex = primarySlotIndex + i;
-      if (slotIndex >= allSlots.length) break;
+    print('Primary slot index: $primarySlotIndex');
+    
+    // For 30min slots, remove both left and right half keys
+    if (selectedDurationMinutes == 30) {
+      final leftKey = '${dateString}_${courtId}_${primarySlot.sId}_L';
+      final rightKey = '${dateString}_${courtId}_${primarySlot.sId}_R';
       
-      final slotToRemove = allSlots[slotIndex];
-      final compositeKey = '${courtId}_${slotToRemove.sId}';
+      print('Removing 30min keys: $leftKey, $rightKey');
+      print('Left key exists: ${multiDateSelections.containsKey(leftKey)}');
+      print('Right key exists: ${multiDateSelections.containsKey(rightKey)}');
       
-      if (selectedDurationMinutes == 30) {
-        // For 30min slots, remove both left and right half keys
-        final leftKey = '${dateString}_${courtId}_${slotToRemove.sId}_L';
-        final rightKey = '${dateString}_${courtId}_${slotToRemove.sId}_R';
-        multiDateSelections.remove(leftKey);
-        multiDateSelections.remove(rightKey);
-      } else {
-        // For other durations, use the standard key
-        final slotKey = '${dateString}_${courtId}_${slotToRemove.sId}';
-        multiDateSelections.remove(slotKey);
+      multiDateSelections.remove(leftKey);
+      multiDateSelections.remove(rightKey);
+      
+      selectedSlots.removeWhere((s) => s.sId == primarySlot.sId);
+      final compositeKey = '${courtId}_${primarySlot.sId}';
+      selectedSlotsWithCourtInfo.remove(compositeKey);
+    } else {
+      // For other durations, calculate how many slots to remove
+      int slotsToRemove;
+      switch (selectedDurationMinutes) {
+        case 60:
+          slotsToRemove = 1;
+          break;
+        case 90:
+          slotsToRemove = 2;
+          break;
+        case 120:
+          slotsToRemove = 2;
+          break;
+        default:
+          slotsToRemove = 1;
       }
       
-      selectedSlots.removeWhere((s) => s.sId == slotToRemove.sId);
-      selectedSlotsWithCourtInfo.remove(compositeKey);
+      print('Slots to remove: $slotsToRemove');
+      
+      // Remove all slots in the group
+      for (int i = 0; i < slotsToRemove; i++) {
+        final slotIndex = primarySlotIndex + i;
+        if (slotIndex >= allSlots.length) {
+          print('WARNING: Slot index $slotIndex out of bounds');
+          break;
+        }
+        
+        final slotToRemove = allSlots[slotIndex];
+        final slotKey = '${dateString}_${courtId}_${slotToRemove.sId}';
+        final compositeKey = '${courtId}_${slotToRemove.sId}';
+        
+        print('Removing slot $i: key=$slotKey, exists=${multiDateSelections.containsKey(slotKey)}');
+        
+        multiDateSelections.remove(slotKey);
+        selectedSlots.removeWhere((s) => s.sId == slotToRemove.sId);
+        selectedSlotsWithCourtInfo.remove(compositeKey);
+      }
     }
+    
+    print('Remaining selections after removal: ${multiDateSelections.length}');
   }
   // Check if the same time slot is already selected in a different court
   bool _hasTimeConflictAcrossCourts(String? slotTime, String currentCourtId, String dateString) {

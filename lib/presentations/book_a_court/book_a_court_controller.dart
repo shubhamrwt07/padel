@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:padel_mobile/handler/logger.dart';
 import '../../../../data/request_models/home_models/get_available_court.dart';
 import '../../repositories/home_repository/home_repository.dart';
-import '../../data/response_models/get_courts_by_duration_model.dart' hide Slots;
+import '../../data/response_models/get_courts_by_duration_model.dart' hide CourtDurationSlots;
 import '../../data/response_models/get_all_slot_prices_of_court_model.dart';
 
 class BookACourtController extends GetxController {

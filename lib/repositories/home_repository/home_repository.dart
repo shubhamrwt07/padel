@@ -42,9 +42,10 @@ class HomeRepository {
   Future<GetAllActiveCourtsForSlotWiseModel> fetchAvailableCourtsSlotWise({
     required String registerClubId,       // club id
     required String day,
-     String? date
+     String? date,
+    String? duration
   }) async {
-    String url = "${AppEndpoints.getAllActiveCourtsForSlotWise}register_club_id=$registerClubId&day=$day&date=$date";
+    String url = "${AppEndpoints.getAllActiveCourtsForSlotWise}register_club_id=$registerClubId&day=$day&date=$date&duration=$duration";
 
     try {
       final response = await dioClient.get(url);

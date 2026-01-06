@@ -367,8 +367,8 @@ class BookACourtScreen extends StatelessWidget {
                               // Get unique slots from availabilityByTime (remove duplicates by slot ID)
                               final availableSlots = court.availabilityByTime
                                   ?.expand((availability) => availability.slots ?? [])
-                                  .cast<GetCourtsByDurationModel.Slots>()
-                                  .fold<Map<String, GetCourtsByDurationModel.Slots>>({}, (map, slot) {
+                                  .cast<GetCourtsByDurationModel.CourtDurationSlots>()
+                                  .fold<Map<String, GetCourtsByDurationModel.CourtDurationSlots>>({}, (map, slot) {
                                     if (slot.sId != null) {
                                       map[slot.sId!] = slot;
                                     }
@@ -440,7 +440,7 @@ class BookACourtScreen extends StatelessWidget {
     required String courtName,
     required String type,
     required int selectedIndex,
-    List<GetCourtsByDurationModel.Slots>? availableSlots,
+    List<GetCourtsByDurationModel.CourtDurationSlots>? availableSlots,
     String? courtId,
     int? totalAmount,
   }) {
@@ -655,9 +655,12 @@ class BookACourtScreen extends StatelessWidget {
                         return GestureDetector(
                           onTap: onTap,
                           child: Obx(() {
-                            final dateSelections =
-                                controller.getSelectionsByDate()[dateString] ??
-                                [];
+                            final realCourtSelections = 
+                                controller.realCourtSelections.entries
+                                    .where((entry) => entry.value['date'] == dateString)
+                                    .map((entry) => entry.value)
+                                    .toList();
+                            final totalSelections = realCourtSelections.length;
 
                             return AnimatedSwitcher(
                               duration: const Duration(milliseconds: 500),
@@ -691,7 +694,7 @@ class BookACourtScreen extends StatelessWidget {
                                         border: Border.all(
                                           color: isSelected
                                               ? Colors.transparent
-                                              : dateSelections.isNotEmpty
+                                              : totalSelections > 0
                                               ? AppColors.primaryColor
                                               : AppColors.blackColor.withAlpha(
                                                   20,
@@ -710,8 +713,7 @@ class BookACourtScreen extends StatelessWidget {
                                                   fontWeight: FontWeight.w600,
                                                   color: isSelected
                                                       ? Colors.white
-                                                      : dateSelections
-                                                            .isNotEmpty
+                                                      : totalSelections > 0
                                                       ? AppColors.primaryColor
                                                       : AppColors.textColor,
                                                 ),
@@ -725,8 +727,7 @@ class BookACourtScreen extends StatelessWidget {
                                                     fontSize: 11,
                                                     color: isSelected
                                                         ? Colors.white
-                                                        : dateSelections
-                                                              .isNotEmpty
+                                                        : totalSelections > 0
                                                         ? AppColors.primaryColor
                                                         : Colors.black,
                                                   ),
@@ -735,7 +736,7 @@ class BookACourtScreen extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    if (dateSelections.isNotEmpty)
+                                    if (totalSelections > 0)
                                       Positioned(
                                         top: -2,
                                         right: -6,
@@ -750,7 +751,7 @@ class BookACourtScreen extends StatelessWidget {
                                                 : AppColors.primaryColor,
                                           ),
                                           child: Text(
-                                            "${dateSelections.length}",
+                                            "$totalSelections",
                                             style: const TextStyle(
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
