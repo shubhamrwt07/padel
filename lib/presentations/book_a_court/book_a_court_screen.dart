@@ -185,6 +185,27 @@ class BookACourtScreen extends StatelessWidget {
 
   Widget availableCourts() {
     return Obx(() {
+      // Check if no slots are selected from main grid
+      if (controller.multiDateSelections.isEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Available Courts', style: Get.textTheme.labelLarge),
+            const SizedBox(height: 16),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Text(
+                  'Please select a time slot from above to see available courts.',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+
       // Show loading state
       if (controller.isLoadingCourtsByDuration.value) {
         return Column(
@@ -217,7 +238,7 @@ class BookACourtScreen extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(20.0),
                 child: Text(
-                  'No courts available. Please select a time slot first.',
+                  'No courts available for the selected time slot.',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -235,29 +256,16 @@ class BookACourtScreen extends StatelessWidget {
           ...List.generate(clubs.length, (index) {
             final club = clubs[index];
             
-            // Use totalAmount from availabilityByTime in API or updated slot prices
+            // Use totalAmount from fetchCourtsByDuration API
             int minPrice = 0;
             if (club.courts != null && club.courts!.isNotEmpty) {
-              // First try to get prices from updated slot data (after fetchAllSlotPrices)
-              final allSlotAmounts = club.courts!
+              final allTotalAmounts = club.courts!
                   .expand((court) => court.availabilityByTime ?? [])
-                  .expand((availability) => availability.slots ?? [])
-                  .where((slot) => slot.amount != null && slot.amount! > 0)
-                  .map((slot) => slot.amount!)
+                  .where((availability) => availability.totalAmount != null && availability.totalAmount! > 0)
+                  .map((availability) => availability.totalAmount!)
                   .toList();
-              
-              if (allSlotAmounts.isNotEmpty) {
-                minPrice = allSlotAmounts.reduce((a, b) => a < b ? a : b);
-              } else {
-                // Fallback to totalAmount from API
-                final allTotalAmounts = club.courts!
-                    .expand((court) => court.availabilityByTime ?? [])
-                    .where((availability) => availability.totalAmount != null && availability.totalAmount! > 0)
-                    .map((availability) => availability.totalAmount!)
-                    .toList();
-                if (allTotalAmounts.isNotEmpty) {
-                  minPrice = allTotalAmounts.reduce((a, b) => a < b ? a : b);
-                }
+              if (allTotalAmounts.isNotEmpty) {
+                minPrice = allTotalAmounts.reduce((a, b) => a < b ? a : b);
               }
             }
 
@@ -379,11 +387,8 @@ class BookACourtScreen extends StatelessWidget {
                                   if (slot.time != null) {
                                     int? updatedPrice;
                                     if (selectedDurationMinutes == 90) {
-                                      final price60 = controller.findPriceForSlot(slot.time!, dayName, 60);
-                                      final price30 = controller.findPriceForSlot(slot.time!, dayName, 30);
-                                      if (price60 != null && price30 != null) {
-                                        updatedPrice = price60 + price30;
-                                      }
+                                      // For 90min display: show only 60min price
+                                      updatedPrice = controller.findPriceForSlot(slot.time!, dayName, 60);
                                     } else {
                                       final duration = selectedDurationMinutes == 120 ? 60 : selectedDurationMinutes;
                                       updatedPrice = controller.findPriceForSlot(slot.time!, dayName, duration);
@@ -396,6 +401,12 @@ class BookACourtScreen extends StatelessWidget {
                                 }
                               }
 
+                              // Get totalAmount from availabilityByTime
+                              int? totalAmount;
+                              if (court.availabilityByTime != null && court.availabilityByTime!.isNotEmpty) {
+                                totalAmount = court.availabilityByTime!.first.totalAmount;
+                              }
+
                               return Padding(
                                 padding: EdgeInsets.only(
                                   bottom: courtIndex < club.courts!.length - 1 ? 16 : 0,
@@ -406,6 +417,7 @@ class BookACourtScreen extends StatelessWidget {
                                   selectedIndex: index * 100 + courtIndex, // Unique index
                                   availableSlots: availableSlots,
                                   courtId: court.courtId ?? '',
+                                  totalAmount: totalAmount,
                                 ),
                               );
                             }),
@@ -430,6 +442,7 @@ class BookACourtScreen extends StatelessWidget {
     required int selectedIndex,
     List<GetCourtsByDurationModel.Slots>? availableSlots,
     String? courtId,
+    int? totalAmount,
   }) {
     return Obx(() {
       // Only show slots if available from API
@@ -457,7 +470,7 @@ class BookACourtScreen extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 10,),
+          SizedBox(width: 15,),
 
           /// TIME SLOTS - Only show if slots available
           if (displaySlots.isNotEmpty)
@@ -466,19 +479,19 @@ class BookACourtScreen extends StatelessWidget {
                 children: List.generate(displaySlots.length, (index) {
                   final slot = displaySlots[index];
 
-                  return Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(
-                        right: index == displaySlots.length - 1 ? 0 : 10,
-                      ),
-                      child: _buildCourtSlotTile(
-                        slot,
-                        courtName,
-                        selectedIndex,
-                        index,
-                        courtId: courtId ?? 'court$selectedIndex',
-                        availableSlots: displaySlots,
-                      ),
+                  return Container(
+                    width: 83,
+                    margin: EdgeInsets.only(
+                      right: index == displaySlots.length - 1 ? 0 : 10,
+                    ),
+                    child: _buildCourtSlotTile(
+                      slot,
+                      courtName,
+                      selectedIndex,
+                      index,
+                      courtId: courtId ?? 'court$selectedIndex',
+                      availableSlots: displaySlots,
+                      totalAmount: totalAmount,
                     ),
                   );
                 }),
@@ -859,6 +872,7 @@ class BookACourtScreen extends StatelessWidget {
     int slotIndex, {
     String? courtId,
     List<dynamic>? availableSlots,
+    int? totalAmount,
   }) {
     // Check actual selection state from controller (for real court selections)
     final resolvedCourtId = courtId ?? 'court${courtIndex + 1}';
@@ -870,6 +884,11 @@ class BookACourtScreen extends StatelessWidget {
     // Check if this is the second slot in 90min mode
     final isSecondSlotIn90Min = is90MinSlot && !isSelected && 
         controller.isSecondSlotIn90MinForRealCourt(slot, resolvedCourtId, availableSlots);
+
+    // Check if this is the second slot in 120min mode
+    final is120MinSlot = selectedDuration == '120 min';
+    final isSecondSlotIn120Min = is120MinSlot && !isSelected && 
+        controller.isSecondSlotIn120MinForRealCourt(slot, resolvedCourtId, availableSlots);
 
     const blueColor = Color(0xff053CFF);
     const radius = 5.0;
@@ -938,8 +957,23 @@ class BookACourtScreen extends StatelessWidget {
                       ),
                     ),
 
-                  /// FULL GRADIENT FOR NON-30MIN AND NON-90MIN-SECOND-SLOT SELECTIONS
-                  if (isSelected && !isHalfSlot && !isSecondSlotIn90Min)
+                  /// FULL GRADIENT FOR NON-30MIN AND NON-90MIN-SECOND-SLOT AND NON-120MIN-SECOND-SLOT SELECTIONS
+                  if (isSelected && !isHalfSlot && !isSecondSlotIn90Min && !isSecondSlotIn120Min)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff1F41BB), Color(0xff0E1E55)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// FULL GRADIENT FOR 120MIN SECOND SLOT
+                  if (isSecondSlotIn120Min)
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -1044,7 +1078,7 @@ class BookACourtScreen extends StatelessWidget {
                     ),
 
                   /// LEFT BLUE STRIP (ONLY WHEN NOT SELECTED)
-                  if (!isSelected && !isSecondSlotIn90Min)
+                  if (!isSelected && !isSecondSlotIn90Min && !isSecondSlotIn120Min)
                     Positioned.fill(
                       left: 0,
                       child: Align(
@@ -1078,7 +1112,7 @@ class BookACourtScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              slot.time ?? "",
+                              controller.formatTimeForDisplay(slot.time),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -1088,7 +1122,7 @@ class BookACourtScreen extends StatelessWidget {
                             Text(
                               '₹${slot.amount ?? 0}',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
@@ -1114,7 +1148,7 @@ class BookACourtScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              slot.time ?? "",
+                              controller.formatTimeForDisplay(slot.time),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -1124,7 +1158,7 @@ class BookACourtScreen extends StatelessWidget {
                             Text(
                               '₹${slot.amount ?? 0}',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
@@ -1150,7 +1184,7 @@ class BookACourtScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              slot.time ?? "",
+                              controller.formatTimeForDisplay(slot.time),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -1160,7 +1194,7 @@ class BookACourtScreen extends StatelessWidget {
                             Text(
                               '₹${slot.amount ?? 0}',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
@@ -1170,8 +1204,34 @@ class BookACourtScreen extends StatelessWidget {
                       ),
                     ),
 
+                  /// TEXT FOR 120MIN SECOND SLOT
+                  if (isSecondSlotIn120Min)
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            controller.formatTimeForDisplay(slot.time),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '₹${slot.amount ?? 0}',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   /// TEXT FOR OTHER CASES
-                  if (!isSecondSlotIn90Min && (!isHalfSlot || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) || 
+                  if (!isSecondSlotIn90Min && !isSecondSlotIn120Min && (!isHalfSlot || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) || 
                       (!_isLeftHalfSelectedInRealCourt(slot, resolvedCourtId) && !_isRightHalfSelectedInRealCourt(slot, resolvedCourtId))))
                     Center(
                       child: Column(
@@ -1179,22 +1239,19 @@ class BookACourtScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            slot.time ?? "",
+                            controller.formatTimeForDisplay(slot.time),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) ? Colors.white : Colors.black87,
+                              color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) || isSecondSlotIn120Min ? Colors.white : Colors.black87,
                             ),
                           ),
-                          Transform.translate(
-                            offset: Offset(0, 2),
-                            child: Text(
-                              '₹${slot.amount ?? 0}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) ? Colors.white : AppColors.primaryColor,
-                              ),
+                          Text(
+                            '₹${slot.amount ?? 0}',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w500,
+                              color: isSelected || _isBothHalvesSelectedInRealCourt(slot, resolvedCourtId) || isSecondSlotIn120Min ? Colors.white : AppColors.primaryColor,
                             ),
                           ),
                         ],
@@ -1297,7 +1354,7 @@ class BookACourtScreen extends StatelessWidget {
                       : (isSelected || isPartOfGroup)
                       ? Colors.transparent
                       : Colors.grey.shade300,
-                  width: (isSelected || isPartOfGroup) ? 2 : 1,
+                  width: 1,
                 ),
               ),
               child: Stack(
@@ -1399,19 +1456,19 @@ class BookACourtScreen extends StatelessWidget {
                     ),
 
                   /// VERTICAL DIVIDER FOR 30MIN SLOTS
-                  if (isHalfSlot && !isUnavailable)
+                  if (isHalfSlot && !isUnavailable&& !_isRightHalfSelected(slot, courtId)&& !_isLeftHalfSelected(slot, courtId))
                     Positioned(
                       left: 40,
                       top: 0,
                       bottom: 0,
                       child: Container(
                         width: 2,
-                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                        color: AppColors.primaryColor.withValues(alpha: 0.2),
                       ),
                     ),
 
                   /// LEFT BLUE STRIP (ONLY WHEN AVAILABLE AND NOT SELECTED)
-                  if (!isUnavailable && !isSelected && !isPartOfGroup)
+                  if (!isUnavailable && !isSelected && !isPartOfGroup && (!isHalfSlot || (!_isLeftHalfSelected(slot, courtId) && !_isRightHalfSelected(slot, courtId))))
                     Positioned.fill(
                       left: 0,
                       child: Align(
@@ -1442,7 +1499,7 @@ class BookACourtScreen extends StatelessWidget {
                           ).createShader(bounds);
                         },
                         child: Text(
-                          slot.time ?? "",
+                          controller.formatTimeForDisplay(slot.time),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -1465,7 +1522,7 @@ class BookACourtScreen extends StatelessWidget {
                           ).createShader(bounds);
                         },
                         child: Text(
-                          slot.time ?? "",
+                          controller.formatTimeForDisplay(slot.time),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -1488,7 +1545,7 @@ class BookACourtScreen extends StatelessWidget {
                           ).createShader(bounds);
                         },
                         child: Text(
-                          slot.time ?? "",
+                          controller.formatTimeForDisplay(slot.time),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -1507,7 +1564,7 @@ class BookACourtScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            slot.time ?? "",
+                            controller.formatTimeForDisplay(slot.time),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -1787,7 +1844,7 @@ class BookACourtScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '₹ ${slot.amount ?? 0}',
+                  '₹ ${slot.amount}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

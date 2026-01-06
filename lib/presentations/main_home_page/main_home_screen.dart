@@ -254,17 +254,17 @@ class MainHomeScreen extends StatelessWidget {
                     AppStrings.yourBooking,
                     style: Get.textTheme.headlineMedium,
                   ),
-                  // const Spacer(),
-                  // GestureDetector(
-                  //   onTap: () => Get.toNamed(RoutesName.home),
-                  //   child: Container(
-                  //     color: Colors.transparent,
-                  //     child: Text(
-                  //       "See all",
-                  //       style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
-                  //     ),
-                  //   ),
-                  // ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: (){},
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Text(
+                        "See all",
+                        style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -381,9 +381,10 @@ class MainHomeScreen extends StatelessWidget {
   Widget _bookingInfo(BuildContext context, dynamic club) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: Get.width * 0.3,
+          width: Get.width * 0.27,
           child: Text(
             club?.clubName ?? "N/A",
             style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.blackColor),
@@ -393,12 +394,12 @@ class MainHomeScreen extends StatelessWidget {
         Row(
           children: [
             Image.asset(Assets.imagesIcLocation, scale: 3, color: AppColors.blackColor),
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
             SizedBox(
               width: Get.width * 0.3,
               child: Text(
                 club?.city ?? "N/A",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor,fontSize: 10),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -415,7 +416,7 @@ class MainHomeScreen extends StatelessWidget {
         Row(
           children: [
             const Icon(Icons.star, color: AppColors.secondaryColor, size: 13),
-            Text("4.9", style: Theme.of(context).textTheme.bodySmall),
+            Text("4.0", style: Theme.of(context).textTheme.bodySmall),
           ],
         ).paddingOnly(bottom: 20),
       ],
@@ -433,41 +434,42 @@ class MainHomeScreen extends StatelessWidget {
               Text(
                 controller.homeController.formatDate(b.bookingDate),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w500,fontSize: 11,
                   color: AppColors.blackColor
                 ),
               ),
               if (b.slot!.first.slotTimes != null && b.slot!.first.slotTimes!.isNotEmpty)
                 Text(
-                  "${formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? "")} - ${formatTimeSlot(b.slot!.first.slotTimes!.last.time ?? "")}",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor),
+                  b.slot!.first.slotTimes!.length > 1 
+                    ? "${formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? "")} - ${formatTimeSlot(b.slot!.first.slotTimes!.last.time ?? "")}"
+                    : formatTimeSlot(b.slot!.first.slotTimes!.first.time ?? ""),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor,fontSize: 11),
                 ).paddingOnly(left: 5),
             ],
           ),
-          //     child: Obx(() {
-          //       final isLoading = controller.homeController.loadingBookingId.value == b.sId;
-          //       return Container(
-          //         height: 23,
-          //         width: 55,
-          //         alignment: Alignment.center,
-          //         decoration: BoxDecoration(
-          //           borderRadius: BorderRadius.circular(10),
-          //           color: AppColors.secondaryColor,
-          //         ),
-          //         child: isLoading
-          //             ? LoadingAnimationWidget.waveDots(
-          //           color: AppColors.whiteColor,
-          //           size: 20,
-          //         )
-          //             : Text(
-          //           "Play Now",
-          //           style: Get.textTheme.headlineSmall!
-          //               .copyWith(color: Colors.white, fontSize: 10),
-          //         ),
-          //       );
-          //     }),
-          //   ),
-          // )
+              Text("(60m)",style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.blackColor,fontSize: 11))
+              // Obx(() {
+              //   final isLoading = controller.homeController.loadingBookingId.value == b.sId;
+              //   return Container(
+              //     height: 23,
+              //     width: 55,
+              //     alignment: Alignment.center,
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(10),
+              //       color: AppColors.secondaryColor,
+              //     ),
+              //     child: isLoading
+              //         ? LoadingAnimationWidget.waveDots(
+              //       color: AppColors.whiteColor,
+              //       size: 20,
+              //     )
+              //         : Text(
+              //       "Play Now",
+              //       style: Get.textTheme.headlineSmall!
+              //           .copyWith(color: Colors.white, fontSize: 10),
+              //     ),
+              //   );
+              // }),
         ],
       ),
     ).paddingOnly(bottom: 2);
@@ -705,12 +707,12 @@ class MainHomeScreen extends StatelessWidget {
             return _buildCourtCarouselCard(context, court);
           },
           options: CarouselOptions(
-            height: 260,
+            height: 300,
             viewportFraction: 0.78,
             enlargeCenterPage: true,
             enlargeStrategy: CenterPageEnlargeStrategy.scale,
-            enableInfiniteScroll: true,
-            autoPlay: true,
+            enableInfiniteScroll: courts.length > 1,
+            autoPlay: courts.length > 1,
             autoPlayInterval: const Duration(seconds: 3),
           ),
         ),
@@ -730,7 +732,7 @@ class MainHomeScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
               /// IMAGE
@@ -776,77 +778,108 @@ class MainHomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              /// BLACK GRADIENT
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.75),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
               /// CONTENT
               Positioned(
                 left: 16,
                 right: 16,
                 bottom: 16,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      court.clubName ?? "N/A",
-                      style: Get.textTheme.titleMedium!
-                          .copyWith(color: Colors.white),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on,
-                            color: Colors.green, size: 14),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            "${court.address}, ${court.city}",
-                            style: Get.textTheme.bodySmall!
-                                .copyWith(color: Colors.white70),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 4,horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            court.clubName ?? "N/A",
+                            style: Get.textTheme.titleMedium!
+                                .copyWith(color: Colors.white,fontSize: 16),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
+                          Row(
+                            children: [
+                              const Icon(Icons.star,
+                                  color: Colors.green, size: 16),
+                              const SizedBox(width: 4),
+                              const Text(
+                                "4.9",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
 
-                    const SizedBox(height: 6),
-
-                    Text(
-                      "${court.courtCount ?? 0} Courts | ${court.features?.join(' | ') ?? 'Available'}",
-                      style: Get.textTheme.bodySmall!
-                          .copyWith(color: Colors.white70),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.star,
-                                color: Colors.green, size: 16),
-                            const SizedBox(width: 4),
-                            const Text(
-                              "4.9",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on,
+                              color: Colors.green, size: 14),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              "${court.city},${court.zipCode}",
+                              style: Get.textTheme.bodySmall!
+                                  .copyWith(color: Colors.white70,fontSize: 10),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          "₹ ${formatAmount(court.totalAmount ?? 0)}",
-                          style: Get.textTheme.titleMedium!
-                              .copyWith(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Text(
+                        "${court.courtCount ?? 0} Courts | ${court.features?.join(' | ') ?? 'Available'}",
+                        style: Get.textTheme.bodySmall!
+                            .copyWith(color: Colors.white70,fontSize: 10),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Row(
+                        children: [
+                          Text("Booking Price",style: Get.textTheme.headlineLarge!.copyWith(color: AppColors.secondaryColor),),
+                          const Spacer(),
+                          Text(
+                            "₹ ${formatAmount(court.totalAmount ?? 0)}",
+                            style: Get.textTheme.titleMedium!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
