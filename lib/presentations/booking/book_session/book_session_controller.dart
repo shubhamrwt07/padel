@@ -333,6 +333,19 @@ class BookSessionController extends GetxController {
       selectedSlots.removeWhere((s) => s.sId == slotId);
       selectedSlotsWithCourtInfo.remove('${resolvedCourtId}_$slotId');
     } else {
+      // For 30-minute slots, ensure only one half is selected at a time
+      if (selectedDurationMinutes == 30 && isLeftHalf != null) {
+        final leftKey = '${dateString}_${resolvedCourtId}_${slotId}_L';
+        final rightKey = '${dateString}_${resolvedCourtId}_${slotId}_R';
+        
+        // Remove the opposite half if it's selected
+        if (isLeftHalf && multiDateSelections.containsKey(rightKey)) {
+          multiDateSelections.remove(rightKey);
+        } else if (!isLeftHalf && multiDateSelections.containsKey(leftKey)) {
+          multiDateSelections.remove(leftKey);
+        }
+      }
+      
       // Add selection based on duration
       _addSlotGroup(slot, resolvedCourtId, resolvedCourtName, dateString, currentDate, isLeftHalf);
     }
@@ -732,6 +745,22 @@ class BookSessionController extends GetxController {
     final leftKey = '${dateString}_${courtId}_${slot.sId}_L';
     final rightKey = '${dateString}_${courtId}_${slot.sId}_R';
     return multiDateSelections.containsKey(leftKey) && multiDateSelections.containsKey(rightKey);
+  }
+  
+  /// Check if left half of a 30-minute slot is selected
+  bool _isLeftHalfSelected(Slots slot, String courtId) {
+    final currentDate = selectedDate.value ?? DateTime.now();
+    final dateString = _dateFormatter.format(currentDate);
+    final leftKey = '${dateString}_${courtId}_${slot.sId}_L';
+    return multiDateSelections.containsKey(leftKey);
+  }
+  
+  /// Check if right half of a 30-minute slot is selected
+  bool _isRightHalfSelected(Slots slot, String courtId) {
+    final currentDate = selectedDate.value ?? DateTime.now();
+    final dateString = _dateFormatter.format(currentDate);
+    final rightKey = '${dateString}_${courtId}_${slot.sId}_R';
+    return multiDateSelections.containsKey(rightKey);
   }
 
   /// Normalize time format for comparison (convert to consistent format)
