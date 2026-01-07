@@ -57,6 +57,7 @@ class Assets {
   static const String imagesImgDummy5 = 'assets/images/img_dummy_5.png';
   static const String imagesImgGooglePay = 'assets/images/img_google_pay.png';
   static const String imagesImgHomeLogo = 'assets/images/img_home_logo.png';
+  static const String imagesImgLeaderBoardBg = 'assets/images/img_leaderBoard_bg.svg';
   static const String imagesImgOpenMatchBg = 'assets/images/img_open_match_bg.svg';
   static const String imagesImgOpenMatchGreenBg = 'assets/images/img_open_match_green_bg.svg';
   static const String imagesImgOtherUpi = 'assets/images/img_other_upi.png';

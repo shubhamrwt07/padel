@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:padel_mobile/core/network/dio_client.dart';
 import 'package:padel_mobile/repositories/leaderBoard_repo/leaderBoard_repository.dart';
 import 'package:padel_mobile/data/response_models/leaderBoard/get_leaderBoard_model.dart';
@@ -50,9 +51,27 @@ class LeaderboardController extends GetxController {
 
   final categories = ['Player', 'Team', 'Tournaments', 'State Level'];
   var selectedCategory = 'Player'.obs;
+  
+  // Method to handle tab selection with coming soon logic
+  void selectCategory(String category) {
+    if (category == 'Player') {
+      selectedCategory.value = category;
+      showStateFilters.value = false;
+    } else {
+      Get.snackbar(
+        'Coming Soon',
+        'This feature will be available soon!',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Get.theme.primaryColor,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
   RxDouble borderRadius = 24.0.obs;
 
   var expandedIndex = (-1).obs;
+  var myRankExpanded = false.obs;
   RxBool isHandleVisible = true.obs;
   var selectedGender = ''.obs;
   var selectedYear = ''.obs;
@@ -188,5 +207,9 @@ class LeaderboardController extends GetxController {
 
   void toggleExpand(int index) {
     expandedIndex.value = expandedIndex.value == index ? -1 : index;
+  }
+  
+  void toggleMyRankExpand() {
+    myRankExpanded.value = !myRankExpanded.value;
   }
 }
