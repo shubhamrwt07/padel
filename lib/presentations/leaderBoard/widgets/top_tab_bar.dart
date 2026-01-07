@@ -11,7 +11,7 @@ class TopTabBar extends StatelessWidget {
     final selectedIndex = controller.categories.indexOf(controller.selectedCategory.value);
     return DefaultTabController(
       length: controller.categories.length,
-      initialIndex: selectedIndex,
+      initialIndex: 0, // Always keep Player tab selected
       child: TabBar(
         isScrollable: true,
         indicator: const UnderlineTabIndicator(
@@ -27,13 +27,30 @@ class TopTabBar extends StatelessWidget {
         labelPadding: const EdgeInsets.only(left: 0, right: 30),
         unselectedLabelStyle: Get.textTheme.headlineSmall,
         onTap: (index) {
-          // ✅ Update only this observable
-          controller.selectedCategory.value = controller.categories[index];
-          controller.showStateFilters.value = controller.categories[index] == 'State Level';
-
+          final selectedTab = controller.categories[index];
+          if (selectedTab != 'Player') {
+            Get.snackbar(
+              'Coming Soon',
+              'This feature will be available soon!',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: AppColors.whiteColor,
+              colorText: AppColors.primaryColor,
+              duration: const Duration(seconds: 2),
+            );
+          }
         },
         tabs: controller.categories
-            .map((tab) => Tab(text: tab))
+            .map((tab) => Tab(
+              child: Opacity(
+                opacity: tab == 'Player' ? 1.0 : 0.5,
+                child: Text(
+                  tab,
+                  style: tab == 'Player' 
+                    ? Get.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w900, color: Colors.white)
+                    : Get.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w900, color: Colors.white38),
+                ),
+              ),
+            ))
             .toList(),
       ),
     );

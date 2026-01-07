@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:padel_mobile/configs/app_colors.dart';
 import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:get/get.dart';
+import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/generated/assets.dart';
 import 'package:padel_mobile/presentations/leaderBoard/widgets/top_tab_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -38,21 +39,21 @@ class LeaderboardScreen extends StatelessWidget {
               children: [
                 TopTabBar(),
                 const SizedBox(height: 16),
-                Obx(() {
-                  if (controller.selectedCategory.value == 'Tournaments') {
-                    return _buildTournamentFilters();
-                  } else {
-                    return _buildTabBar();
-                  }
-                }),
-                const SizedBox(height: 10),
+                // Obx(() {
+                //   if (controller.selectedCategory.value == 'Tournaments') {
+                //     return _buildTournamentFilters();
+                //   } else {
+                //     return _buildTabBar();
+                //   }
+                // }),
+                const SizedBox(height: 20),
 
                 // ✅ Directly reactive podium
                 Obx(() {
                   if (controller.isLoading.value) {
                     return const SizedBox(
                       height: 300,
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(child: LoadingWidget(color: Colors.white,)),
                     );
                   }
                   
@@ -66,8 +67,8 @@ class LeaderboardScreen extends StatelessWidget {
             Obx(() {
               if (controller.isLoading.value) {
                 return DraggableScrollableSheet(
-                  initialChildSize: 0.44,
-                  minChildSize: 0.44,
+                  initialChildSize: 0.48,
+                  minChildSize: 0.48,
                   maxChildSize: 1.0,
                   builder: (context, scroll) {
                     return Container(
@@ -301,9 +302,9 @@ class LeaderboardScreen extends StatelessWidget {
       child: Stack(
         children: [
           Transform.scale(
-            scale: 1.1,
+            scale: 1.2,
             child: SvgPicture.asset(
-              Assets.imagesImgBackgroundScoreView,
+              Assets.imagesImgLeaderBoardBg,
               fit: BoxFit.cover,
             ),
           ).paddingOnly(left: 10, top: 10),
@@ -471,7 +472,7 @@ class LeaderboardScreen extends StatelessWidget {
 
 
   Widget _buildLeaderboardSheet(BuildContext context, List<Map<String, dynamic>> data) {
-    const double minSize = 0.44;
+    const double minSize = 0.48;
     const double maxSize = 1.0;
     const double maxRadius = 24.0;
 
@@ -530,6 +531,8 @@ class LeaderboardScreen extends StatelessWidget {
                       }),
                       
                       // My Rank section - only show for Player tab with API data
+                      if (!controller.isHandleVisible.value)
+                        SizedBox(height: 10,),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -660,99 +663,173 @@ class LeaderboardScreen extends StatelessWidget {
   }
 
   Widget _buildMyRankCard(Map<String, dynamic> myRank) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '#${myRank['rank']}',
-            style: Get.textTheme.labelLarge!.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            ),
+    return Obx(() {
+      final isExpanded = controller.myRankExpanded.value;
+      
+      return InkWell(
+        onTap: () => controller.toggleMyRankExpand(),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
           ),
-          const SizedBox(width: 10),
-          CircleAvatar(
-            radius: 15,
-            backgroundColor: AppColors.primaryColor,
-            child: myRank['image'].toString().isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: myRank['image'],
-                    imageBuilder: (context, imageProvider) => Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    placeholder: (context, url) => Text(
-                      _getInitials(myRank['name']),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 25,
+                    child: Text(
+                      '${myRank['rank']}',
+                      style: Get.textTheme.labelLarge!.copyWith(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
                       ),
-                    ),
-                    errorWidget: (context, url, error) => Text(
-                      _getInitials(myRank['name']),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                : Text(
-                    _getInitials(myRank['name']),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              myRank['name'],
-              style: Get.textTheme.labelLarge!.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                  Container(
+                    color: Colors.transparent,
+                    width: 30,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${myRank['change'] > 0 ? '+' : ''}${myRank['change']}',
+                          style: TextStyle(
+                            color: myRank['change'] > 0
+                                ? Colors.green
+                                : (myRank['change'] < 0 ? Colors.red : Colors.grey),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        if (myRank['change'] > 0)
+                          SvgPicture.asset(
+                            Assets.imagesIcTreadingUp,
+                            height: 14,
+                            width: 14,
+                          )
+                        else if (myRank['change'] < 0)
+                          SvgPicture.asset(
+                            Assets.imagesIcTradingDown,
+                            height: 14,
+                            width: 14,
+                          ),
+                      ],
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 15,
+                    backgroundColor: AppColors.primaryColor,
+                    child: myRank['image'].toString().isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: myRank['image'],
+                            imageBuilder: (context, imageProvider) => Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: imageProvider,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            placeholder: (context, url) => Text(
+                              _getInitials(myRank['name']),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Text(
+                              _getInitials(myRank['name']),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            _getInitials(myRank['name']),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "${myRank['name']} (You)",
+                        style: Get.textTheme.labelLarge!.copyWith(fontSize: 12,fontWeight: FontWeight.w500)
+                    ),
+                  ),
+                  Container(
+                    height: 25,
+                    width: 55,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryColor,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      '${myRank['score']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ).paddingOnly(right: 10),
+                  Icon(
+                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: Colors.grey[600],
+                    size: 16,
+                  ),
+                ],
               ),
-            ),
-          ),
-          Container(
-            height: 25,
-            width: 55,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.secondaryColor,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Text(
-              '${myRank['score']}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+              
+              // Expandable stats section inside same container
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: isExpanded
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStat('${myRank['streak']}', 'Streak'),
+                            _buildStat('${myRank['matches']}', 'Matches'),
+                            _buildStat('${myRank['wins']}', 'Wins'),
+                            _buildStat('${myRank['losses']}', 'Losses'),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ),
-          ).paddingOnly(right: 10),
-          Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.grey[600],
-            size: 16,
+            ],
           ),
-        ],
-      ),
+        ),
+      );
+    });
+  }
+  
+  Widget _buildStat(String value, String label) {
+    return Column(
+      children: [
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryColor)),
+        const SizedBox(height: 2),
+        Text(label,
+            style: const TextStyle(color: Colors.black, fontSize: 10)),
+      ],
     );
   }
 
@@ -772,173 +849,182 @@ class LeaderboardCard extends GetView<LeaderboardController> {
     return Obx(() {
       final isExpanded = controller.expandedIndex.value == index;
 
-      return Column(
-        children: [
-          InkWell(
-            onTap: () => controller.toggleExpand(index),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        color: Colors.transparent,
-                        width: 30,
-                        child: Text(
-                          '#${item['rank']}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Container(
-                        color: Colors.transparent,
-                        width: 30,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${item['change'] > 0 ? '+' : ''}${item['change']}',
-                              style: TextStyle(
-                                color: item['change'] > 0
-                                    ? Colors.green
-                                    : (item['change'] < 0 ? Colors.red : Colors.grey),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(width: 3),
-                            if (item['change'] > 0)
-                              SvgPicture.asset(
-                                Assets.imagesIcTreadingUp,
-                                height: 14,
-                                width: 14,
-                              )
-                            else if (item['change'] < 0)
-                              SvgPicture.asset(
-                                Assets.imagesIcTradingDown,
-                                height: 14,
-                                width: 14,
-                              ),
-                          ],
-                        ),
-                      ),
-                      CircleAvatar(
-                        radius: 15,
-                        backgroundColor: AppColors.primaryColor,
-                        child: item['image'].toString().isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: item['image'],
-                                imageBuilder: (context, imageProvider) => Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                      image: imageProvider,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                placeholder: (context, url) => Text(
-                                  _getInitials(item['name']),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) => Text(
-                                  _getInitials(item['name']),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                _getInitials(item['name']),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ).paddingOnly(right: 10),
-                      Container(
-                        color: Colors.transparent,
-                        width: 70,
-                        child: Text(
-                          item['name'],
-                          style: Get.textTheme.labelLarge!.copyWith(fontSize: 12,fontWeight: FontWeight.w500),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        height: 25,
-                        width: 55,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.secondaryColor,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          '${item['score']}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+      return Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primaryColor.withOpacity(0.1)),
+        ),
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () => controller.toggleExpand(index),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          color: Colors.transparent,
+                          width: 25,
+                          child: Text(
+                            '${item['rank']}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ).paddingOnly(right: 10),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.grey[600],
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // 👇 Add divider line below the row (always visible)
-          Container(
-            height: 1,
-            color: Colors.grey.withValues(alpha: 0.2),
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-          ),
-
-          // 👇 Smooth expand animation
-          AnimatedSize(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            child: isExpanded
-                ? Column(
-              children: [
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStat('${item['streak']}', 'Streak'),
-                    _buildStat('${item['matches']}', 'Matches'),
-                    _buildStat('${item['wins']}', 'Wins'),
-                    _buildStat('${item['losses']}', 'Losses'),
+                        Container(
+                          color: Colors.transparent,
+                          width: 30,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${item['change'] > 0 ? '+' : ''}${item['change']}',
+                                style: TextStyle(
+                                  color: item['change'] > 0
+                                      ? Colors.green
+                                      : (item['change'] < 0 ? Colors.red : Colors.grey),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              if (item['change'] > 0)
+                                SvgPicture.asset(
+                                  Assets.imagesIcTreadingUp,
+                                  height: 14,
+                                  width: 14,
+                                )
+                              else if (item['change'] < 0)
+                                SvgPicture.asset(
+                                  Assets.imagesIcTradingDown,
+                                  height: 14,
+                                  width: 14,
+                                ),
+                            ],
+                          ),
+                        ),
+                        CircleAvatar(
+                          radius: 15,
+                          backgroundColor: AppColors.primaryColor,
+                          child: item['image'].toString().isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: item['image'],
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) => Text(
+                                    _getInitials(item['name']),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Text(
+                                    _getInitials(item['name']),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  _getInitials(item['name']),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ).paddingOnly(right: 10),
+                        Container(
+                          color: Colors.transparent,
+                          width: 70,
+                          child: Text(
+                            item['name'],
+                            style: Get.textTheme.labelLarge!.copyWith(fontSize: 12,fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          height: 25,
+                          width: 55,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryColor,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            '${item['score']}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ).paddingOnly(right: 10),
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.grey[600],
+                          size: 16,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
-              ],
-            )
-                : const SizedBox.shrink(),
-          ),
-        ],
+              ),
+            ),
+            //
+            // // 👇 Add divider line below the row (always visible)
+            // Container(
+            //   height: 1,
+            //   color: Colors.grey.withValues(alpha: 0.2),
+            //   margin: const EdgeInsets.symmetric(horizontal: 8),
+            // ),
+
+            // 👇 Smooth expand animation
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: isExpanded
+                  ? Column(
+                children: [
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStat('${item['streak']}', 'Streak'),
+                      _buildStat('${item['matches']}', 'Matches'),
+                      _buildStat('${item['wins']}', 'Wins'),
+                      _buildStat('${item['losses']}', 'Losses'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       );
     });
   }
