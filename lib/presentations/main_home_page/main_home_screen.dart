@@ -8,6 +8,7 @@ import 'package:padel_mobile/configs/components/app_bar.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
 import 'package:padel_mobile/generated/assets.dart';
+import 'package:padel_mobile/presentations/bottomnav/bottom_nav_controller.dart';
 import 'package:padel_mobile/presentations/drawer/zoom_drawer_controller.dart';
 import 'package:padel_mobile/presentations/main_home_page/main_home_controller.dart';
 import 'package:padel_mobile/presentations/notification/notification_controller.dart';
@@ -254,17 +255,20 @@ class MainHomeScreen extends StatelessWidget {
                     AppStrings.yourBooking,
                     style: Get.textTheme.headlineMedium,
                   ),
-                  // const Spacer(),
-                  // GestureDetector(
-                  //   onTap: (){},
-                  //   child: Container(
-                  //     color: Colors.transparent,
-                  //     child: Text(
-                  //       "See all",
-                  //       style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
-                  //     ),
-                  //   ),
-                  // ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: (){
+                      final bottomNavController = Get.find<BottomNavigationController>();
+                      bottomNavController.updateIndex(1);
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Text(
+                        "See all",
+                        style: Get.textTheme.labelLarge!.copyWith(color: AppColors.primaryColor),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -294,8 +298,9 @@ class MainHomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (!controller.homeController.isCheckingScoreboard.value) {
-          if (b.sId != null && b.sId!.isNotEmpty) {
-            controller.homeController.createScoreBoard(bookingId: b.sId!);
+          final id = b.bookingType == "openMatch" ? b.openMatchId?.sId : b.sId;
+          if (id != null && id.isNotEmpty) {
+            controller.homeController.createScoreBoard(bookingId: id);
           }
         }
       },
@@ -308,8 +313,10 @@ class MainHomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.tabColor),
-                gradient:LinearGradient(
-                  colors: [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
+                gradient: LinearGradient(
+                  colors: b.bookingType == "normal" 
+                    ? [Color(0xffF0FFF4), Color(0xffC6F6D5).withValues(alpha: 0.3)]
+                    : [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -485,7 +492,7 @@ class MainHomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           image: const DecorationImage(
-            image: AssetImage(Assets.imagesImgBookNow),
+            image: AssetImage(Assets.imagesImgSwootBanner),
             fit: BoxFit.cover,
             alignment: Alignment(0, -0.3),
           ),
@@ -518,8 +525,8 @@ class MainHomeScreen extends StatelessWidget {
                   Get.toNamed(RoutesName.home);
                 },
                 child: Container(
-                  width: Get.width * 0.4,
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
+                  width: Get.width * 0.35,
+                  padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 5),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(40),
                     color: Colors.white,
@@ -530,9 +537,10 @@ class MainHomeScreen extends StatelessWidget {
                       Text(
                         "BOOK NOW!",
                         style: Get.textTheme.titleSmall!
-                            .copyWith(fontSize: 15),
+                            .copyWith(fontSize: 13),
                       ).paddingOnly(left: 10),
                       CircleAvatar(
+                        radius: 15,
                         backgroundColor: AppColors.primaryColor,
                         child: const Icon(Icons.arrow_forward, color: Colors.white),
                       ),
@@ -1002,30 +1010,37 @@ class MainHomeScreen extends StatelessWidget {
 
   ///
   Widget statsDashboard() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: _matchPlayedCard()),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  children: [
-                    _leaderboardCard(),
-                    SizedBox(height: 10,),
-                    _xpCard(),
-                  ],
+    return Obx(() {
+      final profile = controller.profileController.profileModel.value;
+      final recentMatches = profile?.response?.recentMatches ?? [];
+      
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(child: _matchPlayedCard()),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _leaderboardCard(),
+                      SizedBox(height: 10,),
+                      _xpCard(),
+                    ],
+                  ),
                 ),
-              ),
+              ],
+            ),
+            if (recentMatches.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _recentMatches(),
             ],
-          ),
-          const SizedBox(height: 10),
-          _recentMatches(),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
   Widget _matchPlayedCard() {
     return Obx(() {
@@ -1201,72 +1216,64 @@ class MainHomeScreen extends StatelessWidget {
   Widget _recentMatches() {
     return Obx(() {
       final profile = controller.profileController.profileModel.value;
-      final currentWinStreak = profile?.response?.currentWinStreak ?? 0;
-      final currentLoseStreak = profile?.response?.currentLoseStreak ?? 0;
+      final recentMatches = profile?.response?.recentMatches ?? [];
       
-      // Generate recent matches based on streaks (simplified logic)
-      List<String> results = [];
-      if (currentWinStreak > 0) {
-        results = List.generate(currentWinStreak > 5 ? 5 : currentWinStreak, (index) => 'W');
-      } else if (currentLoseStreak > 0) {
-        results = List.generate(currentLoseStreak > 5 ? 5 : currentLoseStreak, (index) => 'L');
-      } else {
-        results = ['W', 'L', 'W', 'W', 'L']; // Default pattern
-      }
-      
-      // Ensure we have exactly 5 results
-      while (results.length < 5) {
-        results.add('W');
-      }
-      if (results.length > 5) {
-        results = results.take(5).toList();
-      }
+      // Use only API data, don't pad with extra results
+      List<String> results = recentMatches.isNotEmpty 
+          ? recentMatches 
+          : [];
 
-      return Row(
-        children: [
-          SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(right: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF003AFF),Color(0xFF07289A),],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-            child: Row(
-              children: [
-                 Text(
-                  'Recent Matches',
-                  style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white)
-                ),
-                const SizedBox(width: 8),
-                ...results.map(
-                      (e) => Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    width: 24,
-                    height: 24,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: Text(
-                      e,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: e == 'W' ? Colors.green : Colors.red,
-                      ),
-                    ),
+      return Container(
+        color: Colors.transparent,
+        width: Get.width,
+        child: Row(
+          children: [
+            SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(right: 10),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(40),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF003AFF),Color(0xFF07289A),],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
                 ),
-              ],
+                child: Row(
+                  children: [
+                     Text(
+                      'Recent Matches',
+                      style: Get.textTheme.headlineSmall!.copyWith(color: Colors.white)
+                    ),
+                    const SizedBox(width: 8),
+                    ...results.map(
+                          (e) => Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          e,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: e == 'W' ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(left: 10),
-        ],
+            SvgPicture.asset(Assets.imagesIcPadelBall,).paddingOnly(left: 10),
+          ],
+        ),
       );
     });
   }

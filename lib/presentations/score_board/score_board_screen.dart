@@ -44,30 +44,35 @@ class ScoreBoardScreen extends StatelessWidget {
             ),
           ],
           context: context),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+      body: StreamBuilder<Map<String, dynamic>>(
+        stream: controller.scoreboardStream,
+        builder: (context, snapshot) {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container( 
-                  height: 120,
-                  color: AppColors.primaryColor,
-                  width: Get.width,
+                Stack(
+                  children: [
+                    Container( 
+                      height: 120,
+                      color: AppColors.primaryColor,
+                      width: Get.width,
+                    ),
+                    Obx(() => controller.isLoading.value
+                        ? BuildMatchCardShimmer().paddingOnly(left: 15, right: 15, top: 10)
+                        : _buildMatchCard(context).paddingOnly(left: 15, right: 15, top: 10)),
+                  ],
                 ),
+                const SizedBox(height: 12),
+                _buildAddScoreButton(),
+                const SizedBox(height: 12),
                 Obx(() => controller.isLoading.value
-                    ? BuildMatchCardShimmer().paddingOnly(left: 15, right: 15, top: 10)
-                    : _buildMatchCard(context).paddingOnly(left: 15, right: 15, top: 10)),
+                    ? BuildSetSectionShimmer().paddingOnly(left: 15, right: 15)
+                    : _buildSetSection().paddingOnly(left: 15, right: 15)),
               ],
             ),
-            const SizedBox(height: 12),
-            _buildAddScoreButton(),
-            const SizedBox(height: 12),
-            Obx(() => controller.isLoading.value
-                ? BuildSetSectionShimmer().paddingOnly(left: 15, right: 15)
-                : _buildSetSection().paddingOnly(left: 15, right: 15)),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -152,15 +157,16 @@ class ScoreBoardScreen extends StatelessWidget {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: "${DateFormat('EEEE').format(date!)} ",
+                        text: date != null ? "${DateFormat('EEEE').format(date)} " : "Invalid Date ",
                         style: Get.textTheme.bodySmall!.copyWith(
                           fontWeight: FontWeight.w900,
                           fontSize: 13
                         ),
                       ),
                       TextSpan(
-                        text:
-                        "${DateFormat('dd MMM').format(date)} | ${formatTimeSlot(controller.matchTime.value)}",
+                        text: date != null
+                            ? "${DateFormat('dd MMM').format(date)} | ${formatTimeSlot(controller.matchTime.value)}"
+                            : "| ${formatTimeSlot(controller.matchTime.value)}",
                         style: Get.textTheme.bodySmall!.copyWith(
                           fontWeight: FontWeight.w500,fontSize: 13
                         ),

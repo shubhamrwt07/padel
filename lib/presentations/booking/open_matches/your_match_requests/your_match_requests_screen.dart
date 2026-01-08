@@ -289,7 +289,7 @@ class YourMatchRequestsScreen extends StatelessWidget {
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          '${club?.address ?? ''}, ${club?.city ?? ''}',
+                          '${club?.city ?? ''},${club?.zipCode??""}',
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 14,

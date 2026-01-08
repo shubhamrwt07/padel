@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/multiple_gender.dart';
 import 'package:padel_mobile/handler/text_formatter.dart';
@@ -155,7 +156,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
               }
 
               return GestureDetector(
-                onTap: () {
+                onTap: (booking.bookingType ?? "").toLowerCase() == "normal" ? () {
                   final bookingId = booking.sId;
                   if (bookingId != null && bookingId.isNotEmpty) {
                     Get.toNamed(
@@ -169,7 +170,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   } else {
                     Get.snackbar("Error", "Booking ID not available");
                   }
-                },
+                } : null,
                 child: type == "completed"
                     ? _buildCompletedBookingCard(context, booking, club, index)
                     : _buildUpcomingBookingCard(context, booking, club, index, type),
@@ -188,7 +189,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
     final price = (booking.totalAmount ?? 2000).toString();
     final score = _getMatchScore(booking);
     final bookingType = booking.bookingType ?? "";
-    final isBlueTheme = bookingType.toLowerCase() == "normal" || bookingType.toLowerCase() == "openMatch";
+    final isBlueTheme = bookingType.toLowerCase() == "normal";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -196,13 +197,13 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isBlueTheme ? const Color(0xffC8D6FB) : const Color(0xff3DBE64).withOpacity(0.5),
+          color: !isBlueTheme ? const Color(0xffC8D6FB) : const Color(0xff3DBE64).withOpacity(0.5),
           width: 1,
         ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isBlueTheme
+          colors: !isBlueTheme
               ? [const Color(0xffF3F7FF), const Color(0xff9EBAFF).withOpacity(0.3)]
               : [const Color(0xffBFEECD).withOpacity(0.3), const Color(0xffBFEECD).withOpacity(0.2)],
         ),
@@ -294,7 +295,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                     ),
 
                   ],
-                ),
+                ).paddingOnly(bottom: 5),
               ),
             ],
           ),
@@ -327,7 +328,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                     Text(
                       score,
                       style: const TextStyle(
-                        fontSize: 48,
+                        fontSize: 30,
                         fontWeight: FontWeight.w700,
                         color: Color(0xff1c46a0),
                         letterSpacing: 2,
@@ -410,7 +411,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                     Text(
                       clubName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Colors.black,
                       ),
@@ -593,7 +594,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
     final address = "${club?.city ?? ''}, ${club?.zipCode ?? ''}";
     final price = (booking.totalAmount ?? 2000).toString();
     final bookingType = booking.bookingType ?? "";
-    final isBlueTheme = bookingType.toLowerCase() == "normal" || bookingType.toLowerCase() == "openMatch";
+    final isBlueTheme = bookingType.toLowerCase() == "normal";
 
     // Get real players from scoreboard
     final playerAvatars = _buildPlayerAvatarsFromScoreboard(booking);
@@ -604,9 +605,9 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: isBlueTheme ? Color(0xffC8D6FB) : Color(0xff3DBE64).withOpacity(0.5)),
+        border: Border.all(color: !isBlueTheme ? Color(0xffC8D6FB) : Color(0xff3DBE64).withOpacity(0.5)),
         gradient: LinearGradient(
-          colors: isBlueTheme
+          colors: !isBlueTheme
               ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withOpacity(0.3)]
               : [Color(0xffBFEECD).withOpacity(0.3), Color(0xffBFEECD).withOpacity(0.2)],
         ),
@@ -615,7 +616,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         children: [
           Align(
               alignment: AlignmentGeometry.centerRight,
-              child: SvgPicture.asset(isBlueTheme?Assets.imagesImgOpenMatchBg:Assets.imagesImgOpenMatchGreenBg,height: 190,width: 150,).paddingOnly(right: 20)),
+              child: SvgPicture.asset(!isBlueTheme?Assets.imagesImgOpenMatchBg:Assets.imagesImgOpenMatchGreenBg,height: 190,width: 150,).paddingOnly(right: 20)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -629,18 +630,18 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                       Row(
                         children: [
                           _buildDateTimeInfo(context, booking),
-                          if (isUpcoming)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.secondaryColor,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: const Text(
-                                "A",
-                                style: TextStyle(color: Colors.white, fontSize: 9),
-                              ),
-                            ).paddingOnly(left: 5),
+                          // if (isUpcoming)
+                          //   Container(
+                          //     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          //     decoration: BoxDecoration(
+                          //       color: AppColors.secondaryColor,
+                          //       borderRadius: BorderRadius.circular(30),
+                          //     ),
+                          //     child: const Text(
+                          //       "A",
+                          //       style: TextStyle(color: Colors.white, fontSize: 9),
+                          //     ),
+                          //   ).paddingOnly(left: 5),
                         ],
                       ),
                       // Skill Level Tags (if upcoming)
@@ -834,7 +835,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
+          backgroundColor: !isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImage(
@@ -847,7 +848,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   firstLetter,
                   style: TextStyle(
                     fontSize: 16,
-                    color: (isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor).withOpacity(0.5),
+                    color: (!isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor).withOpacity(0.5),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -857,7 +858,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   firstLetter,
                   style: TextStyle(
                     fontSize: 18,
-                    color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                    color: !isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -868,7 +869,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                 firstLetter,
                 style: TextStyle(
                   fontSize: 18,
-                  color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                  color: !isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -881,16 +882,19 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
 
   List<Widget> _buildAddButtonsFromScoreboard(dynamic booking, String bookingType) {
     final scoreboard = booking.scoreboard;
-    if (scoreboard?.teams == null) return [_buildAvailableCircleFromScoreboard(bookingType, booking: booking), _buildAvailableCircleFromScoreboard(bookingType, booking: booking)];
+    if (scoreboard?.teams == null) return List.generate(4, (index) => _buildAvailableCircleFromScoreboard(bookingType, booking: booking));
 
     int totalPlayers = 0;
     for (var team in scoreboard.teams) {
       totalPlayers += (team.players?.length ?? 0) as int;
     }
 
-    // Show add buttons for remaining slots (assuming max 4 players)
+    // Ensure minimum 4 total avatars (players + add buttons)
     int remainingSlots = 4 - totalPlayers;
-    if (remainingSlots <= 0) return [];
+    if (remainingSlots < 0) remainingSlots = 0;
+    if (totalPlayers + remainingSlots < 4) {
+      remainingSlots = 4 - totalPlayers;
+    }
 
     return List.generate(remainingSlots, (index) => _buildAvailableCircleFromScoreboard(bookingType, booking: booking));
   }
@@ -901,18 +905,22 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
       onTap: () {
         if (booking != null) {
           final matchId = booking.sId ?? "";
+          final scoreboardId = booking.scoreboard?.sId ?? "";
+          final bookingId = booking.sId ??"";
           final isMatchCreator = _isMatchCreator(booking);
           final isLoginUserInMatch = _isLoginUserInMatch(booking);
 
           if (isMatchCreator) {
-            Get.bottomSheet(AppPlayersBottomSheetScore(matchId: matchId, teamName: "teamA"), isScrollControlled: true);
+            Get.bottomSheet(AppPlayersBottomSheetScore(matchId: matchId, teamName: "teamA",bookingId:bookingId ,), isScrollControlled: true);
           } else {
             AddPlayerBottomSheet.show(
               context,
               arguments: {
                 "team": "teamA",
                 "matchId": matchId,
+                "scoreBoardId": scoreboardId,
                 "needOpenMatchesForAllCourts": true,
+                "needBookingHistory": true,
                 "matchLevel": "Professional",
                 "isLoginUser": !isLoginUserInMatch,
                 "isMatchCreator": isMatchCreator,
@@ -926,8 +934,8 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor: isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
-          child: Icon(Icons.add, color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor),
+          backgroundColor: !isBlueTheme ? const Color(0xffeaf0ff) : Color(0xffDFF7E6),
+          child: Icon(Icons.add, color: !isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor),
         ),
       ),
     );
@@ -945,7 +953,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              width: (playerAvatars.length + addButtons.length) * 28 + 28,
+              width: math.max((playerAvatars.length + addButtons.length) * 28 + 28, 4 * 28 + 28),
               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -1033,7 +1041,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                           width: 28,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color: isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
+                            color: !isBlueTheme ? AppColors.primaryColor : AppColors.secondaryColor,
                           ),
                           child: Icon(Icons.chat_outlined, color: Colors.white, size: 18)
                       )
@@ -1067,7 +1075,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: "3",
+                                  text: "0",
                                   style: Get.textTheme.labelSmall!.copyWith(color: AppColors.primaryColor),
                                 ),
                                 TextSpan(
@@ -1145,6 +1153,15 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
   Widget _expandedCard(BuildContext context, int index, dynamic booking, List<Widget> playerAvatars, List<Widget> addButtons, String clubName, String address, String price, String type) {
     final isUpcoming = type == "upcoming";
     final timeStr = _getTimeString(booking);
+    
+    // Count actual players from scoreboard
+    int totalPlayers = 0;
+    final scoreboard = booking.scoreboard;
+    if (scoreboard?.teams != null) {
+      for (var team in scoreboard.teams) {
+        totalPlayers += (team.players?.length ?? 0) as int;
+      }
+    }
 
     return Container(
       margin: EdgeInsets.only(top: 10),
@@ -1176,12 +1193,12 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
             children: [
               Icon(Icons.group, size: 18),
               SizedBox(width: 8),
-              Text("4 attendee (4 confirmed)", style: Get.textTheme.bodySmall),
+              Text("4 attendee ($totalPlayers confirmed)", style: Get.textTheme.bodySmall),
             ],
           ),
           const SizedBox(height: 8),
           Container(
-            width: (playerAvatars.length + addButtons.length) * 28 + 28,
+            width: math.max((playerAvatars.length + addButtons.length) * 28 + 28, 4 * 28 + 28),
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1240,15 +1257,12 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
                   ],
                 ),
               ),
-              Transform.translate(
-                offset: Offset(0, 2),
-                child: Text(
-                  "₹ $price",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xff1c46a0),
-                  ),
+              Text(
+                "₹ $price",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xff1c46a0),
                 ),
               ),
             ],
@@ -1402,7 +1416,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
         for (var player in team.players) {
           final name = player.playerId?.name ?? player.name ?? '';
           final phoneNumber = player.playerId?.phoneNumber?.toString() ?? '';
-          final countryCode = player.playerId?.countryCode?.toString() ?? '';
+          final countryCode ='+91';
           final profilePic = player.playerId?.profilePic ?? '';
 
           playerWidgets.add(
@@ -1471,7 +1485,7 @@ class _BookingHistoryUiState extends State<BookingHistoryUi> {
   bool _isMatchCreator(dynamic booking) {
     final userId = storage.read('userId');
     if (userId == null || booking == null) return false;
-    return booking.ownerId == userId.toString();
+    return booking.userId == userId.toString();
   }
 
   bool _isLoginUserInMatch(dynamic booking) {

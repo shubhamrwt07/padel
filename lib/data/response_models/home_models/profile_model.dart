@@ -64,6 +64,8 @@ class Response {
   int? simpleMatchCount;
   int? totalMatchesPlayed;
   int? totalWins;
+  List<String>? recentMatches;
+
 
   Response({
     this.location,
@@ -97,6 +99,7 @@ class Response {
     this.simpleMatchCount,
     this.totalMatchesPlayed,
     this.totalWins,
+    this.recentMatches,
   });
 
   Response.fromJson(Map<String, dynamic> json) {
@@ -134,6 +137,10 @@ class Response {
     simpleMatchCount = json['simpleMatchCount'];
     totalMatchesPlayed = json['totalMatchesPlayed'];
     totalWins = json['totalWins'];
+    recentMatches = json['recentMatches'] != null
+        ? List<String>.from(json['recentMatches'])
+        : null;
+
   }
 
   Map<String, dynamic> toJson() {
@@ -169,6 +176,8 @@ class Response {
       'simpleMatchCount': simpleMatchCount,
       'totalMatchesPlayed': totalMatchesPlayed,
       'totalWins': totalWins,
+      'recentMatches': recentMatches,
+
     };
   }
 }

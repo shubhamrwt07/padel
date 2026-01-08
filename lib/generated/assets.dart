@@ -65,6 +65,7 @@ class Assets {
   static const String imagesImgPhonePay = 'assets/images/img_phone_pay.png';
   static const String imagesImgRoundBackground = 'assets/images/img_round_background.svg';
   static const String imagesImgScoreView = 'assets/images/img_score_view.svg';
+  static const String imagesImgSwootBanner = 'assets/images/img_swoot_banner.png';
   static const String imagesImgVsRounds = 'assets/images/img_vs_rounds.svg';
   static const String imagesPadelLogo = 'assets/images/Padel_logo.svg';
   static const String imagesPadelLogo11 = 'assets/images/Padel_logo_11.svg';

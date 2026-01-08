@@ -584,18 +584,17 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
       decoration: BoxDecoration(
         // color: const Color(0xffeaf0ff),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color:index % 2 == 0? Color(0xffC8D6FB):Color(0xff3DBE64).withValues(alpha: 0.5)),
+        border: Border.all(color: Color(0xffC8D6FB)),
         gradient: LinearGradient(
-            colors: index % 2 == 0
-              ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)]
-              : [Color(0xffBFEECD).withValues(alpha: 0.3),Color(0xffBFEECD).withValues(alpha: 0.2)],
+            colors:[Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)]
+             ,
         )
       ),
       child: Stack(
         children: [
           Align(
               alignment: AlignmentGeometry.centerRight,
-              child: SvgPicture.asset(index % 2 == 0?Assets.imagesImgOpenMatchBg:Assets.imagesImgOpenMatchGreenBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
+              child: SvgPicture.asset(Assets.imagesImgOpenMatchBg,height:_isLoginUserInMatch(data)?190: 150,width: 150,).paddingOnly(right: 20)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -630,17 +629,17 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondaryColor,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Text(
-                              "A",
-                              style: TextStyle(color: Colors.white,fontSize: 9),
-                            ),
-                          ).paddingOnly(left: 5),
+                          // Container(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          //   decoration: BoxDecoration(
+                          //     color: AppColors.secondaryColor,
+                          //     borderRadius: BorderRadius.circular(30),
+                          //   ),
+                          //   child: const Text(
+                          //     "A",
+                          //     style: TextStyle(color: Colors.white,fontSize: 9),
+                          //   ),
+                          // ).paddingOnly(left: 5),
                         ],
                       ),
                       // ⭐ Professional | Mixed
@@ -728,7 +727,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
+          backgroundColor:const Color(0xffeaf0ff),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImage(
@@ -751,7 +750,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                   firstLetter,
                   style:  TextStyle(
                     fontSize: 18,
-                    color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                    color: AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -762,7 +761,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                 firstLetter,
                 style:  TextStyle(
                   fontSize: 18,
-                  color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                  color: AppColors.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -812,8 +811,8 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor:index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
-          child: Icon(Icons.add, color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor),
+          backgroundColor:const Color(0xffeaf0ff),
+          child: Icon(Icons.add, color:AppColors.primaryColor),
         ),
       ),
     );
@@ -1478,7 +1477,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
                           width: 28,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                            color:AppColors.primaryColor,
                           ),
                           child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
                       )
@@ -1618,7 +1617,7 @@ class _OpenMatchesScreenState extends State<OpenMatchesScreen> {
             children: [
               Icon(Icons.group, size: 18),
               SizedBox(width: 8),
-              Text("${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} attendee (${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} confirmed)", style: Get.textTheme.bodySmall),
+              Text("${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} attendee (${(data.teamA?.length ?? 0) + (data.teamB?.length ?? 0)} confirmed)", style: Get.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w400,fontSize: 11)),
             ],
           ),
           const SizedBox(height: 8),

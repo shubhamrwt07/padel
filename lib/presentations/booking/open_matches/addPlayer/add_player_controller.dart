@@ -6,6 +6,7 @@ import 'package:padel_mobile/presentations/score_board/score_board_controller.da
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/presentations/booking/open_matches/your_match_requests/your_match_requests_controller.dart';
+import 'package:padel_mobile/presentations/bookinghistory/booking_history_controller.dart';
 import '../../widgets/booking_exports.dart';
 
 class AddPlayerController extends GetxController {
@@ -16,6 +17,7 @@ class AddPlayerController extends GetxController {
   ScoreBoardController? scoreBoardController;
   YourMatchRequestsController? yourMatchRequestsController;
   OpenMatchForAllCourtController? openMatchForAllCourtController;
+  BookingHistoryController? bookingHistoryController;
 
   // final firstNameController = TextEditingController();
   // final lastNameController = TextEditingController();
@@ -360,6 +362,7 @@ class AddPlayerController extends GetxController {
 
       if (response?.data != null) {
         await scoreBoardController?.fetchScoreBoard();
+        // await bookingHistoryController?.fetchBookings();
         Get.back(result: true);
         Get.back();
         SnackBarUtils.showSuccessSnackBar(
@@ -506,6 +509,11 @@ class AddPlayerController extends GetxController {
     if (args["needOpenMatchesForAllCourts"] == true &&
         Get.isRegistered<OpenMatchForAllCourtController>()) {
       openMatchForAllCourtController = Get.find<OpenMatchForAllCourtController>();
+    }
+
+    if (args["needBookingHistory"] == true &&
+        Get.isRegistered<BookingHistoryController>()) {
+      bookingHistoryController = Get.find<BookingHistoryController>();
     }
 
     // Check if login user wants to add themselves

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:padel_mobile/presentations/booking/widgets/booking_exports.dart';
 import 'package:padel_mobile/presentations/profile/profile_controller.dart';
 import 'package:padel_mobile/repositories/score_board_repo/score_board_repository.dart';
@@ -17,6 +18,12 @@ class ScoreBoardController extends GetxController {
   RxBool isCompleted = false.obs;
 
   final _uuid = Uuid();
+  
+  // Stream controller for periodic updates
+  late StreamController<Map<String, dynamic>> _scoreboardStreamController;
+  late Timer _periodicTimer;
+  
+  Stream<Map<String, dynamic>> get scoreboardStream => _scoreboardStreamController.stream;
 
   ///Capitalize First Word------------------------------------------------------
   String capitalizeFirstWord(String text) {
@@ -284,7 +291,63 @@ class ScoreBoardController extends GetxController {
     openMatchId.value = Get.arguments["openMatchId"] ?? "";
     CustomLogger.logMessage(msg: "BOOKING ID-> ${bookingId.value}", level: LogLevel.info);
     CustomLogger.logMessage(msg: "OPEN MATCH ID-> ${openMatchId.value}", level: LogLevel.info);
+    
+    _scoreboardStreamController = StreamController<Map<String, dynamic>>.broadcast();
     await fetchScoreBoard();
+    _startPeriodicUpdates();
+  }
+  
+  void _startPeriodicUpdates() {
+    _periodicTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      await _fetchScoreBoardForStream();
+    });
+  }
+  
+  Future<void> _fetchScoreBoardForStream() async {
+    try {
+      if (_scoreboardStreamController.isClosed) return;
+      
+      final response = await repository.getScoreBoard(bookingId: bookingId.value);
+      if (response.status == 200 && response.data!.isNotEmpty) {
+        final item = response.data!.first;
+        
+        // Update sets
+        sets.clear();
+        if (item.sets != null && item.sets!.isNotEmpty) {
+          for (var s in item.sets!) {
+            sets.add({
+              "uniqueId": _uuid.v4(),
+              "setNumber": s.setNumber ?? 0,
+              "teamAScore": s.teamAScore ?? 0,
+              "teamBScore": s.teamBScore ?? 0,
+              "winner": s.winner,
+            });
+          }
+        }
+        sets.refresh();
+        
+        // Update scores
+        teamAWins.value = item.totalScore?.teamA ?? 0;
+        teamBWins.value = item.totalScore?.teamB ?? 0;
+        winner.value = item.winner?.toString() ?? "None";
+        isCompleted.value = item.isCompleted ?? false;
+        
+        if (!_scoreboardStreamController.isClosed) {
+          _scoreboardStreamController.add({'updated': true});
+        }
+      }
+    } catch (e) {
+      CustomLogger.logMessage(msg: "Stream fetch error: $e", level: LogLevel.error);
+    }
+  }
+  
+  @override
+  void onClose() {
+    _periodicTimer.cancel();
+    if (!_scoreboardStreamController.isClosed) {
+      _scoreboardStreamController.close();
+    }
+    super.onClose();
   }
 
   ///Add Score------------------------------------------------------------------

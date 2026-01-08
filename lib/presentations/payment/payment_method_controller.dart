@@ -12,11 +12,11 @@ import '../book_a_court/book_a_court_controller.dart'; // Import BookACourtContr
 
 class PaymentMethodController extends GetxController {
   var option = ''.obs;
-
+  RxBool isProcessing = false.obs;
   late RazorpayPaymentService _paymentService;
+  
   // Get CartController instance
   final CartController cartController = Get.find<CartController>();
-  RxBool isProcessing = false.obs;
   
   // Check if BookACourtController is available
   BookACourtController? get bookACourtController {
@@ -37,7 +37,6 @@ class PaymentMethodController extends GetxController {
   void onInit() {
     super.onInit();
     _paymentService = RazorpayPaymentService();
-    // Set up payment event handlers
     _paymentService.onPaymentSuccess = _handlePaymentSuccess;
     _paymentService.onPaymentFailure = _handlePaymentFailure;
     _paymentService.onExternalWallet = _handleExternalWallet;
@@ -47,10 +46,10 @@ class PaymentMethodController extends GetxController {
 
     Get.generalDialog(
       barrierDismissible: false,
-      barrierColor: Colors.white, // full white background
+      barrierColor: Colors.white,
       pageBuilder: (_, __, ___) {
         return Scaffold(
-          backgroundColor: Colors.white, // again ensure full white
+          backgroundColor: Colors.white,
           body: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -76,10 +75,8 @@ class PaymentMethodController extends GetxController {
       },
     );
 
-
     await _processBookingAfterPayment();
   }
-
 
   void _handlePaymentFailure(PaymentFailureResponse response) {
     isProcessing.value = false;
@@ -288,7 +285,6 @@ class PaymentMethodController extends GetxController {
     isProcessing.value = true;
 
     try {
-      // Get amount from BookACourtController if available, otherwise use CartController
       double amountToPay;
       if (isFromBookACourt && bookACourtController != null) {
         amountToPay = bookACourtController!.totalAmount.value.toDouble();
@@ -302,17 +298,14 @@ class PaymentMethodController extends GetxController {
         currency: 'INR',
         name: 'Swoot',
         description: 'Paying for court booking',
-        orderId: '',
         userEmail: 'test@example.com',
         userContact: '9999999999',
-        notes: {'user_id': '123', 'product_id': 'abc'},
-        theme: '#1F41BB',
       );
+      
     } catch (e) {
       isProcessing.value = false;
-      CustomLogger.logMessage(msg: "Error: $e",level: LogLevel.error);
-    }finally{
-      isProcessing.value = false;
+      CustomLogger.logMessage(msg: "Error: $e", level: LogLevel.error);
+      SnackBarUtils.showErrorSnackBar("Payment failed: $e");
     }
   }
 
