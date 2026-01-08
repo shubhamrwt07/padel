@@ -373,17 +373,17 @@ class RequestsScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Text(
-                            "A",
-                            style: TextStyle(color: Colors.white, fontSize: 9),
-                          ),
-                        ).paddingOnly(left: 5),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.green,
+                        //     borderRadius: BorderRadius.circular(30),
+                        //   ),
+                        //   child: const Text(
+                        //     "A",
+                        //     style: TextStyle(color: Colors.white, fontSize: 9),
+                        //   ),
+                        // ).paddingOnly(left: 5),
                       ],
                     ),
                     Row(
@@ -848,7 +848,7 @@ class RequestsScreen extends StatelessWidget {
                   Text(club?.clubName ?? 'N/A',style:Get.textTheme.labelLarge),
                   SizedBox(
                       width: Get.width*0.5,
-                      child: Text("${club?.address ?? ''}, ${club?.city ?? ''} ${club?.zipCode ?? ''}",style:Get.textTheme.bodySmall,overflow: TextOverflow.clip,)),
+                      child: Text("${club?.city ?? ''} ${club?.zipCode ?? ''}",style:Get.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w400),overflow: TextOverflow.clip,)),
                 ],
               ),
             ],
@@ -862,7 +862,7 @@ class RequestsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Type of Court (${club?.courtCount ?? 0} court)",style:Get.textTheme.labelLarge),
-                  Text(club?.courtType?.join(' • ') ?? 'N/A',style:Get.textTheme.bodySmall),
+                  Text(club?.courtType?.join(' • ').split(" ").first ?? 'N/A',style:Get.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w400)),
                 ],
               ),
             ],

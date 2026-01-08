@@ -81,54 +81,66 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
           ).paddingOnly(right: 5),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10,),
-              _buildDatePicker(),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.03),
-                child: _buildTimeTabs(),
-              ),
-              Transform.translate(
-                offset: Offset(0, -Get.height * 0.015),
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return Center(child: ListView.builder(shrinkWrap: true,itemCount: 3,itemBuilder: (context,index){
-                      return buildMatchCardShimmer();
-                    }));
-                  }
-                  final matches = controller.matchesBySelection.value;
-                  if (matches == null || (matches.data?.isEmpty ?? true)) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.event_busy_outlined, size: 50, color: AppColors.darkGrey),
-                          Text(
-                            'No matches available for this time',
-                            style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ).paddingOnly(top: Get.height * 0.1),
-                    );
-                  }
-                  // Initialize expanded states if needed
-                  if (_expandedStates.length != matches.data!.length) {
-                    _expandedStates.clear();
-                    _expandedStates.addAll(List.filled(matches.data!.length, false));
-                  }
+      body: RefreshIndicator(
+        color: Colors.white,
+        onRefresh: () async {
+          await controller.fetchMatchesForSelection();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top - Get.height * 0.09,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 10,),
+                  _buildDatePicker(),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.03),
+                    child: _buildTimeTabs(),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -Get.height * 0.015),
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return Center(child: ListView.builder(shrinkWrap: true,itemCount: 3,itemBuilder: (context,index){
+                          return buildMatchCardShimmer();
+                        }));
+                      }
+                      final matches = controller.matchesBySelection.value;
+                      if (matches == null || (matches.data?.isEmpty ?? true)) {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.event_busy_outlined, size: 50, color: AppColors.darkGrey),
+                              Text(
+                                'No matches available for this time',
+                                style: Get.textTheme.labelLarge?.copyWith(color: AppColors.darkGrey),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ).paddingOnly(top: Get.height * 0.1),
+                        );
+                      }
+                      // Initialize expanded states if needed
+                      if (_expandedStates.length != matches.data!.length) {
+                        _expandedStates.clear();
+                        _expandedStates.addAll(List.filled(matches.data!.length, false));
+                      }
 
-                  return Column(
-                    children: matches.data!.asMap().entries.map((entry) =>
-                        _buildMatchCardFromData(context, entry.value, entry.key)).toList(),
-                  );
-                }),
+                      return Column(
+                        children: matches.data!.asMap().entries.map((entry) =>
+                            _buildMatchCardFromData(context, entry.value, entry.key)).toList(),
+                      );
+                    }),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -496,11 +508,9 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
       decoration: BoxDecoration(
         // color: const Color(0xffeaf0ff),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color:index % 2 == 0? Color(0xffC8D6FB):Color(0xff3DBE64).withValues(alpha: 0.5)),
+          border: Border.all(color:Color(0xffC8D6FB)),
           gradient: LinearGradient(
-            colors: index % 2 == 0
-                ? [Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)]
-                : [Color(0xffBFEECD).withValues(alpha: 0.3),Color(0xffBFEECD).withValues(alpha: 0.2)],
+            colors:[Color(0xffF3F7FF), Color(0xff9EBAFF).withValues(alpha: 0.3)],
           )
       ),
       child: Stack(
@@ -542,17 +552,17 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondaryColor,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Text(
-                              "A",
-                              style: TextStyle(color: Colors.white,fontSize: 9),
-                            ),
-                          ).paddingOnly(left: 5),
+                          // Container(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          //   decoration: BoxDecoration(
+                          //     color: AppColors.secondaryColor,
+                          //     borderRadius: BorderRadius.circular(30),
+                          //   ),
+                          //   child: const Text(
+                          //     "A",
+                          //     style: TextStyle(color: Colors.white,fontSize: 9),
+                          //   ),
+                          // ).paddingOnly(left: 5),
                         ],
                       ),
                       // ⭐ Professional | Mixed
@@ -640,7 +650,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor: index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
+          backgroundColor:const Color(0xffeaf0ff),
           child: ClipOval(
             child: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImage(
@@ -663,7 +673,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                   firstLetter,
                   style:  TextStyle(
                     fontSize: 18,
-                    color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                    color:  AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -674,7 +684,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                 firstLetter,
                 style:  TextStyle(
                   fontSize: 18,
-                  color: index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                  color: AppColors.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -725,8 +735,8 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
         backgroundColor: Colors.white,
         child: CircleAvatar(
           radius: 20,
-          backgroundColor:index % 2 == 0? const Color(0xffeaf0ff):Color(0xffDFF7E6),
-          child: Icon(Icons.add, color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor),
+          backgroundColor: const Color(0xffeaf0ff),
+          child: Icon(Icons.add, color: AppColors.primaryColor),
         ),
       ),
     );
@@ -1417,7 +1427,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
                           width: 28,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color:index % 2 == 0? AppColors.primaryColor:AppColors.secondaryColor,
+                            color:AppColors.primaryColor,
                           ),
                           child:Icon(Icons.chat_outlined, color: Colors.white, size: 18)
                       )

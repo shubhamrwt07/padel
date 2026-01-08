@@ -62,7 +62,8 @@ class BookingHistoryData {
   int? iV;
   dynamic customerReview;
   OpenMatchId? openMatchId;
-  Scoreboard? scoreboard; // ✅ NEW
+  Scoreboard? scoreboard;
+  List<PlayerId>? playerIds; // ✅ NEW FIELD ADDED
 
   BookingHistoryData({
     this.sId,
@@ -79,7 +80,8 @@ class BookingHistoryData {
     this.iV,
     this.customerReview,
     this.openMatchId,
-    this.scoreboard, // ✅ NEW
+    this.scoreboard,
+    this.playerIds, // ✅ NEW FIELD ADDED
   });
 
   BookingHistoryData.fromJson(Map<String, dynamic> json) {
@@ -114,6 +116,14 @@ class BookingHistoryData {
     scoreboard = json['scoreboard'] != null
         ? Scoreboard.fromJson(json['scoreboard'])
         : null;
+
+    // ✅ PARSE playerIds - NEW
+    if (json['playerIds'] != null) {
+      playerIds = <PlayerId>[];
+      json['playerIds'].forEach((v) {
+        playerIds!.add(PlayerId.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -143,6 +153,11 @@ class BookingHistoryData {
     // ✅ TO JSON
     if (scoreboard != null) {
       data['scoreboard'] = scoreboard!.toJson();
+    }
+
+    // ✅ TO JSON - NEW
+    if (playerIds != null) {
+      data['playerIds'] = playerIds!.map((v) => v.toJson()).toList();
     }
 
     return data;
