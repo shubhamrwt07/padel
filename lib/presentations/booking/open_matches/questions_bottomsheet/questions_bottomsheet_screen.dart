@@ -159,12 +159,12 @@ class QuestionsBottomsheetScreen extends StatelessWidget {
                         if (!controller.validateSelections()) {
                           return;
                         }
-                        controller.initiatePaymentAndCreateMatch();
+                        controller.initiateMatchCreation();
                       },
                         child:controller.isProcessing.value== true?LoadingAnimationWidget.waveDots(
                           color: AppColors.blackColor,
                           size: 45,
-                        ).paddingOnly(right: 40) : Text("Direct Payment",style:Get.textTheme.headlineLarge!.copyWith(color: AppColors.secondaryColor,fontSize: 16)).paddingOnly(right: 40),
+                        ).paddingOnly(right: 40) : Text("Create Match",style:Get.textTheme.headlineLarge!.copyWith(color: AppColors.secondaryColor,fontSize: 16)).paddingOnly(right: 40),
                     )
                   ],
                 ),

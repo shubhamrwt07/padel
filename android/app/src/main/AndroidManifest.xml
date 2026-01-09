@@ -37,6 +37,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        
+        <!-- Razorpay Activity -->
+        <activity
+            android:name="com.razorpay.CheckoutActivity"
+            android:exported="false"
+            android:theme="@style/CheckoutTheme" />
+        
         <!-- Firebase default notification configuration -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

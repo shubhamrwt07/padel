@@ -446,7 +446,7 @@ class HomeController extends GetxController {
         "userId": storage.read("userId") ?? "",
         "courtName": booking.slot?[0].courtName ?? "",
         "clubName": booking.registerClubId?.clubName ?? "",
-        if (openMatchId.value.isNotEmpty) "openMatchId": openMatchId.value,
+        if (booking.bookingType != "normal" && openMatchId.value.isNotEmpty) "openMatchId": openMatchId.value,
         "teams": [
           {
             "name": "Team A",

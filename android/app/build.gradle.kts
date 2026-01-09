@@ -66,6 +66,10 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            
+            // Disable minification and resource shrinking to avoid duplicate class issues
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

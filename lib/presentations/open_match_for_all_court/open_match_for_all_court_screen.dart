@@ -480,7 +480,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
 
     while (teamAPlayers.length < 2) {
       teamAPlayers.add(
-        _buildAvailableCircle("teamA", data.sId ?? "", data.skillLevel, index, data),
+        _buildAvailableCircle("teamA", data.bookingId ?? "", data.skillLevel, index, data),
       );
     }
 
@@ -498,7 +498,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
 
     while (teamBPlayers.length < 2) {
       teamBPlayers.add(
-        _buildAvailableCircle("teamB", data.sId ?? "", data.skillLevel, index, data),
+        _buildAvailableCircle("teamB", data.bookingId ?? "", data.skillLevel, index, data),
       );
     }
 
@@ -710,7 +710,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
             arguments: {
               "bookingId":match?.bookingId??'',
               "team": team,
-              "matchId": matchId,
+              "matchId": match?.bookingId??'',
               "needOpenMatchesForAllCourts": true,
               "matchLevel": skillLevel,
               "isLoginUser": !isLoginUserInMatch,

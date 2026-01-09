@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -24,7 +25,7 @@ class QuestionsBottomsheetController extends GetxController {
   RxString selectedGameLevel = ''.obs;
   RxString selectedGameType = ''.obs;
   RxString selectedMatchType = ''.obs;
-  late RazorpayPaymentService _paymentService;
+  RazorpayPaymentService? _paymentService;
   CartController get cartController => Get.find<CartController>();
   final storage = GetStorage();
   
@@ -71,7 +72,7 @@ class QuestionsBottomsheetController extends GetxController {
 
   RxList<Map<String, dynamic>> teamB = <Map<String, dynamic>>[].obs;
 
-  // Modified method to handle payment success callback
+  // Payment success handler for iOS
   Future<void> onPaymentSuccess({
     required String paymentId,
     required String orderId,
@@ -122,11 +123,53 @@ class QuestionsBottomsheetController extends GetxController {
     }
   }
 
-  // Handle payment failure
-  void onPaymentError(String error) {
-    log("Payment failed: $error");
-    isProcessing.value = false;
-    SnackBarUtils.showErrorSnackBar("Payment failed: $error");
+  // Handle payment failure for iOS
+  // Direct match creation without payment (for Android)
+  Future<void> createDirectMatch() async {
+    log("🚀 Starting direct match creation process");
+    if (!validateSelections()) {
+      return;
+    }
+    
+    if (!validateTeams()) {
+      SnackBarUtils.showWarningSnackBar("Please add required players to both teams");
+      return;
+    }
+
+    isProcessing.value = true;
+
+    Get.generalDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white,
+      pageBuilder: (_, __, ___) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LoadingWidget(color: AppColors.primaryColor, size: 30),
+                const SizedBox(height: 20),
+                const Text(
+                  "Creating your open match...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Please wait while we set up your match.",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    
+    await createMatchAfterPayment();
   }
 
   // Create match after payment success
@@ -419,7 +462,20 @@ class QuestionsBottomsheetController extends GetxController {
     );
   }
 
-  // Main method for direct payment
+  // Platform-specific match creation
+  Future<void> initiateMatchCreation() async {
+    log("🚀 Starting platform-specific match creation process");
+    
+    if (Platform.isIOS) {
+      // Use Razorpay for iOS
+      await initiatePaymentAndCreateMatch();
+    } else {
+      // Direct match creation for Android
+      await createDirectMatch();
+    }
+  }
+
+  // Payment method for iOS
   Future<void> initiatePaymentAndCreateMatch() async {
     log("💳 Starting payment initiation process");
     if (!validateSelections()) {
@@ -443,7 +499,7 @@ class QuestionsBottomsheetController extends GetxController {
         return;
       }
 
-      await _paymentService.initiatePayment(
+      await _paymentService!.initiatePayment(
         keyId: 'rzp_test_1DP5mmOlF5G5ag',
         amount: price,
         currency: 'INR',
@@ -480,29 +536,32 @@ class QuestionsBottomsheetController extends GetxController {
 
   @override
   void onInit() {
-    _paymentService = RazorpayPaymentService();
+    // Only initialize Razorpay for iOS
+    if (Platform.isIOS) {
+      _paymentService = RazorpayPaymentService();
 
-    _paymentService.onPaymentSuccess = (response) {
-      onPaymentSuccess(
-        paymentId: response.paymentId ?? '',
-        orderId: response.orderId ?? '',
-        signature: response.signature ?? '',
-      );
-    };
+      _paymentService!.onPaymentSuccess = (response) {
+        onPaymentSuccess(
+          paymentId: response.paymentId ?? '',
+          orderId: response.orderId ?? '',
+          signature: response.signature ?? '',
+        );
+      };
 
-    _paymentService.onPaymentFailure = (response) {
-      String errorMessage = 'Payment failed';
-      if (response.code == Razorpay.PAYMENT_CANCELLED) {
-        errorMessage = 'Payment was cancelled';
-      } else if (response.message != null) {
-        errorMessage = response.message!;
-      }
-      onPaymentError(errorMessage);
-    };
+      _paymentService!.onPaymentFailure = (response) {
+        String errorMessage = 'Payment failed';
+        if (response.code == Razorpay.PAYMENT_CANCELLED) {
+          errorMessage = 'Payment was cancelled';
+        } else if (response.message != null) {
+          errorMessage = response.message!;
+        }
+        // onPaymentError(errorMessage);
+      };
 
-    _paymentService.onExternalWallet = (response) {
-      log('External wallet used: ${response.walletName}');
-    };
+      _paymentService!.onExternalWallet = (response) {
+        log('External wallet used: ${response.walletName}');
+      };
+    }
 
     profileController.fetchUserProfile();
     
@@ -538,7 +597,7 @@ class QuestionsBottomsheetController extends GetxController {
 
   @override
   void onClose() {
-    _paymentService.dispose();
+    _paymentService?.dispose();
     super.onClose();
   }
   

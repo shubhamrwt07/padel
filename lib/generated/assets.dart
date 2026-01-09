@@ -7,15 +7,18 @@ class Assets {
   static const String imagesGirl = 'assets/images/girl.png';
   static const String imagesGirls = 'assets/images/girls.png';
   static const String imagesIcAmericano = 'assets/images/ic_americano.svg';
+  static const String imagesIcAmericanoNew = 'assets/images/ic_americano_new.svg';
   static const String imagesIcApple = 'assets/images/ic_apple.svg';
   static const String imagesIcBalanceWallet = 'assets/images/ic_balance_wallet.png';
   static const String imagesIcBookACourt = 'assets/images/ic_book_a_court.png';
+  static const String imagesIcBookACourtNew = 'assets/images/ic_book_a_court_new.svg';
   static const String imagesIcBookingcancellation = 'assets/images/ic_bookingcancellation.svg';
   static const String imagesIcBookings = 'assets/images/ic_bookings.svg';
   static const String imagesIcCamara = 'assets/images/ic_camara.png';
   static const String imagesIcCap = 'assets/images/ic_cap.svg';
   static const String imagesIcCelebration = 'assets/images/ic_celebration.svg';
   static const String imagesIcChallenges = 'assets/images/ic_challenges.svg';
+  static const String imagesIcChallengesNew = 'assets/images/ic_challenges_new.svg';
   static const String imagesIcCheckCircle = 'assets/images/ic_check_circle.svg';
   static const String imagesIcEye = 'assets/images/ic_eye.png';
   static const String imagesIcEyeOff = 'assets/images/ic_eye_off.png';
@@ -28,6 +31,7 @@ class Assets {
   static const String imagesIcMasterCardPayment = 'assets/images/ic_master_card_payment.svg';
   static const String imagesIcMixedGender = 'assets/images/ic_mixed_gender.svg';
   static const String imagesIcMyClub = 'assets/images/ic_my_club.svg';
+  static const String imagesIcOpenMatchNew = 'assets/images/ic_open_match_new.svg';
   static const String imagesIcPackages = 'assets/images/ic_packages.svg';
   static const String imagesIcPadelBall = 'assets/images/ic_padel_ball.svg';
   static const String imagesIcPadelIcon = 'assets/images/ic_padel_icon.svg';
