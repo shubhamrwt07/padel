@@ -28,7 +28,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
     return Scaffold(
       bottomNavigationBar: _bottomButton(context),
       appBar: primaryAppBar(
-          title: Text("Open Matches"), context: context,centerTitle: true,
+          title: Text("Find a Game"), context: context,centerTitle: true,
         action: [
           GestureDetector(
             onTap: () {
@@ -165,7 +165,7 @@ class _OpenMatchForAllCourtScreenState extends State<OpenMatchForAllCourtScreen>
       child: CustomButton(
         width: Get.width * 0.9,
         child: Text(
-          "Create an Open Match",
+          "Create a Game",
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: AppColors.whiteColor),
         ).paddingOnly(right: Get.width * 0.14),
         onTap: () {
