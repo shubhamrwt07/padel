@@ -4,7 +4,7 @@ import 'package:padel_mobile/presentations/open_match_for_all_court/create_open_
 class CreateOpenMatchForAllCourtsBinding implements Bindings{
   @override
   void dependencies() {
-    Get.put(CreateOpenMatchForAllCourtsController());
+    // Get.put(CreateOpenMatchForAllCourtsController());
   }
 
 }
