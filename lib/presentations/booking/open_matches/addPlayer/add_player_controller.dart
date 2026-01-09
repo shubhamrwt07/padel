@@ -345,6 +345,7 @@ class AddPlayerController extends GetxController {
   Future<bool> addGuestPlayer() async {
     try {
       final body = {
+        "bookingId":bookingId.value,
         "scoreboardId": scoreboardId.value,
         if (openMatchId.value.isNotEmpty) "openMatchId": openMatchId.value,
         "teams": [

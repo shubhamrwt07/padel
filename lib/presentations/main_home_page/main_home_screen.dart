@@ -558,69 +558,97 @@ class MainHomeScreen extends StatelessWidget {
   /// QUICK ACTIONS
   Widget _quickActions() {
     final items = [
-      {"icon": Assets.assetsImagesIcBookACourt, "title": "Book a Court", "action": "book"},
-      {"icon": Assets.imagesIcFindAGame, "title": "Find a Game", "action": "match"},
-      {"icon": Assets.imagesIcAmericano, "title": "Americano", "action": "americano"},
-      {"icon": Assets.imagesIcChallenges, "title": "Challenge", "action": "challenge"},
+      {
+        "icon": Assets.imagesIcBookACourtNew,
+        "title": "Find a Court",
+        "action": "book",
+        "boxSize": 60.0,
+        "iconSize": 34.0,
+      },
+      {
+        "icon": Assets.imagesIcOpenMatchNew,
+        "title": "Find a Game",
+        "action": "match",
+        "boxSize": 60.0,
+        "iconSize": 34.0,
+      },
+      {
+        "icon": Assets.imagesIcAmericanoNew,
+        "title": "Americano",
+        "action": "americano",
+        "boxSize": 60.0,
+        "iconSize": 34.0,
+      },
+      {
+        "icon": Assets.imagesIcChallengesNew,
+        "title": "Challenge",
+        "action": "challenge",
+        "boxSize": 65.0,
+        "iconSize": 54.0,
+      },
     ];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: items
-          .map(
-            (e) => GestureDetector(
-              onTap: () => _handleQuickAction(e["action"] as String),
-              child: Column(
-                        children: [
-                          Container(
-                            height: 60,
-                            width: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFF3F56D6),
-                                  Color(0xFF2B44C4),
-                                ],
-                              ),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: -20,
-                                  left: -20,
-                                  child: Container(
-                                    height: 80,
-                                    width: 80,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.04),
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: SvgPicture.asset(
-                                    e["icon"] as String,
-                                    color: Colors.white,
-                                    width: 28,
-                                    height: 28,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+      children: items.map((e) {
+        final double boxSize = e["boxSize"] as double;
+        final double iconSize = e["iconSize"] as double;
 
-                          const SizedBox(height: 6),
-              Text(e["title"] as String,style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),),
-                        ],
+        return GestureDetector(
+          onTap: () => _handleQuickAction(e["action"] as String),
+          child: Column(
+            children: [
+              Container(
+                height: boxSize,
+                width: boxSize,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF3F56D6),
+                      Color(0xFF2B44C4),
+                    ],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -boxSize * 0.35,
+                      left: -boxSize * 0.35,
+                      child: Container(
+                        height: boxSize * 1.3,
+                        width: boxSize * 1.3,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.04),
+                        ),
                       ),
-            ),
-      )
-          .toList(),
+                    ),
+                    Center(
+                      child: SvgPicture.asset(
+                        e["icon"] as String,
+                        width: iconSize,
+                        height: iconSize,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                e["title"] as String,
+                style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
+
 
   void _handleQuickAction(String action) {
     if(Get.isSnackbarOpen) return;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -23,7 +24,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
       backgroundColor: AppColors.whiteColor,
       appBar: primaryAppBar(
         centerTitle: true,
-        title: Text("Direct Payment"),
+        title: Text("Book Now"),
         // action: [
         //   Container(
         //     alignment: Alignment.center,
@@ -356,7 +357,12 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                                 SnackBarUtils.showWarningSnackBar("Amount cannot be zero");
                                 return;
                               }
-                              await controller.startPayment();
+                              // Platform-specific payment handling
+                              if (Platform.isIOS) {
+                                await controller.startPayment();
+                              } else {
+                                await controller.processDirectBooking();
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryColor,
@@ -366,7 +372,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
                               ),
                             ),
                             child: Text(
-                              "Pay using ${title}",
+                              "Book using ${title}",
                               style: TextStyle(
                                 color: AppColors.whiteColor,
                                 fontSize: 16,
@@ -422,7 +428,12 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
             }
           }
 
-            await controller.startPayment();
+            // Platform-specific payment handling
+            if (Platform.isIOS) {
+              await controller.startPayment();
+            } else {
+              await controller.processDirectBooking();
+            }
           },
           child: controller.isProcessing.value || cartController.isBooking.value
               ? LoadingAnimationWidget.waveDots(
@@ -450,7 +461,7 @@ class PaymentMethodScreen extends GetView<PaymentMethodController> {
               ),
               SizedBox(width: 20),
               Text(
-                "Payment",
+                "Book Now",
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColors.whiteColor,
                 ),

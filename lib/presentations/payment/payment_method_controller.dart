@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:padel_mobile/configs/components/loader_widgets.dart';
 import 'package:padel_mobile/configs/components/snack_bars.dart';
 import 'package:padel_mobile/configs/routes/routes_name.dart';
@@ -7,18 +8,16 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../services/payment_services/razorpay.dart';
 import '../auth/forgot_password/widgets/forgot_password_exports.dart';
 import '../booking/successful_screens/booking_successful_screen.dart';
-import '../cart/cart_controller.dart'; // Import CartController
-import '../book_a_court/book_a_court_controller.dart'; // Import BookACourtController
+import '../cart/cart_controller.dart';
+import '../book_a_court/book_a_court_controller.dart';
 
 class PaymentMethodController extends GetxController {
   var option = ''.obs;
   RxBool isProcessing = false.obs;
-  late RazorpayPaymentService _paymentService;
+  RazorpayPaymentService? _paymentService;
   
-  // Get CartController instance
   final CartController cartController = Get.find<CartController>();
   
-  // Check if BookACourtController is available
   BookACourtController? get bookACourtController {
     try {
       return Get.isRegistered<BookACourtController>() ? Get.find<BookACourtController>() : null;
@@ -27,7 +26,6 @@ class PaymentMethodController extends GetxController {
     }
   }
   
-  // Check if booking is from BookACourtController
   bool get isFromBookACourt {
     final controller = bookACourtController;
     return controller != null && controller.realCourtSelections.isNotEmpty;
@@ -36,10 +34,13 @@ class PaymentMethodController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _paymentService = RazorpayPaymentService();
-    _paymentService.onPaymentSuccess = _handlePaymentSuccess;
-    _paymentService.onPaymentFailure = _handlePaymentFailure;
-    _paymentService.onExternalWallet = _handleExternalWallet;
+    // Only initialize Razorpay for iOS
+    if (Platform.isIOS) {
+      _paymentService = RazorpayPaymentService();
+      _paymentService!.onPaymentSuccess = _handlePaymentSuccess;
+      _paymentService!.onPaymentFailure = _handlePaymentFailure;
+      // _paymentService!.onExternalWallet = _handleExternalWallet;
+    }
   }
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     isProcessing.value = false;
@@ -84,14 +85,42 @@ class PaymentMethodController extends GetxController {
     SnackBarUtils.showErrorSnackBar("Payment Failed: ${response.message}");
   }
 
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    isProcessing.value = false;
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Text('External Wallet: ${response.walletName}'),
-        backgroundColor: Colors.blue,
-      ),
+  // Direct booking without payment (for Android)
+  Future<void> processDirectBooking() async {
+    isProcessing.value = true;
+
+    Get.generalDialog(
+      barrierDismissible: false,
+      barrierColor: Colors.white,
+      pageBuilder: (_, __, ___) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LoadingWidget(color: AppColors.primaryColor, size: 30),
+                const SizedBox(height: 20),
+                const Text(
+                  "Booking in progress...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Please wait while we confirm your booking.",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
+
+    await _processBookingAfterPayment();
   }
 
   Future<void> _processBookingAfterPayment() async {
@@ -282,36 +311,43 @@ class PaymentMethodController extends GetxController {
       return;
     }
 
-    isProcessing.value = true;
+    // Check platform and use appropriate method
+    if (Platform.isIOS) {
+      // Use Razorpay for iOS
+      isProcessing.value = true;
 
-    try {
-      double amountToPay;
-      if (isFromBookACourt && bookACourtController != null) {
-        amountToPay = bookACourtController!.totalAmount.value.toDouble();
-      } else {
-        amountToPay = cartController.totalPrice.value.toDouble();
+      try {
+        double amountToPay;
+        if (isFromBookACourt && bookACourtController != null) {
+          amountToPay = bookACourtController!.totalAmount.value.toDouble();
+        } else {
+          amountToPay = cartController.totalPrice.value.toDouble();
+        }
+        
+        await _paymentService!.initiatePayment(
+          keyId: 'rzp_test_1DP5mmOlF5G5ag',
+          amount: amountToPay,
+          currency: 'INR',
+          name: 'Swoot',
+          description: 'Paying for court booking',
+          userEmail: 'test@example.com',
+          userContact: '9999999999',
+        );
+        
+      } catch (e) {
+        isProcessing.value = false;
+        CustomLogger.logMessage(msg: "Error: $e", level: LogLevel.error);
+        SnackBarUtils.showErrorSnackBar("Payment failed: $e");
       }
-      
-      await _paymentService.initiatePayment(
-        keyId: 'rzp_test_1DP5mmOlF5G5ag',
-        amount: amountToPay,
-        currency: 'INR',
-        name: 'Swoot',
-        description: 'Paying for court booking',
-        userEmail: 'test@example.com',
-        userContact: '9999999999',
-      );
-      
-    } catch (e) {
-      isProcessing.value = false;
-      CustomLogger.logMessage(msg: "Error: $e", level: LogLevel.error);
-      SnackBarUtils.showErrorSnackBar("Payment failed: $e");
+    } else {
+      // Direct booking for Android
+      await processDirectBooking();
     }
   }
 
   @override
   void dispose() {
-    _paymentService.dispose();
+    _paymentService?.dispose();
     super.dispose();
   }
 
